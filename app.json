@@ -1,0 +1,42 @@
+{
+    "name": "acehelp",
+    "scripts": {},
+    "env": {
+      "SECRET_KEY_BASE": {
+        "generator": "secret"
+      },
+      "RACK_ENV": {
+        "value": "staging"
+      },
+      "RAILS_ENV": {
+        "value": "staging"
+      },
+      "HEROKU_APP_NAME": {
+        "required": true
+      },
+      "LOG_LEVEL": {
+        "value": "DEBUG"
+      }
+    },
+    "formation": {
+      "web": {
+        "quantity": 1
+      }
+    },
+    "addons": [
+      {
+        "plan": "heroku-postgresql",
+        "options": {
+          "version": "9.5"
+        }
+      }
+    ],
+    "buildpacks": [
+      {
+        "url": "heroku/nodejs"
+      },
+      {
+        "url": "heroku/ruby"
+      }
+    ]
+  }
