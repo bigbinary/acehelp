@@ -23,7 +23,7 @@ bundle exec rails server
 ```
 
 Once we see `webpack: Compiled successfully.` message in terminal,
-we can visit the app at http://localhost:3333.
+we can visit the app at http://localhost:3000.
 
 Webpack will automatically compile if a file inside `app/javascript/` directory is modified in development mode.
 
