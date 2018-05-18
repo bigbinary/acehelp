@@ -8,7 +8,7 @@ import Http
 -- import Element.Attributes exposing (width, height, paddingXY, spacing, px, fill, alignRight, verticalCenter)
 -- import Element.Events exposing (onClick)
 -- import Views.Style exposing (stylesheet, AHStyle, renderAnim)
-import Views.Container exposing (rowView)
+import Views.Container exposing (rowView, closeButton)
 import Data.Article exposing (..)
 import Request.Article exposing (..)
 import Animation
@@ -111,12 +111,37 @@ maximizedView model =
           ]
         ]
       )
-      [ articleListView model ]
+      [ topBar
+      , articleListView model
+      ]
 
+
+topBar : Html Message
+topBar =
+  rowView [("background-color", "rgb(60, 170, 249)")]
+    [ span 
+      [ style 
+        [ ("text-align", "center")
+        , ("display", "block")
+        , ("color", "#fff")
+        ]
+      ] [ text "Ace Help" ]
+    , div 
+        [ style
+          [ ("position", "absolute")
+          , ("top", "0")
+          , ("bottom", "0")
+          , ("right", "35px")
+          , ("line-height", "0")
+          ]
+        , onClick <| SetAppState Minimized
+        ] 
+        [ closeButton ]
+    ]
 
 articleListView : Model -> Html Message
 articleListView model =
-  rowView
+  rowView []
     (List.map (\a ->
               div [] [text a.title]
               ) model.articles)
