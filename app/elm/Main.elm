@@ -39,7 +39,7 @@ init =
   ({ articles = []
   , containerAnim = Animation.style initContainerAnim
   , currentAppState = Minimized
-  }, getArticles)
+  }, Cmd.none)
 
 -- VIEW
 
@@ -178,22 +178,26 @@ update message model =
 
     SetAppState s ->
       let
-          anim =
+          (anim, cmd) =
             case s of
               Maximized ->
-                Animation.interrupt
+                (Animation.interrupt
                   [ Animation.to 
                     [ Animation.opacity 1
                     , Animation.right <| Animation.px 0
                     ]
                   ]
                   model.containerAnim
+                , getArticles  
+                )
               Minimized -> 
-                Animation.interrupt
+                (Animation.interrupt
                   [ Animation.to initContainerAnim ] model.containerAnim
+                , Cmd.none
+                )
       in
           
-        ({ model | currentAppState = s, containerAnim = anim }, Cmd.none)
+        ({ model | currentAppState = s, containerAnim = anim }, cmd)
     
     ArticlesReceived (Ok articleList) -> 
       ({model | articles = articleList}, Cmd.none)
