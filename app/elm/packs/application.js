@@ -7,4 +7,13 @@
 // To reference this file, add <%= javascript_pack_tag 'application' %> to the appropriate
 // layout file, like app/views/layouts/application.html.erb
 
-console.log('Hello World from Webpacker')
+import Elm from "../Main"
+import "../../assets/stylesheets/application.css"
+
+document.addEventListener('DOMContentLoaded', () => {
+    const node = document.createElement('div')
+    node.id = "acehelp-hook"
+    var app = Elm.Main.embed(node);
+    document.body.appendChild(node)
+    
+  });

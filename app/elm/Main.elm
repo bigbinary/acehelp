@@ -72,6 +72,7 @@ minimizedView =
         , ("text-align", "center")
         , ("color", "#fff")
         , ("font-size", "80px")
+        , ("font-family", "proxima-nova, Arial, sans-serif")
         ]
       , onClick (SetAppState Maximized)
       ] [ text "?" ]
@@ -103,6 +104,7 @@ maximizedView model =
             , ("height", "100%")
             , ("width", "720px")
             , ("box-shadow", "0 0 50px 0px rgb(153, 153, 153)")
+            , ("font-family", "proxima-nova, Arial, sans-serif")
             ]
           ]
         ]
