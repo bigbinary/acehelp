@@ -101,6 +101,8 @@ maximizedView model =
   div (List.concat [ Animation.render model.containerAnim
         , [ style 
             [ ("position", "fixed")
+            , ("top", "0")
+            , ("background", "#fff")
             , ("height", "100%")
             , ("width", "720px")
             , ("box-shadow", "0 0 50px 0px rgb(153, 153, 153)")

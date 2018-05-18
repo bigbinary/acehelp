@@ -9,6 +9,7 @@
 
 import Elm from "../Main"
 import "../../assets/stylesheets/application.css"
+import "../../assets/stylesheets/reset.scss"
 
 document.addEventListener('DOMContentLoaded', () => {
     const node = document.createElement('div')
