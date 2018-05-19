@@ -3,15 +3,17 @@ module Data.Article exposing (..)
 import Json.Decode exposing (int, string, float, nullable, list, Decoder)
 import Json.Decode.Pipeline exposing (decode, required, optional, hardcoded)
 
+type alias ArticleId = Int
+
 type alias Article =
-  { id: Int
+  { id: ArticleId
   , title: String
   , summary: String
   , content: String
   }
 
 type alias ArticleShort =
-  { id: Int
+  { id: ArticleId
   , title: String
   , summary: String
   }

@@ -34,7 +34,7 @@ initContainerAnim =
         , Animation.right <| Animation.px -770
         ]
 
-init : (Model, Cmd Message)
+init : (Model, Cmd Msg)
 init =
   ({ articles = []
   , containerAnim = Animation.style initContainerAnim
@@ -44,7 +44,7 @@ init =
 -- VIEW
 
 
--- minimizedView : Html Message
+-- minimizedView : Html Msg
 -- minimizedView =
 --   layout stylesheet
 --     <| screen
@@ -58,7 +58,7 @@ init =
 --           (Element.text "?")
 
 
-minimizedView : Html Message
+minimizedView : Html Msg
 minimizedView =
   div [ style
         [ ("position", "fixed")
@@ -78,7 +78,7 @@ minimizedView =
       ] [ text "?" ]
 
 
--- maximizedView : Model -> Html Message
+-- maximizedView : Model -> Html Msg
 -- maximizedView model =
   -- layout stylesheet 
   --   <| screen 
@@ -96,7 +96,7 @@ minimizedView =
   --           []
   --       )
 
-maximizedView : Model -> Html Message
+maximizedView : Model -> Html Msg
 maximizedView model =
   div (List.concat [ Animation.render model.containerAnim
         , [ style 
@@ -116,7 +116,7 @@ maximizedView model =
       ]
 
 
-topBar : Html Message
+topBar : Html Msg
 topBar =
   rowView [("background-color", "rgb(60, 170, 249)")]
     [ span 
@@ -130,38 +130,44 @@ topBar =
       closeButton <| SetAppState Minimized
     ]
 
-articleListView : Model -> Html Message
+articleListView : Model -> Html Msg
 articleListView model =
   rowView []
     (List.map (\a ->
               div [] [text a.title]
               ) model.articles)
 
-view : Model -> Html Message
+
+view : Model -> Html Msg
 view model =
   case model.currentAppState of
     Minimized -> minimizedView
     Maximized -> maximizedView model
 
--- MESSAGE
+-- Msg
 
-type Message
+type Msg
   = Animate Animation.Msg
   | SetAppState AppState
-  | ArticlesReceived (Result Http.Error (List ArticleShort))
+  | ArticleListReceived (Result Http.Error (List ArticleShort))
+  | ArticleReceived (Result Http.Error Article)
 
 -- UPDATE
 
 
-getArticles : Cmd Message
-getArticles =
-  Http.send ArticlesReceived(requestArticles)
+getArticleList : Cmd Msg
+getArticleList =
+  Http.send ArticleListReceived(requestArticleList)
 
 
+getArticle : ArticleId -> Cmd Msg
+getArticle aId =
+  Http.send ArticleReceived(requestArticle aId)
 
-update : Message -> Model -> (Model, Cmd Message)
-update message model =
-  case message of
+
+update : Msg -> Model -> (Model, Cmd Msg)
+update msg model =
+  case msg of
     Animate aniMsg ->
       ({ model
       | containerAnim = Animation.update aniMsg model.containerAnim
@@ -179,7 +185,7 @@ update message model =
                     ]
                   ]
                   model.containerAnim
-                , getArticles  
+                , getArticleList  
                 )
               Minimized -> 
                 (Animation.interrupt
@@ -190,20 +196,22 @@ update message model =
           
         ({ model | currentAppState = s, containerAnim = anim }, cmd)
     
-    ArticlesReceived (Ok articleList) -> 
+    ArticleListReceived (Ok articleList) -> 
       ({model | articles = articleList}, Cmd.none)
+    
+
     _ ->
       (model, Cmd.none)
 
 -- SUBSCRIPTIONS
 
-subscriptions : Model -> Sub Message
+subscriptions : Model -> Sub Msg
 subscriptions model =
   Animation.subscription Animate [ model.containerAnim ]
 
 -- MAIN
 
-main : Program Never Model Message
+main : Program Never Model Msg
 main =
   Html.program
     {
