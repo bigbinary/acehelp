@@ -126,17 +126,8 @@ topBar =
         , ("color", "#fff")
         ]
       ] [ text "Ace Help" ]
-    , div 
-        [ style
-          [ ("position", "absolute")
-          , ("top", "0")
-          , ("bottom", "0")
-          , ("right", "35px")
-          , ("line-height", "0")
-          ]
-        , onClick <| SetAppState Minimized
-        ] 
-        [ closeButton ]
+    , 
+      closeButton <| SetAppState Minimized
     ]
 
 articleListView : Model -> Html Message
