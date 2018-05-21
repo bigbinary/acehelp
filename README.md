@@ -33,6 +33,10 @@ Webpack will automatically compile if a file inside `app/javascript/` directory 
 is enabled on this application. It means when a PR is sent then heroku
 automatically deploys an application for that branch.
 
+## Continuous deployment when PR is merged to master
+
+Whenever PR is merged to master then master code is automatically deployed to [http://staging.acehelp.com](http://staging.acehelp.com).
+
 ## About BigBinary
 
 ![BigBinary](https://raw.githubusercontent.com/bigbinary/bigbinary-assets/press-assets/PNG/logo-light-solid-small.png?raw=true)
