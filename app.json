@@ -1,6 +1,8 @@
 {
     "name": "acehelp",
-    "scripts": {},
+    "scripts": {
+      "postdeploy": "bundle exec rake db:migrate && bundle exec rake setup_sample_data"
+    },
     "env": {
       "SECRET_KEY_BASE": {
         "generator": "secret"
