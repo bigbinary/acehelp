@@ -35,7 +35,7 @@ def delete_all_records_from_all_tables
 end
 
 desc "Deletes all records and populates sample data"
-task setup_sample_data: [:environment, :not_production] do
+task setup_sample_data: [:environment] do
   delete_all_records_from_all_tables
 
   c1 = Category.create! name: "Getting Started"
