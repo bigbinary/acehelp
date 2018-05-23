@@ -5,6 +5,7 @@ import Request.Article exposing (..)
 import Views.Container exposing (rowView)
 import Html exposing (..)
 import Html.Events exposing (onClick)
+import Html.Attributes exposing (style)
 import Http
 import Task
 import Animation
@@ -66,7 +67,9 @@ view model =
     rowView []
         (List.map
             (\a ->
-                div [ onClick <| LoadArticle a.id ] [ text a.title ]
+                div [ onClick <| LoadArticle a.id
+                    , style [("cursor", "pointer")]
+                    ] [ text a.title ]
             )
             model
         )
