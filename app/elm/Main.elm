@@ -4,46 +4,58 @@ import Html exposing (..)
 import Html.Attributes exposing (style)
 import Html.Events exposing (onClick)
 import Http
+
+
 -- import Element exposing (el, text,  column, layout, screen)
 -- import Element.Attributes exposing (width, height, paddingXY, spacing, px, fill, alignRight, verticalCenter)
 -- import Element.Events exposing (onClick)
 -- import Views.Style exposing (stylesheet, AHStyle, renderAnim)
-import Views.Container exposing (rowView, closeButton)
+
+import Page.ArticleList as ArticleListSection
+import Views.Container exposing (topBar, closeButton)
 import Data.Article exposing (..)
 import Request.Article exposing (..)
 import Animation
+
 
 -- MODEL
 
 
 type AppState
-  = Minimized
-  | Maximized
+    = Minimized
+    | Maximized
 
 
 type alias Model =
-  { articles : List ArticleShort
-  , containerAnim: Animation.State
-  , currentAppState: AppState
-  }
+    { articles : ArticleListSection.Model
+    , containerAnim : Animation.State
+    , currentAppState : AppState
+    }
+
+
 
 -- INIT
 
-initContainerAnim =
-        [ Animation.opacity 0
-        , Animation.right <| Animation.px -770
-        ]
 
-init : (Model, Cmd Msg)
+initAnim : List Animation.Property
+initAnim =
+    [ Animation.opacity 0
+    , Animation.right <| Animation.px -770
+    ]
+
+
+init : ( Model, Cmd Msg )
 init =
-  ({ articles = []
-  , containerAnim = Animation.style initContainerAnim
-  , currentAppState = Minimized
-  }, Cmd.none)
+    ( { articles = ArticleListSection.noArticles
+      , containerAnim = Animation.style initAnim
+      , currentAppState = Minimized
+      }
+    , Cmd.none
+    )
+
+
 
 -- VIEW
-
-
 -- minimizedView : Html Msg
 -- minimizedView =
 --   layout stylesheet
@@ -60,163 +72,163 @@ init =
 
 minimizedView : Html Msg
 minimizedView =
-  div [ style
-        [ ("position", "fixed")
-        , ("width", "100px")
-        , ("height", "100px")
-        , ("top", "50%")
-        , ("right", "0px")
-        , ("transform", "translateY(-50%)")
-        , ("background-color", "rgb(60, 170, 249)")
-        , ("border-radius", "50%")
-        , ("text-align", "center")
-        , ("color", "#fff")
-        , ("font-size", "80px")
-        , ("font-family", "proxima-nova, Arial, sans-serif")
+    div
+        [ style
+            [ ( "position", "fixed" )
+            , ( "width", "100px" )
+            , ( "height", "100px" )
+            , ( "top", "50%" )
+            , ( "right", "0px" )
+            , ( "transform", "translateY(-50%)" )
+            , ( "background-color", "rgb(60, 170, 249)" )
+            , ( "border-radius", "50%" )
+            , ( "text-align", "center" )
+            , ( "color", "#fff" )
+            , ( "font-size", "80px" )
+            , ( "font-family", "proxima-nova, Arial, sans-serif" )
+            ]
+        , onClick (SetAppState Maximized)
         ]
-      , onClick (SetAppState Maximized)
-      ] [ text "?" ]
+        [ text "?" ]
+
 
 
 -- maximizedView : Model -> Html Msg
 -- maximizedView model =
-  -- layout stylesheet 
-  --   <| screen 
-  --   <| el Views.Style.MainContainerStyle 
-  --       ( renderAnim model.containerAnim
-  --           [ width (px 720)
-  --           , height fill 
-  --           ]
-  --       )
-  --       ( column Views.Style.StackStyle 
-  --           [ width fill
-  --           , height fill
-  --           , paddingXY 30 10
-  --           ] 
-  --           []
-  --       )
+-- layout stylesheet
+--   <| screen
+--   <| el Views.Style.MainContainerStyle
+--       ( renderAnim model.containerAnim
+--           [ width (px 720)
+--           , height fill
+--           ]
+--       )
+--       ( column Views.Style.StackStyle
+--           [ width fill
+--           , height fill
+--           , paddingXY 30 10
+--           ]
+--           []
+--       )
+
 
 maximizedView : Model -> Html Msg
 maximizedView model =
-  div (List.concat [ Animation.render model.containerAnim
-        , [ style 
-            [ ("position", "fixed")
-            , ("top", "0")
-            , ("background", "#fff")
-            , ("height", "100%")
-            , ("width", "720px")
-            , ("box-shadow", "0 0 50px 0px rgb(153, 153, 153)")
-            , ("font-family", "proxima-nova, Arial, sans-serif")
+    div
+        (List.concat
+            [ Animation.render model.containerAnim
+            , [ style
+                    [ ( "position", "fixed" )
+                    , ( "top", "0" )
+                    , ( "background", "#fff" )
+                    , ( "height", "100%" )
+                    , ( "width", "720px" )
+                    , ( "box-shadow", "0 0 50px 0px rgb(153, 153, 153)" )
+                    , ( "font-family", "proxima-nova, Arial, sans-serif" )
+                    ]
+              ]
             ]
-          ]
+        )
+        [ topBar <| SetAppState Minimized
+        , ArticleListSection.view model.articles |> Html.map ArticleListMsg
         ]
-      )
-      [ topBar
-      , articleListView model
-      ]
-
-
-topBar : Html Msg
-topBar =
-  rowView [("background-color", "rgb(60, 170, 249)")]
-    [ span 
-      [ style 
-        [ ("text-align", "center")
-        , ("display", "block")
-        , ("color", "#fff")
-        ]
-      ] [ text "Ace Help" ]
-    , 
-      closeButton <| SetAppState Minimized
-    ]
-
-articleListView : Model -> Html Msg
-articleListView model =
-  rowView []
-    (List.map (\a ->
-              div [] [text a.title]
-              ) model.articles)
 
 
 view : Model -> Html Msg
 view model =
-  case model.currentAppState of
-    Minimized -> minimizedView
-    Maximized -> maximizedView model
+    case model.currentAppState of
+        Minimized ->
+            minimizedView
+
+        Maximized ->
+            maximizedView model
+
+
 
 -- Msg
 
+
 type Msg
-  = Animate Animation.Msg
-  | SetAppState AppState
-  | ArticleListReceived (Result Http.Error (List ArticleShort))
-  | ArticleReceived (Result Http.Error Article)
+    = Animate Animation.Msg
+    | SetAppState AppState
+    | ArticleListMsg ArticleListSection.Msg
+    | ArticleListReceived (Result Http.Error (List ArticleShort))
+    | ArticleReceived (Result Http.Error Article)
+
+
 
 -- UPDATE
 
 
 getArticleList : Cmd Msg
 getArticleList =
-  Http.send ArticleListReceived(requestArticleList)
+    Http.send ArticleListReceived (requestArticleList)
 
 
 getArticle : ArticleId -> Cmd Msg
 getArticle aId =
-  Http.send ArticleReceived(requestArticle aId)
+    Http.send ArticleReceived (requestArticle aId)
 
 
-update : Msg -> Model -> (Model, Cmd Msg)
+update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
-  case msg of
-    Animate aniMsg ->
-      ({ model
-      | containerAnim = Animation.update aniMsg model.containerAnim
-      }, Cmd.none)
+    case msg of
+        Animate aniMsg ->
+            ( { model
+                | containerAnim = Animation.update aniMsg model.containerAnim
+              }
+            , Cmd.none
+            )
 
-    SetAppState s ->
-      let
-          (anim, cmd) =
-            case s of
-              Maximized ->
-                (Animation.interrupt
-                  [ Animation.to 
-                    [ Animation.opacity 1
-                    , Animation.right <| Animation.px 0
-                    ]
-                  ]
-                  model.containerAnim
-                , getArticleList  
-                )
-              Minimized -> 
-                (Animation.interrupt
-                  [ Animation.to initContainerAnim ] model.containerAnim
-                , Cmd.none
-                )
-      in
-          
-        ({ model | currentAppState = s, containerAnim = anim }, cmd)
-    
-    ArticleListReceived (Ok articleList) -> 
-      ({model | articles = articleList}, Cmd.none)
-    
+        SetAppState s ->
+            let
+                ( anim, cmd ) =
+                    case s of
+                        Maximized ->
+                            ( Animation.interrupt
+                                [ Animation.to
+                                    [ Animation.opacity 1
+                                    , Animation.right <| Animation.px 0
+                                    ]
+                                ]
+                                model.containerAnim
+                            , getArticleList
+                            )
 
-    _ ->
-      (model, Cmd.none)
+                        Minimized ->
+                            ( Animation.interrupt
+                                [ Animation.to initAnim ]
+                                model.containerAnim
+                            , Cmd.none
+                            )
+            in
+                ( { model | currentAppState = s, containerAnim = anim }, cmd )
+
+        ArticleListReceived (Ok articleList) ->
+            ( { model | articles = articleList }, Cmd.none )
+
+        _ ->
+            ( model, Cmd.none )
+
+
 
 -- SUBSCRIPTIONS
 
+
 subscriptions : Model -> Sub Msg
 subscriptions model =
-  Animation.subscription Animate [ model.containerAnim ]
+    Animation.subscription Animate [ model.containerAnim ]
+
+
 
 -- MAIN
 
+
 main : Program Never Model Msg
 main =
-  Html.program
-    {
-      init = init,
-      view = view,
-      update = update,
-      subscriptions = subscriptions
-    }
+    Html.program
+        { init = init
+        , view = view
+        , update = update
+        , subscriptions = subscriptions
+        }
