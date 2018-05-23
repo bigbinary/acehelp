@@ -1,5 +1,8 @@
 class ApplicationController < ActionController::Base
 
+  include ::Concerns::Errors
+  include ::Concerns::ErrorHandlers
+
   def index
     render
   end

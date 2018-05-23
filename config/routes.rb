@@ -4,6 +4,7 @@ Rails.application.routes.draw do
   get "/getting-started", to: "application#getting_started"
   get "/integrations", to: "application#integrations"
   get "/pricing", to: "application#pricing"
+  resources :article, only: :index
 
   namespace :api, defaults: {format: 'json'} do
     namespace :v1, module: 'v1' do
