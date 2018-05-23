@@ -26,8 +26,18 @@ type AppState
     | Maximized
 
 
+type Section
+    = Blank
+    | ArticleListSection ArticleListSection.Model
+
+
+type SectionState
+    = Loaded Section
+    | TransitioningFrom Section
+
+
 type alias Model =
-    { articles : ArticleListSection.Model
+    { sectionState : SectionState
     , containerAnim : Animation.State
     , currentAppState : AppState
     }
@@ -46,7 +56,7 @@ initAnim =
 
 init : ( Model, Cmd Msg )
 init =
-    ( { articles = ArticleListSection.noArticles
+    ( { sectionState = Loaded Blank
       , containerAnim = Animation.style initAnim
       , currentAppState = Minimized
       }
@@ -130,7 +140,7 @@ maximizedView model =
             ]
         )
         [ topBar <| SetAppState Minimized
-        , ArticleListSection.view model.articles |> Html.map ArticleListMsg
+        , getSectionView <| getSection model.sectionState
         ]
 
 
@@ -158,6 +168,26 @@ type Msg
 
 
 -- UPDATE
+
+
+getSectionView : Section -> Html Msg
+getSectionView section =
+    case section of
+        Blank ->
+            text ""
+
+        ArticleListSection m ->
+            Html.map ArticleListMsg <| ArticleListSection.view m
+
+
+getSection : SectionState -> Section
+getSection sectionState =
+    case sectionState of
+        Loaded section ->
+            section
+
+        TransitioningFrom section ->
+            section
 
 
 getArticleList : Cmd Msg
@@ -205,7 +235,7 @@ update msg model =
                 ( { model | currentAppState = s, containerAnim = anim }, cmd )
 
         ArticleListReceived (Ok articleList) ->
-            ( { model | articles = articleList }, Cmd.none )
+            ( { model | sectionState = Loaded (ArticleListSection articleList) }, Cmd.none )
 
         _ ->
             ( model, Cmd.none )
