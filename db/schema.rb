@@ -10,10 +10,19 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2018_05_22_031809) do
+ActiveRecord::Schema.define(version: 2018_05_22_154357) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
+
+  create_table "article_urls", force: :cascade do |t|
+    t.integer "article_id", null: false
+    t.integer "url_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["article_id"], name: "index_article_urls_on_article_id"
+    t.index ["url_id"], name: "index_article_urls_on_url_id"
+  end
 
   create_table "articles", force: :cascade do |t|
     t.string "title", null: false
@@ -26,6 +35,12 @@ ActiveRecord::Schema.define(version: 2018_05_22_031809) do
 
   create_table "categories", force: :cascade do |t|
     t.string "name", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
+  create_table "urls", force: :cascade do |t|
+    t.string "url", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
   end
