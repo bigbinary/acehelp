@@ -4,6 +4,7 @@ import Html exposing (..)
 import Html.Attributes exposing (style)
 import Html.Events exposing (onClick)
 import Http
+import Task
 
 
 -- import Element exposing (el, text,  column, layout, screen)
@@ -12,9 +13,9 @@ import Http
 -- import Views.Style exposing (stylesheet, AHStyle, renderAnim)
 
 import Page.ArticleList as ArticleListSection
+import Page.Article as ArticleSection
 import Views.Container exposing (topBar, closeButton)
 import Data.Article exposing (..)
-import Request.Article exposing (..)
 import Animation
 
 
@@ -29,6 +30,7 @@ type AppState
 type Section
     = Blank
     | ArticleListSection ArticleListSection.Model
+    | ArticleSection ArticleSection.Model
 
 
 type SectionState
@@ -162,8 +164,9 @@ type Msg
     = Animate Animation.Msg
     | SetAppState AppState
     | ArticleListMsg ArticleListSection.Msg
-    | ArticleListReceived (Result Http.Error (List ArticleShort))
-    | ArticleReceived (Result Http.Error Article)
+    | ArticleListLoaded (Result Http.Error (List ArticleShort))
+    | ArticleMsg
+    | ArticleLoaded (Result Http.Error Article)
 
 
 
@@ -174,10 +177,14 @@ getSectionView : Section -> Html Msg
 getSectionView section =
     case section of
         Blank ->
+            -- Show spinner here
             text ""
 
         ArticleListSection m ->
             Html.map ArticleListMsg <| ArticleListSection.view m
+
+        ArticleSection m ->
+            ArticleSection.view m
 
 
 getSection : SectionState -> Section
@@ -188,16 +195,6 @@ getSection sectionState =
 
         TransitioningFrom section ->
             section
-
-
-getArticleList : Cmd Msg
-getArticleList =
-    Http.send ArticleListReceived (requestArticleList)
-
-
-getArticle : ArticleId -> Cmd Msg
-getArticle aId =
-    Http.send ArticleReceived (requestArticle aId)
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -212,7 +209,7 @@ update msg model =
 
         SetAppState s ->
             let
-                ( anim, cmd ) =
+                ( anim, secState, cmd ) =
                     case s of
                         Maximized ->
                             ( Animation.interrupt
@@ -222,20 +219,33 @@ update msg model =
                                     ]
                                 ]
                                 model.containerAnim
-                            , getArticleList
+                            , TransitioningFrom (getSection model.sectionState)
+                              -- TODO: Call API and retrive contextual support response
+                            , Task.attempt ArticleListLoaded ArticleListSection.init
                             )
 
                         Minimized ->
                             ( Animation.interrupt
                                 [ Animation.to initAnim ]
                                 model.containerAnim
+                            , Loaded Blank
                             , Cmd.none
                             )
             in
-                ( { model | currentAppState = s, containerAnim = anim }, cmd )
+                ( { model | currentAppState = s, containerAnim = anim, sectionState = secState }, cmd )
 
-        ArticleListReceived (Ok articleList) ->
+        ArticleListLoaded (Ok articleList) ->
             ( { model | sectionState = Loaded (ArticleListSection articleList) }, Cmd.none )
+
+        ArticleListMsg aMsg ->
+            case aMsg of
+                ArticleListSection.LoadArticle articleId ->
+                    ( { model | sectionState = TransitioningFrom (getSection model.sectionState) }
+                    , Task.attempt ArticleLoaded <| ArticleSection.init articleId
+                    )
+
+        ArticleLoaded (Ok article) ->
+            ( { model | sectionState = Loaded (ArticleSection article) }, Cmd.none )
 
         _ ->
             ( model, Cmd.none )

@@ -1,9 +1,10 @@
-module Page.ArticleList exposing (init, Msg, Model, view, noArticles)
+module Page.ArticleList exposing (init, Msg(..), Model, view, noArticles)
 
 import Data.Article exposing (..)
 import Request.Article exposing (..)
 import Views.Container exposing (rowView)
 import Html exposing (..)
+import Html.Events exposing (onClick)
 import Http
 import Task
 import Animation
@@ -65,7 +66,7 @@ view model =
     rowView []
         (List.map
             (\a ->
-                div [] [ text a.title ]
+                div [ onClick <| LoadArticle a.id ] [ text a.title ]
             )
             model
         )
