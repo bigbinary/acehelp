@@ -1,22 +1,21 @@
-module Page.ArticleList exposing (init, Msg(..), Model, view, noArticles)
+module Page.ArticleList exposing (init, initAnim, Msg(..), Model, view, noArticles)
 
 import Data.Article exposing (..)
 import Request.Article exposing (..)
-import Views.Container exposing (rowView)
+import Views.Container exposing (rowView, popInInitialAnim)
 import Html exposing (..)
 import Html.Events exposing (onClick)
 import Html.Attributes exposing (style)
 import Http
 import Task
 import Animation
-import Color exposing (grey, rgb)
 
 
 -- MODEL
 
 
-type alias Model =
-    List ArticleShort
+type alias Model = List ArticleShort
+    
 
 
 noArticles : List ArticleShort
@@ -29,18 +28,8 @@ init =
     Http.toTask requestArticleList
 
 
-initAnim : List Animation.Property
-initAnim =
-    [ Animation.opacity 0
-    , Animation.scale 0.6
-    , Animation.shadow
-        { offsetX = 0
-        , offsetY = 0
-        , size = 20
-        , blur = 0
-        , color = rgb 153 153 153
-        }
-    ]
+initAnim : Animation.State
+initAnim = Animation.style popInInitialAnim
 
 
 

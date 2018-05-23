@@ -5,6 +5,8 @@ import Html.Attributes exposing (style)
 import Html.Events exposing (onClick)
 import Svg
 import Svg.Attributes
+import Animation
+import Color exposing (rgb)
 
 
 rowView : List ( String, String ) -> List (Html msg) -> Html msg
@@ -56,3 +58,17 @@ topBar onClose =
             [ text "Ace Help" ]
         , closeButton onClose
         ]
+
+
+popInInitialAnim : List Animation.Property
+popInInitialAnim =
+    [ Animation.opacity 0
+    , Animation.scale 0.6
+    , Animation.shadow
+        { offsetX = 0
+        , offsetY = 0
+        , size = 20
+        , blur = 0
+        , color = rgb 153 153 153
+        }
+    ]
