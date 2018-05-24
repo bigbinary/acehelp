@@ -17,21 +17,3 @@ spinner color =
         , Html.div [Attributes.class "rect4"] []
         , Html.div [Attributes.class "rect5"] []
         ]
-
-
-spinnerStyle : Html msg
-spinnerStyle =
-    Html.Styled.toUnstyled <| global
-        [ Css.Foreign.class "ah-spinner"
-            <| 
-            [ descendants
-                [ Css.Foreign.div 
-                    [ margin2 (px 100) auto
-                    , width (px 50)
-                    , height (px 40)
-                    , textAlign center
-                    , fontSize (px 10)
-                    ]
-                ]
-            ]
-        ]

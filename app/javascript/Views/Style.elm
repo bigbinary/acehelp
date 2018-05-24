@@ -30,6 +30,13 @@ type ArticleStyles
     | Body
 
 
+ahGrey : Color
+ahGrey = Color.rgb 153 153 153
+
+
+ahBlue : Color
+ahBlue = Color.rgb 60 170 249
+
 defaultFont : Property class variation
 defaultFont =
     Font.typeface
@@ -57,7 +64,7 @@ stylesheet =
                 { offset = ( 0, 0 )
                 , size = 15
                 , blur = 50
-                , color = Color.rgb 153 153 153
+                , color = ahGrey
                 }
             , Style.opacity 0.0
             ]
@@ -80,6 +87,6 @@ popInInitialAnim =
         , offsetY = 0
         , size = 20
         , blur = 0
-        , color = rgb 153 153 153
+        , color = ahGrey
         }
     ]
