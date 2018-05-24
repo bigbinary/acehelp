@@ -5,12 +5,22 @@ import Html.Attributes as Attributes exposing (style)
 import Views.Spinner exposing (..)
 import Views.Style exposing (ahBlue)
 
+
 sectionLoadingView : Html msg
 sectionLoadingView =
-    div [ style
+    div
+        [ style
             [ ( "position", "relative" )
             , ( "height", "100%" )
             ]
         ]
-        [ spinner ahBlue
+        [ div
+            [ style
+                [ ( "position", "absolute" )
+                , ( "top", "50%" )
+                , ( "left", "50%" )
+                , ( "transform", "translate(-50%, -50%)" )
+                ]
+            ]
+            [ spinner ahBlue ]
         ]

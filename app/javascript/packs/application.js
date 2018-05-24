@@ -9,8 +9,8 @@
 
 import Elm from "../Main"
 import "../../assets/stylesheets/application.css"
-import "../../assets/stylesheets/reset.scss"
 import "../../assets/stylesheets/spinner.scss"
+import "../../assets/stylesheets/reset.scss"
 
 document.addEventListener("DOMContentLoaded", () => {
   var domId = "acehelp-hook";
