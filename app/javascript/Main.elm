@@ -8,6 +8,7 @@ import Task
 import Page.ArticleList as ArticleListSection
 import Page.Article as ArticleSection
 import Views.Container exposing (topBar, closeButton)
+import Views.Spinner exposing (spinnerStyle)
 import Data.Article exposing (..)
 import Animation
 
@@ -98,7 +99,9 @@ maximizedView model =
               ]
             ]
         )
-        [ topBar <| SetAppState Minimized
+        -- TEMP: Add styles on top
+        [ spinnerStyle
+        , topBar <| SetAppState Minimized
         , getSectionView <| getSection model.sectionState
         ]
 
