@@ -7,7 +7,19 @@
     "elm-webpack-loader": "^4.5.0"
   },
   "devDependencies": {
-    "elm-hot-loader": "^0.5.4",
-    "webpack-dev-server": "2.11.2"
+    "elm-hot-loader": "0.5.4",
+    "webpack-dev-server": "2.11.2",
+    "elm-format": "0.6.1-alpha",
+    "husky": "0.14.3",
+    "lint-staged": "7.0.4"
+  },
+  "scripts": {
+    "precommit": "lint-staged"
+  },
+  "lint-staged": {
+    "*.elm": [
+      "elm-format --yes",
+      "git add"
+    ]
   }
 }
