@@ -6,7 +6,7 @@ module Api::V1
       if categories.present?
         render json: categories, root: "categories", status: 200
       else
-        render_no_content "No record found"
+        raise ActiveRecord::RecordNotFound.new "No record found"
       end
     end
 

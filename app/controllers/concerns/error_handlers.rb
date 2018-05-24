@@ -2,39 +2,39 @@ module Concerns::ErrorHandlers
   extend ::ActiveSupport::Concern
 
   def render_unauthorized(err)
-    render json: {}, meta: json_meta_body(err), status: :unauthorized
+    render json: json_body(err), status: :unauthorized
   end
 
   def render_unprocessable_entity(err)
-    render json: {}, meta: json_meta_body(err), status: :unprocessable_entity
+    render json: json_body(err), status: :unprocessable_entity
   end
 
   def render_bad_request(err)
-    render json: {}, meta: json_meta_body(err), status: :bad_request
+    render json: json_body(err), status: :bad_request
   end
 
   def render_not_found(err)
-    render json: {}, meta: json_meta_body(err), status: :not_found
+    render json: json_body(err), status: :not_found
   end
 
   def render_not_acceptable(err)
-    render json: {}, meta: json_meta_body(err), status: :not_acceptable
+    render json: json_body(err), status: :not_acceptable
   end
 
   def render_forbidden(err)
-    render json: {}, meta: json_meta_body(err), status: :forbidden
+    render json: json_body(err), status: :forbidden
   end
 
   def render_service_not_available(err)
-    render json: {}, meta: json_meta_body(err), status: :service_unavailable
+    render json: json_body(err), status: :service_unavailable
   end
 
   def render_ok(msg)
-    render json: {}, meta: json_meta_body(msg), status: :ok
+    render json: json_body(msg), status: :ok
   end
 
   def render_no_content(msg)
-    render json: {}, meta: json_meta_body(msg), status: 204
+    render json: json_body(msg), status: 204
   end
 
   private
@@ -44,7 +44,7 @@ module Concerns::ErrorHandlers
   # @param message [String] Error Message
   #
   # @return [Hash] Meta Body
-  def json_meta_body(message)
-    { success: false, errors: message }
+  def json_body(message)
+    { errors: message }
   end
 end

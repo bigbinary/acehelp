@@ -3,7 +3,8 @@ require "test_helper"
 class Api::V1::LibraryControllerTest < ActionDispatch::IntegrationTest
   def test_all_for_categories_and_articles
     category = Category.create!(name: "Magzine")
-    article = Article.create!(title: "Good Wife's Guide", desc: "how a good wife should act", category_id: category.id)
+    organization = Organization.create!(name: "BigBinary")
+    article = Article.create!(title: "Good Wife's Guide", desc: "how a good wife should act", category_id: category.id, organization_id: organization.id)
 
     get api_v1_all_url, params: { format: :json }
 
@@ -18,6 +19,6 @@ class Api::V1::LibraryControllerTest < ActionDispatch::IntegrationTest
 
   	get api_v1_all_url, params: { format: :json }
 
-    assert_response 204
+    assert_response 404
   end
 end
