@@ -12,7 +12,7 @@ type alias Article =
   , content: String
   }
 
-type alias ArticleShort =
+type alias ArticleSummary =
   { id: ArticleId
   , title: String
   , summary: String
@@ -24,14 +24,14 @@ type alias ArticleShort =
 -- DECODERS
 
 
-decodeArticles: Decoder (List ArticleShort)
+decodeArticles: Decoder (List ArticleSummary)
 decodeArticles =
-  list decodeArticleShort
+  list decodeArticleSummary
 
 
-decodeArticleShort : Decoder ArticleShort
-decodeArticleShort =
-  decode ArticleShort
+decodeArticleSummary : Decoder ArticleSummary
+decodeArticleSummary =
+  decode ArticleSummary
     |> required "id" int
     |> required "title" string
     |> required "summary" string

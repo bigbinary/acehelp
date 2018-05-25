@@ -14,16 +14,16 @@ import Animation
 -- MODEL
 
 
-type alias Model = List ArticleShort
+type alias Model = List ArticleSummary
     
 
 
-noArticles : List ArticleShort
+noArticles : List ArticleSummary
 noArticles =
     []
 
 
-init : Task.Task Http.Error (List ArticleShort)
+init : Task.Task Http.Error (List ArticleSummary)
 init =
     Http.toTask requestArticleList
 

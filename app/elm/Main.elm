@@ -6,12 +6,6 @@ import Html.Events exposing (onClick)
 import Http
 import Task
 
-
--- import Element exposing (el, text,  column, layout, screen)
--- import Element.Attributes exposing (width, height, paddingXY, spacing, px, fill, alignRight, verticalCenter)
--- import Element.Events exposing (onClick)
--- import Views.Style exposing (stylesheet, AHStyle, renderAnim)
-
 import Page.ArticleList as ArticleListSection
 import Page.Article as ArticleSection
 import Views.Container exposing (topBar, closeButton)
@@ -40,7 +34,7 @@ type SectionState
 
 type alias Model =
     { sectionState : SectionState
-    , containerAnim : Animation.State
+    , containerAnimation: Animation.State
     , currentAppState : AppState
     }
 
@@ -49,8 +43,8 @@ type alias Model =
 -- INIT
 
 
-initAnim : List Animation.Property
-initAnim =
+initAnimation: List Animation.Property
+initAnimation=
     [ Animation.opacity 0
     , Animation.right <| Animation.px -770
     ]
@@ -59,27 +53,11 @@ initAnim =
 init : ( Model, Cmd Msg )
 init =
     ( { sectionState = Loaded Blank
-      , containerAnim = Animation.style initAnim
+      , containerAnimation= Animation.style initAnimation
       , currentAppState = Minimized
       }
     , Cmd.none
     )
-
-
-
--- VIEW
--- minimizedView : Html Msg
--- minimizedView =
---   layout stylesheet
---     <| screen
---     <| el Views.Style.AHButton
---           [ verticalCenter
---           , alignRight
---           , width (px 100)
---           , height (px 100)
---           , onClick (SetAppState Maximized)
---           ]
---           (Element.text "?")
 
 
 minimizedView : Html Msg
@@ -105,30 +83,11 @@ minimizedView =
 
 
 
--- maximizedView : Model -> Html Msg
--- maximizedView model =
--- layout stylesheet
---   <| screen
---   <| el Views.Style.MainContainerStyle
---       ( renderAnim model.containerAnim
---           [ width (px 720)
---           , height fill
---           ]
---       )
---       ( column Views.Style.StackStyle
---           [ width fill
---           , height fill
---           , paddingXY 30 10
---           ]
---           []
---       )
-
-
 maximizedView : Model -> Html Msg
 maximizedView model =
     div
         (List.concat
-            [ Animation.render model.containerAnim
+            [ Animation.render model.containerAnimation
             , [ style
                     [ ( "position", "fixed" )
                     , ( "top", "0" )
@@ -164,7 +123,7 @@ type Msg
     = Animate Animation.Msg
     | SetAppState AppState
     | ArticleListMsg ArticleListSection.Msg
-    | ArticleListLoaded (Result Http.Error (List ArticleShort))
+    | ArticleListLoaded (Result Http.Error (List ArticleSummary))
     | ArticleMsg
     | ArticleLoaded (Result Http.Error Article)
 
@@ -200,17 +159,17 @@ getSection sectionState =
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
-        Animate aniMsg ->
+        Animate animationMsg ->
             ( { model
-                | containerAnim = Animation.update aniMsg model.containerAnim
+                | containerAnimation= Animation.update animationMsg model.containerAnimation
               }
             , Cmd.none
             )
 
-        SetAppState s ->
+        SetAppState appState ->
             let
-                ( anim, secState, cmd ) =
-                    case s of
+                ( animation, newSectionState, cmd ) =
+                    case appState of
                         Maximized ->
                             ( Animation.interrupt
                                 [ Animation.to
@@ -218,7 +177,7 @@ update msg model =
                                     , Animation.right <| Animation.px 0
                                     ]
                                 ]
-                                model.containerAnim
+                                model.containerAnimation
                             , TransitioningFrom (getSection model.sectionState)
                               -- TODO: Call API and retrive contextual support response
                             , Task.attempt ArticleListLoaded ArticleListSection.init
@@ -226,13 +185,13 @@ update msg model =
 
                         Minimized ->
                             ( Animation.interrupt
-                                [ Animation.to initAnim ]
-                                model.containerAnim
+                                [ Animation.to initAnimation]
+                                model.containerAnimation
                             , Loaded Blank
                             , Cmd.none
                             )
             in
-                ( { model | currentAppState = s, containerAnim = anim, sectionState = secState }, cmd )
+                ( { model | currentAppState = appState, containerAnimation = animation, sectionState = newSectionState }, cmd )
 
         ArticleListLoaded (Ok articleList) ->
             ( { model | sectionState = Loaded (ArticleListSection articleList) }, Cmd.none )
@@ -257,7 +216,7 @@ update msg model =
 
 subscriptions : Model -> Sub Msg
 subscriptions model =
-    Animation.subscription Animate [ model.containerAnim ]
+    Animation.subscription Animate [ model.containerAnimation]
 
 
 
