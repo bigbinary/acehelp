@@ -5,11 +5,12 @@ import Html.Attributes exposing (style)
 import Html.Events exposing (onClick)
 import Http
 import Task
-import Page.ArticleList as ArticleListSection
+import Page.CategoryList as CategoryListSection
 import Page.Article as ArticleSection
 import Views.Container exposing (topBar, closeButton)
 import Views.Loading exposing (sectionLoadingView)
 import Data.Article exposing (..)
+import Data.Category exposing (..)
 import Animation
 
 
@@ -23,8 +24,7 @@ type AppState
 
 type Section
     = Blank
-    | Loading 
-    | ArticleListSection ArticleListSection.Model
+    | CategoryListSection CategoryListSection.Model
     | ArticleSection ArticleSection.Model
 
 
@@ -122,8 +122,8 @@ view model =
 type Msg
     = Animate Animation.Msg
     | SetAppState AppState
-    | ArticleListMsg ArticleListSection.Msg
-    | ArticleListLoaded (Result Http.Error (List ArticleSummary))
+    | CategoryListMsg CategoryListSection.Msg
+    | CategoryListLoaded (Result Http.Error Categories)
     | ArticleMsg
     | ArticleLoaded (Result Http.Error Article)
 
@@ -141,8 +141,8 @@ getSectionView section =
         Loading ->
             sectionLoadingView
 
-        ArticleListSection m ->
-            Html.map ArticleListMsg <| ArticleListSection.view m
+        CategoryListSection m ->
+            Html.map CategoryListMsg <| CategoryListSection.view m
 
         ArticleSection m ->
             ArticleSection.view m
@@ -156,6 +156,11 @@ getSection sectionState =
 
         TransitioningFrom section ->
             Loading
+
+
+transitionFromSection : SectionState -> SectionState
+transitionFromSection sectionState =
+    TransitioningFrom (getSection sectionState)
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -180,9 +185,9 @@ update msg model =
                                     ]
                                 ]
                                 model.containerAnimation
-                            , TransitioningFrom (getSection model.sectionState)
+                            , transitionFromSection model.sectionState
                               -- TODO: Call API and retrive contextual support response
-                            , Task.attempt ArticleListLoaded ArticleListSection.init
+                            , Task.attempt CategoryListLoaded CategoryListSection.init
                             )
 
                         Minimized ->
@@ -195,13 +200,13 @@ update msg model =
             in
                 ( { model | currentAppState = appState, containerAnimation = animation, sectionState = newSectionState }, cmd )
 
-        ArticleListLoaded (Ok articleList) ->
-            ( { model | sectionState = Loaded (ArticleListSection articleList) }, Cmd.none )
+        CategoryListLoaded (Ok categories) ->
+            ( { model | sectionState = Loaded (CategoryListSection categories.categories) }, Cmd.none )
 
-        ArticleListMsg aMsg ->
+        CategoryListMsg aMsg ->
             case aMsg of
-                ArticleListSection.LoadArticle articleId ->
-                    ( { model | sectionState = TransitioningFrom (getSection model.sectionState) }
+                CategoryListSection.LoadArticle articleId ->
+                    ( { model | sectionState = transitionFromSection model.sectionState }
                     , Task.attempt ArticleLoaded <| ArticleSection.init articleId
                     )
 
