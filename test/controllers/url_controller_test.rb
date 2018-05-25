@@ -24,17 +24,17 @@ class UrlControllerTest < ActionDispatch::IntegrationTest
   end
 
   def test_create_success
-    post "/url", params: { url: { url: "https://amazon.com" } }, headers: { "api-key": @organization.api_key }
+    post url_index_url, params: { url: { url: "https://amazon.com" } }, headers: { "api-key": @organization.api_key }
     assert_response :success
   end
 
   def test_update_success
-    put "/url/#{@url.id}", params: { url: { url: "https://amazon.com" } }, headers: { "api-key": @organization.api_key }
+    put url_path(@url.id), params: { url: { url: "https://amazon.com" } }, headers: { "api-key": @organization.api_key }
     assert_response :success
   end
 
   def test_destroy_success
-    delete "/url/#{@url.id}", params: nil, headers: { "api-key": @organization.api_key }
+    delete url_path(@url.id), params: nil, headers: { "api-key": @organization.api_key }
     assert_response :success
   end
 

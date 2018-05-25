@@ -38,17 +38,17 @@ class ArticleControllerTest < ActionDispatch::IntegrationTest
   end
 
   def test_create_success
-    post "/article", params: { article: { title: "rails", desc: "about framework", category_id: @category.id } }, headers: { "api-key": @organization.api_key }
+    post article_index_url, params: { article: { title: "rails", desc: "about framework", category_id: @category.id } }, headers: { "api-key": @organization.api_key }
     assert_response :success
   end
 
   def test_update_success
-    put "/article/#{@article.id}", params: { article: { title: "Rails" } }, headers: { "api-key": @organization.api_key }
+    put article_path(@article.id), params: { article: { title: "Rails" } }, headers: { "api-key": @organization.api_key }
     assert_response :success
   end
 
   def test_destroy_success
-    delete "/article/#{@article.id}", params: nil, headers: { "api-key": @organization.api_key }
+    delete article_path(@article.id), params: nil, headers: { "api-key": @organization.api_key }
     assert_response :success
   end
 
