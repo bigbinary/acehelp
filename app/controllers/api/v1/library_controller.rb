@@ -3,11 +3,7 @@ module Api::V1
 
     def all
       categories = Category.all
-      if categories.present?
-        render json: categories, root: "categories", status: 200
-      else
-        raise ActiveRecord::RecordNotFound.new "No record found"
-      end
+      render json: categories, root: "categories", status: 200
     end
 
   end

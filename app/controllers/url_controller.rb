@@ -14,7 +14,7 @@ class UrlController < ApplicationController
     if url.save
       render json: {message: "Url created successfully"}, status: 200
     else
-      raise ActiveRecord::RecordNotSaved.new url.errors.full_messages
+      render_bad_request url.errors.full_messages.join(',')
     end
   end
 

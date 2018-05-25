@@ -25,7 +25,7 @@ class ArticleController < ApplicationController
     if article.save
       render json: {message: "Article created successfully"}, status: 200
     else
-      raise ActiveRecord::RecordNotSaved.new article.errors.full_messages.join(',')
+      render_bad_request article.errors.full_messages.join(',')
     end
   end
 

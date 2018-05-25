@@ -7,9 +7,9 @@ module LoadOrganization
     end
 
     def load_organization
-      raise AuthModule::Unauthorized.new "Unauthorized Request" if request.headers["api-key"].blank?
+      render_bad_request if request.headers["api-key"].blank?
       @organization = organization_scope.find_by(api_key: request.headers["api-key"])
-      raise AuthModule::InvalidToken.new "Token not Valid" unless @organization
+      render_bad_request "Token not Valid" unless @organization
     end
 
     def organization_scope

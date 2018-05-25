@@ -19,6 +19,6 @@ class Api::V1::LibraryControllerTest < ActionDispatch::IntegrationTest
 
   	get api_v1_all_url, params: { format: :json }
 
-    assert_response 404
+    assert_response 200
   end
 end
