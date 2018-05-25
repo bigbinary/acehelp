@@ -44,7 +44,7 @@ class ArticleController < ApplicationController
   private
 
   def set_article
-    @article = Article.find_by(id: params[:article_id], organization_id: @organization.id)
+    @article = Article.find_by(id: params[:id], organization_id: @organization.id)
     raise ActiveRecord::RecordNotFound.new "Invalid Article" unless @article
   end
 
@@ -53,7 +53,7 @@ class ArticleController < ApplicationController
   end
 
   def valid_category_id?
-    Category.exists?(id: params[:category_id])
+    Category.exists?(id: article_params[:category_id])
   end
 
 end

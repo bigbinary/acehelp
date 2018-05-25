@@ -1,7 +1,7 @@
 # Read about fixtures at http://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
 
-one:
-  url: MyString
+google:
+  url: "http://google.com"
 
-two:
-  url: MyString
+bigbinary:
+  url: "http://bigbinary.com"
