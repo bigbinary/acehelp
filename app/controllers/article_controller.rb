@@ -17,8 +17,6 @@ class ArticleController < ApplicationController
   end
 
   def create
-    render_bad_request "Invalid category" unless valid_category_id?
-    
     article = Article.new(article_params)
     article[:organization_id] = @organization.id
 
@@ -47,10 +45,6 @@ class ArticleController < ApplicationController
 
   def article_params
     params.require(:article).permit(:title, :desc, :category_id)
-  end
-
-  def valid_category_id?
-    Category.exists?(id: article_params[:category_id])
   end
 
 end
