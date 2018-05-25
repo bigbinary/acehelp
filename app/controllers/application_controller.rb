@@ -5,6 +5,8 @@ class ApplicationController < ActionController::Base
   include ::Concerns::Errors
   include ::Concerns::ErrorHandlers
 
+  include LoadOrganization
+
   def index
     render
   end
@@ -19,18 +21,6 @@ class ApplicationController < ActionController::Base
 
   def pricing
     render
-  end
-
-  private
-
-  def load_organization
-    raise AuthModule::Unauthorized.new "Unauthorized Request" if request.headers["api-key"].blank?
-    @organization = organization_scope.find_by(api_key: request.headers["api-key"])
-    raise AuthModule::InvalidToken.new "Token not Valid" unless @organization
-  end
-
-  def organization_scope
-    Organization
   end
 
 end

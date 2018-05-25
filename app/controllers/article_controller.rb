@@ -1,25 +1,23 @@
 class ArticleController < ApplicationController
 
-  before_action :load_organization, except: :index
   before_action :set_article, only: [:show, :update, :destroy]
   
   def index
     article_scope = if params[:url].present?
-                      Url.find_by(url: params[:url])
-                    elsif params[:api_key].present?
-                      load_organization
+                      Url.find_by(url: params[:url], organization_id: @organization.id)
+                    else
                       @organization
                     end
 
     if article_scope.present?
       render json: article_scope.articles, root: "articles", status: 200
     else
-      raise BadRequest.new "Invalid Request"
+      render_bad_request "Invalid Request"
     end
   end
 
   def create
-    raise BadRequest.new "Invalid category" unless valid_category_id?
+    render_bad_request "Invalid category" unless valid_category_id?
     
     article = Article.new(article_params)
     article[:organization_id] = @organization.id
@@ -27,7 +25,7 @@ class ArticleController < ApplicationController
     if article.save
       render json: {message: "Article created successfully"}, status: 200
     else
-      raise ActiveRecord::RecordNotSaved.new article.errors.full_messages
+      raise ActiveRecord::RecordNotSaved.new article.errors.full_messages.join(',')
     end
   end
 
@@ -44,8 +42,7 @@ class ArticleController < ApplicationController
   private
 
   def set_article
-    @article = Article.find_by(id: params[:id], organization_id: @organization.id)
-    raise ActiveRecord::RecordNotFound.new "Invalid Article" unless @article
+    @article = Article.find_by!(id: params[:id], organization_id: @organization.id)
   end
 
   def article_params

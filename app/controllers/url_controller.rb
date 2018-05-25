@@ -1,6 +1,5 @@
 class UrlController < ApplicationController
 
-  before_action :load_organization
   before_action :set_url, only: [:update, :destroy]
   
   def index
@@ -20,11 +19,8 @@ class UrlController < ApplicationController
   end
 
   def update
-    if @url.update(url_params)
-      render json: {message: "url updated successfully"}, status: 200
-    else
-      raise BadRequest.new @url.errors.full_messages
-    end
+    @url.update!(url_params)
+    render json: {message: "url updated successfully"}, status: 200
   end
 
   def destroy
@@ -35,8 +31,7 @@ class UrlController < ApplicationController
   private
 
   def set_url
-    @url = Url.find_by(id: params[:id], organization_id: @organization.id)
-    raise ActiveRecord::RecordNotFound.new "Invalid Article" unless @url
+    @url = Url.find_by!(id: params[:id], organization_id: @organization.id)
   end
 
   def url_params
