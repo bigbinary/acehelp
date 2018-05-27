@@ -5,7 +5,6 @@ import Html.Attributes exposing (style)
 import Html.Events exposing (onClick)
 import Http
 import Task
-
 import Page.ArticleList as ArticleListSection
 import Page.Article as ArticleSection
 import Views.Container exposing (topBar, closeButton)
@@ -34,7 +33,7 @@ type SectionState
 
 type alias Model =
     { sectionState : SectionState
-    , containerAnimation: Animation.State
+    , containerAnimation : Animation.State
     , currentAppState : AppState
     }
 
@@ -43,8 +42,8 @@ type alias Model =
 -- INIT
 
 
-initAnimation: List Animation.Property
-initAnimation=
+initAnimation : List Animation.Property
+initAnimation =
     [ Animation.opacity 0
     , Animation.right <| Animation.px -770
     ]
@@ -53,7 +52,7 @@ initAnimation=
 init : ( Model, Cmd Msg )
 init =
     ( { sectionState = Loaded Blank
-      , containerAnimation= Animation.style initAnimation
+      , containerAnimation = Animation.style initAnimation
       , currentAppState = Minimized
       }
     , Cmd.none
@@ -80,7 +79,6 @@ minimizedView =
         , onClick (SetAppState Maximized)
         ]
         [ text "?" ]
-
 
 
 maximizedView : Model -> Html Msg
@@ -161,7 +159,7 @@ update msg model =
     case msg of
         Animate animationMsg ->
             ( { model
-                | containerAnimation= Animation.update animationMsg model.containerAnimation
+                | containerAnimation = Animation.update animationMsg model.containerAnimation
               }
             , Cmd.none
             )
@@ -185,7 +183,7 @@ update msg model =
 
                         Minimized ->
                             ( Animation.interrupt
-                                [ Animation.to initAnimation]
+                                [ Animation.to initAnimation ]
                                 model.containerAnimation
                             , Loaded Blank
                             , Cmd.none
@@ -216,7 +214,7 @@ update msg model =
 
 subscriptions : Model -> Sub Msg
 subscriptions model =
-    Animation.subscription Animate [ model.containerAnimation]
+    Animation.subscription Animate [ model.containerAnimation ]
 
 
 

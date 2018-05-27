@@ -14,8 +14,8 @@ import Animation
 -- MODEL
 
 
-type alias Model = List ArticleSummary
-    
+type alias Model =
+    List ArticleSummary
 
 
 noArticles : List ArticleSummary
@@ -29,7 +29,8 @@ init =
 
 
 initAnim : Animation.State
-initAnim = Animation.style popInInitialAnim
+initAnim =
+    Animation.style popInInitialAnim
 
 
 
@@ -56,9 +57,11 @@ view model =
     rowView []
         (List.map
             (\a ->
-                div [ onClick <| LoadArticle a.id
-                    , style [("cursor", "pointer")]
-                    ] [ text a.title ]
+                div
+                    [ onClick <| LoadArticle a.id
+                    , style [ ( "cursor", "pointer" ) ]
+                    ]
+                    [ text a.title ]
             )
             model
         )
