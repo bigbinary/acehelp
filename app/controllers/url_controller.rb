@@ -5,32 +5,32 @@ class UrlController < ApplicationController
   
   def index
     urls = @organization.urls
-    render json: urls, root: "urls"
+    render json: urls, root: 'urls'
   end
 
   def create
     url = @organization.urls.new(url_params)
 
-    if url.save!
-      render json: { message: "Url created successfully" }
+    if url.save
+      render json: { message: 'Url created successfully' }
     else
-      render_bad_request "Invalid Request"
+      render_bad_request 'Bad Request'
     end
   end
 
   def update
-    if @url.update!(url_params)
-      render json: { message: "url updated successfully" }
+    if @url.update(url_params)
+      render json: { message: 'url updated successfully' }
     else
-      render_bad_request "Invalid Request"
+      render_bad_request 'Bad Request'
     end
   end
 
   def destroy
-    if @url.destroy!
-      render json: { message: "url deleted successfully" }
+    if @url.destroy
+      render json: { message: 'url deleted successfully' }
     else
-      render_bad_request "Invalid Request"
+      render_bad_request 'Bad Request'
     end
   end
 

@@ -11,35 +11,35 @@ class ArticleController < ApplicationController
                     end
 
     if article_scope.present?
-      render json: article_scope.articles, root: "articles"
+      render json: article_scope.articles, root: 'articles'
     else
-      render_bad_request "Invalid Request"
+      render_bad_request 'Invalid Request'
     end
   end
 
   def create
     article = @organization.articles.new(article_params)
 
-    if article.save!
-      render json: { message: "Article created successfully" }
+    if article.save
+      render json: { message: 'Article created successfully' }
     else
-      render_bad_request "Invalid Request"
+      render_bad_request 'Bad Request'
     end
   end
 
   def update
-    if @article.update!(article_params)
-      render json: { message: "Article updated successfully" }
+    if @article.update(article_params)
+      render json: { message: 'Article updated successfully' }
     else
-      render_bad_request "Invalid Request"
+      render_bad_request 'Bad Request'
     end
   end
 
   def destroy
-    if @article.destroy!
-      render json: { message: "Article deleted successfully" }
+    if @article.destroy
+      render json: { message: 'Article deleted successfully' }
     else
-      render_bad_request "Invalid Request"
+      render_bad_request 'Bad Request'
     end
   end
 

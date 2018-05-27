@@ -17,8 +17,8 @@ class ArticleControllerTest < ActionDispatch::IntegrationTest
   
   def test_index_success
     url = Url.create!(url: "https://google.com", organization_id: @organization.id)
-    article = Article.create! title: "Good Wife's Guide",
-                              desc: "how a good wife should act",
+    article = Article.create! title: "Math's Guide",
+                              desc: "maths formulae",
                               category_id: @category.id,
                               organization_id: @organization.id
     ArticleUrl.create!(url_id: url.id, article_id: article.id)
@@ -27,7 +27,7 @@ class ArticleControllerTest < ActionDispatch::IntegrationTest
     
     assert_response :success
     json = JSON.parse(response.body)
-    assert_equal "Good Wife's Guide", json.first.second.first["title"]
+    assert_equal "Math's Guide", json.first.second.first["title"]
   end
 
   def test_index_success_for_organization
