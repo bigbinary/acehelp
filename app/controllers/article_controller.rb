@@ -23,7 +23,7 @@ class ArticleController < ApplicationController
     if article.save
       render json: { message: 'Article created successfully' }
     else
-      render_bad_request 'Bad Request'
+      render_unprocessable_entity 'Bad Request'
     end
   end
 
@@ -31,7 +31,7 @@ class ArticleController < ApplicationController
     if @article.update(article_params)
       render json: { message: 'Article updated successfully' }
     else
-      render_bad_request 'Bad Request'
+      render_unprocessable_entity 'Bad Request'
     end
   end
 
@@ -39,7 +39,7 @@ class ArticleController < ApplicationController
     if @article.destroy
       render json: { message: 'Article deleted successfully' }
     else
-      render_bad_request 'Bad Request'
+      render_unprocessable_entity 'Bad Request'
     end
   end
 

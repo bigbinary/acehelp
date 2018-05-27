@@ -14,7 +14,7 @@ class UrlController < ApplicationController
     if url.save
       render json: { message: 'Url created successfully' }
     else
-      render_bad_request 'Bad Request'
+      render_unprocessable_entity 'Bad Request'
     end
   end
 
@@ -22,7 +22,7 @@ class UrlController < ApplicationController
     if @url.update(url_params)
       render json: { message: 'url updated successfully' }
     else
-      render_bad_request 'Bad Request'
+      render_unprocessable_entity 'Bad Request'
     end
   end
 
@@ -30,7 +30,7 @@ class UrlController < ApplicationController
     if @url.destroy
       render json: { message: 'url deleted successfully' }
     else
-      render_bad_request 'Bad Request'
+      render_unprocessable_entity 'Bad Request'
     end
   end
 
