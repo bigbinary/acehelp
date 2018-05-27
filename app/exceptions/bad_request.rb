@@ -1,2 +1,0 @@
-class BadRequest < StandardError
-end

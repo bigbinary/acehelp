@@ -29,6 +29,10 @@ class UrlControllerTest < ActionDispatch::IntegrationTest
   end
 
   def test_update_success
+    assert_raises(ActiveRecord::RecordNotFound) do
+      put url_path(-345), params: { url: { url: "https://amazon.com" } }, headers: { "api-key": @organization.api_key }
+    end
+
     put url_path(@url.id), params: { url: { url: "https://amazon.com" } }, headers: { "api-key": @organization.api_key }
     assert_response :success
   end

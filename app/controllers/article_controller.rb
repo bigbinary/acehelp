@@ -1,4 +1,5 @@
 class ArticleController < ApplicationController
+  include LoadOrganization
 
   before_action :load_article, only: [:show, :update, :destroy]
   
@@ -10,25 +11,36 @@ class ArticleController < ApplicationController
                     end
 
     if article_scope.present?
-      render json: article_scope.articles, root: "articles", status: 200
+      render json: article_scope.articles, root: "articles"
     else
       render_bad_request "Invalid Request"
     end
   end
 
   def create
-    Article.create!(article_creation_params)
-    render json: { message: "Article created successfully" }, status: 200
+    article = @organization.articles.new(article_params)
+
+    if article.save!
+      render json: { message: "Article created successfully" }
+    else
+      render_bad_request "Invalid Request"
+    end
   end
 
   def update
-    @article.update!(article_params)
-    render json: { message: "Article updated successfully" }, status: 200
+    if @article.update!(article_params)
+      render json: { message: "Article updated successfully" }
+    else
+      render_bad_request "Invalid Request"
+    end
   end
 
   def destroy
-    @article.destroy!
-    render json: { message: "Article deleted successfully" }, status: 200
+    if @article.destroy!
+      render json: { message: "Article deleted successfully" }
+    else
+      render_bad_request "Invalid Request"
+    end
   end
 
   private
@@ -40,9 +52,4 @@ class ArticleController < ApplicationController
   def article_params
     params.require(:article).permit(:title, :desc, :category_id)
   end
-
-  def article_creation_params
-    article_params.merge!(organization_id: @organization.id)
-  end
-
 end

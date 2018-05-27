@@ -1,25 +1,37 @@
 class UrlController < ApplicationController
+  include LoadOrganization
 
   before_action :load_url, only: [:update, :destroy]
   
   def index
     urls = @organization.urls
-    render json: urls, root: "urls", status: 200
+    render json: urls, root: "urls"
   end
 
   def create
-    Url.create!(url_creation_params)
-    render json: { message: "Url created successfully" }, status: 200
+    url = @organization.urls.new(url_params)
+
+    if url.save!
+      render json: { message: "Url created successfully" }
+    else
+      render_bad_request "Invalid Request"
+    end
   end
 
   def update
-    @url.update!(url_params)
-    render json: { message: "url updated successfully" }, status: 200
+    if @url.update!(url_params)
+      render json: { message: "url updated successfully" }
+    else
+      render_bad_request "Invalid Request"
+    end
   end
 
   def destroy
-    @url.destroy!
-    render json: { message: "url deleted successfully" }, status: 200
+    if @url.destroy!
+      render json: { message: "url deleted successfully" }
+    else
+      render_bad_request "Invalid Request"
+    end
   end
 
   private
@@ -30,9 +42,5 @@ class UrlController < ApplicationController
 
   def url_params
     params.require(:url).permit(:url)
-  end
-
-  def url_creation_params
-    url_params.merge!(organization_id: @organization.id)
   end
 end
