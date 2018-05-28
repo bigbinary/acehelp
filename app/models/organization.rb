@@ -10,7 +10,7 @@ class Organization < ApplicationRecord
   private
 
   def ensure_api_key_assigned
-    return if self.api_key.present?
+    return if api_key.present?
 
     loop do
       self.api_key = SecureRandom.hex(10)
