@@ -1,5 +1,6 @@
-class HttpUrlValidator < ActiveModel::Validator
+# frozen_string_literal: tru
 
+class HttpUrlValidator < ActiveModel::Validator
   def self.compliant?(value)
     uri = URI.parse(value)
     uri.is_a?(URI::HTTP) && !uri.host.nil?
@@ -12,5 +13,4 @@ class HttpUrlValidator < ActiveModel::Validator
       record.errors.add("Url", "is not a valid HTTP URL")
     end
   end
-
 end

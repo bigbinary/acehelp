@@ -1,7 +1,8 @@
-require 'test_helper'
+# frozen_string_literal: true
+
+require "test_helper"
 
 class ArticleTest < ActiveSupport::TestCase
-
   def test_article_validation
     article = articles :ror
     assert_not article.valid?
