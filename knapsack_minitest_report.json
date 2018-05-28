@@ -1,0 +1,9 @@
+{
+  "test/models/category_test.rb": 0.013618946075439453,
+  "test/controllers/api/v1/category_controller_test.rb": 0.16896510124206543,
+  "test/models/article_test.rb": 0.005018949508666992,
+  "test/models/url_test.rb": 0.005101919174194336,
+  "test/controllers/url_controller_test.rb": 0.060272932052612305,
+  "test/controllers/article_controller_test.rb": 0.09127211570739746,
+  "test/models/organization_test.rb": 0.0050029754638671875
+}
