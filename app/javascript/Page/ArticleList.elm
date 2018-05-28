@@ -2,7 +2,8 @@ module Page.ArticleList exposing (init, initAnim, Msg(..), Model, view, noArticl
 
 import Data.Article exposing (..)
 import Request.Article exposing (..)
-import Views.Container exposing (rowView, popInInitialAnim)
+import Views.Container exposing (rowView)
+import Views.Style exposing (popInInitialAnim)
 import Html exposing (..)
 import Html.Events exposing (onClick)
 import Html.Attributes exposing (style)

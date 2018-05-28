@@ -53,4 +53,3 @@ task setup_sample_data: [:environment] do
 
   puts "sample data was added successfully"
 end
-
