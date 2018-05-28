@@ -40,11 +40,13 @@ class ArticleControllerTest < ActionDispatch::IntegrationTest
 
   def test_create_success
     post article_index_url, params: { article: { title: "rails", desc: "about framework", category_id: @category.id } }, headers: { "api-key": @organization.api_key }
+
     assert_response :success
   end
 
   def test_update_success
     put article_path(@article.id), params: { article: { title: "Rails" } }
+
     assert_response :unauthorized
 
     assert_raises(ActiveRecord::RecordNotFound) do
@@ -52,14 +54,16 @@ class ArticleControllerTest < ActionDispatch::IntegrationTest
     end
 
     put article_path(@article.id), params: { article: { title: "Rails" } }, headers: { "api-key": @organization.api_key }
+
     assert_response :success
   end
 
   def test_destroy_success
     delete article_path(@article.id), params: { article: { title: "Rails" } }
-    assert_response :unauthorized
 
+    assert_response :unauthorized
     delete article_path(@article.id), params: nil, headers: { "api-key": @organization.api_key }
+
     assert_response :success
   end
 

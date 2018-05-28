@@ -24,10 +24,10 @@ class Api::V1::LibraryControllerTest < ActionDispatch::IntegrationTest
   end
 
   def test_all_for_no_categories_and_articles
-  	Category.delete_all
-  	Article.delete_all
+    Category.delete_all
+    Article.delete_all
 
-  	get api_v1_all_url, params: { format: :json }
+    get api_v1_all_url, params: { format: :json }
 
     assert_response 200
   end

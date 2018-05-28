@@ -25,6 +25,7 @@ class UrlControllerTest < ActionDispatch::IntegrationTest
 
   def test_create_success
     post url_index_url, params: { url: { url: "https://amazon.com" } }, headers: { "api-key": @organization.api_key }
+
     assert_response :success
   end
 
@@ -34,11 +35,13 @@ class UrlControllerTest < ActionDispatch::IntegrationTest
     end
 
     put url_path(@url.id), params: { url: { url: "https://amazon.com" } }, headers: { "api-key": @organization.api_key }
+
     assert_response :success
   end
 
   def test_destroy_success
     delete url_path(@url.id), params: nil, headers: { "api-key": @organization.api_key }
+
     assert_response :success
   end
 
