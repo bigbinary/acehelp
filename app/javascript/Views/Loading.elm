@@ -3,7 +3,7 @@ module Views.Loading exposing (..)
 import Html exposing (..)
 import Html.Attributes as Attributes exposing (style)
 import Views.Spinner exposing (..)
-import Views.Style exposing (ahBlue)
+import Views.Style exposing (acehelpBlue)
 
 
 sectionLoadingView : Html msg
@@ -22,5 +22,5 @@ sectionLoadingView =
                 , ( "transform", "translate(-50%, -50%)" )
                 ]
             ]
-            [ spinner ahBlue ]
+            [ spinner acehelpBlue ]
         ]
