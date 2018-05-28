@@ -14,10 +14,10 @@ class UrlControllerTest < ActionDispatch::IntegrationTest
     @article.save
     @url.save
   end
-  
+
   def test_index_success
     get url_index_url, params: nil, headers: { "api-key": @organization.api_key }
-    
+
     assert_response :success
     json = JSON.parse(response.body)
     assert_equal "http://google.com", json.first.second.first["url"]

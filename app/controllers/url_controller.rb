@@ -2,7 +2,7 @@ class UrlController < ApplicationController
   include LoadOrganization
 
   before_action :load_url, only: [:update, :destroy]
-  
+
   def index
     urls = @organization.urls
     render json: urls, root: 'urls'
