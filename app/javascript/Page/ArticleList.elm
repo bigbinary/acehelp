@@ -51,12 +51,12 @@ view : Model -> Html Msg
 view model =
     rowView []
         (List.map
-            (\a ->
+            (\article ->
                 div
-                    [ onClick <| LoadArticle a.id
+                    [ onClick <| LoadArticle article.id
                     , style [ ( "cursor", "pointer" ) ]
                     ]
-                    [ text a.title ]
+                    [ text article.title ]
             )
             model.articles
         )

@@ -25,6 +25,7 @@ type AppState
 
 type Section
     = Blank
+    | Loading
     | CategoryListSection CategoryListSection.Model
     | ArticleSection ArticleSection.Model
     | ArticleListSection ArticleListSection.Model
@@ -140,7 +141,7 @@ getSectionView section =
     case section of
         Blank ->
             sectionLoadingView
-        
+
         Loading ->
             sectionLoadingView
 
@@ -209,8 +210,8 @@ update msg model =
         CategoryListLoaded (Ok categories) ->
             ( { model | sectionState = Loaded (CategoryListSection categories.categories) }, Cmd.none )
 
-        CategoryListMsg aMsg ->
-            case aMsg of
+        CategoryListMsg categoryListMsg ->
+            case categoryListMsg of
                 CategoryListSection.LoadCategory categoryId ->
                     let
                         getCategoryListModel =
@@ -243,6 +244,13 @@ update msg model =
                             Nothing ->
                                 -- TODO: This is an error case and needs to be handled
                                 ( model, Cmd.none )
+
+        ArticleListMsg articleListMsg ->
+            case articleListMsg of
+                ArticleListSection.LoadArticle articleId ->
+                    ( { model | sectionState = transitionFromSection model.sectionState }
+                    , Task.attempt ArticleLoaded <| ArticleSection.init articleId
+                    )
 
         ArticleLoaded (Ok article) ->
             ( { model | sectionState = Loaded (ArticleSection article) }, Cmd.none )
