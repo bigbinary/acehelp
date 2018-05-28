@@ -1,0 +1,22 @@
+<!DOCTYPE HTML>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <title>Demo Client</title>
+    <%= stylesheet_pack_tag 'application' %>
+  </head>
+  <body>
+    <div id="simulated-content">
+      <p>
+        <%= link_to "Getting started", "/getting-started"%>
+      </p>
+      <p>
+        <%= link_to "Integrations", "/integrations"%>
+      </p>
+      <p>
+        <%= link_to "Pricing", "/pricing"%>
+      </p>
+    </div>
+    <%= javascript_pack_tag "application" %>
+  </body>
+</html>

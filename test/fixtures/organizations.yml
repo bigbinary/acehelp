@@ -1,7 +1,9 @@
 # Read about fixtures at http://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
 
-autobiography:
-  name: AutoBioGraphy
+bigbinary:
+  name: BigBinary
+  api_key: MyString
 
-novel:
-  name: Novel
+zindi:
+  name: Zindi
+  api_key: MyString
