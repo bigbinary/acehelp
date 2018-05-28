@@ -1,4 +1,4 @@
-module Page.CategoryList exposing (init, initAnim, Msg(..), Model, view, noArticles)
+module Page.CategoryList exposing (init, initAnim, Msg(..), Model, view, noArticles, getCategoryWithId)
 
 import Data.Category exposing (..)
 import Data.Article exposing (..)
@@ -39,7 +39,7 @@ initAnim =
 
 
 type Msg
-    = LoadArticle ArticleId
+    = LoadCategory ArticleId
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -56,12 +56,21 @@ update msg model =
 view : Model -> Html Msg
 view model =
     rowView []
-        -- (List.map
-        --     (\a ->
-        --         div [ onClick <| LoadArticle a.id
-        --             , style [("cursor", "pointer")]
-        --             ] [ text a.title ]
-        --     )
-        --     model
-        -- )
-        []
+        (List.map
+            (\category ->
+                div
+                    [ onClick <| LoadCategory category.id
+                    , style [ ( "cursor", "pointer" ) ]
+                    ]
+                    [ text category.name ]
+            )
+            model
+        )
+
+
+getCategoryWithId : CategoryId -> Model -> Maybe Category
+getCategoryWithId categoryId categoryList =
+    List.head <|
+        List.filter
+            (\category -> category.id == categoryId)
+            categoryList

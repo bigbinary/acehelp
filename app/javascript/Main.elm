@@ -7,6 +7,7 @@ import Http
 import Task
 import Page.CategoryList as CategoryListSection
 import Page.Article as ArticleSection
+import Page.ArticleList as ArticleListSection
 import Views.Container exposing (topBar, closeButton)
 import Views.Loading exposing (sectionLoadingView)
 import Data.Article exposing (..)
@@ -26,6 +27,7 @@ type Section
     = Blank
     | CategoryListSection CategoryListSection.Model
     | ArticleSection ArticleSection.Model
+    | ArticleListSection ArticleListSection.Model
 
 
 type SectionState
@@ -124,6 +126,7 @@ type Msg
     | SetAppState AppState
     | CategoryListMsg CategoryListSection.Msg
     | CategoryListLoaded (Result Http.Error Categories)
+    | ArticleListMsg ArticleListSection.Msg
     | ArticleMsg
     | ArticleLoaded (Result Http.Error Article)
 
@@ -141,11 +144,14 @@ getSectionView section =
         Loading ->
             sectionLoadingView
 
-        CategoryListSection m ->
-            Html.map CategoryListMsg <| CategoryListSection.view m
+        CategoryListSection model ->
+            Html.map CategoryListMsg <| CategoryListSection.view model
 
-        ArticleSection m ->
-            ArticleSection.view m
+        ArticleSection model ->
+            ArticleSection.view model
+
+        ArticleListSection model ->
+            Html.map ArticleListMsg <| ArticleListSection.view model
 
 
 getSection : SectionState -> Section
@@ -205,10 +211,38 @@ update msg model =
 
         CategoryListMsg aMsg ->
             case aMsg of
-                CategoryListSection.LoadArticle articleId ->
-                    ( { model | sectionState = transitionFromSection model.sectionState }
-                    , Task.attempt ArticleLoaded <| ArticleSection.init articleId
-                    )
+                CategoryListSection.LoadCategory categoryId ->
+                    let
+                        getCategoryListModel =
+                            (\section ->
+                                case section of
+                                    CategoryListSection model ->
+                                        Just model
+
+                                    _ ->
+                                        Nothing
+                            )
+
+                        currentCategory =
+                            Maybe.andThen (CategoryListSection.getCategoryWithId categoryId)
+                                (getCategoryListModel <|
+                                    getSection model.sectionState
+                                )
+
+                        currentArticles =
+                            Maybe.map
+                                .articles
+                                currentCategory
+                    in
+                        case currentArticles of
+                            Just articles ->
+                                ( { model | sectionState = Loaded <| ArticleListSection { id = categoryId, articles = articles } }
+                                , Cmd.none
+                                )
+
+                            Nothing ->
+                                -- TODO: This is an error case and needs to be handled
+                                ( model, Cmd.none )
 
         ArticleLoaded (Ok article) ->
             ( { model | sectionState = Loaded (ArticleSection article) }, Cmd.none )
