@@ -43,3 +43,5 @@ config/database.yml
 
 # Ignore yml files
 config/database.yml
+
+.idea

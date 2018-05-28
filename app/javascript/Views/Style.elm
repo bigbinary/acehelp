@@ -10,7 +10,9 @@ import Style.Shadow as Shadow
 import Style.Border as Border
 import Color exposing (..)
 
+
 -- Experimental stuff with style-elements and elm-style-animations
+
 
 type AHStyle
     = AHButton
@@ -30,15 +32,15 @@ type ArticleStyles
 
 defaultFont : Property class variation
 defaultFont =
-    Font.typeface 
-                [ Font.font "proxima-nova"
-                , Font.font "Arial"
-                , Font.font "sans-serif"
-                ]
+    Font.typeface
+        [ Font.font "proxima-nova"
+        , Font.font "Arial"
+        , Font.font "sans-serif"
+        ]
 
 
 stylesheet : StyleSheet AHStyle variation
-stylesheet = 
+stylesheet =
     Style.styleSheet
         [ style AHButton
             [ defaultFont
@@ -59,8 +61,10 @@ stylesheet =
                 }
             , Style.opacity 0.0
             ]
-            --  TODO: Add other styles
+
+        --  TODO: Add other styles
         ]
+
 
 renderAnim : Animation.State -> List (Element.Attribute variation msg) -> List (Element.Attribute variation msg)
 renderAnim animStyle otherAttrs =
