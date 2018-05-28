@@ -1,3 +1,5 @@
+# frozen_string_literal: tru
+
 class Organization < ApplicationRecord
   has_many :urls
   has_many :articles
@@ -9,12 +11,12 @@ class Organization < ApplicationRecord
 
   private
 
-  def ensure_api_key_assigned
-    return if api_key.present?
+    def ensure_api_key_assigned
+      return if api_key.present?
 
-    loop do
-      self.api_key = SecureRandom.hex(10)
-      break unless self.class.where(api_key: api_key).exists?
+      loop do
+        self.api_key = SecureRandom.hex(10)
+        break unless self.class.where(api_key: api_key).exists?
+      end
     end
-  end
 end

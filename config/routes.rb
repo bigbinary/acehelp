@@ -1,5 +1,7 @@
+# frozen_string_literal: true
+
 Rails.application.routes.draw do
-  get '/', to: 'home#index'
+  get "/", to: "home#index"
 
   get "/getting-started", to: "home#getting_started"
   get "/integrations", to: "home#integrations"
@@ -8,8 +10,8 @@ Rails.application.routes.draw do
   resources :article, except: [:show, :new]
   resources :url, except: [:show, :new]
 
-  namespace :api, defaults: {format: 'json'} do
-    namespace :v1, module: 'v1' do
+  namespace :api, defaults: { format: "json" } do
+    namespace :v1, module: "v1" do
       get "/all" => "category#index"
     end
   end

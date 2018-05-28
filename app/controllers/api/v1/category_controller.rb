@@ -1,10 +1,12 @@
-module Api::V1
-  class CategoryController < BaseController
+# frozen_string_literal: true
 
-    def index
-      categories = Category.all
-      render json: categories, root: "categories"
+module Api
+  module V1
+    class CategoryController < BaseController
+      def index
+        categories = Category.all
+        render json: categories, root: "categories"
+      end
     end
-
   end
 end
