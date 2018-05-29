@@ -12,7 +12,9 @@ import Views.Container exposing (topBar, closeButton)
 import Views.Loading exposing (sectionLoadingView)
 import Data.Article exposing (..)
 import Data.Category exposing (..)
+import Utils exposing (getUrlPathData)
 import Animation
+import Navigation
 
 
 -- MODEL
@@ -46,6 +48,7 @@ type alias Model =
     , sectionState : SectionState
     , containerAnimation : Animation.State
     , currentAppState : AppState
+    , context : Navigation.Location
     }
 
 
@@ -60,12 +63,13 @@ initAnimation =
     ]
 
 
-init : Flags -> ( Model, Cmd Msg )
-init flags =
+init : Flags -> Navigation.Location -> ( Model, Cmd Msg )
+init flags location =
     ( { nodeEnv = flags.node_env
       , sectionState = Loaded Blank
       , containerAnimation = Animation.style initAnimation
       , currentAppState = Minimized
+      , context = getUrlPathData location
       }
     , Cmd.none
     )
@@ -137,6 +141,7 @@ type Msg
     | ArticleListMsg ArticleListSection.Msg
     | ArticleMsg
     | ArticleLoaded (Result Http.Error Article)
+    | UrlChange Navigation.Location
 
 
 
@@ -262,6 +267,10 @@ update msg model =
         ArticleLoaded (Ok article) ->
             ( { model | sectionState = Loaded (ArticleSection article) }, Cmd.none )
 
+        
+        UrlChange location ->
+            ( { model | context = getUrlPathData location }, Cmd.none )
+
         -- TODO: Get rid of this all condition handler
         _ ->
             ( model, Cmd.none )
@@ -282,7 +291,7 @@ subscriptions model =
 
 main : Program Flags Model Msg
 main =
-    Html.programWithFlags
+    Navigation.programWithFlags UrlChange
         { init = init
         , view = view
         , update = update
