@@ -59,8 +59,6 @@ group :development, :test do
   # Minitest reporter plugin for CircleCI. Gerates JUnit xml reports from tests. https://github.com/circleci/minitest-ci
   gem "minitest-ci"
   gem "minitest", "5.10.3"
-  # Call "byebug" anywhere in the code to stop execution and get a debugger console
-  gem "byebug", platforms: [:mri, :mingw, :x64_mingw]
 end
 
 group :development do
