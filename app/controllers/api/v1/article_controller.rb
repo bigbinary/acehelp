@@ -11,8 +11,7 @@ module Api
 
       private
         def load_article
-          @article = Article.find_by(id: params[:id])
-          render_not_found "Invalid Article Id" if @article.blank?
+          @article = Article.find(params[:id])
         end
     end
   end
