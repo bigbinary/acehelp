@@ -40,4 +40,8 @@ config/database.yml
 
 .DS_Store
 */.DS_Store
+
+# Ignore yml files
+config/database.yml
+
 .idea

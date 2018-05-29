@@ -8,6 +8,7 @@ import Task
 import Page.ArticleList as ArticleListSection
 import Page.Article as ArticleSection
 import Views.Container exposing (topBar, closeButton)
+import Views.Loading exposing (sectionLoadingView)
 import Data.Article exposing (..)
 import Animation
 
@@ -22,6 +23,7 @@ type AppState
 
 type Section
     = Blank
+    | Loading 
     | ArticleListSection ArticleListSection.Model
     | ArticleSection ArticleSection.Model
 
@@ -134,8 +136,10 @@ getSectionView : Section -> Html Msg
 getSectionView section =
     case section of
         Blank ->
-            -- Show spinner here
-            text ""
+            sectionLoadingView
+        
+        Loading ->
+            sectionLoadingView
 
         ArticleListSection m ->
             Html.map ArticleListMsg <| ArticleListSection.view m
@@ -151,7 +155,7 @@ getSection sectionState =
             section
 
         TransitioningFrom section ->
-            section
+            Loading
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )

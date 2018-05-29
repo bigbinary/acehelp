@@ -7,6 +7,9 @@
 ```
 ./bin/bundle install
 
+# Database setup and populate sample data
+cp config/database.yml.postgresql config/database.yml
+
 ./bin/rails db:setup
 
 ./bin/yarn install

@@ -4,14 +4,15 @@
   "dependencies": {
     "@rails/webpacker": "3.5",
     "elm": "^0.18.0",
-    "elm-webpack-loader": "^4.5.0"
+    "elm-webpack-loader": "^4.5.0",
+    "prettier": "^1.13.0"
   },
   "devDependencies": {
-    "elm-hot-loader": "0.5.4",
-    "webpack-dev-server": "2.11.2",
     "elm-format": "0.6.1-alpha",
+    "elm-hot-loader": "0.5.4",
     "husky": "0.14.3",
-    "lint-staged": "7.0.4"
+    "lint-staged": "7.0.4",
+    "webpack-dev-server": "2.11.2"
   },
   "scripts": {
     "precommit": "lint-staged"
@@ -19,6 +20,10 @@
   "lint-staged": {
     "*.elm": [
       "elm-format --yes",
+      "git add"
+    ],
+    "*.js": [
+      "prettier --write",
       "git add"
     ]
   }

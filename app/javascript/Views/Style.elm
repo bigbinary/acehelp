@@ -30,6 +30,16 @@ type ArticleStyles
     | Body
 
 
+acehelpGrey : Color
+acehelpGrey =
+    Color.rgb 153 153 153
+
+
+acehelpBlue : Color
+acehelpBlue =
+    Color.rgb 60 170 249
+
+
 defaultFont : Property class variation
 defaultFont =
     Font.typeface
@@ -57,7 +67,7 @@ stylesheet =
                 { offset = ( 0, 0 )
                 , size = 15
                 , blur = 50
-                , color = Color.rgb 153 153 153
+                , color = acehelpGrey
                 }
             , Style.opacity 0.0
             ]
@@ -69,3 +79,17 @@ stylesheet =
 renderAnim : Animation.State -> List (Element.Attribute variation msg) -> List (Element.Attribute variation msg)
 renderAnim animStyle otherAttrs =
     (List.map Element.Attributes.toAttr <| Animation.render animStyle) ++ otherAttrs
+
+
+popInInitialAnim : List Animation.Property
+popInInitialAnim =
+    [ Animation.opacity 0
+    , Animation.scale 0.6
+    , Animation.shadow
+        { offsetX = 0
+        , offsetY = 0
+        , size = 20
+        , blur = 0
+        , color = acehelpGrey
+        }
+    ]
