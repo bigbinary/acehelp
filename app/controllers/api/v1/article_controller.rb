@@ -11,7 +11,7 @@ module Api
 
       private
         def load_article
-          @article = Article.find_by!(id: params[:id])
+          @article = Article.find(params[:id])
         end
     end
   end
