@@ -193,7 +193,7 @@ update msg model =
                                 ]
                                 model.containerAnimation
                             , transitionFromSection model.sectionState
-                              -- TODO: Call API and retrive contextual support response
+                              -- TODO: Call API and retrieve contextual support response
                             , Task.attempt CategoryListLoaded CategoryListSection.init
                             )
 
@@ -214,6 +214,17 @@ update msg model =
             case categoryListMsg of
                 CategoryListSection.LoadCategory categoryId ->
                     let
+                        currentArticles =
+                            Maybe.map
+                                .articles
+                                currentCategory
+
+                        currentCategory =
+                            Maybe.andThen (CategoryListSection.getCategoryWithId categoryId)
+                                (getCategoryListModel <|
+                                    getSection model.sectionState
+                                )
+
                         getCategoryListModel =
                             (\section ->
                                 case section of
@@ -223,17 +234,6 @@ update msg model =
                                     _ ->
                                         Nothing
                             )
-
-                        currentCategory =
-                            Maybe.andThen (CategoryListSection.getCategoryWithId categoryId)
-                                (getCategoryListModel <|
-                                    getSection model.sectionState
-                                )
-
-                        currentArticles =
-                            Maybe.map
-                                .articles
-                                currentCategory
                     in
                         case currentArticles of
                             Just articles ->
@@ -255,6 +255,7 @@ update msg model =
         ArticleLoaded (Ok article) ->
             ( { model | sectionState = Loaded (ArticleSection article) }, Cmd.none )
 
+        -- TODO: Get rid of this all condition handler
         _ ->
             ( model, Cmd.none )
 

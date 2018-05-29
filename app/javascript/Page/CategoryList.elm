@@ -19,11 +19,6 @@ type alias Model =
     List Category
 
 
-noArticles : List Category
-noArticles =
-    []
-
-
 init : Task.Task Http.Error Categories
 init =
     Http.toTask requestCategories
@@ -39,14 +34,7 @@ initAnim =
 
 
 type Msg
-    = LoadCategory ArticleId
-
-
-update : Msg -> Model -> ( Model, Cmd Msg )
-update msg model =
-    case msg of
-        _ ->
-            ( model, Cmd.none )
+    = LoadCategory CategoryId
 
 
 
