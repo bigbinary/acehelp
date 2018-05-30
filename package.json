@@ -15,7 +15,7 @@
     "webpack-dev-server": "2.11.2"
   },
   "scripts": {
-    "precommit": "lint-staged"
+    "precommit": "lint-staged",
     "test": "elm-test",
     "ci": "sysconfcpus --num 1 elm-test"
   },
