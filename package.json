@@ -16,6 +16,8 @@
   },
   "scripts": {
     "precommit": "lint-staged"
+    "test": "elm-test",
+    "ci": "sysconfcpus --num 1 elm-test"
   },
   "lint-staged": {
     "*.elm": [
