@@ -4,6 +4,9 @@ import Http exposing (request, encodeUri, header, Header)
 import Json.Decode exposing (Decoder)
 
 
+import Http exposing (encodeUri)
+
+
 -- Set True to access api calls from localhost
 
 
