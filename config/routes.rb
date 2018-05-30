@@ -14,7 +14,7 @@ Rails.application.routes.draw do
     namespace :v1, module: "v1" do
       get "/all" => "category#index"
 
-      resources :article, only: [:show]
+      resources :article, only: [:show, :index]
     end
   end
 end
