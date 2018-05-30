@@ -15,5 +15,9 @@ module Concerns
     def render_unprocessable_entity(err)
       render json: { errors: err }, status: :unprocessable_entity
     end
+
+    def render_not_found(err)
+      render json: { errors: err }, status: :not_found
+    end
   end
 end
