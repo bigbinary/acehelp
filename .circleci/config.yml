@@ -71,6 +71,9 @@ jobs:
       # Enable if using yarn
       - run: bin/yarn install
       - run: bin/webpack
+      # install elm package
+      - run: elm-package install elm-lang/html
+      - run: elm make app/javascript/Main.elm
       - run: bundle exec ruby-audit check
       - run: bundle exec bundle-audit check --update
 

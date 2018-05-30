@@ -5,11 +5,13 @@ import Html.Attributes exposing (style)
 import Html.Events exposing (onClick)
 import Http
 import Task
-import Page.ArticleList as ArticleListSection
+import Page.CategoryList as CategoryListSection
 import Page.Article as ArticleSection
+import Page.ArticleList as ArticleListSection
 import Views.Container exposing (topBar, closeButton)
 import Views.Loading exposing (sectionLoadingView)
 import Data.Article exposing (..)
+import Data.Category exposing (..)
 import Animation
 
 
@@ -24,8 +26,9 @@ type AppState
 type Section
     = Blank
     | Loading
-    | ArticleListSection ArticleListSection.Model
+    | CategoryListSection CategoryListSection.Model
     | ArticleSection ArticleSection.Model
+    | ArticleListSection ArticleListSection.Model
 
 
 type SectionState
@@ -122,8 +125,9 @@ view model =
 type Msg
     = Animate Animation.Msg
     | SetAppState AppState
+    | CategoryListMsg CategoryListSection.Msg
+    | CategoryListLoaded (Result Http.Error Categories)
     | ArticleListMsg ArticleListSection.Msg
-    | ArticleListLoaded (Result Http.Error (List ArticleSummary))
     | ArticleMsg
     | ArticleLoaded (Result Http.Error Article)
 
@@ -141,11 +145,14 @@ getSectionView section =
         Loading ->
             sectionLoadingView
 
-        ArticleListSection m ->
-            Html.map ArticleListMsg <| ArticleListSection.view m
+        CategoryListSection model ->
+            Html.map CategoryListMsg <| CategoryListSection.view model
 
-        ArticleSection m ->
-            ArticleSection.view m
+        ArticleSection model ->
+            ArticleSection.view model
+
+        ArticleListSection model ->
+            Html.map ArticleListMsg <| ArticleListSection.view model
 
 
 getSection : SectionState -> Section
@@ -156,6 +163,11 @@ getSection sectionState =
 
         TransitioningFrom section ->
             Loading
+
+
+transitionFromSection : SectionState -> SectionState
+transitionFromSection sectionState =
+    TransitioningFrom (getSection sectionState)
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -180,9 +192,9 @@ update msg model =
                                     ]
                                 ]
                                 model.containerAnimation
-                            , TransitioningFrom (getSection model.sectionState)
-                              -- TODO: Call API and retrive contextual support response
-                            , Task.attempt ArticleListLoaded ArticleListSection.init
+                            , transitionFromSection model.sectionState
+                              -- TODO: Call API and retrieve contextual support response
+                            , Task.attempt CategoryListLoaded CategoryListSection.init
                             )
 
                         Minimized ->
@@ -195,19 +207,55 @@ update msg model =
             in
                 ( { model | currentAppState = appState, containerAnimation = animation, sectionState = newSectionState }, cmd )
 
-        ArticleListLoaded (Ok articleList) ->
-            ( { model | sectionState = Loaded (ArticleListSection articleList) }, Cmd.none )
+        CategoryListLoaded (Ok categories) ->
+            ( { model | sectionState = Loaded (CategoryListSection categories.categories) }, Cmd.none )
 
-        ArticleListMsg aMsg ->
-            case aMsg of
+        CategoryListMsg categoryListMsg ->
+            case categoryListMsg of
+                CategoryListSection.LoadCategory categoryId ->
+                    let
+                        currentArticles =
+                            Maybe.map
+                                .articles
+                                currentCategory
+
+                        currentCategory =
+                            Maybe.andThen (CategoryListSection.getCategoryWithId categoryId)
+                                (getCategoryListModel <|
+                                    getSection model.sectionState
+                                )
+
+                        getCategoryListModel =
+                            (\section ->
+                                case section of
+                                    CategoryListSection model ->
+                                        Just model
+
+                                    _ ->
+                                        Nothing
+                            )
+                    in
+                        case currentArticles of
+                            Just articles ->
+                                ( { model | sectionState = Loaded <| ArticleListSection { id = categoryId, articles = articles } }
+                                , Cmd.none
+                                )
+
+                            Nothing ->
+                                -- TODO: This is an error case and needs to be handled
+                                ( model, Cmd.none )
+
+        ArticleListMsg articleListMsg ->
+            case articleListMsg of
                 ArticleListSection.LoadArticle articleId ->
-                    ( { model | sectionState = TransitioningFrom (getSection model.sectionState) }
+                    ( { model | sectionState = transitionFromSection model.sectionState }
                     , Task.attempt ArticleLoaded <| ArticleSection.init articleId
                     )
 
         ArticleLoaded (Ok article) ->
             ( { model | sectionState = Loaded (ArticleSection article) }, Cmd.none )
 
+        -- TODO: Get rid of this all condition handler
         _ ->
             ( model, Cmd.none )
 
