@@ -22,6 +22,17 @@ module Api
 
         assert_response :not_found
       end
+
+      def test_search_article
+        get api_v1_articles_search_url
+
+        assert_response :success
+        get api_v1_articles_search_url, params: { query: "Ruby" }
+
+        assert_response :success
+        json = JSON.parse(response.body)
+        assert_equal @article.title, json.first.second.first["title"]
+      end
     end
   end
 end

@@ -16,4 +16,17 @@ class ArticleTest < ActiveSupport::TestCase
 
     assert article.valid?
   end
+
+  def setup
+    Searchkick.enable_callbacks
+  end
+
+  def teardown
+    Searchkick.disable_callbacks
+  end
+
+  def test_search
+    Article.search_index.refresh
+    assert_equal ["Ruby on rails"], Article.search("Ruby").map(&:title)
+  end
 end

@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 class Article < ApplicationRecord
-  searchkick
+  searchkick callbacks: :async #background jobs for indexing for better performance
 
   belongs_to :category
   belongs_to :organization

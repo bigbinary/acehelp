@@ -12,9 +12,11 @@ Rails.application.routes.draw do
 
   namespace :api, defaults: { format: "json" } do
     namespace :v1, module: "v1" do
-      get "/all" => "category#index"
+      get "/all", to: "category#index"
 
       resources :article, only: [:show]
+
+      get "articles/search", to: "article#search"
     end
   end
 end
