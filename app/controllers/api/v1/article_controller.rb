@@ -14,7 +14,7 @@ module Api
           fields: ["title^2", "desc"],
           limit: 10,
           load: false,
-          match: :phrase,
+          operator: "or",
           select: [:id, :title, :desc],
           order: { _score: :desc }
           })
