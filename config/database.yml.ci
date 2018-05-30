@@ -1,0 +1,14 @@
+idefault: &default
+  adapter: postgresql
+  host: 127.0.0.1
+  encoding: unicode
+  pool: <%= ENV.fetch("RAILS_MAX_THREADS") { 10 } %>
+
+development:
+  <<: *default
+  database: acehelp_development
+
+test:
+  <<: *default
+  user: postgres
+  database: acehelp_test<%= ENV['CIRCLE_NODE_INDEX'] %>

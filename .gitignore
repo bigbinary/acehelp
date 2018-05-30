@@ -45,3 +45,4 @@ config/database.yml
 config/database.yml
 
 .idea
+test/reports

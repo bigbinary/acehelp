@@ -52,6 +52,13 @@ gem "active_model_serializers", "~> 0.9.4"
 group :development, :test do
   # Call "byebug" anywhere in the code to stop execution and get a debugger console
   gem "byebug", platforms: [:mri, :mingw, :x64_mingw]
+  # For splitting tests across CircleCI containers
+  gem "knapsack"
+  # customizable MiniTest output formats
+  gem "minitest-reporters", require: false
+  # Minitest reporter plugin for CircleCI. Gerates JUnit xml reports from tests. https://github.com/circleci/minitest-ci
+  gem "minitest-ci"
+  gem "minitest", "5.10.3"
 end
 
 group :development do
@@ -61,6 +68,10 @@ group :development do
   # Spring speeds up development by keeping your application running in the background. Read more: https://github.com/rails/spring
   gem "spring"
   gem "spring-watcher-listen", "~> 2.0.0"
+  # Patch-level verification for Bundler. https://github.com/rubysec/bundler-audit
+  gem "bundler-audit", require: false
+  # vulnerabity checker for Ruby itself. https://github.com/civisanalytics/ruby_audit
+  gem "ruby_audit", require: false
 
   # A Ruby static code analyzer, based on the community Ruby style guide
   gem "rubocop", require: false
