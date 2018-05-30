@@ -2,13 +2,9 @@ module Page.Article exposing (init, Model, view)
 
 import Data.Article exposing (..)
 import Request.Article exposing (..)
-import Views.Container exposing (rowView)
 import Html exposing (..)
-import Html.Events exposing (onClick)
 import Http
 import Task
-import Animation
-import Color exposing (rgb)
 
 
 -- MODEL
