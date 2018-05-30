@@ -48,7 +48,7 @@ type alias Model =
     , sectionState : SectionState
     , containerAnimation : Animation.State
     , currentAppState : AppState
-    , context : Navigation.Location
+    , context : String
     }
 
 
