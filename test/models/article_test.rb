@@ -26,6 +26,7 @@ class ArticleTest < ActiveSupport::TestCase
   end
 
   def test_search
+    article = articles :ror
     Article.search_index.refresh
     assert_equal ["Ruby on rails"], Article.search("Ruby").map(&:title)
   end
