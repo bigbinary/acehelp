@@ -1,19 +1,17 @@
 module Request.Article exposing (..)
 
 import Http
+import Task exposing (Task)
+import Reader exposing (Reader)
+import Request.Helpers exposing (apiUrl, httpGet, ApiKey, Context, NodeEnv)
 import Data.Article exposing (ArticleId, Article, ArticleSummary, decodeArticles, decodeArticle)
 
 
-requestArticleList : Http.Request (List ArticleSummary)
+requestArticleList : Reader ( NodeEnv, ApiKey, Context ) (Task Http.Error (List ArticleSummary))
 requestArticleList =
-    Http.get "https://www.mocky.io/v2/5afd46c63200005f00f1ab39" decodeArticles
+    Reader.Reader (\( env, apiKey, context ) -> Http.toTask (httpGet apiKey context (apiUrl env "article") [] decodeArticles))
 
 
-
--- Http.get "http://www.mocky.io/v2/5b06b0362f00004f00c61e7b" decodeArticles
--- Http.get (apiUrl "all") decodeArticles
-
-
-requestArticle : ArticleId -> Http.Request Article
-requestArticle aId =
-    Http.get "https://www.mocky.io/v2/5afd46363200005300f1ab36" decodeArticle
+requestArticle : Reader ( NodeEnv, ApiKey, Context, ArticleId ) (Task Http.Error Article)
+requestArticle =
+    Reader.Reader (\( env, apiKey, context, articleId ) -> Http.toTask (httpGet apiKey context (apiUrl env ("article/" ++ (toString articleId))) [] decodeArticle))

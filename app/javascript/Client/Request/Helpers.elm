@@ -64,7 +64,7 @@ httpGet apiKey context url queryParams decoder =
         contextKeyValue =
             case context of
                 Context value ->
-                    [ ( "context", value ) ]
+                    [ ( "url", value ) ]
 
                 NoContext ->
                     []
