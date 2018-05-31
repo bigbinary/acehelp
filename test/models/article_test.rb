@@ -26,8 +26,15 @@ class ArticleTest < ActiveSupport::TestCase
   end
 
   def test_search
-    article = articles :ror
+    c1 = Category.create! name: "Code"
+    org = Organization.create! name: "Google"
+    c1.articles.create!(
+      title: "How do I put nodejs code in my website?",
+      desc: "coming soon",
+      organization_id: org.id
+    )
+    Article.reindex
     Article.search_index.refresh
-    assert_equal ["Ruby on rails"], Article.search("Ruby").map(&:title)
+    assert_equal ["How do I put nodejs code in my website?"], Article.search("nodejs").map(&:title)
   end
 end
