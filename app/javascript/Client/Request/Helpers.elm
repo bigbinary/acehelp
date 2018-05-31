@@ -4,7 +4,8 @@ import Http exposing (request, encodeUri, header, Header)
 import Json.Decode exposing (Decoder)
 
 
-import Http exposing (encodeUri)
+import Http exposing (request, encodeUri, header, Header)
+import Json.Decode exposing (Decoder)
 
 
 -- Set True to access api calls from localhost
@@ -40,7 +41,6 @@ apiUrl env str =
         _ ->
             -- If it is development environment or anything else fall back to local/relative api path
             "/api/v1/" ++ str
-
 
 constructUrl : String -> List ( String, String ) -> String
 constructUrl baseUrl queryParams =
