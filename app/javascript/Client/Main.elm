@@ -142,7 +142,7 @@ type Msg
     | CategoryListLoaded (Result Http.Error Categories)
     | ArticleListMsg ArticleListSection.Msg
     | ArticleMsg
-    | ArticleLoaded (Result Http.Error Article)
+    | ArticleLoaded (Result Http.Error ArticleResponse)
     | UrlChange Navigation.Location
 
 
@@ -266,8 +266,8 @@ update msg model =
                     , Task.attempt ArticleLoaded (Reader.run ArticleSection.init ( model.nodeEnv, "", model.context, articleId ))
                     )
 
-        ArticleLoaded (Ok article) ->
-            ( { model | sectionState = Loaded (ArticleSection article) }, Cmd.none )
+        ArticleLoaded (Ok articleResponse) ->
+            ( { model | sectionState = Loaded (ArticleSection articleResponse.article) }, Cmd.none )
 
         UrlChange location ->
             ( { model | context = Context (getUrlPathData location) }, Cmd.none )

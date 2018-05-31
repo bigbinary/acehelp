@@ -1,4 +1,4 @@
-module Data.Article exposing (..)
+module Data.Article exposing (ArticleId, ArticleResponse, Article, ArticleSummary, decodeArticles, decodeArticleSummary, decodeArticle, decodeArticleResponse)
 
 import Json.Decode exposing (int, string, float, nullable, list, Decoder)
 import Json.Decode.Pipeline exposing (decode, required, optional, hardcoded)
@@ -8,10 +8,13 @@ type alias ArticleId =
     Int
 
 
+type alias ArticleResponse =
+    { article : Article }
+
+
 type alias Article =
     { id : ArticleId
     , title : String
-    , summary : String
     , content : String
     }
 
@@ -44,5 +47,10 @@ decodeArticle =
     decode Article
         |> required "id" int
         |> required "title" string
-        |> required "summary" string
-        |> required "content" string
+        |> required "desc" string
+
+
+decodeArticleResponse : Decoder ArticleResponse
+decodeArticleResponse =
+    decode ArticleResponse
+        |> required "article" decodeArticle
