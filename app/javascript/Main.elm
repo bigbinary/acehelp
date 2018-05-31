@@ -5,6 +5,7 @@ import Html.Attributes exposing (style)
 import Html.Events exposing (onClick)
 import Http
 import Task
+import Reader
 import Page.CategoryList as CategoryListSection
 import Page.Article as ArticleSection
 import Page.ArticleList as ArticleListSection
@@ -206,8 +207,8 @@ update msg model =
                                 ]
                                 model.containerAnimation
                             , transitionFromSection model.sectionState
-                              -- TODO: Call API and retrieve contextual support response
-                            , Task.attempt CategoryListLoaded (CategoryListSection.init model.nodeEnv "" "")
+                              -- TODO: Pass ApiKey Instead of blank string
+                            , Task.attempt CategoryListLoaded (Reader.run CategoryListSection.init (model.nodeEnv, ""))
                             )
 
                         Minimized ->

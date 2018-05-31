@@ -10,6 +10,7 @@ import Html.Attributes exposing (style)
 import Http
 import Task
 import Animation
+import Reader
 
 
 -- MODEL
@@ -19,9 +20,9 @@ type alias Model =
     List Category
 
 
-init : NodeEnv -> ApiKey -> Context -> Task.Task Http.Error Categories
-init env apiKey context =
-    Http.toTask <| requestCategories env apiKey context
+init : Reader.Reader (NodeEnv, ApiKey) (Task.Task Http.Error Categories)
+init =
+    requestCategories
 
 
 initAnim : Animation.State

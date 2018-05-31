@@ -1,4 +1,4 @@
-module Request.Helpers exposing (apiUrl, constructUrl, httpGet, ApiKey, Url, QueryParameters, Context, NodeEnv)
+module Request.Helpers exposing (apiUrl, constructUrl, httpGet, ApiKey, Url, QueryParameters, Context(..), NodeEnv)
 
 import Http exposing (request, encodeUri, header, Header)
 import Json.Decode exposing (Decoder)
@@ -16,8 +16,9 @@ type alias QueryParameters =
     List ( String, String )
 
 
-type alias Context =
-    String
+type Context
+    = Context String
+    | NoContext
 
 
 type alias ApiKey =
@@ -54,8 +55,16 @@ httpGet apiKey context url queryParams decoder =
                 , [ header "api-key" apiKey ]
                 ]
 
+        contextKeyValue =
+            case context of
+                Context value ->
+                    [ ( "context", value ) ]
+
+                NoContext ->
+                    []
+
         callUrl =
-            constructUrl url <| [ ( "context", context ) ] ++ queryParams
+            constructUrl url <| contextKeyValue ++ queryParams
     in
         request
             { method = "GET"
