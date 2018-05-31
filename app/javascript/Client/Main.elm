@@ -141,6 +141,7 @@ type Msg
     | CategoryListMsg CategoryListSection.Msg
     | CategoryListLoaded (Result Http.Error Categories)
     | ArticleListMsg ArticleListSection.Msg
+    | ArticleListLoaded (Result Http.Error (List ArticleSummary))
     | ArticleMsg
     | ArticleLoaded (Result Http.Error ArticleResponse)
     | UrlChange Navigation.Location
@@ -208,7 +209,7 @@ update msg model =
                                 model.containerAnimation
                             , transitionFromSection model.sectionState
                               -- TODO: Pass ApiKey Instead of blank string
-                            , Task.attempt CategoryListLoaded (Reader.run CategoryListSection.init ( model.nodeEnv, "" ))
+                            , Task.attempt ArticleListLoaded (Reader.run ArticleListSection.init ( model.nodeEnv, "", model.context ))
                             )
 
                         Minimized ->
@@ -251,7 +252,7 @@ update msg model =
                     in
                         case currentArticles of
                             Just articles ->
-                                ( { model | sectionState = Loaded <| ArticleListSection { id = categoryId, articles = articles } }
+                                ( { model | sectionState = Loaded <| ArticleListSection { id = Just categoryId, articles = articles } }
                                 , Cmd.none
                                 )
 
@@ -265,6 +266,9 @@ update msg model =
                     ( { model | sectionState = transitionFromSection model.sectionState }
                     , Task.attempt ArticleLoaded (Reader.run ArticleSection.init ( model.nodeEnv, "", model.context, articleId ))
                     )
+
+        ArticleListLoaded (Ok articleList) ->
+            ( { model | sectionState = Loaded (ArticleListSection { id = Nothing, articles = articleList }) }, Cmd.none )
 
         ArticleLoaded (Ok articleResponse) ->
             ( { model | sectionState = Loaded (ArticleSection articleResponse.article) }, Cmd.none )
