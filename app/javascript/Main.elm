@@ -12,6 +12,7 @@ import Views.Container exposing (topBar, closeButton)
 import Views.Loading exposing (sectionLoadingView)
 import Data.Article exposing (..)
 import Data.Category exposing (..)
+import Request.Helpers exposing (NodeEnv)
 import Utils exposing (getUrlPathData)
 import Animation
 import Navigation
@@ -44,7 +45,7 @@ type SectionState
 
 
 type alias Model =
-    { nodeEnv : String
+    { nodeEnv : NodeEnv
     , sectionState : SectionState
     , containerAnimation : Animation.State
     , currentAppState : AppState
@@ -206,7 +207,7 @@ update msg model =
                                 model.containerAnimation
                             , transitionFromSection model.sectionState
                               -- TODO: Call API and retrieve contextual support response
-                            , Task.attempt CategoryListLoaded (CategoryListSection.init model.nodeEnv)
+                            , Task.attempt CategoryListLoaded (CategoryListSection.init model.nodeEnv "" "")
                             )
 
                         Minimized ->
@@ -267,7 +268,6 @@ update msg model =
         ArticleLoaded (Ok article) ->
             ( { model | sectionState = Loaded (ArticleSection article) }, Cmd.none )
 
-        
         UrlChange location ->
             ( { model | context = getUrlPathData location }, Cmd.none )
 
