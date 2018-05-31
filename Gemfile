@@ -51,6 +51,9 @@ gem "active_model_serializers", "~> 0.9.4"
 
 #Intelligent search made easy with Rails and Elasticsearch
 gem 'searchkick'
+gem 'elasticsearch-model'
+gem 'elasticsearch-rails'
+gem 'bonsai-elasticsearch-rails'
 
 group :development, :test do
   # Call "byebug" anywhere in the code to stop execution and get a debugger console
