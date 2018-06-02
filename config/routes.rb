@@ -15,6 +15,7 @@ Rails.application.routes.draw do
       get "/all" => "category#index"
 
       resources :article, only: [:show, :index]
+      resource :contacts, only: :create
     end
   end
 end
