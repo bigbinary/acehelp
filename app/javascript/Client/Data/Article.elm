@@ -1,4 +1,4 @@
-module Data.Article exposing (ArticleId, ArticleResponse, Article, ArticleSummary, decodeArticles, decodeArticleSummary, decodeArticle, decodeArticleResponse)
+module Data.Article exposing (ArticleId, ArticleListResponse, ArticleResponse, Article, ArticleSummary, decodeArticles, decodeArticleSummary, decodeArticle, decodeArticleResponse)
 
 import Json.Decode exposing (int, string, float, nullable, list, Decoder)
 import Json.Decode.Pipeline exposing (decode, required, optional, hardcoded)
@@ -6,6 +6,10 @@ import Json.Decode.Pipeline exposing (decode, required, optional, hardcoded)
 
 type alias ArticleId =
     Int
+
+
+type alias ArticleListResponse =
+    { articles : List ArticleSummary }
 
 
 type alias ArticleResponse =
@@ -30,9 +34,10 @@ type alias ArticleSummary =
 -- DECODERS
 
 
-decodeArticles : Decoder (List ArticleSummary)
+decodeArticles : Decoder ArticleListResponse
 decodeArticles =
-    list decodeArticleSummary
+    decode ArticleListResponse
+        |> required "articles" (list decodeArticleSummary)
 
 
 decodeArticleSummary : Decoder ArticleSummary

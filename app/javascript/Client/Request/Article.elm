@@ -4,10 +4,10 @@ import Http
 import Task exposing (Task)
 import Reader exposing (Reader)
 import Request.Helpers exposing (apiUrl, httpGet, ApiKey, Context, NodeEnv)
-import Data.Article exposing (ArticleId, ArticleResponse, ArticleSummary, decodeArticles, decodeArticleResponse)
+import Data.Article exposing (ArticleId, ArticleResponse, ArticleListResponse, ArticleSummary, decodeArticles, decodeArticleResponse)
 
 
-requestArticleList : Reader ( NodeEnv, ApiKey, Context ) (Task Http.Error (List ArticleSummary))
+requestArticleList : Reader ( NodeEnv, ApiKey, Context ) (Task Http.Error ArticleListResponse)
 requestArticleList =
     Reader.Reader (\( env, apiKey, context ) -> Http.toTask (httpGet apiKey context (apiUrl env "article") [] decodeArticles))
 

@@ -28,7 +28,7 @@ noArticles =
     []
 
 
-init : Reader ( NodeEnv, ApiKey, Context ) (Task Http.Error (List ArticleSummary))
+init : Reader ( NodeEnv, ApiKey, Context ) (Task Http.Error ArticleListResponse)
 init =
     requestArticleList
 

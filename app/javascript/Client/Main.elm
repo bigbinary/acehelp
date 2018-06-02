@@ -141,7 +141,7 @@ type Msg
     | CategoryListMsg CategoryListSection.Msg
     | CategoryListLoaded (Result Http.Error Categories)
     | ArticleListMsg ArticleListSection.Msg
-    | ArticleListLoaded (Result Http.Error (List ArticleSummary))
+    | ArticleListLoaded (Result Http.Error ArticleListResponse)
     | ArticleMsg
     | ArticleLoaded (Result Http.Error ArticleResponse)
     | UrlChange Navigation.Location
@@ -268,7 +268,7 @@ update msg model =
                     )
 
         ArticleListLoaded (Ok articleList) ->
-            ( { model | sectionState = Loaded (ArticleListSection { id = Nothing, articles = articleList }) }, Cmd.none )
+            ( { model | sectionState = Loaded (ArticleListSection { id = Nothing, articles = articleList.articles }) }, Cmd.none )
 
         ArticleLoaded (Ok articleResponse) ->
             ( { model | sectionState = Loaded (ArticleSection articleResponse.article) }, Cmd.none )
