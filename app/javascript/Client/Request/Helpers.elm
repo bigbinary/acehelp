@@ -48,13 +48,18 @@ constructUrl baseUrl queryParams =
         [] ->
             baseUrl
 
+        -- NOTE: removed encodeUri for value part of query parameter to get things working and since we do not decode server side at the moment
         _ ->
-            baseUrl ++ "?" ++ String.join "&" (List.map (\( key, value ) -> encodeUri key ++ "=" ++ encodeUri value) queryParams)
+            baseUrl ++ "?" ++ String.join "&" (List.map (\( key, value ) -> encodeUri key ++ "=" ++ value) queryParams)
 
 
 httpGet : ApiKey -> Context -> Url -> QueryParameters -> Decoder a -> Http.Request a
 httpGet apiKey context url queryParams decoder =
     let
+        -- NOTE: This should not be hardcoded or needed at all. It is right now hardcoded since this is the only entry we have in db
+        tempBase =
+            "http://ace-invoice.com"
+
         headers =
             List.concat
                 [ defaultRequestHeaders
@@ -64,7 +69,7 @@ httpGet apiKey context url queryParams decoder =
         contextKeyValue =
             case context of
                 Context value ->
-                    [ ( "url", value ) ]
+                    [ ( "url", tempBase ++ value ) ]
 
                 NoContext ->
                     []
