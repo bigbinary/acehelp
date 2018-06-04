@@ -36,7 +36,7 @@ type AppState
 type Section
     = Blank
     | Loading
-    | ErrorSection
+    | ErrorSection ErrorSection.Model
     | CategoryListSection CategoryListSection.Model
     | ArticleSection ArticleSection.Model
     | ArticleListSection ArticleListSection.Model
@@ -162,8 +162,8 @@ getSectionView section =
         Loading ->
             sectionLoadingView
 
-        ErrorSection ->
-            ErrorSection.view
+        ErrorSection model ->
+            ErrorSection.view model
 
         CategoryListSection model ->
             Html.map CategoryListMsg <| CategoryListSection.view model
@@ -231,7 +231,7 @@ update msg model =
             ( { model | sectionState = Loaded (CategoryListSection categories.categories) }, Cmd.none )
 
         CategoryListLoaded (Err error) ->
-            ( { model | sectionState = Loaded ErrorSection }, Cmd.none )
+            ( { model | sectionState = Loaded (ErrorSection error) }, Cmd.none )
 
         CategoryListMsg categoryListMsg ->
             case categoryListMsg of
@@ -285,10 +285,10 @@ update msg model =
             ( { model | context = Context (getUrlPathData location) }, Cmd.none )
 
         ArticleListLoaded (Err error) ->
-            ( { model | sectionState = Loaded ErrorSection }, Cmd.none )
+            ( { model | sectionState = Loaded (ErrorSection error) }, Cmd.none )
 
         ArticleLoaded (Err error) ->
-            ( { model | sectionState = Loaded ErrorSection }, Cmd.none )
+            ( { model | sectionState = Loaded (ErrorSection error) }, Cmd.none )
 
         ArticleMsg ->
             ( model, Cmd.none )

@@ -2,25 +2,44 @@ module Page.Error exposing (..)
 
 import Html exposing (..)
 import Html.Attributes exposing (..)
+import Http
 
 
--- Note: Modified version of https://codepen.io/sqfreakz/pen/GJRJOY
+-- MODEL
 
 
-view : Html msg
-view =
-    div [ id "something-went-wrong" ]
-        [ div [ id "clouds" ]
-            [ div [ class "cloud x1" ] []
-            , div [ class "cloud x1_5" ] []
-            , div [ class "cloud x2" ] []
-            , div [ class "cloud x3" ] []
+type alias Model =
+    Http.Error
+
+
+
+-- UPDATE
+-- VIEW
+
+
+view : Model -> Html msg
+view error =
+    let
+        ( text1, text2, text3 ) =
+            case error of
+                Http.BadUrl message ->
+                    ( "OOPS!", "That should not have happend!", "" )
+
+                Http.Timeout ->
+                    ( "OOPS!", "Looks like your request timedout!", "" )
+
+                Http.NetworkError ->
+                    ( "UH OH!", "The network did not respond nicely!", "" )
+
+                Http.BadPayload debugMsg response ->
+                    ( "OOPS!", "Something went wrong!", debugMsg )
+
+                Http.BadStatus response ->
+                    ( toString response.status.code, response.status.message, "" )
+    in
+        div [ id "something-went-wrong" ]
+            [ div [ class "error" ] []
+            , div [ class "text text1" ] [ text text1 ]
+            , div [ class "text text2" ] [ text text2 ]
+            , div [ class "text text3" ] [ text text3 ]
             ]
-        , div [ class "c" ]
-            [ div [ class "_404" ] [ text "404" ]
-            , hr [] []
-            , div [ class "_1" ] [ text "THE PAGE" ]
-            , div [ class "_2" ] [ text "WAS NOT FOUND" ]
-            , a [ class "btn" ] [ text "BACK TO MARS" ]
-            ]
-        ]
