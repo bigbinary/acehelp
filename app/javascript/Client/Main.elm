@@ -9,6 +9,7 @@ import Reader
 import Page.CategoryList as CategoryListSection
 import Page.Article as ArticleSection
 import Page.ArticleList as ArticleListSection
+import Page.Error as ErrorSection
 import Views.Container exposing (topBar, closeButton)
 import Views.Loading exposing (sectionLoadingView)
 import Data.Article exposing (..)
@@ -35,6 +36,7 @@ type AppState
 type Section
     = Blank
     | Loading
+    | ErrorSection
     | CategoryListSection CategoryListSection.Model
     | ArticleSection ArticleSection.Model
     | ArticleListSection ArticleListSection.Model
@@ -160,6 +162,9 @@ getSectionView section =
         Loading ->
             sectionLoadingView
 
+        ErrorSection ->
+            ErrorSection.view
+
         CategoryListSection model ->
             Html.map CategoryListMsg <| CategoryListSection.view model
 
@@ -225,6 +230,9 @@ update msg model =
         CategoryListLoaded (Ok categories) ->
             ( { model | sectionState = Loaded (CategoryListSection categories.categories) }, Cmd.none )
 
+        CategoryListLoaded (Err error) ->
+            ( { model | sectionState = Loaded ErrorSection }, Cmd.none )
+
         CategoryListMsg categoryListMsg ->
             case categoryListMsg of
                 CategoryListSection.LoadCategory categoryId ->
@@ -276,12 +284,20 @@ update msg model =
         UrlChange location ->
             ( { model | context = Context (getUrlPathData location) }, Cmd.none )
 
-        -- TODO: Get rid of this all condition handler
-        _ ->
+        ArticleListLoaded (Err error) ->
+            ( { model | sectionState = Loaded ErrorSection }, Cmd.none )
+
+        ArticleLoaded (Err error) ->
+            ( { model | sectionState = Loaded ErrorSection }, Cmd.none )
+
+        ArticleMsg ->
             ( model, Cmd.none )
 
 
 
+-- TODO: Get rid of this all condition handler
+-- _ ->
+--     ( model, Cmd.none )
 -- SUBSCRIPTIONS
 
 
