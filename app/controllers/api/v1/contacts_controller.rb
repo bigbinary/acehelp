@@ -7,7 +7,7 @@ module Api
         contact = Contact.new(contact_params)
 
         if contact.save
-          render json: { message: "Thank you for your message. We will contact you soon!"}
+          render json: { message: "Thank you for your message. We will contact you soon!" }
         else
           render_unprocessable_entity contact.errors.full_messages.to_sentence
         end
