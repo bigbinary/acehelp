@@ -21,26 +21,4 @@ body {
     line-height: 20px;
     text-align: center;
 }
-#simulated-content{
-    width: 960px;
-    margin: 0 auto;
-}
-#lipsum { 
-    text-align: justify;
-    clear: both;
-    margin: 10px 3%;
-}
-h1 {
-    font-size: 70px;
-    line-height: 90px;
-}
-h1, h2 {
-    font-family: DauphinPlain;
-    font-weight: 400;
-}
-p {
-    text-align: justify;
-    margin: 0 0 15px;
-}
-
  
