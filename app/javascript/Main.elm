@@ -18,6 +18,11 @@ import Animation
 -- MODEL
 
 
+type alias Flags =
+    { node_env : String
+    }
+
+
 type AppState
     = Minimized
     | Maximized
@@ -37,7 +42,8 @@ type SectionState
 
 
 type alias Model =
-    { sectionState : SectionState
+    { nodeEnv : String
+    , sectionState : SectionState
     , containerAnimation : Animation.State
     , currentAppState : AppState
     }
@@ -54,9 +60,10 @@ initAnimation =
     ]
 
 
-init : ( Model, Cmd Msg )
-init =
-    ( { sectionState = Loaded Blank
+init : Flags -> ( Model, Cmd Msg )
+init flags =
+    ( { nodeEnv = flags.node_env
+      , sectionState = Loaded Blank
       , containerAnimation = Animation.style initAnimation
       , currentAppState = Minimized
       }
@@ -194,7 +201,7 @@ update msg model =
                                 model.containerAnimation
                             , transitionFromSection model.sectionState
                               -- TODO: Call API and retrieve contextual support response
-                            , Task.attempt CategoryListLoaded CategoryListSection.init
+                            , Task.attempt CategoryListLoaded (CategoryListSection.init model.nodeEnv)
                             )
 
                         Minimized ->
@@ -273,9 +280,9 @@ subscriptions model =
 -- MAIN
 
 
-main : Program Never Model Msg
+main : Program Flags Model Msg
 main =
-    Html.program
+    Html.programWithFlags
         { init = init
         , view = view
         , update = update

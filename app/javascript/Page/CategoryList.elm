@@ -19,9 +19,9 @@ type alias Model =
     List Category
 
 
-init : Task.Task Http.Error Categories
-init =
-    Http.toTask requestCategories
+init : String -> Task.Task Http.Error Categories
+init env =
+    Http.toTask (requestCategories env)
 
 
 initAnim : Animation.State
