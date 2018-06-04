@@ -3,9 +3,15 @@ module Page.Error exposing (..)
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Http
+import Json.Decode exposing (string)
+import Json.Decode.Pipeline exposing (decode, required)
 
 
 -- MODEL
+
+
+type alias ApiErrorMessage =
+    { error : String }
 
 
 type alias Model =
@@ -35,7 +41,12 @@ view error =
                     ( "OOPS!", "Something went wrong!", debugMsg )
 
                 Http.BadStatus response ->
-                    ( toString response.status.code, response.status.message, "" )
+                    let
+                        apiMessage =
+                            decode ApiErrorMessage
+                                |> Json.Decode.Pipeline.required "error" string
+                    in
+                        ( toString response.status.code, response.status.message, "" )
     in
         div [ id "something-went-wrong" ]
             [ div [ class "error" ] []
