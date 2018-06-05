@@ -2,6 +2,7 @@
 
 class Article < ApplicationRecord
   searchkick
+
   belongs_to :category
   belongs_to :organization
   has_many :article_urls
