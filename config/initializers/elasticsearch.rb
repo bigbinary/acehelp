@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 if Rails.env == "production" || Rails.env == "staging"
   url = ENV["BONSAI_URL"]
   transport_options = { request: { timeout: 250 } }

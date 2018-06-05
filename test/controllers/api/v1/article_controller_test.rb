@@ -37,6 +37,7 @@ module Api
         get api_v1_article_index_url, params: { url: nil }
 
         assert_response :bad_request
+
         get api_v1_article_index_url, params: { url: "random_url" }
 
         assert_response :not_found
@@ -46,7 +47,12 @@ module Api
         get api_v1_articles_search_url
 
         assert_response :success
+
         get api_v1_articles_search_url, params: { query: "Ruby" }
+
+        assert_response :success
+        json = JSON.parse(response.body)
+        assert_equal "Ruby on rails", json.first.second.first["title"]
       end
     end
   end

@@ -49,8 +49,8 @@ gem "bootsnap", ">= 1.1.0", require: false
 # Making it easy to serialize models for client-side use
 gem "active_model_serializers", "~> 0.9.4"
 
-#Intelligent search made easy with Rails and Elasticsearch
-gem 'searchkick'
+# Intelligent search made easy with Rails and Elasticsearch
+gem "searchkick"
 
 group :development, :test do
   # Call "byebug" anywhere in the code to stop execution and get a debugger console
