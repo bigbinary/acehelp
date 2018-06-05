@@ -12,9 +12,9 @@ import Color.Convert exposing (colorToCssRgb)
 spinner : Color.Color -> Html msg
 spinner color =
     Html.div [ Attributes.class "ah-spinner" ]
-        [ Html.div [ Attributes.class "rect1", style [ ( "background-color", colorToCssRgb color ) ] ] []
-        , Html.div [ Attributes.class "rect2", style [ ( "background-color", colorToCssRgb color ) ] ] []
-        , Html.div [ Attributes.class "rect3", style [ ( "background-color", colorToCssRgb color ) ] ] []
-        , Html.div [ Attributes.class "rect4", style [ ( "background-color", colorToCssRgb color ) ] ] []
-        , Html.div [ Attributes.class "rect5", style [ ( "background-color", colorToCssRgb color ) ] ] []
+        [ Html.div [ Attributes.class "rect rect1", style [ ( "background-color", colorToCssRgb color ) ] ] []
+        , Html.div [ Attributes.class "rect rect2", style [ ( "background-color", colorToCssRgb color ) ] ] []
+        , Html.div [ Attributes.class "rect rect3", style [ ( "background-color", colorToCssRgb color ) ] ] []
+        , Html.div [ Attributes.class "rect rect4", style [ ( "background-color", colorToCssRgb color ) ] ] []
+        , Html.div [ Attributes.class "rect rect5", style [ ( "background-color", colorToCssRgb color ) ] ] []
         ]

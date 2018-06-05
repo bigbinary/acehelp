@@ -22,14 +22,16 @@ module Api
       end
 
       def search
-        render json: Article.search(params[:query], {
+        search_query_filter = {
           fields: ["title^2", "desc"],
           limit: 10,
           load: false,
           operator: "or",
           select: [:id, :title, :desc],
           order: { _score: :desc }
-        })
+        }
+
+        render json: Article.search(params[:query], search_query_filter)
       end
 
       private
