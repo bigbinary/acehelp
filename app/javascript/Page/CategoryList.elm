@@ -1,8 +1,8 @@
 module Page.CategoryList exposing (init, initAnim, Msg(..), Model, view, getCategoryWithId)
 
 import Data.Category exposing (..)
-import Data.Article exposing (..)
 import Request.Category exposing (..)
+import Request.Helpers exposing (ApiKey, Context, NodeEnv)
 import Views.Container exposing (rowView, popInInitialAnim)
 import Html exposing (..)
 import Html.Events exposing (onClick)
@@ -10,6 +10,7 @@ import Html.Attributes exposing (style)
 import Http
 import Task
 import Animation
+import Reader
 
 
 -- MODEL
@@ -19,9 +20,9 @@ type alias Model =
     List Category
 
 
-init : String -> Task.Task Http.Error Categories
-init env =
-    Http.toTask (requestCategories env)
+init : Reader.Reader (NodeEnv, ApiKey) (Task.Task Http.Error Categories)
+init =
+    requestCategories
 
 
 initAnim : Animation.State

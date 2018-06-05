@@ -5,6 +5,7 @@ import Html.Attributes exposing (style)
 import Html.Events exposing (onClick)
 import Http
 import Task
+import Reader
 import Page.CategoryList as CategoryListSection
 import Page.Article as ArticleSection
 import Page.ArticleList as ArticleListSection
@@ -12,7 +13,10 @@ import Views.Container exposing (topBar, closeButton)
 import Views.Loading exposing (sectionLoadingView)
 import Data.Article exposing (..)
 import Data.Category exposing (..)
+import Request.Helpers exposing (NodeEnv)
+import Utils exposing (getUrlPathData)
 import Animation
+import Navigation
 
 
 -- MODEL
@@ -42,10 +46,11 @@ type SectionState
 
 
 type alias Model =
-    { nodeEnv : String
+    { nodeEnv : NodeEnv
     , sectionState : SectionState
     , containerAnimation : Animation.State
     , currentAppState : AppState
+    , context : String
     }
 
 
@@ -60,12 +65,13 @@ initAnimation =
     ]
 
 
-init : Flags -> ( Model, Cmd Msg )
-init flags =
+init : Flags -> Navigation.Location -> ( Model, Cmd Msg )
+init flags location =
     ( { nodeEnv = flags.node_env
       , sectionState = Loaded Blank
       , containerAnimation = Animation.style initAnimation
       , currentAppState = Minimized
+      , context = getUrlPathData location
       }
     , Cmd.none
     )
@@ -137,6 +143,7 @@ type Msg
     | ArticleListMsg ArticleListSection.Msg
     | ArticleMsg
     | ArticleLoaded (Result Http.Error Article)
+    | UrlChange Navigation.Location
 
 
 
@@ -200,8 +207,8 @@ update msg model =
                                 ]
                                 model.containerAnimation
                             , transitionFromSection model.sectionState
-                              -- TODO: Call API and retrieve contextual support response
-                            , Task.attempt CategoryListLoaded (CategoryListSection.init model.nodeEnv)
+                              -- TODO: Pass ApiKey Instead of blank string
+                            , Task.attempt CategoryListLoaded (Reader.run CategoryListSection.init (model.nodeEnv, ""))
                             )
 
                         Minimized ->
@@ -262,6 +269,9 @@ update msg model =
         ArticleLoaded (Ok article) ->
             ( { model | sectionState = Loaded (ArticleSection article) }, Cmd.none )
 
+        UrlChange location ->
+            ( { model | context = getUrlPathData location }, Cmd.none )
+
         -- TODO: Get rid of this all condition handler
         _ ->
             ( model, Cmd.none )
@@ -282,7 +292,7 @@ subscriptions model =
 
 main : Program Flags Model Msg
 main =
-    Html.programWithFlags
+    Navigation.programWithFlags UrlChange
         { init = init
         , view = view
         , update = update
