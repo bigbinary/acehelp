@@ -8,7 +8,16 @@ module Api
       setup do
         @article = articles :ror
         @url = urls :google
+        @organization = organizations :bigbinary
+        @category = categories :autobiography
         ArticleUrl.create!(article_id: @article.id, url_id: @url.id)
+
+        @search_article = Article.create!(
+          title: "How to do search with elasticsearch",
+          desc: "Learn elasticsearch",
+          category_id: @category.id,
+          organization_id: @organization.id
+        )
       end
 
       def test_show_article_success
@@ -48,11 +57,11 @@ module Api
 
         assert_response :success
 
-        get api_v1_articles_search_url, params: { query: "Ruby" }
+        get api_v1_articles_search_url, params: { query: "search" }
 
         assert_response :success
         json = JSON.parse(response.body)
-        assert_equal "Ruby on rails", json.first.second.first["title"]
+        assert_equal "How to do search with elasticsearch", json.first.second.first["title"]
       end
     end
   end

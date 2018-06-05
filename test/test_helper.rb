@@ -30,9 +30,7 @@ module ActiveSupport
     # in alphabetical order.
     fixtures :all
 
-    # reindex models
-    Article.reindex
-    # and disable callbacks
+    # disable callbacks
     Searchkick.disable_callbacks
 
     # Add more helper methods to be used by all tests here...
