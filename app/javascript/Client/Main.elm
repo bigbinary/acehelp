@@ -10,7 +10,7 @@ import Page.CategoryList as CategoryListSection
 import Page.Article as ArticleSection
 import Page.ArticleList as ArticleListSection
 import Page.Error as ErrorSection
-import Views.Container exposing (topBar, closeButton)
+import Views.Container exposing (topBar)
 import Views.Loading exposing (sectionLoadingView)
 import Data.Article exposing (..)
 import Data.Category exposing (..)
@@ -53,7 +53,12 @@ type alias Model =
     , containerAnimation : Animation.State
     , currentAppState : AppState
     , context : Context
+    , history : ModelHistory
     }
+
+
+type ModelHistory
+    = ModelHistory (List Model)
 
 
 
@@ -74,6 +79,7 @@ init flags location =
       , containerAnimation = Animation.style initAnimation
       , currentAppState = Minimized
       , context = Context <| getUrlPathData location
+      , history = ModelHistory []
       }
     , Cmd.none
     )
@@ -118,7 +124,7 @@ maximizedView model =
               ]
             ]
         )
-        [ topBar <| SetAppState Minimized
+        [ topBar GoBack (SetAppState Minimized)
         , getSectionView <| getSection model.sectionState
         ]
 
@@ -147,6 +153,7 @@ type Msg
     | ArticleMsg
     | ArticleLoaded (Result Http.Error ArticleResponse)
     | UrlChange Navigation.Location
+    | GoBack
 
 
 
@@ -228,7 +235,11 @@ update msg model =
                 ( { model | currentAppState = appState, containerAnimation = animation, sectionState = newSectionState }, cmd )
 
         CategoryListLoaded (Ok categories) ->
-            ( { model | sectionState = Loaded (CategoryListSection categories.categories) }, Cmd.none )
+            let
+                (ModelHistory history) =
+                    model.history
+            in
+                ( { model | sectionState = Loaded (CategoryListSection categories.categories), history = ModelHistory (model :: history) }, Cmd.none )
 
         CategoryListLoaded (Err error) ->
             ( { model | sectionState = Loaded (ErrorSection error) }, Cmd.none )
@@ -276,10 +287,28 @@ update msg model =
                     )
 
         ArticleListLoaded (Ok articleList) ->
-            ( { model | sectionState = Loaded (ArticleListSection { id = Nothing, articles = articleList.articles }) }, Cmd.none )
+            let
+                (ModelHistory history) =
+                    model.history
+            in
+            ( { model | sectionState = Loaded (ArticleListSection { id = Nothing, articles = articleList.articles }), history = ModelHistory (model :: history) }, Cmd.none )
 
         ArticleLoaded (Ok articleResponse) ->
-            ( { model | sectionState = Loaded (ArticleSection articleResponse.article) }, Cmd.none )
+            let
+                (ModelHistory history) =
+                    model.history
+            in
+                ( { model | sectionState = Loaded (ArticleSection articleResponse.article), history = ModelHistory (model :: history) }, Cmd.none )
+
+        GoBack ->
+            let
+                (ModelHistory history) =
+                    model.history
+
+                newModel =
+                    Maybe.withDefault model <| List.head history
+            in
+                ( newModel, Cmd.none )
 
         UrlChange location ->
             ( { model | context = Context (getUrlPathData location) }, Cmd.none )

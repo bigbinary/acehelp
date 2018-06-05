@@ -1,7 +1,7 @@
 module Views.Container exposing (..)
 
 import Html exposing (..)
-import Html.Attributes exposing (style)
+import Html.Attributes exposing (style, class)
 import Html.Events exposing (onClick)
 import Svg
 import Svg.Attributes
@@ -18,6 +18,38 @@ rowView aStyle children =
         children
 
 
+leftArrowButton : msg -> Html msg
+leftArrowButton clickMsg =
+    div
+        [ class "arrow left"
+        , style
+            [ ( "position", "absolute" )
+            , ( "top", "0" )
+            , ( "bottom", "0" )
+            , ( "left", "15px" )
+            , ( "line-height", "0" )
+            ]
+        , onClick <| clickMsg
+        ]
+        [ Svg.svg
+            [ Svg.Attributes.width "50"
+            , Svg.Attributes.height "80"
+            , Svg.Attributes.viewBox "0 0 50 80"
+            , Svg.Attributes.style "width: 20px; height: 20px; fill: #fff; position: absolute; top: 50%; transform: translateY(-50%);"
+            ]
+            [ Svg.polyline
+                [ Svg.Attributes.fill "none"
+                , Svg.Attributes.stroke "#FFFFFF"
+                , Svg.Attributes.strokeWidth "10"
+                , Svg.Attributes.strokeLinecap "round"
+                , Svg.Attributes.strokeLinejoin "round"
+                , Svg.Attributes.points " 45.63,75.8 0.375,38.087 45.63,0.375 "
+                ]
+                []
+            ]
+        ]
+
+
 closeButton : msg -> Html msg
 closeButton clkMsg =
     div
@@ -27,6 +59,7 @@ closeButton clkMsg =
             , ( "bottom", "0" )
             , ( "right", "35px" )
             , ( "line-height", "0" )
+            , ( "cursor", "pointer" )
             ]
         , onClick <| clkMsg
         ]
@@ -45,10 +78,11 @@ closeButton clkMsg =
         ]
 
 
-topBar : msg -> Html msg
-topBar onClose =
+topBar : msg -> msg -> Html msg
+topBar onBack onClose =
     rowView [ ( "background-color", "rgb(60, 170, 249)" ) ]
-        [ span
+        [ leftArrowButton onBack
+        , span
             [ style
                 [ ( "text-align", "center" )
                 , ( "display", "block" )
