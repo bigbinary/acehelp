@@ -57,6 +57,7 @@ module Api
 
         assert_response :success
 
+        Article.reindex
         get api_v1_articles_search_url, params: { query: "search" }
 
         assert_response :success

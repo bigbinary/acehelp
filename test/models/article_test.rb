@@ -34,7 +34,7 @@ class ArticleTest < ActiveSupport::TestCase
       organization_id: org.id
     )
 
-    Article.search_index.refresh
+    Article.reindex
 
     assert_equal ["How do I put nodejs code in my website?"], Article.search("nodejs").map(&:title)
   end
