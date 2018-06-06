@@ -112,7 +112,7 @@ maximizedView : Model -> Html Msg
 maximizedView model =
     let
         history =
-            getFirstHistory model
+            getModelFromHistory model
 
         showBackButton =
             case history of
@@ -218,8 +218,8 @@ transitionFromSection sectionState =
     TransitioningFrom (getSection sectionState)
 
 
-getFirstHistory : Model -> Maybe Model
-getFirstHistory modelHistory =
+getModelFromHistory : Model -> Maybe Model
+getModelFromHistory modelHistory =
     case modelHistory.history of
         ModelHistory model ->
             Just model
@@ -228,10 +228,10 @@ getFirstHistory modelHistory =
             Nothing
 
 
-getPreviousModel : Model -> Model
-getPreviousModel currentModel =
+getPreviousValidState : Model -> Model
+getPreviousValidState currentModel =
     let
-        getModelFromHistory model =
+        getValidModelFromSection model =
             case model of
                 Just newModel ->
                     case (getSection newModel.sectionState) of
@@ -240,7 +240,7 @@ getPreviousModel currentModel =
                             currentModel
 
                         Loading ->
-                            getModelFromHistory (getFirstHistory newModel)
+                            getValidModelFromSection (getModelFromHistory newModel)
 
                         _ ->
                             newModel
@@ -249,7 +249,7 @@ getPreviousModel currentModel =
                     currentModel
 
         previousModel =
-            getModelFromHistory <| getFirstHistory currentModel
+            getValidModelFromSection <| getModelFromHistory currentModel
     in
         previousModel
 
@@ -349,7 +349,7 @@ update msg model =
                 ( { model | sectionState = Loaded (ArticleSection articleResponse.article) }, Cmd.none )
 
         GoBack ->
-            ( getPreviousModel model, Cmd.none )
+            ( getPreviousValidState model, Cmd.none )
 
         UrlChange location ->
             ( { model | context = Context (getUrlPathData location) }, Cmd.none )
