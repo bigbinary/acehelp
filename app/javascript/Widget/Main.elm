@@ -208,7 +208,7 @@ update msg model =
                                 model.containerAnimation
                             , transitionFromSection model.sectionState
                               -- TODO: Pass ApiKey Instead of blank string
-                            , Task.attempt CategoryListLoaded (Reader.run CategoryListSection.init (model.nodeEnv, ""))
+                            , Task.attempt CategoryListLoaded (Reader.run CategoryListSection.init ( model.nodeEnv, "" ))
                             )
 
                         Minimized ->

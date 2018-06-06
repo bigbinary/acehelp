@@ -7,7 +7,7 @@ import Data.Category exposing (Categories, decodeCategories)
 import Request.Helpers exposing (..)
 
 
-requestCategories : Reader (NodeEnv, ApiKey) (Task Http.Error Categories)
+requestCategories : Reader ( NodeEnv, ApiKey ) (Task Http.Error Categories)
 requestCategories =
     -- Http.get "http://www.mocky.io/v2/5b06b0362f00004f00c61e7b" decodeCategories
-    Reader.Reader (\(env, apiKey) -> Http.toTask (httpGet apiKey NoContext (apiUrl env "all") [] decodeCategories))
+    Reader.Reader (\( env, apiKey ) -> Http.toTask (httpGet apiKey NoContext (apiUrl env "all") [] decodeCategories))
