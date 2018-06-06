@@ -58,7 +58,8 @@ type alias Model =
 
 
 type ModelHistory
-    = ModelHistory (List Model)
+    = ModelHistory Model
+    | NoHistory
 
 
 
@@ -79,7 +80,7 @@ init flags location =
       , containerAnimation = Animation.style initAnimation
       , currentAppState = Minimized
       , context = Context <| getUrlPathData location
-      , history = ModelHistory []
+      , history = NoHistory
       }
     , Cmd.none
     )
@@ -219,11 +220,12 @@ transitionFromSection sectionState =
 
 getFirstHistory : Model -> Maybe Model
 getFirstHistory modelHistory =
-    let
-        (ModelHistory history) =
-            modelHistory.history
-    in
-        List.head history
+    case modelHistory.history of
+        ModelHistory model ->
+            Just model
+
+        NoHistory ->
+            Nothing
 
 
 getPreviousModel : Model -> Model
@@ -299,9 +301,6 @@ update msg model =
             case categoryListMsg of
                 CategoryListSection.LoadCategory categoryId ->
                     let
-                        (ModelHistory history) =
-                            model.history
-
                         currentArticles =
                             Maybe.map
                                 .articles
@@ -327,7 +326,7 @@ update msg model =
                             Just articles ->
                                 ( { model
                                     | sectionState = Loaded <| ArticleListSection { id = Just categoryId, articles = articles }
-                                    , history = ModelHistory (model :: history)
+                                    , history = ModelHistory model
                                   }
                                 , Cmd.none
                                 )
@@ -337,22 +336,14 @@ update msg model =
                                 ( model, Cmd.none )
 
         ArticleListMsg articleListMsg ->
-            let
-                (ModelHistory history) =
-                    model.history
-            in
             case articleListMsg of
                 ArticleListSection.LoadArticle articleId ->
-                    ( { model | sectionState = transitionFromSection model.sectionState, history = ModelHistory (model :: history) }
+                    ( { model | sectionState = transitionFromSection model.sectionState, history = ModelHistory model }
                     , Task.attempt ArticleLoaded (Reader.run ArticleSection.init ( model.nodeEnv, "", model.context, articleId ))
                     )
 
         ArticleListLoaded (Ok articleList) ->
-            let
-                (ModelHistory history) =
-                    model.history
-            in
-            ( { model | sectionState = Loaded (ArticleListSection { id = Nothing, articles = articleList.articles }), history = ModelHistory (model :: history) }, Cmd.none )
+            ( { model | sectionState = Loaded (ArticleListSection { id = Nothing, articles = articleList.articles })}, Cmd.none )
 
         ArticleLoaded (Ok articleResponse) ->
                 ( { model | sectionState = Loaded (ArticleSection articleResponse.article) }, Cmd.none )
