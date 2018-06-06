@@ -78,20 +78,30 @@ closeButton clkMsg =
         ]
 
 
-topBar : msg -> msg -> Html msg
-topBar onBack onClose =
-    rowView [ ( "background-color", "rgb(60, 170, 249)" ) ]
-        [ leftArrowButton onBack
-        , span
-            [ style
-                [ ( "text-align", "center" )
-                , ( "display", "block" )
-                , ( "color", "#fff" )
+topBar : Bool -> msg -> msg -> Html msg
+topBar showBack onBack onClose =
+    let
+        initialChildren =
+            [ span
+                [ style
+                    [ ( "text-align", "center" )
+                    , ( "display", "block" )
+                    , ( "color", "#fff" )
+                    ]
                 ]
+                [ text "Ace Help" ]
+            , closeButton onClose
             ]
-            [ text "Ace Help" ]
-        , closeButton onClose
-        ]
+
+        children =
+            case showBack of
+                True ->
+                    (leftArrowButton onBack) :: initialChildren
+
+                False ->
+                    initialChildren
+    in
+        rowView [ ( "background-color", "rgb(60, 170, 249)" ) ] children
 
 
 popInInitialAnim : List Animation.Property

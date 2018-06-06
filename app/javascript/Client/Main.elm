@@ -109,24 +109,44 @@ minimizedView =
 
 maximizedView : Model -> Html Msg
 maximizedView model =
-    div
-        (List.concat
-            [ Animation.render model.containerAnimation
-            , [ style
-                    [ ( "position", "fixed" )
-                    , ( "top", "0" )
-                    , ( "background", "#fff" )
-                    , ( "height", "100%" )
-                    , ( "width", "720px" )
-                    , ( "box-shadow", "0 0 50px 0px rgb(153, 153, 153)" )
-                    , ( "font-family", "proxima-nova, Arial, sans-serif" )
-                    ]
-              ]
+    let
+        history =
+            getFirstHistory model
+
+        showBackButton =
+            case history of
+                Just previousModel ->
+                    case (getSection previousModel.sectionState) of
+                        Blank ->
+                            False
+
+                        Loading ->
+                            False
+
+                        _ ->
+                            True
+
+                Nothing ->
+                    False
+    in
+        div
+            (List.concat
+                [ Animation.render model.containerAnimation
+                , [ style
+                        [ ( "position", "fixed" )
+                        , ( "top", "0" )
+                        , ( "background", "#fff" )
+                        , ( "height", "100%" )
+                        , ( "width", "720px" )
+                        , ( "box-shadow", "0 0 50px 0px rgb(153, 153, 153)" )
+                        , ( "font-family", "proxima-nova, Arial, sans-serif" )
+                        ]
+                  ]
+                ]
+            )
+            [ topBar showBackButton GoBack (SetAppState Minimized)
+            , getSectionView <| getSection model.sectionState
             ]
-        )
-        [ topBar GoBack (SetAppState Minimized)
-        , getSectionView <| getSection model.sectionState
-        ]
 
 
 view : Model -> Html Msg
@@ -197,6 +217,41 @@ transitionFromSection sectionState =
     TransitioningFrom (getSection sectionState)
 
 
+getFirstHistory : Model -> Maybe Model
+getFirstHistory modelHistory =
+    let
+        (ModelHistory history) =
+            modelHistory.history
+    in
+        List.head history
+
+
+getPreviousModel : Model -> Model
+getPreviousModel currentModel =
+    let
+        getModelFromHistory model =
+            case model of
+                Just newModel ->
+                    case (getSection newModel.sectionState) of
+                        Blank ->
+                            -- Blank indicates start of app
+                            currentModel
+
+                        Loading ->
+                            getModelFromHistory (getFirstHistory newModel)
+
+                        _ ->
+                            newModel
+
+                Nothing ->
+                    currentModel
+
+        previousModel =
+            getModelFromHistory <| getFirstHistory currentModel
+    in
+        previousModel
+
+
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
@@ -235,11 +290,7 @@ update msg model =
                 ( { model | currentAppState = appState, containerAnimation = animation, sectionState = newSectionState }, cmd )
 
         CategoryListLoaded (Ok categories) ->
-            let
-                (ModelHistory history) =
-                    model.history
-            in
-                ( { model | sectionState = Loaded (CategoryListSection categories.categories), history = ModelHistory (model :: history) }, Cmd.none )
+            ( { model | sectionState = Loaded (CategoryListSection categories.categories) }, Cmd.none )
 
         CategoryListLoaded (Err error) ->
             ( { model | sectionState = Loaded (ErrorSection error) }, Cmd.none )
@@ -248,6 +299,9 @@ update msg model =
             case categoryListMsg of
                 CategoryListSection.LoadCategory categoryId ->
                     let
+                        (ModelHistory history) =
+                            model.history
+
                         currentArticles =
                             Maybe.map
                                 .articles
@@ -271,7 +325,10 @@ update msg model =
                     in
                         case currentArticles of
                             Just articles ->
-                                ( { model | sectionState = Loaded <| ArticleListSection { id = Just categoryId, articles = articles } }
+                                ( { model
+                                    | sectionState = Loaded <| ArticleListSection { id = Just categoryId, articles = articles }
+                                    , history = ModelHistory (model :: history)
+                                  }
                                 , Cmd.none
                                 )
 
@@ -280,9 +337,13 @@ update msg model =
                                 ( model, Cmd.none )
 
         ArticleListMsg articleListMsg ->
+            let
+                (ModelHistory history) =
+                    model.history
+            in
             case articleListMsg of
                 ArticleListSection.LoadArticle articleId ->
-                    ( { model | sectionState = transitionFromSection model.sectionState }
+                    ( { model | sectionState = transitionFromSection model.sectionState, history = ModelHistory (model :: history) }
                     , Task.attempt ArticleLoaded (Reader.run ArticleSection.init ( model.nodeEnv, "", model.context, articleId ))
                     )
 
@@ -294,21 +355,10 @@ update msg model =
             ( { model | sectionState = Loaded (ArticleListSection { id = Nothing, articles = articleList.articles }), history = ModelHistory (model :: history) }, Cmd.none )
 
         ArticleLoaded (Ok articleResponse) ->
-            let
-                (ModelHistory history) =
-                    model.history
-            in
-                ( { model | sectionState = Loaded (ArticleSection articleResponse.article), history = ModelHistory (model :: history) }, Cmd.none )
+                ( { model | sectionState = Loaded (ArticleSection articleResponse.article) }, Cmd.none )
 
         GoBack ->
-            let
-                (ModelHistory history) =
-                    model.history
-
-                newModel =
-                    Maybe.withDefault model <| List.head history
-            in
-                ( newModel, Cmd.none )
+            ( getPreviousModel model, Cmd.none )
 
         UrlChange location ->
             ( { model | context = Context (getUrlPathData location) }, Cmd.none )
