@@ -6,11 +6,14 @@ import Json.Decode exposing (Decoder)
 
 -- Set True to access api calls from localhost
 
+
 type alias Url =
     String
 
+
 type alias NodeEnv =
     String
+
 
 type alias QueryParameters =
     List ( String, String )

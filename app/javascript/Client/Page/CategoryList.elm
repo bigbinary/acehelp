@@ -20,7 +20,7 @@ type alias Model =
     List Category
 
 
-init : Reader.Reader (NodeEnv, ApiKey) (Task.Task Http.Error Categories)
+init : Reader.Reader ( NodeEnv, ApiKey ) (Task.Task Http.Error Categories)
 init =
     requestCategories
 
