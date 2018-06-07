@@ -43,6 +43,7 @@ config/database.yml
 
 # Ignore yml files
 config/database.yml
+config/secrets.yml
 
 .idea
 test/reports
