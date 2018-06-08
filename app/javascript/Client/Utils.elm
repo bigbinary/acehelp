@@ -1,5 +1,8 @@
 module Utils exposing (..)
 
+import Navigation
 
-getUrlPathData location =
-    location.pathname
+
+getUrlPathData : Navigation.Location -> String
+getUrlPathData =
+    .pathname

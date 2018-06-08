@@ -1,19 +1,24 @@
-module Page.ArticleList exposing (initAnim, Msg(..), Model, view, noArticles)
+module Page.ArticleList exposing (init, initAnim, Msg(..), Model, view, noArticles)
 
 import Data.Category exposing (CategoryId)
 import Data.Article exposing (..)
+import Request.Article exposing (..)
+import Request.Helpers exposing (..)
 import Views.Container exposing (rowView, popInInitialAnim)
 import Html exposing (..)
 import Html.Events exposing (onClick)
 import Html.Attributes exposing (style)
 import Animation
+import Http
+import Task exposing (Task)
+import Reader exposing (Reader)
 
 
 -- MODEL
 
 
 type alias Model =
-    { id : CategoryId
+    { id : Maybe CategoryId
     , articles : List ArticleSummary
     }
 
@@ -21,6 +26,11 @@ type alias Model =
 noArticles : List ArticleSummary
 noArticles =
     []
+
+
+init : Reader ( NodeEnv, ApiKey, Context ) (Task Http.Error ArticleListResponse)
+init =
+    requestArticleList
 
 
 initAnim : Animation.State

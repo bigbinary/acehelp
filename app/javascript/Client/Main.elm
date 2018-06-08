@@ -13,7 +13,7 @@ import Views.Container exposing (topBar, closeButton)
 import Views.Loading exposing (sectionLoadingView)
 import Data.Article exposing (..)
 import Data.Category exposing (..)
-import Request.Helpers exposing (NodeEnv)
+import Request.Helpers exposing (NodeEnv, Context(..))
 import Utils exposing (getUrlPathData)
 import Animation
 import Navigation
@@ -50,7 +50,7 @@ type alias Model =
     , sectionState : SectionState
     , containerAnimation : Animation.State
     , currentAppState : AppState
-    , context : String
+    , context : Context
     }
 
 
@@ -71,7 +71,7 @@ init flags location =
       , sectionState = Loaded Blank
       , containerAnimation = Animation.style initAnimation
       , currentAppState = Minimized
-      , context = getUrlPathData location
+      , context = Context <| getUrlPathData location
       }
     , Cmd.none
     )
@@ -141,8 +141,9 @@ type Msg
     | CategoryListMsg CategoryListSection.Msg
     | CategoryListLoaded (Result Http.Error Categories)
     | ArticleListMsg ArticleListSection.Msg
+    | ArticleListLoaded (Result Http.Error ArticleListResponse)
     | ArticleMsg
-    | ArticleLoaded (Result Http.Error Article)
+    | ArticleLoaded (Result Http.Error ArticleResponse)
     | UrlChange Navigation.Location
 
 
@@ -208,7 +209,7 @@ update msg model =
                                 model.containerAnimation
                             , transitionFromSection model.sectionState
                               -- TODO: Pass ApiKey Instead of blank string
-                            , Task.attempt CategoryListLoaded (Reader.run CategoryListSection.init ( model.nodeEnv, "" ))
+                            , Task.attempt ArticleListLoaded (Reader.run ArticleListSection.init ( model.nodeEnv, "", model.context ))
                             )
 
                         Minimized ->
@@ -251,7 +252,7 @@ update msg model =
                     in
                         case currentArticles of
                             Just articles ->
-                                ( { model | sectionState = Loaded <| ArticleListSection { id = categoryId, articles = articles } }
+                                ( { model | sectionState = Loaded <| ArticleListSection { id = Just categoryId, articles = articles } }
                                 , Cmd.none
                                 )
 
@@ -263,14 +264,17 @@ update msg model =
             case articleListMsg of
                 ArticleListSection.LoadArticle articleId ->
                     ( { model | sectionState = transitionFromSection model.sectionState }
-                    , Task.attempt ArticleLoaded <| ArticleSection.init articleId
+                    , Task.attempt ArticleLoaded (Reader.run ArticleSection.init ( model.nodeEnv, "", model.context, articleId ))
                     )
 
-        ArticleLoaded (Ok article) ->
-            ( { model | sectionState = Loaded (ArticleSection article) }, Cmd.none )
+        ArticleListLoaded (Ok articleList) ->
+            ( { model | sectionState = Loaded (ArticleListSection { id = Nothing, articles = articleList.articles }) }, Cmd.none )
+
+        ArticleLoaded (Ok articleResponse) ->
+            ( { model | sectionState = Loaded (ArticleSection articleResponse.article) }, Cmd.none )
 
         UrlChange location ->
-            ( { model | context = getUrlPathData location }, Cmd.none )
+            ( { model | context = Context (getUrlPathData location) }, Cmd.none )
 
         -- TODO: Get rid of this all condition handler
         _ ->

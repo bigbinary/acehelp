@@ -8,10 +8,17 @@ type alias ArticleId =
     Int
 
 
+type alias ArticleListResponse =
+    { articles : List ArticleSummary }
+
+
+type alias ArticleResponse =
+    { article : Article }
+
+
 type alias Article =
     { id : ArticleId
     , title : String
-    , summary : String
     , content : String
     }
 
@@ -27,9 +34,10 @@ type alias ArticleSummary =
 -- DECODERS
 
 
-decodeArticles : Decoder (List ArticleSummary)
+decodeArticles : Decoder ArticleListResponse
 decodeArticles =
-    list decodeArticleSummary
+    decode ArticleListResponse
+        |> required "articles" (list decodeArticleSummary)
 
 
 decodeArticleSummary : Decoder ArticleSummary
@@ -44,5 +52,10 @@ decodeArticle =
     decode Article
         |> required "id" int
         |> required "title" string
-        |> required "summary" string
-        |> required "content" string
+        |> required "desc" string
+
+
+decodeArticleResponse : Decoder ArticleResponse
+decodeArticleResponse =
+    decode ArticleResponse
+        |> required "article" decodeArticle
