@@ -28,6 +28,7 @@ leftArrowButton clickMsg =
             , ( "bottom", "0" )
             , ( "left", "15px" )
             , ( "line-height", "0" )
+            , ( "cursor", "pointer" )
             ]
         , onClick <| clickMsg
         ]
