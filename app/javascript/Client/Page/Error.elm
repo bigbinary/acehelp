@@ -26,7 +26,7 @@ type alias Model =
 view : Model -> Html msg
 view error =
     let
-        ( text1, text2, text3 ) =
+        ( boldExclamationText, friendlyMessage, systemMessage ) =
             case error of
                 Http.BadUrl message ->
                     ( "OOPS!", "That should not have happend!", "" )
@@ -50,7 +50,7 @@ view error =
     in
         div [ id "something-went-wrong" ]
             [ div [ class "error" ] []
-            , div [ class "text text1" ] [ text text1 ]
-            , div [ class "text text2" ] [ text text2 ]
-            , div [ class "text text3" ] [ text text3 ]
+            , div [ class "text boldExclamationText" ] [ text boldExclamationText ]
+            , div [ class "text friendlyMessage" ] [ text friendlyMessage ]
+            , div [ class "text systemMessage" ] [ text systemMessage ]
             ]

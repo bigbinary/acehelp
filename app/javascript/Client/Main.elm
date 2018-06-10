@@ -295,9 +295,6 @@ update msg model =
 
 
 
--- TODO: Get rid of this all condition handler
--- _ ->
---     ( model, Cmd.none )
 -- SUBSCRIPTIONS
 
 
