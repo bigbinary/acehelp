@@ -15,10 +15,35 @@
  */
 
 html,head,body { padding:0; margin:0; }
-body { 
+body {
     font-family: calibri, helvetica, arial, sans-serif;
     font-size: 14px;
     line-height: 20px;
     text-align: center;
 }
- 
+
+.header {
+  overflow: hidden;
+  background-color: #3caaf9;
+  padding: 20px 10px;
+}
+
+.header-right {
+  float: left;
+}
+
+.header a {
+  float: left;
+  color: black;
+  text-align: center;
+  padding: 12px;
+  text-decoration: none;
+  font-size: 18px;
+  line-height: 25px;
+  border-radius: 4px;
+}
+
+.header a:hover {
+  background-color: #2d7cb5;
+  color: black;
+}
