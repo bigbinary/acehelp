@@ -1,0 +1,49 @@
+/**
+ * How to make 3-corner-rounded triangle in CSS (SO)
+ * http://stackoverflow.com/q/14446677/1397351
+ */
+ #something-went-wrong{
+    display: flex;
+    height: 100%;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    animation: error-pop-in 400ms 1;
+    animation-timing-function: cubic-bezier(0, 0, 0.2, 1);
+    
+    .error{
+        padding-bottom: 10px;
+        &:before{
+            content: url('data:image/png;base64,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')
+        }
+    }
+
+    .text{
+        padding: 0px 20px;
+        color: #aaa;
+        text-align: center;
+
+        &.boldExclamationText{
+            font-size: 4.5em;
+        }
+        &.friendlyMessage{
+            font-size: 2em;
+            width: 200px;
+        }
+        &.systemMessage{
+            font-size: 1em;
+            width: 200px;
+        }
+    }
+
+    @keyframes error-pop-in {
+        0% {
+            transform: translate(0, 64px);
+            opacity: 0;
+        }  
+        100% {
+            transform: translate(0);
+            opacity: 1;
+        }
+      }
+ }

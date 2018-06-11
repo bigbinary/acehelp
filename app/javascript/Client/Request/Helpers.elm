@@ -1,14 +1,7 @@
-module Request.Helpers exposing (apiUrl, constructUrl, httpGet, ApiKey, Url, QueryParameters, Context(..), NodeEnv)
+module Request.Helpers exposing (apiUrl, constructUrl, httpGet, ApiKey, ApiErrorMessage, Url, QueryParameters, Context(..), NodeEnv)
 
 import Http exposing (request, encodeUri, header, Header)
 import Json.Decode exposing (Decoder)
-
-
-import Http exposing (request, encodeUri, header, Header)
-import Json.Decode exposing (Decoder)
-
-
--- Set True to access api calls from localhost
 
 
 type alias Url =
@@ -31,6 +24,8 @@ type Context
 type alias ApiKey =
     String
 
+type alias ApiErrorMessage =
+    { error : String }
 
 apiUrl : String -> String -> String
 apiUrl env str =
