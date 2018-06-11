@@ -1,6 +1,8 @@
 # frozen_string_literal: true
 
 Rails.application.routes.draw do
+  devise_for :users
+
   get "/", to: "home#index"
 
   get "/getting-started", to: "home#getting_started"
@@ -20,5 +22,11 @@ Rails.application.routes.draw do
 
       resource :contacts, only: :create
     end
+  end
+
+  namespace :admin do
+    resources :dashboard, only: [:index]
+    resources :articles
+    resources :urls
   end
 end

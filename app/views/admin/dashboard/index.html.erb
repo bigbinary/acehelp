@@ -1,0 +1,22 @@
+<!DOCTYPE HTML>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <title>Demo Admin</title>
+    <%= stylesheet_pack_tag 'client' %>
+  </head>
+  <body>
+    <div id="simulated-content">
+      <p>
+        <%= link_to "Articles", "/getting-started"%>
+      </p>
+      <p>
+        <%= link_to "Urls", "/integrations"%>
+      </p>
+      <p>
+        <%= link_to "Pricing", "/pricing"%>
+      </p>
+    </div>
+    <%= javascript_pack_tag "admin" %>
+  </body>
+</html>
