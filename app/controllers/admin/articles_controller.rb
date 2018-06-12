@@ -1,11 +1,13 @@
 # frozen_string_literal: true
 
 class Admin::ArticlesController < ApplicationController
+  before_action :ensure_user_is_logged_in
+
   def index
-    if current_user
-      render
-    else
-      redirect_to new_user_session_path
-    end
+    render
+  end
+
+  def new
+    render
   end
 end

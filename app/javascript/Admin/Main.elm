@@ -15,6 +15,7 @@ type alias Model =
     { currentPage : Page
     , articlesList : ArticlesList.Model
     , createArticle : CreateArticle.Model
+    , location : Location
     }
 
 
@@ -29,7 +30,7 @@ init : Location -> ( Model, Cmd Msg )
 init location =
     let
         page =
-            retrivePage location.hash
+            retrivePage location.pathname
 
         ( articleListModel, articleListCmds ) =
             ArticlesList.init
@@ -41,6 +42,7 @@ init location =
             { currentPage = page
             , articlesList = articleListModel
             , createArticle = createArticleModel
+            , location = location
             }
 
         cmds =
@@ -113,19 +115,22 @@ convertPageToHash page =
 
 urlLocationToMsg : Location -> Msg
 urlLocationToMsg location =
-    location.hash
+    location.pathname
         |> retrivePage
         |> ChangePage
 
 
 retrivePage : String -> Page
-retrivePage hash =
-    case hash of
+retrivePage pathname =
+    case pathname of
         "/admin/articles" ->
             ArticlesList
 
-        "articles/new" ->
+        "/admin/articles/new" ->
             CreateArticle
+
+        "/admin/urls" ->
+            UrlList
 
         _ ->
             NotFound
