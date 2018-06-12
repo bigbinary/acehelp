@@ -10,7 +10,7 @@ import Page.CategoryList as CategoryListSection
 import Page.Article as ArticleSection
 import Page.ArticleList as ArticleListSection
 import Page.Error as ErrorSection
-import Views.Container exposing (topBar, closeButton)
+import Views.Container exposing (topBar)
 import Views.Loading exposing (sectionLoadingView)
 import Data.Article exposing (..)
 import Data.Category exposing (..)
@@ -53,7 +53,13 @@ type alias Model =
     , containerAnimation : Animation.State
     , currentAppState : AppState
     , context : Context
+    , history : ModelHistory
     }
+
+
+type ModelHistory
+    = ModelHistory Model
+    | NoHistory
 
 
 
@@ -74,6 +80,7 @@ init flags location =
       , containerAnimation = Animation.style initAnimation
       , currentAppState = Minimized
       , context = Context <| getUrlPathData location
+      , history = NoHistory
       }
     , Cmd.none
     )
@@ -103,24 +110,44 @@ minimizedView =
 
 maximizedView : Model -> Html Msg
 maximizedView model =
-    div
-        (List.concat
-            [ Animation.render model.containerAnimation
-            , [ style
-                    [ ( "position", "fixed" )
-                    , ( "top", "0" )
-                    , ( "background", "#fff" )
-                    , ( "height", "100%" )
-                    , ( "width", "720px" )
-                    , ( "box-shadow", "0 0 50px 0px rgb(153, 153, 153)" )
-                    , ( "font-family", "proxima-nova, Arial, sans-serif" )
-                    ]
-              ]
+    let
+        history =
+            getModelFromHistory model
+
+        showBackButton =
+            case history of
+                Just previousModel ->
+                    case (getSection previousModel.sectionState) of
+                        Blank ->
+                            False
+
+                        Loading ->
+                            False
+
+                        _ ->
+                            True
+
+                Nothing ->
+                    False
+    in
+        div
+            (List.concat
+                [ Animation.render model.containerAnimation
+                , [ style
+                        [ ( "position", "fixed" )
+                        , ( "top", "0" )
+                        , ( "background", "#fff" )
+                        , ( "height", "100%" )
+                        , ( "width", "720px" )
+                        , ( "box-shadow", "0 0 50px 0px rgb(153, 153, 153)" )
+                        , ( "font-family", "proxima-nova, Arial, sans-serif" )
+                        ]
+                  ]
+                ]
+            )
+            [ topBar showBackButton GoBack (SetAppState Minimized)
+            , getSectionView <| getSection model.sectionState
             ]
-        )
-        [ topBar <| SetAppState Minimized
-        , getSectionView <| getSection model.sectionState
-        ]
 
 
 view : Model -> Html Msg
@@ -147,6 +174,7 @@ type Msg
     | ArticleMsg
     | ArticleLoaded (Result Http.Error ArticleResponse)
     | UrlChange Navigation.Location
+    | GoBack
 
 
 
@@ -188,6 +216,42 @@ getSection sectionState =
 transitionFromSection : SectionState -> SectionState
 transitionFromSection sectionState =
     TransitioningFrom (getSection sectionState)
+
+
+getModelFromHistory : Model -> Maybe Model
+getModelFromHistory modelHistory =
+    case modelHistory.history of
+        ModelHistory model ->
+            Just model
+
+        NoHistory ->
+            Nothing
+
+
+getPreviousValidState : Model -> Model
+getPreviousValidState currentModel =
+    let
+        getValidModelFromSection model =
+            case model of
+                Just newModel ->
+                    case (getSection newModel.sectionState) of
+                        Blank ->
+                            -- Blank indicates start of app
+                            currentModel
+
+                        Loading ->
+                            getValidModelFromSection (getModelFromHistory newModel)
+
+                        _ ->
+                            newModel
+
+                Nothing ->
+                    currentModel
+
+        previousModel =
+            getValidModelFromSection <| getModelFromHistory currentModel
+    in
+        previousModel
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -260,7 +324,10 @@ update msg model =
                     in
                         case currentArticles of
                             Just articles ->
-                                ( { model | sectionState = Loaded <| ArticleListSection { id = Just categoryId, articles = articles } }
+                                ( { model
+                                    | sectionState = Loaded <| ArticleListSection { id = Just categoryId, articles = articles }
+                                    , history = ModelHistory model
+                                  }
                                 , Cmd.none
                                 )
 
@@ -271,15 +338,18 @@ update msg model =
         ArticleListMsg articleListMsg ->
             case articleListMsg of
                 ArticleListSection.LoadArticle articleId ->
-                    ( { model | sectionState = transitionFromSection model.sectionState }
+                    ( { model | sectionState = transitionFromSection model.sectionState, history = ModelHistory model }
                     , Task.attempt ArticleLoaded (Reader.run ArticleSection.init ( model.nodeEnv, "", model.context, articleId ))
                     )
 
         ArticleListLoaded (Ok articleList) ->
-            ( { model | sectionState = Loaded (ArticleListSection { id = Nothing, articles = articleList.articles }) }, Cmd.none )
+            ( { model | sectionState = Loaded (ArticleListSection { id = Nothing, articles = articleList.articles })}, Cmd.none )
 
         ArticleLoaded (Ok articleResponse) ->
-            ( { model | sectionState = Loaded (ArticleSection articleResponse.article) }, Cmd.none )
+                ( { model | sectionState = Loaded (ArticleSection articleResponse.article) }, Cmd.none )
+
+        GoBack ->
+            ( getPreviousValidState model, Cmd.none )
 
         UrlChange location ->
             ( { model | context = Context (getUrlPathData location) }, Cmd.none )
