@@ -47,3 +47,15 @@ body {
   background-color: #2d7cb5;
   color: black;
 }
+
+.button {
+  height: 30px;
+  width: 100px;
+  margin: 10px;
+  border-radius: 5px;
+  font-weight: bold;
+}
+
+.button.primary {
+  background: #3caaf9;
+}

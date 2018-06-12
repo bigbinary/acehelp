@@ -1,11 +1,6 @@
 module Page.CreateArticlePage exposing (..)
 
 import Html exposing (..)
-
-
---import Html.Attributes exposing (..)
---import Html.Events exposing (..)
-
 import Data.ArticleData exposing (..)
 
 
@@ -18,11 +13,13 @@ type alias Model =
     }
 
 
-initModel : Model
-initModel =
-    { article = Nothing
-    , articleId = 0
-    }
+init : ( Model, Cmd Msg )
+init =
+    ( { article = Nothing
+      , articleId = 0
+      }
+    , Cmd.none
+    )
 
 
 

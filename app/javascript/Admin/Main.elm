@@ -1,15 +1,11 @@
 module Main exposing (..)
 
-import Html exposing (Html, div, text)
+import Html exposing (Html, div, text, button)
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
 import Navigation exposing (..)
-
-
---import Data.ArticleData exposing (..)
-
-import Page.ArticlesListPage as ArticlesListPage
-import Page.CreateArticlePage as CreateArticlePage
+import Page.ArticlesListPage as ArticlesList
+import Page.CreateArticlePage as CreateArticle
 
 
 -- MODEL
@@ -17,26 +13,16 @@ import Page.CreateArticlePage as CreateArticlePage
 
 type alias Model =
     { currentPage : Page
-    , articlesListPage : ArticlesListPage.Model
-    , createArticlePage : CreateArticlePage.Model
-    , mockValue : String
+    , articlesList : ArticlesList.Model
+    , createArticle : CreateArticle.Model
     }
 
 
 type Page
-    = ArticlesListPage
-    | CreateArticlePage
-    | NotFoundPage
-
-
-
---initModel : Page -> Model
---initModel page =
---    { currentPage = page
---    , articlesListPage = ArticlesListPage.initModel
---    , createArticlePage = CreateArticlePage.initModel
---    , mockValue = "Howdy!"
---    }
+    = ArticlesList
+    | UrlList
+    | CreateArticle
+    | NotFound
 
 
 init : Location -> ( Model, Cmd Msg )
@@ -46,22 +32,21 @@ init location =
             retrivePage location.hash
 
         ( articleListModel, articleListCmds ) =
-            ArticlesListPage.init
+            ArticlesList.init
 
-        --(createArticleModel, createArticleCmds) =
-        --    CreateArticlePage.initModel
+        ( createArticleModel, createArticleCmds ) =
+            CreateArticle.init
+
         initModel =
             { currentPage = page
-            , articlesListPage = articleListModel
-            , createArticlePage = CreateArticlePage.initModel
-            , mockValue = "Howdy"
+            , articlesList = articleListModel
+            , createArticle = createArticleModel
             }
 
         cmds =
             Cmd.batch
                 [ Cmd.map ArticlesListMsg articleListCmds
-
-                --, Cmd.map
+                , Cmd.map CreateArticleMsg createArticleCmds
                 ]
     in
         ( initModel, cmds )
@@ -74,7 +59,8 @@ init location =
 type Msg
     = Navigate Page
     | ChangePage Page
-    | ArticlesListMsg ArticlesListPage.Msg
+    | ArticlesListMsg ArticlesList.Msg
+    | CreateArticleMsg CreateArticle.Msg
 
 
 
@@ -93,23 +79,35 @@ update msg model =
         ArticlesListMsg alMsg ->
             let
                 ( articleListModel, articleListCmd ) =
-                    ArticlesListPage.update alMsg model.articlesListPage
+                    ArticlesList.update alMsg model.articlesList
             in
-                ( { model | articlesListPage = articleListModel }
+                ( { model | articlesList = articleListModel }
                 , Cmd.map ArticlesListMsg articleListCmd
+                )
+
+        CreateArticleMsg caMsg ->
+            let
+                ( createArticleModel, createArticleCmd ) =
+                    CreateArticle.update caMsg model.createArticle
+            in
+                ( { model | createArticle = createArticleModel }
+                , Cmd.map CreateArticleMsg createArticleCmd
                 )
 
 
 convertPageToHash : Page -> String
 convertPageToHash page =
     case page of
-        ArticlesListPage ->
+        ArticlesList ->
             "/admin/articles"
 
-        CreateArticlePage ->
-            "/admin/articles/create"
+        CreateArticle ->
+            "/admin/articles/new"
 
-        NotFoundPage ->
+        UrlList ->
+            "/admin/urls"
+
+        NotFound ->
             "/404"
 
 
@@ -124,13 +122,13 @@ retrivePage : String -> Page
 retrivePage hash =
     case hash of
         "/admin/articles" ->
-            ArticlesListPage
+            ArticlesList
 
-        "/admin/articles/create" ->
-            CreateArticlePage
+        "articles/new" ->
+            CreateArticle
 
         _ ->
-            NotFoundPage
+            NotFound
 
 
 
@@ -151,12 +149,27 @@ view model =
     let
         page =
             case model.currentPage of
-                _ ->
+                ArticlesList ->
                     Html.map ArticlesListMsg
-                        (ArticlesListPage.view model.articlesListPage)
+                        (ArticlesList.view model.articlesList)
+
+                CreateArticle ->
+                    Html.map CreateArticleMsg
+                        (CreateArticle.view model.createArticle)
+
+                _ ->
+                    div [] [ text "Not Found" ]
     in
         div []
             [ adminHeader model
+            , div
+                [ style
+                    [ ( "float", "right" )
+                    ]
+                , onClick (Navigate CreateArticle)
+                ]
+                [ button [ class "button primary" ] [ text "New Article" ]
+                ]
             , page
             ]
 
@@ -165,8 +178,8 @@ adminHeader : Model -> Html Msg
 adminHeader model =
     div [ class "header" ]
         [ div [ class "header-right" ]
-            [ Html.a [ onClick (Navigate ArticlesListPage) ] [ text "Articles" ]
-            , Html.a [ href "urls" ] [ text "URL" ]
+            [ Html.a [ onClick (Navigate ArticlesList) ] [ text "Articles" ]
+            , Html.a [ onClick (Navigate UrlList) ] [ text "URL" ]
             ]
         ]
 
