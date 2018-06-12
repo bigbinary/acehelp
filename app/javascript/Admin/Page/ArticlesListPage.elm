@@ -10,13 +10,11 @@ import Html.Attributes exposing (..)
 import Data.ArticleData exposing (..)
 
 
---import Request.ArticleRequest exposing (..)
---import Task
 -- Model
 
 
 type alias Model =
-    { articles : String --List ArticleSummary
+    { articles : List ArticleListResponse
     , currentArticle : Maybe Article
     , error : Maybe String
     }
@@ -24,7 +22,7 @@ type alias Model =
 
 initModel : Model
 initModel =
-    { articles = ""
+    { articles = []
     , currentArticle = Nothing
     , error = Nothing
     }
@@ -36,10 +34,8 @@ fetchArticlesList =
         url =
             "http://localhost:3000/api/v1/article?url=http://ace-invoice.com/getting-started"
 
-        --request =
-        --    Http.get url articlesDecoder
         request =
-            Http.getString url
+            Http.get url articles
 
         cmd =
             Http.send ArticleLoaded request
@@ -59,7 +55,7 @@ init =
 
 type Msg
     = FetchArticles
-    | ArticleLoaded (Result Http.Error String)
+    | ArticleLoaded (Result Http.Error (List ArticleListResponse))
     | LoadArticle ArticleId
 
 
@@ -82,7 +78,7 @@ update msg model =
 
 view : Model -> Html Msg
 view model =
-    div [ id "article_list" ] [ text model.articles ]
+    div [ id "article_list" ] [ text (toString model.articles) ]
 
 
 rows : List (Html Msg) -> Html Msg
