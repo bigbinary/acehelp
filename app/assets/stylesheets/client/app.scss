@@ -33,6 +33,11 @@
             padding: 20px 10px; position: relative;
         }
         
+        #top-bar-title{
+            text-align: center;
+            display: block;
+            color: #fff;
+        }
     }
 
     .blueThemeBG{
@@ -41,6 +46,37 @@
 
     .clickable{
         cursor: pointer;          
+    }
+
+    .arrow-left{
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        left: 15px;
+        line-height: 0;
+        cursor: pointer;
+
+        svg {
+            width: 20px;
+            height: 20px; 
+            fill: #fff;
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+    }
+
+    .close-button{
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        right: 35px;
+        line-height: 0;
+        cursor: pointer;
+
+        svg {
+            width: 20px; height: 20px; fill: #fff; position: absolute; top: 50%; transform: translateY(-50%);
+        }
     }
 }
         
