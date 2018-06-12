@@ -1,6 +1,7 @@
 module Page.UrlListPage exposing (..)
 
 import Html exposing (..)
+import Html.Attributes exposing (..)
 
 
 --import
@@ -51,4 +52,16 @@ update msg model =
 
 view : Model -> Html Msg
 view model =
-    div [] [ text "Url List Page" ]
+    div
+        []
+        [ div
+            [ style [ ( "float", "right" ) ] ]
+            [ a
+                [ href "/admin/urls/new"
+                , class "button primary"
+                ]
+                [ text "New Url"
+                ]
+            ]
+        , text "Url List Page"
+        ]

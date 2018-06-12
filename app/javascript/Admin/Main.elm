@@ -216,14 +216,6 @@ view model =
     in
         div []
             [ adminHeader model
-            , div
-                [ style
-                    [ ( "float", "right" )
-                    ]
-                , onClick (Navigate CreateArticle)
-                ]
-                [ button [ class "button primary" ] [ text "New Article" ]
-                ]
             , page
             ]
 

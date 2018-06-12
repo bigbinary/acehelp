@@ -78,7 +78,19 @@ update msg model =
 
 view : Model -> Html Msg
 view model =
-    div [ id "article_list" ] [ text (toString model.articles) ]
+    div
+        [ id "article_list"
+        ]
+        [ div
+            [ style [ ( "float", "right" ) ] ]
+            [ a
+                [ href "/admin/articles/new"
+                , class "button primary"
+                ]
+                [ text "New Article" ]
+            ]
+        , text (toString model.articles)
+        ]
 
 
 rows : List (Html Msg) -> Html Msg
