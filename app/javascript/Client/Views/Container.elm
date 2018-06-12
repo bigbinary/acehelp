@@ -1,7 +1,7 @@
 module Views.Container exposing (..)
 
 import Html exposing (..)
-import Html.Attributes exposing (style, class)
+import Html.Attributes exposing (style, class, classList)
 import Html.Events exposing (onClick)
 import Svg
 import Svg.Attributes
@@ -9,11 +9,11 @@ import Animation
 import Color exposing (rgb)
 
 
-rowView : List ( String, String ) -> List (Html msg) -> Html msg
-rowView aStyle children =
+rowView : List ( String, String ) -> List ( String, Bool ) -> List (Html msg) -> Html msg
+rowView customStyle additionalClasses children =
     div
-        [ style
-            ([ ( "padding", "20px 10px" ), ( "position", "relative" ) ] ++ aStyle)
+        [ style customStyle
+        , classList <| [ ( "row-view", True ) ] ++ additionalClasses
         ]
         children
 
@@ -102,7 +102,7 @@ topBar showBack onBack onClose =
                 False ->
                     initialChildren
     in
-        rowView [ ( "background-color", "rgb(60, 170, 249)" ) ] children
+        rowView [] [ ( "blueThemeBG", True ) ] children
 
 
 popInInitialAnim : List Animation.Property

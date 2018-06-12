@@ -1,3 +1,5 @@
+@import "vars";
+
 #acehelp-hook{
     font-family: proxima-nova, Arial, sans-serif;
     font-size: 14px;
@@ -26,6 +28,19 @@
         width: 720px;
         box-shadow: 0 0 50px 0px rgb(153, 153, 153);
         font-family: proxima-nova, Arial, sans-serif;
+
+        .row-view{
+            padding: 20px 10px; position: relative;
+        }
+        
+    }
+
+    .blueThemeBG{
+        background-color: $blueThemeColor;
+    }
+
+    .clickable{
+        cursor: pointer;          
     }
 }
         

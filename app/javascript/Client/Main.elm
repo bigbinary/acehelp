@@ -1,7 +1,7 @@
 module Main exposing (..)
 
 import Html exposing (..)
-import Html.Attributes exposing (id, style)
+import Html.Attributes exposing (id)
 import Html.Events exposing (onClick)
 import Http
 import Task

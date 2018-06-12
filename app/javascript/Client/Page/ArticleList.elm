@@ -7,7 +7,7 @@ import Request.Helpers exposing (..)
 import Views.Container exposing (rowView, popInInitialAnim)
 import Html exposing (..)
 import Html.Events exposing (onClick)
-import Html.Attributes exposing (style)
+import Html.Attributes exposing (class)
 import Animation
 import Http
 import Task exposing (Task)
@@ -60,11 +60,12 @@ update msg model =
 view : Model -> Html Msg
 view model =
     rowView []
+        []
         (List.map
             (\article ->
                 div
                     [ onClick <| LoadArticle article.id
-                    , style [ ( "cursor", "pointer" ) ]
+                    , class "clickable"
                     ]
                     [ text article.title ]
             )
