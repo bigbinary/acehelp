@@ -6,6 +6,8 @@ import Html.Events exposing (..)
 import Navigation exposing (..)
 import Page.ArticlesListPage as ArticlesList
 import Page.CreateArticlePage as CreateArticle
+import Page.UrlListPage as ListUrls
+import Page.UrlCreatePage as CreateUrl
 
 
 -- MODEL
@@ -15,6 +17,8 @@ type alias Model =
     { currentPage : Page
     , articlesList : ArticlesList.Model
     , createArticle : CreateArticle.Model
+    , listUrl : ListUrls.Model
+    , createUrl : CreateUrl.Model
     , location : Location
     }
 
@@ -22,6 +26,7 @@ type alias Model =
 type Page
     = ArticlesList
     | UrlList
+    | UrlCreate
     | CreateArticle
     | NotFound
 
@@ -38,10 +43,18 @@ init location =
         ( createArticleModel, createArticleCmds ) =
             CreateArticle.init
 
+        ( createUrlModel, createUrlCmds ) =
+            CreateUrl.init
+
+        ( urlListModel, urlListCmds ) =
+            ListUrls.init
+
         initModel =
             { currentPage = page
             , articlesList = articleListModel
             , createArticle = createArticleModel
+            , listUrl = urlListModel
+            , createUrl = createUrlModel
             , location = location
             }
 
@@ -49,6 +62,8 @@ init location =
             Cmd.batch
                 [ Cmd.map ArticlesListMsg articleListCmds
                 , Cmd.map CreateArticleMsg createArticleCmds
+                , Cmd.map CreateUrlMsg createUrlCmds
+                , Cmd.map UrlListMsg urlListCmds
                 ]
     in
         ( initModel, cmds )
@@ -63,6 +78,8 @@ type Msg
     | ChangePage Page
     | ArticlesListMsg ArticlesList.Msg
     | CreateArticleMsg CreateArticle.Msg
+    | CreateUrlMsg CreateUrl.Msg
+    | UrlListMsg ListUrls.Msg
 
 
 
@@ -96,6 +113,24 @@ update msg model =
                 , Cmd.map CreateArticleMsg createArticleCmd
                 )
 
+        CreateUrlMsg cuMsg ->
+            let
+                ( createUrlModel, createUrlCmds ) =
+                    CreateUrl.update cuMsg model.createUrl
+            in
+                ( { model | createUrl = createUrlModel }
+                , Cmd.map CreateUrlMsg createUrlCmds
+                )
+
+        UrlListMsg ulMsg ->
+            let
+                ( urlListModel, urlListCmds ) =
+                    ListUrls.update ulMsg model.listUrl
+            in
+                ( { model | listUrl = urlListModel }
+                , Cmd.map UrlListMsg urlListCmds
+                )
+
 
 convertPageToHash : Page -> String
 convertPageToHash page =
@@ -108,6 +143,9 @@ convertPageToHash page =
 
         UrlList ->
             "/admin/urls"
+
+        UrlCreate ->
+            "/admin/urls/new"
 
         NotFound ->
             "/404"
@@ -131,6 +169,9 @@ retrivePage pathname =
 
         "/admin/urls" ->
             UrlList
+
+        "/admin/urls/new" ->
+            UrlCreate
 
         _ ->
             NotFound
@@ -161,6 +202,14 @@ view model =
                 CreateArticle ->
                     Html.map CreateArticleMsg
                         (CreateArticle.view model.createArticle)
+
+                UrlCreate ->
+                    Html.map CreateUrlMsg
+                        (CreateUrl.view model.createUrl)
+
+                UrlList ->
+                    Html.map UrlListMsg
+                        (ListUrls.view model.listUrl)
 
                 _ ->
                     div [] [ text "Not Found" ]
