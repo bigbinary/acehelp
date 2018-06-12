@@ -1,7 +1,7 @@
 module Main exposing (..)
 
 import Html exposing (..)
-import Html.Attributes exposing (style)
+import Html.Attributes exposing (id, style)
 import Html.Events exposing (onClick)
 import Http
 import Task
@@ -89,20 +89,7 @@ init flags location =
 minimizedView : Html Msg
 minimizedView =
     div
-        [ style
-            [ ( "position", "fixed" )
-            , ( "width", "100px" )
-            , ( "height", "100px" )
-            , ( "top", "50%" )
-            , ( "right", "0px" )
-            , ( "transform", "translateY(-50%)" )
-            , ( "background-color", "rgb(60, 170, 249)" )
-            , ( "border-radius", "50%" )
-            , ( "text-align", "center" )
-            , ( "color", "#fff" )
-            , ( "font-size", "80px" )
-            , ( "font-family", "proxima-nova, Arial, sans-serif" )
-            ]
+        [ id "mini-view"
         , onClick (SetAppState Maximized)
         ]
         [ text "?" ]
@@ -133,15 +120,7 @@ maximizedView model =
         div
             (List.concat
                 [ Animation.render model.containerAnimation
-                , [ style
-                        [ ( "position", "fixed" )
-                        , ( "top", "0" )
-                        , ( "background", "#fff" )
-                        , ( "height", "100%" )
-                        , ( "width", "720px" )
-                        , ( "box-shadow", "0 0 50px 0px rgb(153, 153, 153)" )
-                        , ( "font-family", "proxima-nova, Arial, sans-serif" )
-                        ]
+                , [ id "max-view"
                   ]
                 ]
             )
@@ -343,10 +322,10 @@ update msg model =
                     )
 
         ArticleListLoaded (Ok articleList) ->
-            ( { model | sectionState = Loaded (ArticleListSection { id = Nothing, articles = articleList.articles })}, Cmd.none )
+            ( { model | sectionState = Loaded (ArticleListSection { id = Nothing, articles = articleList.articles }) }, Cmd.none )
 
         ArticleLoaded (Ok articleResponse) ->
-                ( { model | sectionState = Loaded (ArticleSection articleResponse.article) }, Cmd.none )
+            ( { model | sectionState = Loaded (ArticleSection articleResponse.article) }, Cmd.none )
 
         GoBack ->
             ( getPreviousValidState model, Cmd.none )
