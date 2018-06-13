@@ -28,28 +28,12 @@ initModel =
     }
 
 
-fetchArticlesList : Cmd Msg
-fetchArticlesList =
-    let
-        url =
-            "http://localhost:3000/api/v1/article?url=http://ace-invoice.com/getting-started"
-
-        request =
-            Http.get url articles
-
-        cmd =
-            Http.send ArticleLoaded request
-    in
-        cmd
-
-
 init : ( Model, Cmd Msg )
 init =
-    ( initModel, fetchArticlesList )
+    ( initModel, (fetchArticlesList "http://ace-invoice.com/getting-started") )
 
 
 
---init :
 -- Update
 
 
@@ -102,3 +86,18 @@ rows articleRows =
             ]
         ]
         articleRows
+
+
+fetchArticlesList : String -> Cmd Msg
+fetchArticlesList orgUrl =
+    let
+        url =
+            "http://localhost:3000/api/v1/article?url=" ++ orgUrl
+
+        request =
+            Http.get url articles
+
+        cmd =
+            Http.send ArticleLoaded request
+    in
+        cmd

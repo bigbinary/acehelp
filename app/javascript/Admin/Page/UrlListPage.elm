@@ -2,15 +2,16 @@ module Page.UrlListPage exposing (..)
 
 import Html exposing (..)
 import Html.Attributes exposing (..)
+import Http
 
 
---import
 -- MODEL
 
 
 type alias Model =
-    { listOfUrls : List Url
+    { listOfUrls : String --List Url
     , urlId : UrlId
+    , error : Maybe String
     }
 
 
@@ -26,8 +27,8 @@ type alias UrlId =
 
 init : ( Model, Cmd Msg )
 init =
-    ( { listOfUrls = [], urlId = 0 }
-    , Cmd.none
+    ( { listOfUrls = "", urlId = 0, error = Nothing }
+    , (fetchUrlList "3c60b69a34f8cdfc76a0")
     )
 
 
@@ -37,6 +38,7 @@ init =
 
 type Msg
     = LoadUrl UrlId
+    | UrlLoaded (Result Http.Error String)
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -44,6 +46,21 @@ update msg model =
     case msg of
         LoadUrl urlId ->
             ( { model | urlId = urlId }, Cmd.none )
+
+        UrlLoaded (Ok urls) ->
+            ( { model | listOfUrls = urls }, Cmd.none )
+
+        UrlLoaded (Err err) ->
+            ( { model | error = Just (toString err) }, Cmd.none )
+
+
+
+-- SUBSCRIPTIONS
+
+
+subscriptions : Model -> Sub Msg
+subscriptions model =
+    Sub.none
 
 
 
@@ -65,3 +82,26 @@ view model =
             ]
         , text "Url List Page"
         ]
+
+
+fetchUrlList : String -> Cmd Msg
+fetchUrlList orgApiKey =
+    let
+        url =
+            "http://localhost:3000/url"
+
+        request =
+            Http.request
+                { method = "GET"
+                , headers = [ (Http.header "api-key" orgApiKey) ]
+                , url = url
+                , body = Http.emptyBody
+                , expect = Http.expectString
+                , timeout = Nothing
+                , withCredentials = False
+                }
+
+        cmd =
+            Http.send UrlLoaded request
+    in
+        cmd
