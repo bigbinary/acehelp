@@ -31,4 +31,8 @@ Rails.application.routes.draw do
     resources :articles
     resources :urls
   end
+
+  if Rails.env.development?
+    mount GraphqlPlayground::Rails::Engine, at: '/graphql/playground', graphql_path: '/graphql'
+  end
 end
