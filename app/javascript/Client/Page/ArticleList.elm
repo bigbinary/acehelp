@@ -4,10 +4,10 @@ import Data.Category exposing (CategoryId)
 import Data.Article exposing (..)
 import Request.Article exposing (..)
 import Request.Helpers exposing (..)
-import Views.Container exposing (rowView, popInInitialAnim)
+import Views.Container exposing (articleShape, popInInitialAnim)
 import Html exposing (..)
 import Html.Events exposing (onClick)
-import Html.Attributes exposing (class)
+import Html.Attributes exposing (id, class)
 import Animation
 import Http
 import Task exposing (Task)
@@ -59,15 +59,16 @@ update msg model =
 
 view : Model -> Html Msg
 view model =
-    rowView []
-        []
+    div [ id "content-wrapper" ]
         (List.map
             (\article ->
                 div
                     [ onClick <| LoadArticle article.id
-                    , class "clickable"
+                    , class "selectable-row"
                     ]
-                    [ text article.title ]
+                    [ i [ class "row-icon" ] [ articleShape "20" "20" "rgb(153, 153, 153)" ]
+                    , span [ class "row-title" ] [ text article.title ]
+                    ]
             )
             model.articles
         )
