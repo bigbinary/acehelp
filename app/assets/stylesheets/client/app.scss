@@ -46,7 +46,11 @@
         font-family: proxima-nova, Arial, sans-serif;
 
         #content-wrapper{
-            padding: 0 2em;
+            padding: 0 50px;
+
+            h1{
+                font-size: 28px;
+            }
         }
 
         .row-view{
