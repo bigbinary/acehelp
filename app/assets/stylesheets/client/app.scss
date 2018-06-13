@@ -8,16 +8,32 @@
 
     #mini-view{
         position: fixed;
-        width: 100px;
-        height: 100px;
-        top: 50%;
-        right: 0px;
-        transform: translateY(-50%);
+        width: 60px;
+        height: 60px;
+        top: 80%;
+        right: 20px;
         background-color: rgb(60, 170, 249);
         border-radius: 50%;
         text-align: center;
         color: #fff;
         font-size: 80px;
+        box-shadow: 0 0 30px 0px rgb(153, 153, 153);
+        cursor: pointer;
+        animation: mini-button-pop-in 400ms 1;
+        animation-timing-function: cubic-bezier(0.68, 0.55, 0.265, 1.55);
+        transition: transform .2s ease-in-out, box-shadow .5s ease-in-out;
+
+        &:hover{
+            transform: scale(1.1);
+            box-shadow: 0 0 35px 2px rgb(153, 153, 153);
+        }
+
+        svg{
+            position: absolute;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            left: 50%;
+        }
     }
 
     #max-view{
@@ -30,7 +46,7 @@
         font-family: proxima-nova, Arial, sans-serif;
 
         .row-view{
-            padding: 20px 10px; position: relative;
+            padding: 20px 0px; position: relative;
         }
         
         #top-bar-title{
