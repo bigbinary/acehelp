@@ -10,7 +10,7 @@
     flex-direction: column;
     animation: error-pop-in 400ms 1;
     animation-timing-function: cubic-bezier(0, 0, 0.2, 1);
-    
+
     .error{
         padding-bottom: 10px;
         &:before{
@@ -40,7 +40,7 @@
         0% {
             transform: translate(0, 64px);
             opacity: 0;
-        }  
+        }
         100% {
             transform: translate(0);
             opacity: 1;

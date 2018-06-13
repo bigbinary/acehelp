@@ -52,6 +52,9 @@ gem "bootsnap", ">= 1.1.0", require: false
 # Making it easy to serialize models for client-side use
 gem "active_model_serializers", "~> 0.9.4"
 
+# To build graphql server
+gem "graphql"
+
 # Intelligent search made easy with Rails and Elasticsearch
 gem "searchkick"
 
@@ -92,6 +95,8 @@ group :test do
   gem "selenium-webdriver"
   # Easy installation and use of chromedriver to run system tests with Chrome
   gem "chromedriver-helper"
+  # To make a client for grphql server
+  gem "graphlient", "~> 0.3.1"
 end
 
 # Windows does not include zoneinfo files, so bundle the tzinfo-data gem

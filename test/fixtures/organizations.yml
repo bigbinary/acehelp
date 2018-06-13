@@ -2,7 +2,7 @@
 
 bigbinary:
   name: BigBinary
-  api_key: MyString
+  api_key: "orgoneapikey"
 
 zindi:
   name: Zindi

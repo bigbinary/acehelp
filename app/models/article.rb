@@ -9,4 +9,6 @@ class Article < ApplicationRecord
   has_many :urls, through: :article_urls
 
   validates :title, uniqueness: { scope: [:organization_id, :category_id] }, presence: true
+
+  scope :for_organization, ->(org) { where(organization: org) }
 end

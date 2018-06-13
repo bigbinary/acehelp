@@ -7,4 +7,6 @@ class Url < ApplicationRecord
 
   validates_uniqueness_of :url, case_sensitive: false
   validates_with HttpUrlValidator
+
+  scope :for_organization, ->(org) { where(organization: org) }
 end

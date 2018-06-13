@@ -3,6 +3,8 @@
 Rails.application.routes.draw do
   devise_for :users
 
+  post "/graphql", to: "graphql#execute"
+
   get "/", to: "home#index"
 
   get "/getting-started", to: "home#getting_started"
