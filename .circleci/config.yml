@@ -89,7 +89,7 @@ jobs:
       - run:
           shell: /bin/bash
           command: |
-            KNAPSACK_GENERATE_REPORT=true COVERAGE=true bundle exec rake test --trace
+            KNAPSACK_GENERATE_REPORT=true COVERAGE=true bundle exec rake knapsack:minitest --trace
 
       - store_test_results:
           path: reports
