@@ -7,7 +7,7 @@ class Resolvers::ArticlesSearch < GraphQL::Function
 
   def call(obj, args, context)
     if args[:id].present?
-        Article.where(id: args[:id]).for_organization(context[:organization])
+      Article.where(id: args[:id]).for_organization(context[:organization])
     else
       Article.for_organization(context[:organization])
     end

@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require "graphlient"
 
 module AceHelp
@@ -5,10 +7,10 @@ module AceHelp
     headers: {
       "api-key": Rails.application.secrets[:api_key]
     }) do |client|
-      client.http do |h|
-        h.connection do |c|
-          c.use Faraday::Adapter::Rack, Rails.application
-        end
+    client.http do |h|
+      h.connection do |c|
+        c.use Faraday::Adapter::Rack, Rails.application
+      end
     end
   end
 end

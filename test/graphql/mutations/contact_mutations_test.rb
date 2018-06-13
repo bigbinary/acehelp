@@ -1,8 +1,9 @@
+# frozen_string_literal: true
+
 require "test_helper"
 require "graphql/client_host"
 
 class Mutations::ContactMutationsTest < ActiveSupport::TestCase
-
   test "create contact mutations" do
     query = <<-'GRAPHQL'
               mutation($input: CreateContactInput!) {
