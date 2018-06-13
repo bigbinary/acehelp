@@ -2,7 +2,7 @@
 
 class Mutations::ContactMutations
   Create = GraphQL::Relay::Mutation.define do
-    name "AddContact"
+    name "CreateContact"
 
     input_field :name, !types.String
     input_field :email, !types.String
@@ -11,7 +11,7 @@ class Mutations::ContactMutations
     return_field :contact, Types::ContactType
     return_field :errors, types.String
 
-    resolve ->(object, inputs, ctx) {
+    resolve ->(object, inputs, context) {
       new_contact = Contact.new(name: inputs[:name], email: inputs[:email], message: inputs[:message])
 
       if new_contact.save

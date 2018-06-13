@@ -10,7 +10,7 @@ class Mutations::ArticleMutationsTest < ActiveSupport::TestCase
 
   test "create article mutations" do
     query = <<-'GRAPHQL'
-              mutation($input: AddArticleInput!) {
+              mutation($input: CreateArticleInput!) {
                 addArticle(input: $input) {
                   article {
                     id
@@ -27,7 +27,7 @@ class Mutations::ArticleMutationsTest < ActiveSupport::TestCase
 
   test "create article failure" do
     query = <<-'GRAPHQL'
-              mutation($input: AddArticleInput!) {
+              mutation($input: CreateArticleInput!) {
                 addArticle(input: $input) {
                   article {
                     id

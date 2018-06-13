@@ -5,7 +5,7 @@ class Mutations::ContactMutationsTest < ActiveSupport::TestCase
 
   test "create contact mutations" do
     query = <<-'GRAPHQL'
-              mutation($input: AddContactInput!) {
+              mutation($input: CreateContactInput!) {
                 addContact(input: $input) {
                   contact {
                     id
@@ -22,7 +22,7 @@ class Mutations::ContactMutationsTest < ActiveSupport::TestCase
 
   test "create contact mutations failure" do
     query = <<-'GRAPHQL'
-              mutation($input: AddContactInput!) {
+              mutation($input: CreateContactInput!) {
                 addContact(input: $input) {
                   contact {
                     id

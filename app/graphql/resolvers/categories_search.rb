@@ -3,7 +3,7 @@
 class Resolvers::CategoriesSearch < GraphQL::Function
   type !types[Types::CategoryType]
 
-  def call(_, _, ctx)
+  def call(_, _, context)
     Category.all
   end
 end

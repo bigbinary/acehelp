@@ -9,7 +9,7 @@ class Mutations::UrlMutationsTest < ActiveSupport::TestCase
 
   test "create url mutations" do
     query = <<-'GRAPHQL'
-              mutation($input: AddUrlInput!) {
+              mutation($input: CreateUrlInput!) {
                 addUrl(input: $input) {
                   url {
                     id
@@ -26,7 +26,7 @@ class Mutations::UrlMutationsTest < ActiveSupport::TestCase
 
   test "create url failure" do
     query = <<-'GRAPHQL'
-              mutation($input: AddUrlInput!) {
+              mutation($input: CreateUrlInput!) {
                 addUrl(input: $input) {
                   url {
                     id

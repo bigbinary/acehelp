@@ -5,6 +5,6 @@ Types::UrlType = GraphQL::ObjectType.define do
   field :id, !types.ID
   field :url, !types.String
   field :articles, -> { !types[Types::ArticleType] }  do
-    resolve -> (url, args, ctx) { url.articles.for_organization(ctx[:organization]) }
+    resolve -> (url, args, context) { url.articles.for_organization(context[:organization]) }
   end
 end

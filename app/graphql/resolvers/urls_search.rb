@@ -5,11 +5,11 @@ class Resolvers::UrlsSearch < GraphQL::Function
 
   argument :url, types.String
 
-  def call(obj, args, ctx)
+  def call(obj, args, context)
     if args[:url]
-      Url.where(url: args[:url]).for_organization(ctx[:organization])
+      Url.where(url: args[:url]).for_organization(context[:organization])
     else
-      Url.for_organization(ctx[:organization])
+      Url.for_organization(context[:organization])
     end
   end
 end
