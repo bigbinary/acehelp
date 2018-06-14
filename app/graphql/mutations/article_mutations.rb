@@ -15,7 +15,7 @@ class Mutations::ArticleMutations
       category = Category.find_by_id(inputs[:category_id])
       return { errors: "Category not found" } if category.nil?
 
-      new_article = category.articles.build(title: inputs[:title], desc: inputs[:desc])
+      new_article = category.articles.new(title: inputs[:title], desc: inputs[:desc])
       new_article.organization = context[:organization]
 
       if new_article.save

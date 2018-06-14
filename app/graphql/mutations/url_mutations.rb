@@ -56,9 +56,11 @@ class Mutations::UrlMutations
       url = Url.find_by(id: inputs[:id], organization_id: context[:organization].id)
       return { errors: "Url not found" } if url.nil?
 
-      url.destroy!
-
-      { deletedId: inputs[:id] }
+      if url.destroy
+        { deletedId: inputs[:id] }
+      else
+        return { errors: "url not deleted" }
+      end
     }
   end
 end

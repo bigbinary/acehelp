@@ -7,7 +7,7 @@ class GraphqlController < ApplicationController
     result = AcehelpSchema.execute(query, variables: variables, context: context, operation_name: operation_name)
     render json: result
   rescue => e
-    return_error e
+    render json: { error:  e.message }, status: 500
   end
 
   private
@@ -45,9 +45,5 @@ class GraphqlController < ApplicationController
       else
         raise ArgumentError, "Unexpected parameter: #{ambiguous_param}"
       end
-    end
-
-    def return_error(e)
-      render json: { error:  e.message }, status: 500
     end
 end
