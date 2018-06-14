@@ -34,6 +34,7 @@ Rails.application.routes.draw do
     resources :dashboard, only: [:index]
     resources :articles
     resources :urls
+    resources :categories
   end
 
   if Rails.env.development?

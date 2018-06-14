@@ -37,9 +37,9 @@ articles =
 articlesDecoder : Decoder ArticleListResponse
 articlesDecoder =
     decode ArticleListResponse
-        |> Pipeline.required "id" int
-        |> Pipeline.required "title" string
-        |> Pipeline.required "desc" string
+        |> required "id" int
+        |> required "title" string
+        |> required "desc" string
         |> at [ "articles" ]
 
 

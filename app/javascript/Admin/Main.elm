@@ -8,6 +8,8 @@ import Page.ArticlesListPage as ArticlesList
 import Page.CreateArticlePage as CreateArticle
 import Page.UrlListPage as ListUrls
 import Page.UrlCreatePage as CreateUrl
+import Page.CategoryListPage as CategoryList
+import Page.CategoryCreatePage as CategoryCreate
 
 
 -- MODEL
@@ -19,6 +21,8 @@ type alias Model =
     , createArticle : CreateArticle.Model
     , listUrl : ListUrls.Model
     , createUrl : CreateUrl.Model
+    , categoryList : CategoryList.Model
+    , categoryCreate : CategoryCreate.Model
     , location : Location
     }
 
@@ -28,6 +32,8 @@ type Page
     | UrlList
     | UrlCreate
     | CreateArticle
+    | CategoryList
+    | CategoryCreate
     | NotFound
 
 
@@ -49,12 +55,20 @@ init location =
         ( urlListModel, urlListCmds ) =
             ListUrls.init
 
+        ( categoryListModel, categoryListCmds ) =
+            CategoryList.init
+
+        ( categoryCreateModel, categoryCreateCmds ) =
+            CategoryCreate.init
+
         initModel =
             { currentPage = page
             , articlesList = articleListModel
             , createArticle = createArticleModel
             , listUrl = urlListModel
             , createUrl = createUrlModel
+            , categoryList = categoryListModel
+            , categoryCreate = categoryCreateModel
             , location = location
             }
 
@@ -64,6 +78,8 @@ init location =
                 , Cmd.map CreateArticleMsg createArticleCmds
                 , Cmd.map CreateUrlMsg createUrlCmds
                 , Cmd.map UrlListMsg urlListCmds
+                , Cmd.map CategoryListMsg categoryListCmds
+                , Cmd.map CategoryCreateMsg categoryCreateCmds
                 ]
     in
         ( initModel, cmds )
@@ -80,6 +96,8 @@ type Msg
     | CreateArticleMsg CreateArticle.Msg
     | CreateUrlMsg CreateUrl.Msg
     | UrlListMsg ListUrls.Msg
+    | CategoryListMsg CategoryList.Msg
+    | CategoryCreateMsg CategoryCreate.Msg
 
 
 
@@ -131,6 +149,26 @@ update msg model =
                 , Cmd.map UrlListMsg urlListCmds
                 )
 
+        CategoryListMsg clMsg ->
+            let
+                ( categoryListModel, categoryListCmd ) =
+                    CategoryList.update clMsg model.categoryList
+            in
+                ( { model | categoryList = categoryListModel }
+                , Cmd.map CategoryListMsg categoryListCmd
+                )
+
+        CategoryCreateMsg ccMsg ->
+            let
+                ( categoryCreateModel, categoryCreateCmd ) =
+                    CategoryCreate.update ccMsg model.categoryCreate
+            in
+                ( { model
+                    | categoryCreate = categoryCreateModel
+                  }
+                , Cmd.map CategoryCreateMsg categoryCreateCmd
+                )
+
 
 convertPageToHash : Page -> String
 convertPageToHash page =
@@ -146,6 +184,12 @@ convertPageToHash page =
 
         UrlCreate ->
             "/admin/urls/new"
+
+        CategoryList ->
+            "/admin/categories"
+
+        CategoryCreate ->
+            "/admin/categories/new"
 
         NotFound ->
             "/404"
@@ -172,6 +216,12 @@ retrivePage pathname =
 
         "/admin/urls/new" ->
             UrlCreate
+
+        "/admin/categories" ->
+            CategoryList
+
+        "/admin/categories/new" ->
+            CategoryCreate
 
         _ ->
             NotFound
@@ -211,6 +261,14 @@ view model =
                     Html.map UrlListMsg
                         (ListUrls.view model.listUrl)
 
+                CategoryList ->
+                    Html.map CategoryListMsg
+                        (CategoryList.view model.categoryList)
+
+                CategoryCreate ->
+                    Html.map CategoryCreateMsg
+                        (CategoryCreate.view model.categoryCreate)
+
                 _ ->
                     div [] [ text "Not Found" ]
     in
@@ -226,6 +284,7 @@ adminHeader model =
         [ div [ class "header-right" ]
             [ Html.a [ onClick (Navigate ArticlesList) ] [ text "Articles" ]
             , Html.a [ onClick (Navigate UrlList) ] [ text "URL" ]
+            , Html.a [ onClick (Navigate CategoryList) ] [ text "Category" ]
             ]
         ]
 
