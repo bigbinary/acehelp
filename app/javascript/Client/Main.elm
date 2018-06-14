@@ -1,7 +1,7 @@
 module Main exposing (..)
 
 import Html exposing (..)
-import Html.Attributes exposing (id, class)
+import Html.Attributes exposing (id, class, style)
 import Html.Events exposing (onClick)
 import Http
 import Task
@@ -89,7 +89,7 @@ init flags location =
 
 minimizedView : Html Msg
 minimizedView =
-    div [ id "mini-view", onClick (SetAppState Maximized) ]
+    div [ id "mini-view", style [ ( "background-color", "rgb(60, 170, 249)" ), ( "color", "#fff" ) ], onClick (SetAppState Maximized) ]
         [ div [ class "question-icon" ]
             [ SolidIcon.question ]
         ]
