@@ -1,12 +1,12 @@
 @import "vars";
 
-#acehelp-hook{
+#acehelp-hook {
     font-family: proxima-nova, Arial, sans-serif;
     font-size: 14px;
     line-height: 20px;
     text-align: center;
 
-    #mini-view{
+    #mini-view {
         position: fixed;
         width: 60px;
         height: 60px;
@@ -23,12 +23,12 @@
         animation-timing-function: cubic-bezier(0.68, 0.55, 0.265, 1.55);
         transition: transform .2s ease-in-out, box-shadow .5s ease-in-out;
 
-        &:hover{
+        &:hover {
             transform: scale(1.1);
             box-shadow: 0 0 35px 2px rgb(153, 153, 153);
         }
 
-        svg{
+        svg {
             position: absolute;
             top: 50%;
             transform: translate(-50%, -50%);
@@ -36,7 +36,7 @@
         }
     }
 
-    #max-view{
+    #max-view {
         position: fixed;
         top: 0;
         background: #fff;
@@ -45,7 +45,7 @@
         box-shadow: 0 0 50px 0px rgb(153, 153, 153);
         font-family: proxima-nova, Arial, sans-serif;
 
-        #content-wrapper{
+        #content-wrapper {
             padding: 0 50px;
 
             h1{
@@ -53,7 +53,7 @@
             }
         }
 
-        .row-view{
+        .row-view {
             padding-top: 20px; 
             padding-bottom: 20px; 
             position: relative;
@@ -74,32 +74,32 @@
                 left: 0;
                 position: absolute;
             }
-            &:hover:before{
+            &:hover:before {
                 background-color: rgb(112, 112, 112);
             }
-            .row-title{
+            .row-title {
                 padding: 3px 15px;
                 position: absolute;
             }
         }
         
         
-        #top-bar-title{
+        #top-bar-title {
             text-align: center;
             display: block;
             color: #fff;
         }
     }
 
-    .blueThemeBG{
+    .blueThemeBG {
         background-color: $blueThemeColor;
     }
 
-    .clickable{
+    .clickable {
         cursor: pointer;          
     }
 
-    .arrow-left{
+    .arrow-left {
         position: absolute;
         top: 0;
         bottom: 0;
@@ -117,7 +117,7 @@
         }
     }
 
-    .close-button{
+    .close-button {
         position: absolute;
         top: 0;
         bottom: 0;
@@ -126,7 +126,12 @@
         cursor: pointer;
 
         svg {
-            width: 20px; height: 20px; fill: #fff; position: absolute; top: 50%; transform: translateY(-50%);
+            width: 20px;
+            height: 20px;
+            fill: #fff;
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
         }
     }
 }
