@@ -4,6 +4,7 @@ import Data.Article exposing (..)
 import Request.Article exposing (..)
 import Request.Helpers exposing (ApiKey, Context, NodeEnv)
 import Html exposing (..)
+import Html.Attributes exposing (id, class)
 import Http
 import Task
 import Reader exposing (Reader)
@@ -28,7 +29,7 @@ init =
 
 view : Model -> Html msg
 view article =
-    div []
-        [ h2 [] [ text article.title ]
+    div [ id "content-wrapper" ]
+        [ h1 [] [ text article.title ]
         , p [] [ text article.content ]
         ]

@@ -1,0 +1,138 @@
+@import "vars";
+
+#acehelp-hook {
+    font-family: proxima-nova, Arial, sans-serif;
+    font-size: 14px;
+    line-height: 20px;
+    text-align: center;
+
+    #mini-view {
+        position: fixed;
+        width: 60px;
+        height: 60px;
+        top: 80%;
+        right: 20px;
+        background-color: rgb(60, 170, 249);
+        border-radius: 50%;
+        text-align: center;
+        color: #fff;
+        font-size: 80px;
+        box-shadow: 0 0 30px 0px rgb(153, 153, 153);
+        cursor: pointer;
+        animation: mini-button-pop-in 400ms 1;
+        animation-timing-function: cubic-bezier(0.68, 0.55, 0.265, 1.55);
+        transition: transform .2s ease-in-out, box-shadow .5s ease-in-out;
+
+        &:hover {
+            transform: scale(1.1);
+            box-shadow: 0 0 35px 2px rgb(153, 153, 153);
+        }
+
+        svg {
+            position: absolute;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            left: 50%;
+        }
+    }
+
+    #max-view {
+        position: fixed;
+        top: 0;
+        background: #fff;
+        height: 100%;
+        width: 720px;
+        box-shadow: 0 0 50px 0px rgb(153, 153, 153);
+        font-family: proxima-nova, Arial, sans-serif;
+
+        #content-wrapper {
+            padding: 0 50px;
+
+            h1{
+                font-size: 28px;
+            }
+        }
+
+        .row-view {
+            padding-top: 20px; 
+            padding-bottom: 20px; 
+            position: relative;
+        }
+
+        .selectable-row {
+            padding: 10px 20px;
+            cursor: pointer;
+            background-color: #fff;
+            border-bottom:1px solid #d6d6d6;
+
+            &:before {
+                content: "";
+                transition: background-color 350ms cubic-bezier(0.4, 0, 0.2, 1) 0ms;
+                width: 6px;
+                height: 24px;
+                display: block;
+                left: 0;
+                position: absolute;
+            }
+            &:hover:before {
+                background-color: rgb(112, 112, 112);
+            }
+            .row-title {
+                padding: 3px 15px;
+                position: absolute;
+            }
+        }
+        
+        
+        #top-bar-title {
+            text-align: center;
+            display: block;
+            color: #fff;
+        }
+    }
+
+    .blueThemeBG {
+        background-color: $blueThemeColor;
+    }
+
+    .clickable {
+        cursor: pointer;          
+    }
+
+    .arrow-left {
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        left: 15px;
+        line-height: 0;
+        cursor: pointer;
+
+        svg {
+            width: 20px;
+            height: 20px; 
+            fill: #fff;
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+    }
+
+    .close-button {
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        right: 35px;
+        line-height: 0;
+        cursor: pointer;
+
+        svg {
+            width: 20px;
+            height: 20px;
+            fill: #fff;
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+    }
+}
+        

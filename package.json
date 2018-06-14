@@ -24,7 +24,7 @@
       "elm-format --yes",
       "git add"
     ],
-    "*.js": [
+    "*.{js, scss, css}": [
       "prettier --write",
       "git add"
     ]

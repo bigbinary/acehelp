@@ -12,6 +12,10 @@ requestArticleList =
     Reader.Reader (\( env, apiKey, context ) -> Http.toTask (httpGet apiKey context (apiUrl env "article") [] decodeArticles))
 
 
+
+-- Reader.Reader (\( env, apiKey, context ) -> Http.toTask (httpGet apiKey context ("https://www.mocky.io/v2/5b1a4ce93300001000fb1362") [] decodeArticles))
+
+
 requestArticle : Reader ( NodeEnv, ApiKey, Context, ArticleId ) (Task Http.Error ArticleResponse)
 requestArticle =
     Reader.Reader

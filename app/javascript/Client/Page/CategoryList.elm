@@ -3,10 +3,10 @@ module Page.CategoryList exposing (init, initAnim, Msg(..), Model, view, getCate
 import Data.Category exposing (..)
 import Request.Category exposing (..)
 import Request.Helpers exposing (ApiKey, Context, NodeEnv)
-import Views.Container exposing (rowView, popInInitialAnim)
+import Views.Container exposing (popInInitialAnim)
 import Html exposing (..)
 import Html.Events exposing (onClick)
-import Html.Attributes exposing (style)
+import Html.Attributes exposing (class)
 import Http
 import Task
 import Animation
@@ -44,12 +44,13 @@ type Msg
 
 view : Model -> Html Msg
 view model =
-    rowView []
+    div
+        []
         (List.map
             (\category ->
                 div
                     [ onClick <| LoadCategory category.id
-                    , style [ ( "cursor", "pointer" ) ]
+                    , class "clickable"
                     ]
                     [ text category.name ]
             )

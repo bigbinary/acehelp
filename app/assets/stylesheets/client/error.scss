@@ -1,3 +1,5 @@
+@import "keyframe-animations";
+
 /**
  * How to make 3-corner-rounded triangle in CSS (SO)
  * http://stackoverflow.com/q/14446677/1397351
@@ -8,7 +10,7 @@
     align-items: center;
     justify-content: center;
     flex-direction: column;
-    animation: error-pop-in 400ms 1;
+    animation: ah-slide-from-bottom-and-pop-in 400ms 1;
     animation-timing-function: cubic-bezier(0, 0, 0.2, 1);
 
     .error{
@@ -36,14 +38,5 @@
         }
     }
 
-    @keyframes error-pop-in {
-        0% {
-            transform: translate(0, 64px);
-            opacity: 0;
-        }
-        100% {
-            transform: translate(0);
-            opacity: 1;
-        }
-      }
+    
  }
