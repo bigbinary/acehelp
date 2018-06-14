@@ -87,6 +87,9 @@ group :development do
 
   # A Ruby static code analyzer, based on the community Ruby style guide
   gem "rubocop", require: false
+
+  #  For mountable GraphQL Playground endpoint
+  gem 'graphql_playground-rails', '~> 1.0'
 end
 
 group :test do

@@ -106,6 +106,8 @@ GEM
     graphql-client (0.12.3)
       activesupport (>= 3.0, < 6.0)
       graphql (~> 1.6)
+    graphql_playground-rails (1.0.0)
+      rails (~> 5.1, >= 5.1.0)
     hashie (3.5.7)
     i18n (1.0.1)
       concurrent-ruby (~> 1.0)
@@ -275,6 +277,7 @@ DEPENDENCIES
   devise (~> 4.4.0)
   graphlient (~> 0.3.1)
   graphql
+  graphql_playground-rails (~> 1.0)
   jbuilder (~> 2.5)
   knapsack
   listen (>= 3.0.5, < 3.2)
