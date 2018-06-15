@@ -6,10 +6,10 @@ import Html.Events exposing (onClick)
 import Http
 import Task
 import Reader
-import Page.CategoryList as CategoryListSection
-import Page.Article as ArticleSection
-import Page.ArticleList as ArticleListSection
-import Page.Error as ErrorSection
+import Section.CategoryList as CategoryListSection
+import Section.Article as ArticleSection
+import Section.ArticleList as ArticleListSection
+import Section.Error as ErrorSection
 import Views.Container exposing (topBar)
 import Views.Loading exposing (sectionLoadingView)
 import Data.Article exposing (..)
