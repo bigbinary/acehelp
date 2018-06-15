@@ -49,15 +49,28 @@ body {
 }
 
 .button {
-  height: 30px;
-  width: 100px;
-  margin: 10px;
-  border-radius: 5px;
-  font-weight: bold;
+  display: inline-block;
+  font-weight: 400;
+  text-align: center;
+  white-space: nowrap;
+  vertical-align: middle;
+  user-select: none;
+  border: 1px solid;
+  padding: .375rem .75rem;
+  font-size: 1rem;
+  line-height: 1.5;
+  border-radius: .25rem;
+  margin: 9px;
+}
+
+.buttonDiv {
+  float: right;
 }
 
 .button.primary {
+  color: #000;
   background: #3caaf9;
+  border-color: #3caaf9;
 }
 
 input[type=text], textarea {

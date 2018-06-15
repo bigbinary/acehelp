@@ -1,35 +1,27 @@
 module Page.CategoryListPage exposing (..)
 
+import Http
 import Html exposing (..)
 import Html.Attributes exposing (..)
-
-
---import Html.Events exposing (..)
-
-import Http
+import Data.CategoryData exposing (..)
+import Request.CategoryRequest exposing (..)
 
 
 -- MODEL
 
 
 type alias Model =
-    { categoryList : String
+    { categoryList : CategoryList
     , errors : Maybe String
-    }
-
-
-type alias Category =
-    { id : Int
-    , name : String
     }
 
 
 init : ( Model, Cmd Msg )
 init =
-    ( { categoryList = ""
+    ( { categoryList = { categories = [] }
       , errors = Nothing
       }
-    , Cmd.none
+    , fetchCategories
     )
 
 
@@ -38,7 +30,7 @@ init =
 
 
 type Msg
-    = CategoriesLoaded (Result Http.Error String)
+    = CategoriesLoaded (Result Http.Error CategoryList)
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -77,10 +69,24 @@ view model =
     div
         []
         [ div
-            [ style
-                [ ( "float", "right" )
+            [ class "buttonDiv" ]
+            [ a
+                [ href "/admin/categories/new"
+                , class "button primary"
                 ]
+                [ text "New Category" ]
             ]
-            [ a [ href "/admin/categories/new" ] [ text "New Category" ] ]
         , text "categories List page"
         ]
+
+
+fetchCategories : Cmd Msg
+fetchCategories =
+    let
+        request =
+            requestCategories "dev" "3c60b69a34f8cdfc76a0"
+
+        cmd =
+            Http.send CategoriesLoaded request
+    in
+        cmd

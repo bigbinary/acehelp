@@ -7,6 +7,7 @@ import Data.ArticleData exposing (..)
 import Http
 import Json.Encode as JE
 import Json.Decode as JD exposing (field)
+import Request.ArticleRequest exposing (..)
 
 
 -- Model
@@ -90,11 +91,20 @@ update msg model =
             )
 
         SaveArticleResponse (Err error) ->
-            ( { model
-                | error = Just (toString error)
-              }
-            , Cmd.none
-            )
+            let
+                errorMessage =
+                    case error of
+                        Http.BadStatus response ->
+                            response.body
+
+                        _ ->
+                            "Error while creating article"
+            in
+                ( { model
+                    | error = Just errorMessage
+                  }
+                , Cmd.none
+                )
 
         _ ->
             ( model, Cmd.none )
@@ -165,17 +175,8 @@ articleEncoder { title, desc } =
 save : Model -> ( Model, Cmd Msg )
 save model =
     let
-        headers =
-            [ (Http.header "api-key" "3c60b69a34f8cdfc76a0") ]
-
-        body =
-            Http.jsonBody <| articleEncoder model
-
-        decoder =
-            field "_id" JD.string
-
         request =
-            post url headers body decoder
+            requestCreateArticle "dev" "3c60b69a34f8cdfc76a0" (articleEncoder model)
 
         cmd =
             Http.send SaveArticleResponse request

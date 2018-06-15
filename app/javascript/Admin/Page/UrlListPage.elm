@@ -1,23 +1,19 @@
 module Page.UrlListPage exposing (..)
 
+import Http
 import Html exposing (..)
 import Html.Attributes exposing (..)
-import Http
+import Request.UrlRequest exposing (..)
+import Data.UrlData exposing (..)
 
 
 -- MODEL
 
 
 type alias Model =
-    { listOfUrls : String --List Url
+    { listOfUrls : UrlsListResponse
     , urlId : UrlId
     , error : Maybe String
-    }
-
-
-type alias Url =
-    { url : String
-    , urlTitle : String
     }
 
 
@@ -27,8 +23,11 @@ type alias UrlId =
 
 init : ( Model, Cmd Msg )
 init =
-    ( { listOfUrls = "", urlId = 0, error = Nothing }
-    , (fetchUrlList "3c60b69a34f8cdfc76a0")
+    ( { listOfUrls = { urls = [] }
+      , urlId = 0
+      , error = Nothing
+      }
+    , (fetchUrlList)
     )
 
 
@@ -38,7 +37,7 @@ init =
 
 type Msg
     = LoadUrl UrlId
-    | UrlLoaded (Result Http.Error String)
+    | UrlLoaded (Result Http.Error UrlsListResponse)
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -72,7 +71,7 @@ view model =
     div
         []
         [ div
-            [ style [ ( "float", "right" ) ] ]
+            [ class "buttonDiv" ]
             [ a
                 [ href "/admin/urls/new"
                 , class "button primary"
@@ -84,22 +83,11 @@ view model =
         ]
 
 
-fetchUrlList : String -> Cmd Msg
-fetchUrlList orgApiKey =
+fetchUrlList : Cmd Msg
+fetchUrlList =
     let
-        url =
-            "http://localhost:3000/url"
-
         request =
-            Http.request
-                { method = "GET"
-                , headers = [ (Http.header "api-key" orgApiKey) ]
-                , url = url
-                , body = Http.emptyBody
-                , expect = Http.expectString
-                , timeout = Nothing
-                , withCredentials = False
-                }
+            requestUrls "dev" "3c60b69a34f8cdfc76a0"
 
         cmd =
             Http.send UrlLoaded request

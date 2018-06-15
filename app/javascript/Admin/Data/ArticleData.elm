@@ -11,8 +11,7 @@ type alias ArticleId =
 type alias Article =
     { id : ArticleId
     , title : String
-    , content : String
-    , keywords : List String
+    , desc : String
     }
 
 
@@ -23,24 +22,22 @@ type alias ArticleSummary =
 
 
 type alias ArticleListResponse =
-    { id : Int
-    , title : String
-    , desc : String
+    { articles : List Article
     }
 
 
-articles : Decoder (List ArticleListResponse)
+articles : Decoder ArticleListResponse
 articles =
-    list articlesDecoder
-
-
-articlesDecoder : Decoder ArticleListResponse
-articlesDecoder =
     decode ArticleListResponse
+        |> required "articles" (list articlesDecoder)
+
+
+articlesDecoder : Decoder Article
+articlesDecoder =
+    decode Article
         |> required "id" int
         |> required "title" string
         |> required "desc" string
-        |> at [ "articles" ]
 
 
 decodeArticles : Decoder (List ArticleSummary)

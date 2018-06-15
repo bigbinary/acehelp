@@ -6,6 +6,7 @@ import Html.Events exposing (..)
 import Http
 import Json.Encode as JE
 import Json.Decode as JD exposing (field)
+import Request.UrlRequest exposing (..)
 
 
 -- MODEL
@@ -13,6 +14,7 @@ import Json.Decode as JD exposing (field)
 
 type alias Model =
     { error : Maybe String
+    , id : Int
     , url : String
     , urlError : Maybe String
     , urlTitle : String
@@ -23,6 +25,7 @@ type alias Model =
 init : ( Model, Cmd Msg )
 init =
     ( { error = Nothing
+      , id = 0
       , url = ""
       , urlError = Nothing
       , urlTitle = ""
@@ -173,40 +176,13 @@ urlEncoder { url } =
         ]
 
 
-url : String
-url =
-    "http://localhost:3000/url"
-
-
 save : Model -> ( Model, Cmd Msg )
 save model =
     let
-        headers =
-            [ (Http.header "api-key" "3c60b69a34f8cdfc76a0") ]
-
-        body =
-            Http.jsonBody <| urlEncoder model
-
-        decoder =
-            field "id" JD.string
-
         request =
-            post url headers body decoder
+            createUrl "dev" "3c60b69a34f8cdfc76a0" (urlEncoder model)
 
         cmd =
             Http.send SaveUrlResponse request
     in
         ( model, cmd )
-
-
-post : String -> List Http.Header -> Http.Body -> JD.Decoder a -> Http.Request a
-post url headers body decoder =
-    Http.request
-        { method = "POST"
-        , url = url
-        , headers = headers
-        , body = body
-        , expect = Http.expectJson decoder
-        , timeout = Nothing
-        , withCredentials = False
-        }

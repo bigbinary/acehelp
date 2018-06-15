@@ -3,6 +3,7 @@ module Page.ArticlesListPage exposing (..)
 import Http
 import Html exposing (..)
 import Html.Attributes exposing (..)
+import Request.ArticleRequest exposing (..)
 
 
 --import Html.Events exposing (..)
@@ -14,7 +15,7 @@ import Data.ArticleData exposing (..)
 
 
 type alias Model =
-    { articles : List ArticleListResponse
+    { articles : ArticleListResponse
     , currentArticle : Maybe Article
     , error : Maybe String
     }
@@ -22,7 +23,7 @@ type alias Model =
 
 initModel : Model
 initModel =
-    { articles = []
+    { articles = { articles = [] }
     , currentArticle = Nothing
     , error = Nothing
     }
@@ -30,7 +31,7 @@ initModel =
 
 init : ( Model, Cmd Msg )
 init =
-    ( initModel, (fetchArticlesList "http://ace-invoice.com/getting-started") )
+    ( initModel, fetchArticlesList )
 
 
 
@@ -39,15 +40,15 @@ init =
 
 type Msg
     = FetchArticles
-    | ArticleLoaded (Result Http.Error (List ArticleListResponse))
+    | ArticleLoaded (Result Http.Error ArticleListResponse)
     | LoadArticle ArticleId
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
-        ArticleLoaded (Ok articles) ->
-            ( { model | articles = articles }, Cmd.none )
+        ArticleLoaded (Ok articlesList) ->
+            ( { model | articles = articlesList }, Cmd.none )
 
         ArticleLoaded (Err err) ->
             ( { model | error = Just (toString err) }, Cmd.none )
@@ -66,7 +67,7 @@ view model =
         [ id "article_list"
         ]
         [ div
-            [ style [ ( "float", "right" ) ] ]
+            [ class "buttonDiv" ]
             [ a
                 [ href "/admin/articles/new"
                 , class "button primary"
@@ -80,22 +81,15 @@ view model =
 rows : List (Html Msg) -> Html Msg
 rows articleRows =
     div
-        [ style
-            [ ( "padding", "20px 10px" )
-            , ( "position", "relative" )
-            ]
-        ]
+        []
         articleRows
 
 
-fetchArticlesList : String -> Cmd Msg
-fetchArticlesList orgUrl =
+fetchArticlesList : Cmd Msg
+fetchArticlesList =
     let
-        url =
-            "http://localhost:3000/api/v1/article?url=" ++ orgUrl
-
         request =
-            Http.get url articles
+            requestArticles "dev" "http://ace-invoice.com/getting-started" "3c60b69a34f8cdfc76a0"
 
         cmd =
             Http.send ArticleLoaded request

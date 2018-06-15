@@ -15,6 +15,11 @@ import Page.CategoryCreatePage as CategoryCreate
 -- MODEL
 
 
+type alias Flags =
+    { node_env : String
+    }
+
+
 type alias Model =
     { currentPage : Page
     , articlesList : ArticlesList.Model
@@ -37,8 +42,8 @@ type Page
     | NotFound
 
 
-init : Location -> ( Model, Cmd Msg )
-init location =
+init : Flags -> Location -> ( Model, Cmd Msg )
+init flags location =
     let
         page =
             retrivePage location.pathname
@@ -293,9 +298,9 @@ adminHeader model =
 -- MAIN
 
 
-main : Program Never Model Msg
+main : Program Flags Model Msg
 main =
-    Navigation.program urlLocationToMsg
+    Navigation.programWithFlags urlLocationToMsg
         { init = init
         , update = update
         , view = view
