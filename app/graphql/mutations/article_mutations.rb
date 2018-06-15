@@ -65,9 +65,11 @@ class Mutations::ArticleMutations
       article = Article.find_by(id: inputs[:id], organization_id: context[:organization].id)
       return { errors: "Article not found" } if article.nil?
 
-      article.destroy!
-
-      { deletedId: inputs[:id] }
+      if article.destroy
+        { deletedId: inputs[:id] }
+      else
+        return { errors: "Article not deleted" }
+      end
     }
   end
 end
