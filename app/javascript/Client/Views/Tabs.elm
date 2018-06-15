@@ -4,6 +4,7 @@ import Html exposing (..)
 import Html.Attributes exposing (id, style, class, classList)
 import Html.Events exposing (on, targetValue)
 import Json.Decode
+import DOM
 
 
 -- MODEL
@@ -20,12 +21,12 @@ type Tabs
 
 
 type Msgs
-    = TabSelected Tabs String
+    = TabSelected Tabs Float
 
 
-onTabSelect : (String -> msg) -> Html.Attribute msg
+onTabSelect : (Float -> msg) -> Html.Attribute msg
 onTabSelect tagger =
-    on "click" (Json.Decode.map tagger targetValue)
+    on "click" (Json.Decode.map tagger decodeOffsetWidth)
 
 
 
@@ -60,3 +61,8 @@ tabToString tab =
 
         ContactUs ->
             "Contact Us"
+
+
+decodeOffsetWidth : Json.Decode.Decoder Float
+decodeOffsetWidth =
+    DOM.target DOM.offsetWidth
