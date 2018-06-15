@@ -30,6 +30,10 @@ init =
 view : Model -> Html msg
 view article =
     div [ id "content-wrapper" ]
-        [ h1 [] [ text article.title ]
-        , p [] [ text article.content ]
+        [ div [ class "article-wrapper" ]
+            [ h1 [] [ text article.title ]
+            , div [ class "article-content" ]
+                [ p [] [ text article.content ]
+                ]
+            ]
         ]
