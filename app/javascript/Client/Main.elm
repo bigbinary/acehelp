@@ -12,6 +12,7 @@ import Section.ArticleList as ArticleListSection
 import Section.Error as ErrorSection
 import Views.Container exposing (topBar)
 import Views.Loading exposing (sectionLoadingView)
+import Views.Tabs exposing (tabView)
 import Data.Article exposing (..)
 import Data.Category exposing (..)
 import Request.Helpers exposing (NodeEnv, Context(..))
@@ -125,6 +126,7 @@ maximizedView model =
                 ]
             )
             [ topBar showBackButton GoBack (SetAppState Minimized)
+            , Html.map TabMsg <| tabView [ Views.Tabs.SuggestedArticles, Views.Tabs.Library, Views.Tabs.ContactUs ]
             , getSectionView <| getSection model.sectionState
             ]
 
@@ -154,6 +156,7 @@ type Msg
     | ArticleLoaded (Result Http.Error ArticleResponse)
     | UrlChange Navigation.Location
     | GoBack
+    | TabMsg Views.Tabs.Msgs
 
 
 
@@ -257,7 +260,7 @@ update msg model =
                                 model.containerAnimation
                             , transitionFromSection model.sectionState
                               -- TODO: Pass ApiKey Instead of blank string
-                            , Task.attempt ArticleListLoaded (Reader.run ArticleListSection.init ( model.nodeEnv, "", model.context ))
+                            , cmdForSuggestedArticles model
                             )
 
                         Minimized ->
@@ -269,6 +272,11 @@ update msg model =
                             )
             in
                 ( { model | currentAppState = appState, containerAnimation = animation, sectionState = newSectionState }, cmd )
+
+        TabMsg tabMsg ->
+            case tabMsg of
+                Views.Tabs.TabSelected tab target ->
+                    cmdForTab (Debug.log (Views.Tabs.tabToString tab) tab) model
 
         CategoryListLoaded (Ok categories) ->
             ( { model | sectionState = Loaded (CategoryListSection categories.categories) }, Cmd.none )
@@ -341,6 +349,33 @@ update msg model =
 
         ArticleMsg ->
             ( model, Cmd.none )
+
+
+cmdForTab : Views.Tabs.Tabs -> Model -> ( Model, Cmd Msg )
+cmdForTab tab model =
+    case tab of
+        Views.Tabs.SuggestedArticles ->
+            ( { model | sectionState = transitionFromSection model.sectionState, history = ModelHistory model }
+            , cmdForSuggestedArticles model
+            )
+
+        Views.Tabs.Library ->
+            ( { model | sectionState = transitionFromSection model.sectionState, history = ModelHistory model }
+            , cmdForLibrary model
+            )
+
+        Views.Tabs.ContactUs ->
+            ( model, Cmd.none )
+
+
+cmdForSuggestedArticles : Model -> Cmd Msg
+cmdForSuggestedArticles model =
+    Task.attempt ArticleListLoaded (Reader.run ArticleListSection.init ( model.nodeEnv, "", model.context ))
+
+
+cmdForLibrary : Model -> Cmd Msg
+cmdForLibrary model =
+    Task.attempt CategoryListLoaded (Reader.run CategoryListSection.init ( model.nodeEnv, "" ))
 
 
 
