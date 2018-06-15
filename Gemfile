@@ -98,7 +98,7 @@ group :test do
   gem "selenium-webdriver"
   # Easy installation and use of chromedriver to run system tests with Chrome
   gem "chromedriver-helper"
-  # To make a client for grphql server
+  # A friendlier Ruby client for consuming GraphQL-based APIs.
   gem "graphlient", "~> 0.3.1"
 end
 

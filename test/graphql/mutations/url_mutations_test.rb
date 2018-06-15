@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require "test_helper"
 require "graphql/client_host"
 
@@ -9,7 +11,7 @@ class Mutations::UrlMutationsTest < ActiveSupport::TestCase
 
   test "create url mutations" do
     query = <<-'GRAPHQL'
-              mutation($input: AddUrlInput!) {
+              mutation($input: CreateUrlInput!) {
                 addUrl(input: $input) {
                   url {
                     id
@@ -26,7 +28,7 @@ class Mutations::UrlMutationsTest < ActiveSupport::TestCase
 
   test "create url failure" do
     query = <<-'GRAPHQL'
-              mutation($input: AddUrlInput!) {
+              mutation($input: CreateUrlInput!) {
                 addUrl(input: $input) {
                   url {
                     id
@@ -53,7 +55,7 @@ class Mutations::UrlMutationsTest < ActiveSupport::TestCase
               }
             GRAPHQL
 
-    result = AceHelp::Client.execute(query, input: {id: @url.id, url: { url: "http://test_update_url.com" } })
+    result = AceHelp::Client.execute(query, input: { id: @url.id, url: { url: "http://test_update_url.com" } })
 
     assert_equal result.data.update_url.url.url, "http://test_update_url.com"
   end
@@ -67,7 +69,7 @@ class Mutations::UrlMutationsTest < ActiveSupport::TestCase
               }
             GRAPHQL
 
-    result = AceHelp::Client.execute(query, input: {id: @url.id })
+    result = AceHelp::Client.execute(query, input: { id: @url.id })
 
     assert_equal result.data.destroy_url.deleted_id.to_i, @url.id
   end

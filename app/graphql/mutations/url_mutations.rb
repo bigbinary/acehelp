@@ -2,15 +2,15 @@
 
 class Mutations::UrlMutations
   Create = GraphQL::Relay::Mutation.define do
-    name "AddUrl"
+    name "CreateUrl"
 
     input_field :url, !types.String
 
     return_field :url, Types::UrlType
 
-    resolve ->(object, inputs, ctx) {
+    resolve ->(object, inputs, context) {
       new_url = Url.new(url: inputs[:url])
-      new_url.organization = ctx[:organization]
+      new_url.organization = context[:organization]
       if new_url.save
         { url: new_url }
       else
@@ -32,8 +32,8 @@ class Mutations::UrlMutations
     return_field :url, Types::UrlType
     return_field :errors, types.String
 
-    resolve ->(object, inputs, ctx) {
-      url = Url.find_by(id: inputs[:id], organization_id: ctx[:organization].id)
+    resolve ->(object, inputs, context) {
+      url = Url.find_by(id: inputs[:id], organization_id: context[:organization].id)
       return { errors: "Url not found" } if url.nil?
 
       if url.update_attributes(inputs[:url].to_h)
@@ -52,13 +52,15 @@ class Mutations::UrlMutations
     return_field :deletedId, !types.ID
     return_field :errors, types.String
 
-    resolve ->(_obj, inputs, ctx) {
-      url = Url.find_by(id: inputs[:id], organization_id: ctx[:organization].id)
+    resolve ->(_obj, inputs, context) {
+      url = Url.find_by(id: inputs[:id], organization_id: context[:organization].id)
       return { errors: "Url not found" } if url.nil?
 
-      url.destroy
-
-      { deletedId: inputs[:id] }
+      if url.destroy
+        { deletedId: inputs[:id] }
+      else
+        return { errors: "url not deleted" }
+      end
     }
   end
 end

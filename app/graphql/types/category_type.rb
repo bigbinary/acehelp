@@ -5,6 +5,6 @@ Types::CategoryType = GraphQL::ObjectType.define do
   field :id, !types.ID
   field :name, !types.String
   field :articles, -> { !types[Types::ArticleType] }  do
-    resolve -> (category, args, ctx) { category.articles.for_organization(ctx[:organization]) }
+    resolve -> (category, args, context) { category.articles.for_organization(context[:organization]) }
   end
 end

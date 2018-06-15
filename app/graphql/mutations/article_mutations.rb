@@ -2,7 +2,7 @@
 
 class Mutations::ArticleMutations
   Create = GraphQL::Relay::Mutation.define do
-    name "AddArticle"
+    name "CreateArticle"
 
     input_field :category_id, !types.ID
     input_field :title, !types.String
@@ -11,13 +11,12 @@ class Mutations::ArticleMutations
     return_field :article, Types::ArticleType
     return_field :errors, types.String
 
-    resolve ->(object, inputs, ctx) {
+    resolve ->(object, inputs, context) {
       category = Category.find_by_id(inputs[:category_id])
       return { errors: "Category not found" } if category.nil?
 
-      articles = category.articles
-      new_article = articles.build(title: inputs[:title], desc: inputs[:desc])
-      new_article.organization = ctx[:organization]
+      new_article = category.articles.new(title: inputs[:title], desc: inputs[:desc])
+      new_article.organization = context[:organization]
 
       if new_article.save
         { article: new_article }
@@ -42,8 +41,8 @@ class Mutations::ArticleMutations
     return_field :article, Types::ArticleType
     return_field :errors, types.String
 
-    resolve ->(object, inputs, ctx) {
-      article = Article.find_by(id: inputs[:id], organization_id: ctx[:organization].id)
+    resolve ->(object, inputs, context) {
+      article = Article.find_by(id: inputs[:id], organization_id: context[:organization].id)
       return { errors: "Article not found" } if article.nil?
 
       if article.update_attributes(inputs[:article].to_h)
@@ -62,13 +61,15 @@ class Mutations::ArticleMutations
     return_field :deletedId, !types.ID
     return_field :errors, types.String
 
-    resolve ->(_obj, inputs, ctx) {
-      article = Article.find_by(id: inputs[:id], organization_id: ctx[:organization].id)
+    resolve ->(_obj, inputs, context) {
+      article = Article.find_by(id: inputs[:id], organization_id: context[:organization].id)
       return { errors: "Article not found" } if article.nil?
 
-      article.destroy
-
-      { deletedId: inputs[:id] }
+      if article.destroy
+        { deletedId: inputs[:id] }
+      else
+        return { errors: "Article not deleted" }
+      end
     }
   end
 end

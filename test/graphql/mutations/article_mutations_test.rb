@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require "test_helper"
 require "graphql/client_host"
 
@@ -10,7 +12,7 @@ class Mutations::ArticleMutationsTest < ActiveSupport::TestCase
 
   test "create article mutations" do
     query = <<-'GRAPHQL'
-              mutation($input: AddArticleInput!) {
+              mutation($input: CreateArticleInput!) {
                 addArticle(input: $input) {
                   article {
                     id
@@ -27,7 +29,7 @@ class Mutations::ArticleMutationsTest < ActiveSupport::TestCase
 
   test "create article failure" do
     query = <<-'GRAPHQL'
-              mutation($input: AddArticleInput!) {
+              mutation($input: CreateArticleInput!) {
                 addArticle(input: $input) {
                   article {
                     id
@@ -54,7 +56,7 @@ class Mutations::ArticleMutationsTest < ActiveSupport::TestCase
               }
             GRAPHQL
 
-    result = AceHelp::Client.execute(query, input: {id: @article.id, article: { title: "update_test_article", desc: "none", category_id: @category.id } })
+    result = AceHelp::Client.execute(query, input: { id: @article.id, article: { title: "update_test_article", desc: "none", category_id: @category.id } })
 
     assert_equal result.data.update_article.article.title, "update_test_article"
   end
@@ -72,7 +74,7 @@ class Mutations::ArticleMutationsTest < ActiveSupport::TestCase
             GRAPHQL
 
     assert_raises(Graphlient::Errors::ExecutionError) do
-      AceHelp::Client.execute(query, input: {id: @article.id, article: { title: "", desc: "none", category_id: @category.id } })
+      AceHelp::Client.execute(query, input: { id: @article.id, article: { title: "", desc: "none", category_id: @category.id } })
     end
   end
 
@@ -85,7 +87,7 @@ class Mutations::ArticleMutationsTest < ActiveSupport::TestCase
               }
             GRAPHQL
 
-    result = AceHelp::Client.execute(query, input: {id: @article.id })
+    result = AceHelp::Client.execute(query, input: { id: @article.id })
 
     assert_equal result.data.destroy_article.deleted_id.to_i, @article.id
   end
