@@ -16,7 +16,6 @@ import Data.ArticleData exposing (..)
 
 type alias Model =
     { articles : ArticleListResponse
-    , currentArticle : Maybe Article
     , error : Maybe String
     }
 
@@ -24,7 +23,6 @@ type alias Model =
 initModel : Model
 initModel =
     { articles = { articles = [] }
-    , currentArticle = Nothing
     , error = Nothing
     }
 
