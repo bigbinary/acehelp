@@ -1,4 +1,4 @@
-module Page.CategoryListPage exposing (..)
+module Page.Category.List exposing (..)
 
 import Http
 import Html exposing (..)

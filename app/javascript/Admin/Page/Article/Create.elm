@@ -1,4 +1,4 @@
-module Page.CreateArticlePage exposing (..)
+module Page.Article.Create exposing (..)
 
 import Html exposing (..)
 import Html.Attributes exposing (..)

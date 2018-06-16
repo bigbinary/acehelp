@@ -4,12 +4,12 @@ import Html exposing (Html, div, text, button)
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
 import Navigation exposing (..)
-import Page.ArticlesListPage as ArticlesList
-import Page.CreateArticlePage as CreateArticle
-import Page.UrlListPage as ListUrls
-import Page.UrlCreatePage as CreateUrl
-import Page.CategoryListPage as CategoryList
-import Page.CategoryCreatePage as CategoryCreate
+import Page.Article.List as ArticlesList
+import Page.Article.Create as CreateArticle
+import Page.Url.List as ListUrls
+import Page.Url.Create as CreateUrl
+import Page.Category.List as CategoryList
+import Page.Category.Create as CategoryCreate
 
 
 -- MODEL

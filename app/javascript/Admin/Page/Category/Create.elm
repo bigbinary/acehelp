@@ -1,4 +1,4 @@
-module Page.CategoryCreatePage exposing (..)
+module Page.Category.Create exposing (..)
 
 import Html exposing (..)
 

@@ -1,4 +1,4 @@
-module Page.UrlListPage exposing (..)
+module Page.Url.List exposing (..)
 
 import Http
 import Html exposing (..)
