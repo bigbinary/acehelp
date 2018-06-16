@@ -54,6 +54,8 @@ gem "active_model_serializers", "~> 0.9.4"
 
 # To build graphql server
 gem "graphql"
+# To resolve N+1 query in Graphql
+gem 'graphql-preload'
 
 # Intelligent search made easy with Rails and Elasticsearch
 gem "searchkick"
