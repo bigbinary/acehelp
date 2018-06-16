@@ -23,6 +23,8 @@ Rails.application.routes.draw do
       get "articles/search", to: "article#search"
 
       resource :contacts, only: :create
+
+      get ":organization_id/data", to: "organization#data"
     end
   end
 
