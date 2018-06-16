@@ -79,8 +79,20 @@ view model =
                 [ text "New Url"
                 ]
             ]
-        , text "Url List Page"
+        , div []
+            (List.map
+                (\url ->
+                    urlRow url
+                )
+                model.listOfUrls.urls
+            )
         ]
+
+
+urlRow : UrlData -> Html Msg
+urlRow url =
+    div []
+        [ text url.url ]
 
 
 fetchUrlList : Cmd Msg

@@ -72,15 +72,23 @@ view model =
                 ]
                 [ text "New Article" ]
             ]
-        , text (toString model.articles)
+        , div
+            []
+            (List.map
+                (\article ->
+                    rows article
+                )
+                model.articles.articles
+            )
         ]
 
 
-rows : List (Html Msg) -> Html Msg
-rows articleRows =
+rows : Article -> Html Msg
+rows article =
     div
         []
-        articleRows
+        [ text article.title
+        ]
 
 
 fetchArticlesList : Cmd Msg

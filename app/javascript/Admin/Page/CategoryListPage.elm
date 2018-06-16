@@ -76,8 +76,21 @@ view model =
                 ]
                 [ text "New Category" ]
             ]
-        , text "categories List page"
+        , div
+            []
+            (List.map
+                (\category ->
+                    categoryRow category
+                )
+                model.categoryList.categories
+            )
         ]
+
+
+categoryRow : Category -> Html Msg
+categoryRow category =
+    div []
+        [ text category.name ]
 
 
 fetchCategories : Cmd Msg
