@@ -12,7 +12,7 @@ $blueThemeColor: rgb(60, 170, 249);
     //@extend-elements
     //original selectors
     //input[type=text], textarea
-    %extend_1 {
+    %inputField {
         width: 50%;
         padding: 12px;
         border: 1px solid $color_celeste_approx;
@@ -73,11 +73,8 @@ $blueThemeColor: rgb(60, 170, 249);
     .buttonDiv {
         float: right;
     }
-    input[type=text] {
-        @extend %extend_1;
-    }
-    textarea {
-        @extend %extend_1;
+    input[type=text], textarea {
+        @extend %inputField;
     }
     input[type=submit] {
         background-color: $color_apple_approx;

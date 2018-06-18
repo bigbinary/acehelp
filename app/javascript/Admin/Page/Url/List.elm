@@ -17,10 +17,6 @@ type alias Model =
     }
 
 
-type alias UrlId =
-    Int
-
-
 init : ( Model, Cmd Msg )
 init =
     ( { listOfUrls = { urls = [] }
