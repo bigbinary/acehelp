@@ -15,10 +15,85 @@
  */
 
 html,head,body { padding:0; margin:0; }
-body { 
+body {
     font-family: calibri, helvetica, arial, sans-serif;
     font-size: 14px;
     line-height: 20px;
     text-align: center;
 }
- 
+
+.header {
+  overflow: hidden;
+  background-color: #3caaf9;
+  padding: 20px 10px;
+}
+
+.header-right {
+  float: left;
+}
+
+.header a {
+  float: left;
+  color: black;
+  text-align: center;
+  padding: 12px;
+  text-decoration: none;
+  font-size: 18px;
+  line-height: 25px;
+  border-radius: 4px;
+}
+
+.header a:hover {
+  background-color: #2d7cb5;
+  color: black;
+}
+
+.button {
+  display: inline-block;
+  font-weight: 400;
+  text-align: center;
+  white-space: nowrap;
+  vertical-align: middle;
+  user-select: none;
+  border: 1px solid;
+  padding: .375rem .75rem;
+  font-size: 1rem;
+  line-height: 1.5;
+  border-radius: .25rem;
+  margin: 9px;
+}
+
+.buttonDiv {
+  float: right;
+}
+
+.button.primary {
+  color: #000;
+  background: #3caaf9;
+  border-color: #3caaf9;
+}
+
+input[type=text], textarea {
+    width: 50%;
+    padding: 12px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-sizing: border-box;
+    margin-top: 6px;
+    margin-bottom: 16px;
+    resize: vertical;
+}
+
+input[type=submit] {
+    background-color: #4CAF50;
+    color: white;
+    padding: 12px 20px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.container {
+    border-radius: 5px;
+    padding: 20px;
+}

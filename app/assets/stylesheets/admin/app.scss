@@ -1,0 +1,93 @@
+$blueThemeColor: rgb(60, 170, 249);
+
+#admin-hook {
+  //colors
+    $color_picton_blue_approx: #3caaf9;
+    $black: black;
+    $color_astral_approx: #2d7cb5;
+    $color_celeste_approx: #ccc;
+    $color_apple_approx: #4caf50;
+    $white: white;
+
+    //@extend-elements
+    //original selectors
+    //input[type=text], textarea
+    %inputField {
+        width: 50%;
+        padding: 12px;
+        border: 1px solid $color_celeste_approx;
+        //Instead of the line below you could use @include border-radius($radius, $vertical-radius)
+        border-radius: 4px;
+        //Instead of the line below you could use @include box-sizing($bs)
+        box-sizing: border-box;
+        margin-top: 6px;
+        margin-bottom: 16px;
+        resize: vertical;
+    }
+
+
+    .header {
+        overflow: hidden;
+        background-color: $color_picton_blue_approx;
+        padding: 20px 10px;
+        a {
+            float: left;
+            color: $black;
+            text-align: center;
+            padding: 12px;
+            text-decoration: none;
+            font-size: 18px;
+            line-height: 25px;
+            //Instead of the line below you could use @include border-radius($radius, $vertical-radius)
+            border-radius: 4px;
+            &:hover {
+                background-color: $color_astral_approx;
+                color: $black;
+            }
+        }
+    }
+    .header-right {
+        float: left;
+    }
+    .button {
+        display: inline-block;
+        font-weight: 400;
+        text-align: center;
+        white-space: nowrap;
+        vertical-align: middle;
+        //Instead of the line below you could use @include user-select($select)
+        user-select: none;
+        border: 1px solid;
+        padding: .375rem .75rem;
+        font-size: 1rem;
+        line-height: 1.5;
+        //Instead of the line below you could use @include border-radius($radius, $vertical-radius)
+        border-radius: .25rem;
+        margin: 9px;
+        &.primary {
+            color: $black;
+            background: $color_picton_blue_approx;
+            border-color: $color_picton_blue_approx;
+        }
+    }
+    .buttonDiv {
+        float: right;
+    }
+    input[type=text], textarea {
+        @extend %inputField;
+    }
+    input[type=submit] {
+        background-color: $color_apple_approx;
+        color: $white;
+        padding: 12px 20px;
+        border: none;
+        //Instead of the line below you could use @include border-radius($radius, $vertical-radius)
+        border-radius: 4px;
+        cursor: pointer;
+    }
+    .container {
+        //Instead of the line below you could use @include border-radius($radius, $vertical-radius)
+        border-radius: 5px;
+        padding: 20px;
+    }
+}

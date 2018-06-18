@@ -23,6 +23,10 @@ Rails.application.routes.draw do
       get "articles/search", to: "article#search"
 
       resource :contacts, only: :create
+
+      namespace :admin do
+        resources :articles, only: [:create]
+      end
     end
   end
 
@@ -30,6 +34,7 @@ Rails.application.routes.draw do
     resources :dashboard, only: [:index]
     resources :articles
     resources :urls
+    resources :categories
   end
 
   if Rails.env.development?
