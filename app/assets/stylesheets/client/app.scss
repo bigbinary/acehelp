@@ -1,7 +1,7 @@
 @import "vars";
 
 #acehelp-hook {
-    font-family: proxima-nova, Arial, sans-serif;
+    font-family: "proxima-nova", Arial, sans-serif;
     font-size: 14px;
     line-height: 20px;
     text-align: center;
@@ -28,11 +28,20 @@
             box-shadow: 0 0 35px 2px rgb(153, 153, 153);
         }
 
-        svg {
-            position: absolute;
-            top: 50%;
-            transform: translate(-50%, -50%);
-            left: 50%;
+        .question-icon {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          height: 100%;
+
+          svg {
+            height: 30px;
+            position: relative;
+            width: 30px;
+            text-align: center;
+            color: #fff;
+            left: 2px;
+          }
         }
     }
 
@@ -45,11 +54,69 @@
         box-shadow: 0 0 50px 0px rgb(153, 153, 153);
         font-family: proxima-nova, Arial, sans-serif;
 
+        .widgetHeader {
+          #top-bar-title {
+            text-align: center;
+            display: block;
+            color: #fff;
+          }
+
+          .headerIcon {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            line-height: 0;
+            cursor: pointer;
+
+            svg {
+              color: #fff;
+            }
+
+            &.back-button {
+              left: 20px;
+
+              svg {
+                width: 18px;
+                height: 18px;
+              }
+            }
+
+            &.close-button {
+              right: 20px;
+
+              svg {
+                width: 16px;
+                height: 16px;
+                transform: rotateZ(45deg);
+              }
+            }
+          }
+        }
+
         #content-wrapper {
             padding: 0 50px;
+            overflow-x: auto;
+            max-height: calc(100vh - 57px);
 
-            h1{
+            .article-wrapper {
+              padding: 30px 0 0;
+
+              h1{
                 font-size: 28px;
+                font-weight: bold;
+                color: #222;
+                margin-bottom: 15px;
+              }
+
+              .article-content {
+                font-size: 16px;
+                line-height: 22px;
+                color: #333;
+
+                p {
+                  margin-bottom: 20px;
+                }
+              }
             }
         }
 
@@ -60,10 +127,11 @@
         }
 
         .selectable-row {
-            padding: 10px 20px;
+            margin: 0 -50px;
+            padding: 15px 20px;
             cursor: pointer;
             background-color: #fff;
-            border-bottom:1px solid #d6d6d6;
+            border-bottom: 1px solid #d6d6d6;
 
             &:before {
                 content: "";
@@ -74,20 +142,34 @@
                 left: 0;
                 position: absolute;
             }
-            &:hover:before {
-                background-color: rgb(112, 112, 112);
-            }
+
             .row-title {
                 padding: 3px 15px;
                 position: absolute;
             }
-        }
-        
-        
-        #top-bar-title {
-            text-align: center;
-            display: block;
-            color: #fff;
+
+            .row-icon {
+              svg {
+                width: 16px;
+                height: 16px;
+                color: #b9b9b9;
+                line-height: 0;
+                position: relative;
+                top: 3px;
+              }
+            }
+
+            &:hover {
+              &:before {
+                background-color: rgb(112, 112, 112);
+              }
+
+              .row-icon {
+                svg {
+                  color: #8a8a8a;
+                }
+              }
+            }
         }
     }
 
@@ -97,42 +179,6 @@
 
     .clickable {
         cursor: pointer;          
-    }
-
-    .arrow-left {
-        position: absolute;
-        top: 0;
-        bottom: 0;
-        left: 15px;
-        line-height: 0;
-        cursor: pointer;
-
-        svg {
-            width: 20px;
-            height: 20px; 
-            fill: #fff;
-            position: absolute;
-            top: 50%;
-            transform: translateY(-50%);
-        }
-    }
-
-    .close-button {
-        position: absolute;
-        top: 0;
-        bottom: 0;
-        right: 35px;
-        line-height: 0;
-        cursor: pointer;
-
-        svg {
-            width: 20px;
-            height: 20px;
-            fill: #fff;
-            position: absolute;
-            top: 50%;
-            transform: translateY(-50%);
-        }
     }
 }
         

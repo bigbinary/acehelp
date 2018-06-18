@@ -24,8 +24,10 @@ type Context
 type alias ApiKey =
     String
 
+
 type alias ApiErrorMessage =
     { error : String }
+
 
 apiUrl : String -> String -> String
 apiUrl env str =
@@ -36,6 +38,7 @@ apiUrl env str =
         _ ->
             -- If it is development environment or anything else fall back to local/relative api path
             "/api/v1/" ++ str
+
 
 constructUrl : String -> List ( String, String ) -> String
 constructUrl baseUrl queryParams =
@@ -53,7 +56,7 @@ httpGet apiKey context url queryParams decoder =
     let
         -- NOTE: This should not be hardcoded or needed at all. It is right now hardcoded since this is the only entry we have in db
         tempBase =
-            "http://ace-invoice.com"
+            "http://aceinvoice.com"
 
         headers =
             List.concat
