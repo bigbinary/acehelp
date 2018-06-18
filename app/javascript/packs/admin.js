@@ -10,7 +10,7 @@
 import Elm from "../Admin/Main";
 
 document.addEventListener("DOMContentLoaded", () => {
-  var node = document.getElementById("body");
+  var node = document.getElementById("admin-hook");
   Elm.Main.embed(node, {
     node_env: process.env.NODE_ENV
   });

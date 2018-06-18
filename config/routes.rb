@@ -20,11 +20,11 @@ Rails.application.routes.draw do
 
       resources :article, only: [:show, :index]
 
-      get "articles/search", to: "article#search"
+      get "/articles/search", to: "article#search"
 
       resource :contacts, only: :create
 
-      get ":organization_id/data", to: "organization#data"
+      get "/organization/:organization_id/data", to: "organization#data"
     end
   end
 
@@ -32,6 +32,7 @@ Rails.application.routes.draw do
     resources :dashboard, only: [:index]
     resources :articles
     resources :urls
+    resources :organization, only: [:show]
   end
 
   if Rails.env.development?
