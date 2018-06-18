@@ -1,10 +1,15 @@
-module Views.Tabs exposing (..)
+port module Views.Tabs exposing (Model, Msg(..), Tabs(..), init, modelWithTabs, allTabs, update, view, tabToString)
 
 import Html exposing (..)
 import Html.Attributes exposing (id, style, class, classList)
-import Html.Events exposing (on, targetValue)
+import Html.Events exposing (onClick, targetValue)
+import Section.CategoryList as CategoryListSection
+import Section.Article as ArticleSection
+import Section.ArticleList as ArticleListSection
 import Json.Decode
+import Task
 import DOM
+import List.Zipper as Zipper exposing (Zipper)
 
 
 -- MODEL
@@ -16,37 +21,75 @@ type Tabs
     | ContactUs
 
 
+type alias Model =
+    Zipper Tabs
+
+
+init : ( Model, Cmd Msg )
+init =
+    ( Zipper.singleton ContactUs, Cmd.none )
+
+
+modelWithTabs : List Tabs -> Model
+modelWithTabs tabs =
+    Zipper.fromList tabs
+        |> Zipper.withDefault ContactUs
+
+
+allTabs : List Tabs
+allTabs =
+    [ SuggestedArticles, Library, ContactUs ]
+
+
 
 -- UPDATE
 
 
-type Msgs
-    = TabSelected Tabs Float
+type Msg
+    = TabSelected Tabs
 
 
-onTabSelect : (Float -> msg) -> Html.Attribute msg
-onTabSelect tagger =
-    on "click" (Json.Decode.map tagger decodeOffsetWidth)
+update : Msg -> Model -> ( Model, Cmd Msg )
+update msg model =
+    case msg of
+        TabSelected newTab ->
+            let
+                updatedTabs =
+                    Zipper.first model
+                        |> Zipper.find ((==) newTab)
+                        |> Zipper.withDefault ContactUs
+            in
+                ( updatedTabs, Cmd.none )
 
 
 
 -- VIEW
 
 
-tabView : List Tabs -> Html Msgs
-tabView tabs =
+view : Model -> Html Msg
+view model =
     let
+        currentTab =
+            Zipper.current model
+
         tabsDom =
-            List.map
-                (\tab -> div [ class "tabs", onTabSelect (TabSelected tab) ] [ text (tabToString tab) ])
-                tabs
+            Zipper.toList model
+                |> List.map
+                    (\tab ->
+                        div
+                            [ classList [ ( "tabs", True ), ( "selected", (Zipper.current model) == tab ) ]
+                            , onClick (TabSelected tab)
+                            ]
+                            [ text (tabToString tab)
+                            ]
+                    )
     in
         div
             [ id "tab-group"
             , style [ ( "background-color", "rgb(60, 170, 249)" ), ( "color", "#fff" ) ]
             ]
         <|
-            (span [ id "under-tab" ] [])
+            (span [ id "under-tab", class (underTabClassForTab currentTab), style [ ( "background-color", "#ffffff" ) ] ] [])
                 :: tabsDom
 
 
@@ -61,6 +104,19 @@ tabToString tab =
 
         ContactUs ->
             "Contact Us"
+
+
+underTabClassForTab : Tabs -> String
+underTabClassForTab tab =
+    case tab of
+        SuggestedArticles ->
+            "highlight-suggested"
+
+        Library ->
+            "highlight-library"
+
+        ContactUs ->
+            "highlight-contactus"
 
 
 decodeOffsetWidth : Json.Decode.Decoder Float

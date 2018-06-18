@@ -12,7 +12,7 @@ import Section.ArticleList as ArticleListSection
 import Section.Error as ErrorSection
 import Views.Container exposing (topBar)
 import Views.Loading exposing (sectionLoadingView)
-import Views.Tabs exposing (tabView)
+import Views.Tabs as Tabs
 import Data.Article exposing (..)
 import Data.Category exposing (..)
 import Request.Helpers exposing (NodeEnv, Context(..))
@@ -55,6 +55,7 @@ type alias Model =
     , containerAnimation : Animation.State
     , currentAppState : AppState
     , context : Context
+    , tabModel : Tabs.Model
     , history : ModelHistory
     }
 
@@ -82,6 +83,7 @@ init flags location =
       , containerAnimation = Animation.style initAnimation
       , currentAppState = Minimized
       , context = Context <| getUrlPathData location
+      , tabModel = Tabs.modelWithTabs Tabs.allTabs
       , history = NoHistory
       }
     , Cmd.none
@@ -126,7 +128,7 @@ maximizedView model =
                 ]
             )
             [ topBar showBackButton GoBack (SetAppState Minimized)
-            , Html.map TabMsg <| tabView [ Views.Tabs.SuggestedArticles, Views.Tabs.Library, Views.Tabs.ContactUs ]
+            , Html.map TabMsg <| Tabs.view model.tabModel
             , getSectionView <| getSection model.sectionState
             ]
 
@@ -156,7 +158,7 @@ type Msg
     | ArticleLoaded (Result Http.Error ArticleResponse)
     | UrlChange Navigation.Location
     | GoBack
-    | TabMsg Views.Tabs.Msgs
+    | TabMsg Tabs.Msg
 
 
 
@@ -259,7 +261,6 @@ update msg model =
                                 ]
                                 model.containerAnimation
                             , transitionFromSection model.sectionState
-                              -- TODO: Pass ApiKey Instead of blank string
                             , cmdForSuggestedArticles model
                             )
 
@@ -274,9 +275,16 @@ update msg model =
                 ( { model | currentAppState = appState, containerAnimation = animation, sectionState = newSectionState }, cmd )
 
         TabMsg tabMsg ->
-            case tabMsg of
-                Views.Tabs.TabSelected tab target ->
-                    cmdForTab (Debug.log (Views.Tabs.tabToString tab) tab) model
+            let
+                ( newModel, newCmd ) =
+                    case tabMsg of
+                        Tabs.TabSelected newTab ->
+                            onTabChange newTab model
+
+                ( newTabModel, tabCmd ) =
+                    Tabs.update tabMsg model.tabModel
+            in
+                ( { newModel | tabModel = newTabModel }, Cmd.batch [ newCmd, Cmd.map TabMsg tabCmd ] )
 
         CategoryListLoaded (Ok categories) ->
             ( { model | sectionState = Loaded (CategoryListSection categories.categories) }, Cmd.none )
@@ -351,20 +359,20 @@ update msg model =
             ( model, Cmd.none )
 
 
-cmdForTab : Views.Tabs.Tabs -> Model -> ( Model, Cmd Msg )
-cmdForTab tab model =
+onTabChange : Tabs.Tabs -> Model -> ( Model, Cmd Msg )
+onTabChange tab model =
     case tab of
-        Views.Tabs.SuggestedArticles ->
+        Tabs.SuggestedArticles ->
             ( { model | sectionState = transitionFromSection model.sectionState, history = ModelHistory model }
             , cmdForSuggestedArticles model
             )
 
-        Views.Tabs.Library ->
+        Tabs.Library ->
             ( { model | sectionState = transitionFromSection model.sectionState, history = ModelHistory model }
             , cmdForLibrary model
             )
 
-        Views.Tabs.ContactUs ->
+        Tabs.ContactUs ->
             ( model, Cmd.none )
 
 
