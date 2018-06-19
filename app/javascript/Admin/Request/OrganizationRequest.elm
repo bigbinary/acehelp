@@ -7,16 +7,16 @@ import Request.RequestHelper exposing (..)
 import Data.OrganizationData as AD exposing (..)
 
 
-organizationUrl : NodeEnv -> Url
-organizationUrl env =
-    (baseUrl env) ++ ""
+organizationUrl : NodeEnv -> OrganizationId -> Url
+organizationUrl env organizationId =
+    (baseUrl env) ++ "/api/v1/organization/" ++ toString(organizationId) ++ "/data"
 
 
-requestOrganization : NodeEnv -> ApiKey -> Http.Request OrganizationResponse
-requestOrganization env apiKey =
+requestOrganization : NodeEnv -> ApiKey -> OrganizationId -> Http.Request OrganizationResponse
+requestOrganization env apiKey organizationId =
     let
         url =
-            (organizationUrl env)
+            (organizationUrl env organizationId)
 
         headers =
             List.concat

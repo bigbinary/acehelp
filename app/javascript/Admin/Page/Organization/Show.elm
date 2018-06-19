@@ -27,9 +27,9 @@ initModel =
     }
 
 
-init : ( Model, Cmd Msg )
-init =
-    ( initModel, fetchOrganization )
+init : OrganizationId -> ( Model, Cmd Msg )
+init organizationId =
+    ( initModel, fetchOrganization organizationId)
 
 
 
@@ -64,11 +64,11 @@ view model =
         [ h1 [] [ text model.organization.organization.name ]
         ]
 
-fetchOrganization : Cmd Msg
-fetchOrganization =
+fetchOrganization : OrganizationId -> Cmd Msg
+fetchOrganization organiztionId =
     let
         request =
-            requestOrganization "dev" "3c60b69a34f8cdfc76a0"
+            requestOrganization "dev" "3c60b69a34f8cdfc76a0" organiztionId
 
         cmd =
             Http.send OrganizationLoaded request

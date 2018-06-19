@@ -11,6 +11,8 @@ import Page.Url.Create as CreateUrl
 import Page.Category.List as CategoryList
 import Page.Category.Create as CategoryCreate
 import Page.Organization.Show as OrganizationShow
+import Data.OrganizationData exposing (OrganizationId)
+import UrlParser as Url exposing (..)
 
 
 -- MODEL
@@ -48,7 +50,7 @@ init : Flags -> Location -> ( Model, Cmd Msg )
 init flags location =
     let
         page =
-            retrivePage location.pathname
+            retrivePage (extractStaticPath location)
 
         ( createArticleModel, createArticleCmds ) =
             CreateArticle.init
@@ -69,7 +71,7 @@ init flags location =
             CategoryCreate.init
 
         ( organizationShowModel, organizationShowCmds ) =
-            OrganizationShow.init
+            OrganizationShow.init (retriveOrganizationFromUrl location)
 
         initModel =
             { currentPage = page
@@ -222,7 +224,7 @@ convertPageToHash page =
 
 urlLocationToMsg : Location -> Msg
 urlLocationToMsg location =
-    location.pathname
+    extractStaticPath location
         |> retrivePage
         |> ChangePage
 
@@ -251,8 +253,50 @@ retrivePage pathname =
         "/admin/organization/1" ->
             OrganizationShow
 
+        "/admin/organization/2" ->
+            OrganizationShow
+
         _ ->
             NotFound
+
+
+extractStaticPath : Location -> String
+extractStaticPath location =
+        let
+            staticPath = parsePath ( s "admin" </> string ) location
+
+            path =
+                case staticPath of
+                    Nothing ->
+                        location.pathname
+
+                    Just staticPath ->
+                        staticPath
+        in
+            case path of
+            "organization" ->
+                "/admin/organization"
+            _ ->
+               location.pathname
+
+
+
+retriveOrganizationFromUrl : Location -> OrganizationId
+retriveOrganizationFromUrl location =
+   let
+      org = parsePath (s "admin" </> s "organization" </> int) location
+   in
+       getOrganizationId ( org )
+
+
+getOrganizationId : Maybe Int -> OrganizationId
+getOrganizationId orgId =
+    case orgId of
+        Just orgId ->
+          orgId
+
+        Nothing ->
+          2
 
 
 
@@ -317,6 +361,7 @@ adminHeader model =
             [ Html.a [ onClick (Navigate ArticlesList) ] [ text "Articles" ]
             , Html.a [ onClick (Navigate UrlList) ] [ text "URL" ]
             , Html.a [ onClick (Navigate CategoryList) ] [ text "Category" ]
+            , Html.a [ onClick (Navigate OrganizationShow) ] [ text "Organization" ]
             ]
         ]
 
