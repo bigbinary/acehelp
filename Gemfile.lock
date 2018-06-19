@@ -81,6 +81,7 @@ GEM
       railties (>= 4.1.0, < 6.0)
       responders
       warden (~> 1.2.3)
+    docile (1.3.0)
     elasticsearch (6.0.2)
       elasticsearch-api (= 6.0.2)
       elasticsearch-transport (= 6.0.2)
@@ -124,6 +125,7 @@ GEM
     jbuilder (2.7.0)
       activesupport (>= 4.2.0)
       multi_json (>= 1.2)
+    json (2.1.0)
     knapsack (1.16.0)
       rake
     listen (3.1.5)
@@ -233,6 +235,11 @@ GEM
     selenium-webdriver (3.12.0)
       childprocess (~> 0.5)
       rubyzip (~> 1.2)
+    simplecov (0.16.1)
+      docile (~> 1.1)
+      json (>= 1.8, < 3)
+      simplecov-html (~> 0.10.0)
+    simplecov-html (0.10.2)
     spring (2.0.2)
       activesupport (>= 4.2)
     spring-watcher-listen (2.0.1)
@@ -303,6 +310,7 @@ DEPENDENCIES
   sass-rails (~> 5.0)
   searchkick
   selenium-webdriver
+  simplecov
   spring
   spring-watcher-listen (~> 2.0.0)
   turbolinks (~> 5)

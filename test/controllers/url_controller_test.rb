@@ -32,6 +32,13 @@ class UrlControllerTest < ActionDispatch::IntegrationTest
     assert_response :success
   end
 
+  def test_create_failure
+    params = { url: { url: "invalid_url" } }
+    post url_index_url, params: params, headers: @headers
+
+    assert_response :unprocessable_entity
+  end
+
   def test_update_success
     params = { url: { url: "https://amazon.com" } }
 
@@ -42,6 +49,14 @@ class UrlControllerTest < ActionDispatch::IntegrationTest
     put url_path(@url.id), params: params, headers: @headers
 
     assert_response :success
+  end
+
+  def test_update_failure
+    params = { url: { url: "invalid_url" } }
+
+    put url_path(@url.id), params: params, headers: @headers
+
+    assert_response :unprocessable_entity
   end
 
   def test_destroy_success

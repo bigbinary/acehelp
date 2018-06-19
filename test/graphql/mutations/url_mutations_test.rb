@@ -60,6 +60,23 @@ class Mutations::UrlMutationsTest < ActiveSupport::TestCase
     assert_equal result.data.update_url.url.url, "http://test_update_url.com"
   end
 
+  test "update url mutation failure" do
+    query = <<-'GRAPHQL'
+              mutation($input: UpdateUrlInput!) {
+                updateUrl(input: $input) {
+                  url {
+                    id
+                    url
+                  }
+                }
+              }
+            GRAPHQL
+
+    assert_raises(Graphlient::Errors::ExecutionError) do
+      AceHelp::Client.execute(query, input: { id: @url.id, url: { url: "wrong url" } })
+    end
+  end
+
   test "delete url mutations" do
     query = <<-'GRAPHQL'
               mutation($input: DestroyUrlInput!) {
