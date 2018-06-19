@@ -8,6 +8,8 @@
 // layout file, like app/views/layouts/application.html.erb
 
 import Elm from "../Admin/Main";
+import "../../assets/stylesheets/application.css";
+import "../../assets/stylesheets/admin/index.scss";
 
 document.addEventListener("DOMContentLoaded", () => {
   var node = document.getElementById("admin-hook");
