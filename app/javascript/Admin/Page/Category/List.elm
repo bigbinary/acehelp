@@ -16,11 +16,16 @@ type alias Model =
     }
 
 
+initModel : Model
+initModel =
+    { categoryList = { categories = [] }
+    , errors = Nothing
+    }
+
+
 init : ( Model, Cmd Msg )
 init =
-    ( { categoryList = { categories = [] }
-      , errors = Nothing
-      }
+    ( initModel
     , fetchCategories
     )
 

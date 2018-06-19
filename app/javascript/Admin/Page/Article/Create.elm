@@ -26,18 +26,23 @@ type alias Model =
     }
 
 
+initModel : Model
+initModel =
+    { article = Nothing
+    , title = ""
+    , titleError = Nothing
+    , desc = ""
+    , descError = Nothing
+    , keywords = ""
+    , keywordError = Nothing
+    , articleId = 0
+    , error = Nothing
+    }
+
+
 init : ( Model, Cmd Msg )
 init =
-    ( { article = Nothing
-      , title = ""
-      , titleError = Nothing
-      , desc = ""
-      , descError = Nothing
-      , keywords = ""
-      , keywordError = Nothing
-      , articleId = 0
-      , error = Nothing
-      }
+    ( initModel
     , Cmd.none
     )
 

@@ -5,7 +5,6 @@ import Html.Attributes exposing (..)
 import Html.Events exposing (..)
 import Http
 import Json.Encode as JE
-import Json.Decode as JD exposing (field)
 import Request.UrlRequest exposing (..)
 
 
@@ -22,15 +21,20 @@ type alias Model =
     }
 
 
+initModel : Model
+initModel =
+    { error = Nothing
+    , id = 0
+    , url = ""
+    , urlError = Nothing
+    , urlTitle = ""
+    , urlTitleError = Nothing
+    }
+
+
 init : ( Model, Cmd Msg )
 init =
-    ( { error = Nothing
-      , id = 0
-      , url = ""
-      , urlError = Nothing
-      , urlTitle = ""
-      , urlTitleError = Nothing
-      }
+    ( initModel
     , Cmd.none
     )
 

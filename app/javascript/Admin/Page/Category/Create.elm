@@ -19,12 +19,17 @@ type alias Model =
     }
 
 
+initModel : Model
+initModel =
+    { id = 0
+    , name = ""
+    , errors = Nothing
+    }
+
+
 init : ( Model, Cmd Msg )
 init =
-    ( { id = 0
-      , name = ""
-      , errors = Nothing
-      }
+    ( initModel
     , Cmd.none
     )
 

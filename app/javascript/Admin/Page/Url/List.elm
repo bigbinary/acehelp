@@ -17,12 +17,17 @@ type alias Model =
     }
 
 
+initModel : Model
+initModel =
+    { listOfUrls = { urls = [] }
+    , urlId = 0
+    , error = Nothing
+    }
+
+
 init : ( Model, Cmd Msg )
 init =
-    ( { listOfUrls = { urls = [] }
-      , urlId = 0
-      , error = Nothing
-      }
+    ( initModel
     , (fetchUrlList)
     )
 
