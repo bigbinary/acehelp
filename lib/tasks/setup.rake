@@ -38,5 +38,18 @@ desc "Deletes all records and populates sample data"
 task setup_sample_data: [:environment] do
   delete_all_records_from_all_tables
   system "rake db:seed"
+
+  create_user
+
   puts "sample data was added successfully"
+end
+
+def create_user(options = {})
+  user_attributes = { email: "sam@example.com",
+                      first_name: "Sam",
+                      last_name: "Smith",
+                      password: "welcome" }
+  attributes = user_attributes.merge(options)
+
+  User.create! attributes
 end
