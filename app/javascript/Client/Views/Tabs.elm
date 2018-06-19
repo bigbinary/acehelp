@@ -3,12 +3,6 @@ port module Views.Tabs exposing (Model, Msg(..), Tabs(..), init, modelWithTabs, 
 import Html exposing (..)
 import Html.Attributes exposing (id, style, class, classList)
 import Html.Events exposing (onClick, targetValue)
-import Section.CategoryList as CategoryListSection
-import Section.Article as ArticleSection
-import Section.ArticleList as ArticleListSection
-import Json.Decode
-import Task
-import DOM
 import List.Zipper as Zipper exposing (Zipper)
 
 
@@ -117,8 +111,3 @@ underTabClassForTab tab =
 
         ContactUs ->
             "highlight-contactus"
-
-
-decodeOffsetWidth : Json.Decode.Decoder Float
-decodeOffsetWidth =
-    DOM.target DOM.offsetWidth

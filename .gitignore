@@ -47,3 +47,6 @@ config/database.yml
 .idea
 test/reports
 coverage
+
+/app/javascript/tests/elm-stuff
+/app/javascript/elm-stuff
