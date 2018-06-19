@@ -8,6 +8,7 @@ import Http
 import Json.Encode as JE
 import Json.Decode as JD exposing (field)
 import Request.ArticleRequest exposing (..)
+import Data.CommonData exposing (Error)
 
 
 -- Model
@@ -16,13 +17,13 @@ import Request.ArticleRequest exposing (..)
 type alias Model =
     { article : Maybe Article
     , title : String
-    , titleError : Maybe String
+    , titleError : Error
     , desc : String
-    , descError : Maybe String
+    , descError : Error
     , keywords : String
-    , keywordError : Maybe String
+    , keywordError : Error
     , articleId : ArticleId
-    , error : Maybe String
+    , error : Error
     }
 
 

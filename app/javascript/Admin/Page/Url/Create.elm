@@ -6,18 +6,19 @@ import Html.Events exposing (..)
 import Http
 import Json.Encode as JE
 import Request.UrlRequest exposing (..)
+import Data.CommonData exposing (Error)
 
 
 -- MODEL
 
 
 type alias Model =
-    { error : Maybe String
+    { error : Error
     , id : Int
     , url : String
-    , urlError : Maybe String
+    , urlError : Error
     , urlTitle : String
-    , urlTitleError : Maybe String
+    , urlTitleError : Error
     }
 
 

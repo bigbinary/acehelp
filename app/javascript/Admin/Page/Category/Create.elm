@@ -1,12 +1,8 @@
 module Page.Category.Create exposing (..)
 
-import Html exposing (..)
-
-
---import Html.Attributes exposing (..)
---import Html.Events exposing (..)
-
 import Http
+import Html exposing (..)
+import Data.CommonData exposing (Error)
 
 
 -- MODEL
@@ -15,7 +11,7 @@ import Http
 type alias Model =
     { id : Int
     , name : String
-    , errors : Maybe String
+    , errors : Error
     }
 
 
