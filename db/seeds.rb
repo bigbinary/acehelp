@@ -7,14 +7,6 @@
 #
 #   movies = Movie.create([{ name: 'Star Wars' }, { name: 'Lord of the Rings' }])
 #   Character.create(name: 'Luke', movie: movies.first)
-
-ArticleUrl.delete_all
-Category.delete_all
-Url.delete_all
-Article.delete_all
-Organization.delete_all
-User.delete_all
-
 org1 = Organization.create! name: "ace-invoice"
 org2 = Organization.create! name: "healthcity"
 
@@ -52,7 +44,3 @@ ArticleUrl.create! article_id: a6.id, url_id: u6.id
 ArticleUrl.create! article_id: a2.id, url_id: u7.id
 ArticleUrl.create! article_id: a4.id, url_id: u6.id
 ArticleUrl.create! article_id: a6.id, url_id: u7.id
-
-user1 = User.find_or_initialize_by email: "sam@example.com", first_name: "Sam", last_name: "Smith"
-user1.password = "welcome"
-user1.save!
