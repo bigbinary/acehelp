@@ -46,3 +46,4 @@ config/database.yml
 
 .idea
 test/reports
+coverage
