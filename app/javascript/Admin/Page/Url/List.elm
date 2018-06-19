@@ -5,6 +5,8 @@ import Html exposing (..)
 import Html.Attributes exposing (..)
 import Request.UrlRequest exposing (..)
 import Data.UrlData exposing (..)
+import Data.CommonData exposing (Error)
+import Page.Common.View exposing (renderError)
 
 
 -- MODEL
@@ -13,7 +15,7 @@ import Data.UrlData exposing (..)
 type alias Model =
     { listOfUrls : UrlsListResponse
     , urlId : UrlId
-    , error : Maybe String
+    , error : Error
     }
 
 
@@ -72,6 +74,10 @@ view model =
     div
         []
         [ div
+            []
+            [ text (renderError model.error)
+            ]
+        , div
             [ class "buttonDiv" ]
             [ a
                 [ href "/admin/urls/new"
@@ -100,7 +106,7 @@ fetchUrlList : Cmd Msg
 fetchUrlList =
     let
         request =
-            requestUrls "dev" "3c60b69a34f8cdfc76a0"
+            requestUrls "dev" "96b66a612c703f573913"
 
         cmd =
             Http.send UrlLoaded request
