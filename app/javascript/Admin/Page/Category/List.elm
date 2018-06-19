@@ -5,6 +5,7 @@ import Html exposing (..)
 import Html.Attributes exposing (..)
 import Data.CategoryData exposing (..)
 import Request.CategoryRequest exposing (..)
+import Data.CommonData exposing (Error)
 
 
 -- MODEL
@@ -12,15 +13,20 @@ import Request.CategoryRequest exposing (..)
 
 type alias Model =
     { categoryList : CategoryList
-    , errors : Maybe String
+    , errors : Error
+    }
+
+
+initModel : Model
+initModel =
+    { categoryList = { categories = [] }
+    , errors = Nothing
     }
 
 
 init : ( Model, Cmd Msg )
 init =
-    ( { categoryList = { categories = [] }
-      , errors = Nothing
-      }
+    ( initModel
     , fetchCategories
     )
 

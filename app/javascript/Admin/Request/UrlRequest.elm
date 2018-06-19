@@ -21,7 +21,7 @@ requestUrls : NodeEnv -> ApiKey -> Http.Request UrlsListResponse
 requestUrls nodeEnv apiKey =
     let
         headers =
-            urlHeaders [ Http.header "api-key" "3c60b69a34f8cdfc76a0" ]
+            urlHeaders [ Http.header "api-key" apiKey ]
     in
         Http.request
             { method = "GET"
@@ -38,7 +38,7 @@ createUrl : NodeEnv -> ApiKey -> JE.Value -> Http.Request String
 createUrl nodeEnv apiKey body =
     let
         headers =
-            urlHeaders [ Http.header "api-key" "3c60b69a34f8cdfc76a0" ]
+            urlHeaders [ Http.header "api-key" apiKey ]
 
         decoder =
             field "_id" JD.string

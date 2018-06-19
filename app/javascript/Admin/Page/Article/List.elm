@@ -4,6 +4,8 @@ import Http
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Request.ArticleRequest exposing (..)
+import Data.CommonData exposing (..)
+import Page.Common.View exposing (renderError)
 
 
 --import Html.Events exposing (..)
@@ -16,7 +18,7 @@ import Data.ArticleData exposing (..)
 
 type alias Model =
     { articles : ArticleListResponse
-    , error : Maybe String
+    , error : Error
     }
 
 
@@ -65,6 +67,9 @@ view model =
         [ id "article_list"
         ]
         [ div
+            []
+            [ text (renderError model.error) ]
+        , div
             [ class "buttonDiv" ]
             [ a
                 [ href "/admin/articles/new"
@@ -95,7 +100,7 @@ fetchArticlesList : Cmd Msg
 fetchArticlesList =
     let
         request =
-            requestArticles "dev" "http://ace-invoice.com/getting-started" "3c60b69a34f8cdfc76a0"
+            requestArticles "dev" "http://aceinvoice.com/getting-started" "96b66a612c703f573913"
 
         cmd =
             Http.send ArticleLoaded request
