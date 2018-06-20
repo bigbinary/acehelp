@@ -4,10 +4,10 @@ import Html exposing (Html, div, text, button)
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
 import Navigation exposing (..)
-import Page.Article.List as ArticlesList
-import Page.Article.Create as CreateArticle
-import Page.Url.List as ListUrls
-import Page.Url.Create as CreateUrl
+import Page.Article.List as ArticleList
+import Page.Article.Create as ArticleCreate
+import Page.Url.List as UrlList
+import Page.Url.Create as UrlCreate
 import Page.Category.List as CategoryList
 import Page.Category.Create as CategoryCreate
 import Page.Organization.Show as OrganizationShow
@@ -25,79 +25,31 @@ type alias Flags =
 
 type alias Model =
     { currentPage : Page
-    , articlesList : ArticlesList.Model
-    , createArticle : CreateArticle.Model
-    , listUrl : ListUrls.Model
-    , createUrl : CreateUrl.Model
-    , categoryList : CategoryList.Model
-    , categoryCreate : CategoryCreate.Model
-    , organizationShow : OrganizationShow.Model
-    , location : Location
     }
 
+
 type Page
-    = ArticlesList
-    | UrlList
-    | UrlCreate
-    | CreateArticle
-    | CategoryList
-    | CategoryCreate
-    | OrganizationShow
+    = ArticleList ArticleList.Model
+    | ArticleCreate ArticleCreate.Model
+    | CategoryList CategoryList.Model
+    | CategoryCreate CategoryCreate.Model
+    | UrlList UrlList.Model
+    | UrlCreate UrlCreate.Model
+    | OrganizationShow OrganizationShow.Model
     | NotFound
 
 
 init : Flags -> Location -> ( Model, Cmd Msg )
 init flags location =
     let
-        page =
-            retrivePage (extractStaticPath location)
-
-        ( createArticleModel, createArticleCmds ) =
-            CreateArticle.init
-
-        ( articleListModel, articleListCmds ) =
-            ArticlesList.init
-
-        ( createUrlModel, createUrlCmds ) =
-            CreateUrl.init
-
-        ( urlListModel, urlListCmds ) =
-            ListUrls.init
-
-        ( categoryListModel, categoryListCmds ) =
-            CategoryList.init
-
-        ( categoryCreateModel, categoryCreateCmds ) =
-            CategoryCreate.init
-
-        ( organizationShowModel, organizationShowCmds ) =
-            OrganizationShow.init (retriveOrganizationFromUrl location)
+        ( pageModel, pageCmd ) =
+            retrivePage location
 
         initModel =
-            { currentPage = page
-            , articlesList = articleListModel
-            , createArticle = createArticleModel
-            , listUrl = urlListModel
-            , createUrl = createUrlModel
-            , categoryList = categoryListModel
-            , categoryCreate = categoryCreateModel
-            , organizationShow = organizationShowModel
-            , location = location
+            { currentPage = pageModel
             }
-
-
-        cmds =
-            Cmd.batch
-                [ Cmd.map ArticlesListMsg articleListCmds
-                , Cmd.map CreateArticleMsg createArticleCmds
-                , Cmd.map CreateUrlMsg createUrlCmds
-                , Cmd.map UrlListMsg urlListCmds
-                , Cmd.map CategoryListMsg categoryListCmds
-                , Cmd.map CategoryCreateMsg categoryCreateCmds
-                , Cmd.map OrganizationShowMsg organizationShowCmds
-                ]
     in
-        ( initModel, cmds )
+        ( initModel, pageCmd )
 
 
 -- MSG
@@ -105,11 +57,11 @@ init flags location =
 
 type Msg
     = Navigate Page
-    | ChangePage Page
-    | ArticlesListMsg ArticlesList.Msg
-    | CreateArticleMsg CreateArticle.Msg
-    | CreateUrlMsg CreateUrl.Msg
-    | UrlListMsg ListUrls.Msg
+    | ChangePage Page (Cmd Msg)
+    | ArticleListMsg ArticleList.Msg
+    | ArticleCreateMsg ArticleCreate.Msg
+    | UrlCreateMsg UrlCreate.Msg
+    | UrlListMsg UrlList.Msg
     | CategoryListMsg CategoryList.Msg
     | CategoryCreateMsg CategoryCreate.Msg
     | OrganizationShowMsg OrganizationShow.Msg
@@ -124,98 +76,99 @@ update msg model =
         Navigate page ->
             ( model, newUrl <| convertPageToHash page )
 
-        ChangePage page ->
-            ( { model | currentPage = page }, Cmd.none )
+        ChangePage page cmd ->
+            ( { model | currentPage = page }, cmd )
 
-
-        ArticlesListMsg alMsg ->
+        ArticleListMsg alMsg ->
             let
                 ( articleListModel, articleListCmd ) =
-                    ArticlesList.update alMsg model.articlesList
+                    ArticleList.update alMsg ArticleList.initModel
             in
-                ( { model | articlesList = articleListModel }
-                , Cmd.map ArticlesListMsg articleListCmd
+                ( { model | currentPage = (ArticleList articleListModel) }
+                , Cmd.map ArticleListMsg articleListCmd
                 )
 
-        CreateArticleMsg caMsg ->
+        ArticleCreateMsg caMsg ->
             let
                 ( createArticleModel, createArticleCmd ) =
-                    CreateArticle.update caMsg model.createArticle
+                    ArticleCreate.update caMsg ArticleCreate.initModel
             in
-                ( { model | createArticle = createArticleModel }
-                , Cmd.map CreateArticleMsg createArticleCmd
+                ( { model | currentPage = (ArticleCreate createArticleModel) }
+                , Cmd.map ArticleCreateMsg createArticleCmd
                 )
 
-        CreateUrlMsg cuMsg ->
+        UrlCreateMsg cuMsg ->
             let
                 ( createUrlModel, createUrlCmds ) =
-                    CreateUrl.update cuMsg model.createUrl
+                    UrlCreate.update cuMsg UrlCreate.initModel
             in
-                ( { model | createUrl = createUrlModel }
-                , Cmd.map CreateUrlMsg createUrlCmds
+                ( { model | currentPage = (UrlCreate createUrlModel) }
+                , Cmd.map UrlCreateMsg createUrlCmds
                 )
 
         UrlListMsg ulMsg ->
             let
                 ( urlListModel, urlListCmds ) =
-                    ListUrls.update ulMsg model.listUrl
+                    UrlList.update ulMsg UrlList.initModel
             in
-                ( { model | listUrl = urlListModel }
+                ( { model | currentPage = (UrlList urlListModel) }
                 , Cmd.map UrlListMsg urlListCmds
                 )
 
         CategoryListMsg clMsg ->
             let
                 ( categoryListModel, categoryListCmd ) =
-                    CategoryList.update clMsg model.categoryList
+                    CategoryList.update clMsg CategoryList.initModel
             in
-                ( { model | categoryList = categoryListModel }
+                ( { model | currentPage = (CategoryList categoryListModel) }
                 , Cmd.map CategoryListMsg categoryListCmd
                 )
 
         CategoryCreateMsg ccMsg ->
             let
                 ( categoryCreateModel, categoryCreateCmd ) =
-                    CategoryCreate.update ccMsg model.categoryCreate
+                    CategoryCreate.update ccMsg CategoryCreate.initModel
             in
                 ( { model
-                    | categoryCreate = categoryCreateModel
+                    | currentPage = (CategoryCreate categoryCreateModel)
                   }
                 , Cmd.map CategoryCreateMsg categoryCreateCmd
                 )
 
         OrganizationShowMsg osMsg ->
             let
-                ( organizationShowModel, organizationShowCmds ) =
-                    OrganizationShow.update osMsg model.organizationShow
+                ( organizationShowModel, organizationShowCmd ) =
+                    OrganizationShow.update osMsg OrganizationShow.initModel
             in
-                ( { model | organizationShow = organizationShowModel }
-                , Cmd.map OrganizationShowMsg organizationShowCmds
+                ( { model
+                    | currentPage = OrganizationShow organizationShowModel
+                  }
+                , Cmd.map OrganizationShowMsg organizationShowCmd
                 )
 
 
 convertPageToHash : Page -> String
 convertPageToHash page =
     case page of
-        ArticlesList ->
+        ArticleList articleListModel ->
             "/admin/articles"
 
-        CreateArticle ->
+        ArticleCreate articleCreateModel ->
             "/admin/articles/new"
 
-        UrlList ->
+        UrlList urlListModel ->
             "/admin/urls"
 
-        UrlCreate ->
+        UrlCreate urlCreateModel ->
             "/admin/urls/new"
 
-        CategoryList ->
+        CategoryList categoryListModel ->
             "/admin/categories"
 
-        CategoryCreate ->
+        CategoryCreate categoryCreateModel ->
             "/admin/categories/new"
 
-        OrganizationShow ->
+        OrganizationShow organizationShowModel->
             "/admin/organization/1"
 
         NotFound ->
@@ -224,47 +177,74 @@ convertPageToHash page =
 
 urlLocationToMsg : Location -> Msg
 urlLocationToMsg location =
-    extractStaticPath location
-        |> retrivePage
-        |> ChangePage
+    let
+        ( pageModel, pageCmd ) =
+            location
+                |> retrivePage
+    in
+        ChangePage pageModel pageCmd
 
 
-retrivePage : String -> Page
-retrivePage pathname =
-    case pathname of
+retrivePage : Location -> ( Page, Cmd Msg )
+retrivePage location =
+    case ( extractStaticPath location ) of
         "/admin/articles" ->
-            ArticlesList
+            let
+                ( pageModel, pageCmd ) =
+                    ArticleList.init
+            in
+                ( ArticleList pageModel, Cmd.map ArticleListMsg pageCmd )
 
         "/admin/articles/new" ->
-            CreateArticle
+            let
+                ( pageModel, pageCmd ) =
+                    (ArticleCreate.init)
+            in
+                ( ArticleCreate pageModel, Cmd.map ArticleCreateMsg pageCmd )
 
         "/admin/urls" ->
-            UrlList
+            let
+                ( pageModel, pageCmd ) =
+                    UrlList.init
+            in
+                ( UrlList pageModel, Cmd.map UrlListMsg pageCmd )
 
         "/admin/urls/new" ->
-            UrlCreate
+            let
+                ( pageModel, pageCmd ) =
+                    UrlCreate.init
+            in
+                ( UrlCreate pageModel, Cmd.map UrlCreateMsg pageCmd )
 
         "/admin/categories" ->
-            CategoryList
+            let
+                ( pageModel, pageCmd ) =
+                    CategoryList.init
+            in
+                ( CategoryList pageModel, Cmd.map CategoryListMsg pageCmd )
 
         "/admin/categories/new" ->
-            CategoryCreate
+            let
+                ( pageModel, pageCmd ) =
+                    CategoryCreate.init
+            in
+                ( CategoryCreate pageModel, Cmd.map CategoryCreateMsg pageCmd )
 
-        "/admin/organization/1" ->
-            OrganizationShow
-
-        "/admin/organization/2" ->
-            OrganizationShow
+        "/admin/organization" ->
+            let
+                ( pageModel, pageCmd ) =
+                    OrganizationShow.init (retriveOrganizationFromUrl location)
+            in
+                ( OrganizationShow pageModel, Cmd.map OrganizationShowMsg pageCmd )
 
         _ ->
-            NotFound
+            ( NotFound, Cmd.none )
 
 
 extractStaticPath : Location -> String
 extractStaticPath location =
         let
-            staticPath = parsePath ( s "admin" </> string ) location
-
+            staticPath = (Debug.log "" (parsePath ( s "admin" </> s "organization" </> String ) location))
             path =
                 case staticPath of
                     Nothing ->
@@ -274,8 +254,12 @@ extractStaticPath location =
                         staticPath
         in
             case path of
-            "organization" ->
+            "1" ->
                 "/admin/organization"
+
+            "2" ->
+                "/admin/organization"
+
             _ ->
                location.pathname
 
@@ -284,7 +268,7 @@ extractStaticPath location =
 retriveOrganizationFromUrl : Location -> OrganizationId
 retriveOrganizationFromUrl location =
    let
-      org = parsePath (s "admin" </> s "organization" </> int) location
+      org = parsePath ( s "admin" </> s "organization" </> int ) location
    in
        getOrganizationId ( org )
 
@@ -296,7 +280,7 @@ getOrganizationId orgId =
           orgId
 
         Nothing ->
-          2
+          -1
 
 
 
@@ -317,33 +301,33 @@ view model =
     let
         page =
             case model.currentPage of
-                ArticlesList ->
-                    Html.map ArticlesListMsg
-                        (ArticlesList.view model.articlesList)
+                ArticleList articleListModel ->
+                    Html.map ArticleListMsg
+                        (ArticleList.view articleListModel)
 
-                CreateArticle ->
-                    Html.map CreateArticleMsg
-                        (CreateArticle.view model.createArticle)
+                ArticleCreate articleCreateModel ->
+                    Html.map ArticleCreateMsg
+                        (ArticleCreate.view articleCreateModel)
 
-                UrlCreate ->
-                    Html.map CreateUrlMsg
-                        (CreateUrl.view model.createUrl)
+                UrlCreate urlCreateModel ->
+                    Html.map UrlCreateMsg
+                        (UrlCreate.view urlCreateModel)
 
-                UrlList ->
+                UrlList urlListModel ->
                     Html.map UrlListMsg
-                        (ListUrls.view model.listUrl)
+                        (UrlList.view urlListModel)
 
-                CategoryList ->
+                CategoryList categoryListModel ->
                     Html.map CategoryListMsg
-                        (CategoryList.view model.categoryList)
+                        (CategoryList.view categoryListModel)
 
-                CategoryCreate ->
+                CategoryCreate categoryCreateModel ->
                     Html.map CategoryCreateMsg
-                        (CategoryCreate.view model.categoryCreate)
+                        (CategoryCreate.view categoryCreateModel)
 
-                OrganizationShow ->
+                OrganizationShow organizationShowModel->
                     Html.map OrganizationShowMsg
-                        (OrganizationShow.view model.organizationShow)
+                        (OrganizationShow.view organizationShowModel)
 
                 _ ->
                     div [] [ text "Not Found" ]
@@ -358,10 +342,9 @@ adminHeader : Model -> Html Msg
 adminHeader model =
     div [ class "header" ]
         [ div [ class "header-right" ]
-            [ Html.a [ onClick (Navigate ArticlesList) ] [ text "Articles" ]
-            , Html.a [ onClick (Navigate UrlList) ] [ text "URL" ]
-            , Html.a [ onClick (Navigate CategoryList) ] [ text "Category" ]
-            , Html.a [ onClick (Navigate OrganizationShow) ] [ text "Organization" ]
+            [ Html.a [ onClick (Navigate <| ArticleList ArticleList.initModel) ] [ text "Articles" ]
+            , Html.a [ onClick (Navigate <| UrlList UrlList.initModel) ] [ text "URL" ]
+            , Html.a [ onClick (Navigate <| CategoryList CategoryList.initModel) ] [ text "Category" ]
             ]
         ]
 

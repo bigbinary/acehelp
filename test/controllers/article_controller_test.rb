@@ -27,6 +27,14 @@ class ArticleControllerTest < ActionDispatch::IntegrationTest
     assert_equal "Ruby on rails", json.first.second.first["title"]
   end
 
+  def test_index_failure
+    headers = { "api-key": @organization.api_key }
+    params = { url: "bad_url" }
+    get article_index_url, params: params, headers: headers
+
+    assert_response :bad_request
+  end
+
   def test_index_success_for_organization
     headers = { "api-key": @organization.api_key }
     get article_index_url, params: nil, headers: headers
@@ -52,6 +60,22 @@ class ArticleControllerTest < ActionDispatch::IntegrationTest
     assert_response :success
   end
 
+  def test_create_failure
+    params = {
+      article: {
+        title: "",
+        desc: "about framework",
+        category_id: @category.id
+      }
+    }
+
+    headers = { "api-key": @organization.api_key }
+
+    post article_index_url, params: params, headers: headers
+
+    assert_response :unprocessable_entity
+  end
+
   def test_update_success
     params = { article: { title: "rails" } }
     headers = { "api-key": @organization.api_key }
@@ -67,6 +91,15 @@ class ArticleControllerTest < ActionDispatch::IntegrationTest
     put article_path(@article.id), params: params, headers: headers
 
     assert_response :success
+  end
+
+  def test_update_failure
+    params = { article: { title: "" } }
+    headers = { "api-key": @organization.api_key }
+
+    put article_path(@article.id), params: params, headers: headers
+
+    assert_response :unprocessable_entity
   end
 
   def test_destroy_success

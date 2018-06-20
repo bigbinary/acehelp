@@ -4,7 +4,7 @@ import Data.Category exposing (CategoryId)
 import Data.Article exposing (..)
 import Request.Article exposing (..)
 import Request.Helpers exposing (..)
-import Views.Container exposing (articleShape, popInInitialAnim)
+import Views.Container exposing (popInInitialAnim)
 import Html exposing (..)
 import Html.Events exposing (onClick)
 import Html.Attributes exposing (id, class)
@@ -12,6 +12,7 @@ import Animation
 import Http
 import Task exposing (Task)
 import Reader exposing (Reader)
+import FontAwesome.Solid as SolidIcon
 
 
 -- MODEL
@@ -66,7 +67,7 @@ view model =
                     [ onClick <| LoadArticle article.id
                     , class "selectable-row"
                     ]
-                    [ i [ class "row-icon" ] [ articleShape "20" "20" "rgb(153, 153, 153)" ]
+                    [ span [ class "row-icon" ] [ SolidIcon.file_alt ]
                     , span [ class "row-title" ] [ text article.title ]
                     ]
             )

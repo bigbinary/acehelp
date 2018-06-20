@@ -22,7 +22,7 @@ type alias Model =
 
 initModel : Model
 initModel =
-    { organization = { organization = Organization 1 "Google" }
+    { organization = { organization = Organization -1 "Not Found" }
     , error = Nothing
     }
 

@@ -1,7 +1,7 @@
 module Main exposing (..)
 
 import Html exposing (..)
-import Html.Attributes exposing (id)
+import Html.Attributes exposing (id, class)
 import Html.Events exposing (onClick)
 import Http
 import Task
@@ -10,7 +10,7 @@ import Page.CategoryList as CategoryListSection
 import Page.Article as ArticleSection
 import Page.ArticleList as ArticleListSection
 import Page.Error as ErrorSection
-import Views.Container exposing (topBar, questionMarkShape)
+import Views.Container exposing (topBar)
 import Views.Loading exposing (sectionLoadingView)
 import Data.Article exposing (..)
 import Data.Category exposing (..)
@@ -18,6 +18,7 @@ import Request.Helpers exposing (NodeEnv, Context(..))
 import Utils exposing (getUrlPathData)
 import Animation
 import Navigation
+import FontAwesome.Solid as SolidIcon
 
 
 -- MODEL
@@ -88,11 +89,10 @@ init flags location =
 
 minimizedView : Html Msg
 minimizedView =
-    div
-        [ id "mini-view"
-        , onClick (SetAppState Maximized)
+    div [ id "mini-view", onClick (SetAppState Maximized) ]
+        [ div [ class "question-icon" ]
+            [ SolidIcon.question ]
         ]
-        [ questionMarkShape "40" "40" "#FFFFFF" ]
 
 
 maximizedView : Model -> Html Msg

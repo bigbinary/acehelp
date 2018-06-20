@@ -102,6 +102,8 @@ group :test do
   gem "chromedriver-helper"
   # A friendlier Ruby client for consuming GraphQL-based APIs.
   gem "graphlient", "~> 0.3.1"
+  # SimpleCov is a code coverage analysis tool for Ruby
+  gem 'simplecov', require: false
 end
 
 # Windows does not include zoneinfo files, so bundle the tzinfo-data gem
