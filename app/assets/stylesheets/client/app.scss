@@ -194,6 +194,15 @@
                 align-items: center;
                 justify-content: center;
                 cursor: pointer;
+                transition: transform .2s ease-in-out;
+
+                &:hover{
+                  transform: scale(1.08)
+                }
+
+                &:active{
+                  transform: scale(1.2)
+                }
             }
 
             #under-tab{
