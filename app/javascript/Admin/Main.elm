@@ -245,23 +245,13 @@ extractStaticPath : Location -> String
 extractStaticPath location =
         let
             staticPath = (Debug.log "" (parsePath ( s "admin" </> s "organization" </> string ) location))
-            path =
-                case staticPath of
+        in
+            case staticPath of
                     Nothing ->
                         location.pathname
 
                     Just staticPath ->
-                        staticPath
-        in
-            case path of
-            "1" ->
-                "/admin/organization"
-
-            "2" ->
-                "/admin/organization"
-
-            _ ->
-               location.pathname
+                        "/admin/organization"
 
 
 
