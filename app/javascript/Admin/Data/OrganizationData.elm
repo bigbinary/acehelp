@@ -17,6 +17,7 @@ type alias Organization =
 
 type alias OrganizationResponse =
     { organization : Organization
+    , articles: List ArticleSummary
     }
 
 
@@ -24,6 +25,7 @@ organization : Decoder OrganizationResponse
 organization =
     decode OrganizationResponse
         |> required "organization" (organizationDecoder)
+        |> required "articles" (list decodeArticleSummary)
 
 
 organizationDecoder : Decoder Organization

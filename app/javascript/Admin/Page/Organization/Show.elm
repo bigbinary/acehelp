@@ -4,6 +4,7 @@ import Http
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Request.OrganizationRequest exposing (..)
+import Data.ArticleData exposing (ArticleSummary)
 
 
 --import Html.Events exposing (..)
@@ -22,7 +23,7 @@ type alias Model =
 
 initModel : Model
 initModel =
-    { organization = { organization = Organization -1 "Not Found" }
+    { organization = { organization = Organization 1 "Not Found", articles = [] }
     , error = Nothing
     }
 
@@ -62,7 +63,24 @@ view : Model -> Html msg
 view model =
     div [ id "content-wrapper" ]
         [ h1 [] [ text model.organization.organization.name ]
+        , div [] (renderArticles model.organization.articles)
         ]
+
+renderArticle : ArticleSummary -> Html msg
+renderArticle article =
+    let
+        children =
+          [ li [] [ text article.title ]
+          ]
+    in
+        ul [] children
+
+
+renderArticles : List ArticleSummary -> List (Html msg)
+renderArticles articles =
+     List.map renderArticle articles
+
+
 
 fetchOrganization : OrganizationId -> Cmd Msg
 fetchOrganization organiztionId =
