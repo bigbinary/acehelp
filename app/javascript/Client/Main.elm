@@ -10,6 +10,7 @@ import Section.CategoryList as CategoryListSection
 import Section.Article as ArticleSection
 import Section.ArticleList as ArticleListSection
 import Section.Error as ErrorSection
+import Section.ContactUs as ContactUsSection
 import Views.Container exposing (topBar)
 import Views.Loading exposing (sectionLoadingView)
 import Views.Tabs as Tabs
@@ -42,6 +43,7 @@ type Section
     | CategoryListSection CategoryListSection.Model
     | ArticleSection ArticleSection.Model
     | ArticleListSection ArticleListSection.Model
+    | ContactUsSection ContactUsSection.Model
 
 
 type SectionState
@@ -185,6 +187,9 @@ getSectionView section =
 
         ArticleListSection model ->
             Html.map ArticleListMsg <| ArticleListSection.view model
+
+        ContactUsSection model ->
+            ContactUsSection.view model
 
 
 getSection : SectionState -> Section
@@ -373,7 +378,7 @@ onTabChange tab model =
             )
 
         Tabs.ContactUs ->
-            ( model, Cmd.none )
+            ( { model | sectionState = Loaded (ContactUsSection ContactUsSection.init) }, Cmd.none )
 
 
 cmdForSuggestedArticles : Model -> Cmd Msg

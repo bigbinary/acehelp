@@ -1,0 +1,13 @@
+@mixin clickAnimation {
+    cursor: pointer;
+    transition: transform .2s ease-in-out;
+
+    &:hover{
+        transform: scale(1.08)
+    }
+    
+    &:active{
+        transform: scale(1.2)
+    }
+}
+
