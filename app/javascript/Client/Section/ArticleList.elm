@@ -1,4 +1,4 @@
-module Page.ArticleList exposing (init, initAnim, Msg(..), Model, view, noArticles)
+module Section.ArticleList exposing (init, initAnim, Msg(..), Model, view, noArticles)
 
 import Data.Category exposing (CategoryId)
 import Data.Article exposing (..)

@@ -47,7 +47,7 @@ topBar showBack onBack onClose =
                 False ->
                     initialChildren
     in
-        div [ classList [ ( "blueThemeBG", True ), ( "row-view", True ), ( "widgetHeader", True ) ] ] children
+        div [ classList [ ( "row-view", True ), ( "widgetHeader", True ) ], style [ ( "background-color", "rgb(60, 170, 249)" ), ( "color", "#fff" ) ] ] children
 
 
 popInInitialAnim : List Animation.Property

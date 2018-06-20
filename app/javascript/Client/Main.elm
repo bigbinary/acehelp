@@ -1,17 +1,18 @@
 module Main exposing (..)
 
 import Html exposing (..)
-import Html.Attributes exposing (id, class)
+import Html.Attributes exposing (id, class, style)
 import Html.Events exposing (onClick)
 import Http
 import Task
 import Reader
-import Page.CategoryList as CategoryListSection
-import Page.Article as ArticleSection
-import Page.ArticleList as ArticleListSection
-import Page.Error as ErrorSection
+import Section.CategoryList as CategoryListSection
+import Section.Article as ArticleSection
+import Section.ArticleList as ArticleListSection
+import Section.Error as ErrorSection
 import Views.Container exposing (topBar)
 import Views.Loading exposing (sectionLoadingView)
+import Views.Tabs as Tabs
 import Data.Article exposing (..)
 import Data.Category exposing (..)
 import Request.Helpers exposing (NodeEnv, Context(..))
@@ -54,6 +55,7 @@ type alias Model =
     , containerAnimation : Animation.State
     , currentAppState : AppState
     , context : Context
+    , tabModel : Tabs.Model
     , history : ModelHistory
     }
 
@@ -81,6 +83,7 @@ init flags location =
       , containerAnimation = Animation.style initAnimation
       , currentAppState = Minimized
       , context = Context <| getUrlPathData location
+      , tabModel = Tabs.modelWithTabs Tabs.allTabs
       , history = NoHistory
       }
     , Cmd.none
@@ -89,7 +92,7 @@ init flags location =
 
 minimizedView : Html Msg
 minimizedView =
-    div [ id "mini-view", onClick (SetAppState Maximized) ]
+    div [ id "mini-view", style [ ( "background-color", "rgb(60, 170, 249)" ), ( "color", "#fff" ) ], onClick (SetAppState Maximized) ]
         [ div [ class "question-icon" ]
             [ SolidIcon.question ]
         ]
@@ -125,6 +128,7 @@ maximizedView model =
                 ]
             )
             [ topBar showBackButton GoBack (SetAppState Minimized)
+            , Html.map TabMsg <| Tabs.view model.tabModel
             , getSectionView <| getSection model.sectionState
             ]
 
@@ -154,6 +158,7 @@ type Msg
     | ArticleLoaded (Result Http.Error ArticleResponse)
     | UrlChange Navigation.Location
     | GoBack
+    | TabMsg Tabs.Msg
 
 
 
@@ -256,8 +261,7 @@ update msg model =
                                 ]
                                 model.containerAnimation
                             , transitionFromSection model.sectionState
-                              -- TODO: Pass ApiKey Instead of blank string
-                            , Task.attempt ArticleListLoaded (Reader.run ArticleListSection.init ( model.nodeEnv, "", model.context ))
+                            , cmdForSuggestedArticles model
                             )
 
                         Minimized ->
@@ -269,6 +273,18 @@ update msg model =
                             )
             in
                 ( { model | currentAppState = appState, containerAnimation = animation, sectionState = newSectionState }, cmd )
+
+        TabMsg tabMsg ->
+            let
+                ( newModel, newCmd ) =
+                    case tabMsg of
+                        Tabs.TabSelected newTab ->
+                            onTabChange newTab model
+
+                ( newTabModel, tabCmd ) =
+                    Tabs.update tabMsg model.tabModel
+            in
+                ( { newModel | tabModel = newTabModel }, Cmd.batch [ newCmd, Cmd.map TabMsg tabCmd ] )
 
         CategoryListLoaded (Ok categories) ->
             ( { model | sectionState = Loaded (CategoryListSection categories.categories) }, Cmd.none )
@@ -341,6 +357,33 @@ update msg model =
 
         ArticleMsg ->
             ( model, Cmd.none )
+
+
+onTabChange : Tabs.Tabs -> Model -> ( Model, Cmd Msg )
+onTabChange tab model =
+    case tab of
+        Tabs.SuggestedArticles ->
+            ( { model | sectionState = transitionFromSection model.sectionState, history = ModelHistory model }
+            , cmdForSuggestedArticles model
+            )
+
+        Tabs.Library ->
+            ( { model | sectionState = transitionFromSection model.sectionState, history = ModelHistory model }
+            , cmdForLibrary model
+            )
+
+        Tabs.ContactUs ->
+            ( model, Cmd.none )
+
+
+cmdForSuggestedArticles : Model -> Cmd Msg
+cmdForSuggestedArticles model =
+    Task.attempt ArticleListLoaded (Reader.run ArticleListSection.init ( model.nodeEnv, "", model.context ))
+
+
+cmdForLibrary : Model -> Cmd Msg
+cmdForLibrary model =
+    Task.attempt CategoryListLoaded (Reader.run CategoryListSection.init ( model.nodeEnv, "" ))
 
 
 

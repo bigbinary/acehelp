@@ -1,4 +1,4 @@
-module Page.Article exposing (init, Model, view)
+module Section.Article exposing (init, Model, view)
 
 import Data.Article exposing (..)
 import Request.Article exposing (..)
