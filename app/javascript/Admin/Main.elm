@@ -244,7 +244,7 @@ retrivePage location =
 extractStaticPath : Location -> String
 extractStaticPath location =
         let
-            staticPath = (Debug.log "" (parsePath ( s "admin" </> s "organization" </> String ) location))
+            staticPath = (Debug.log "" (parsePath ( s "admin" </> s "organization" </> string ) location))
             path =
                 case staticPath of
                     Nothing ->
