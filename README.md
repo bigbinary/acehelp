@@ -28,6 +28,14 @@ bundle exec rails server
 Once we see `webpack: Compiled successfully.` message in terminal,
 we can visit the app at http://localhost:3000.
 
+To create data e.g. Article, Urls etc. you must login as user.
+To login as a user, please visit http://localhost:3000/users/sign_in
+
+```
+# Login info
+sam@example.com / welcome
+```
+
 Webpack will automatically compile if a file inside `app/javascript/` directory is modified in development mode.
 
 ## Heroku Review
