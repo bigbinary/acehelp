@@ -364,27 +364,30 @@ update msg model =
             ( model, Cmd.none )
 
         ContactUsMsg contactUsMsg ->
-            case contactUsMsg of
-                ContactUsSection.SendMessage payload ->
-                    ( { model | sectionState = transitionFromSection model.sectionState }, Cmd.map ContactUsMsg <| Task.attempt ContactUsSection.RequestMessageCompleted (Reader.run requestContactUs ( model.nodeEnv, "", { name = payload.name, email = payload.email, message = payload.message } )) )
+            let
+                currentContactUsModel =
+                    getContactUsModel <|
+                        getSection model.sectionState
 
-                ContactUsSection.RequestMessageCompleted postResponse ->
-                    let
-                        currentContactUsModel =
-                            getContactUsModel <|
-                                getSection model.sectionState
+                getContactUsModel section =
+                    case section of
+                        ContactUsSection model ->
+                            model
 
-                        getContactUsModel section =
-                            case section of
-                                ContactUsSection model ->
-                                    model
+                        _ ->
+                            ContactUsSection.init
 
-                                _ ->
-                                    ContactUsSection.init
+                ( newContactUsModel, _ ) =
+                    ContactUsSection.update contactUsMsg currentContactUsModel
+            in
+                case contactUsMsg of
+                    ContactUsSection.SendMessage payload ->
+                        ( { model | sectionState = TransitioningFrom (ContactUsSection newContactUsModel) }, Cmd.map ContactUsMsg <| Task.attempt ContactUsSection.RequestMessageCompleted (Reader.run requestContactUs ( model.nodeEnv, "", { name = payload.name, email = payload.email, message = payload.message } )) )
 
-                        ( newContactUsModel, _ ) =
-                            ContactUsSection.update contactUsMsg currentContactUsModel
-                    in
+                    ContactUsSection.RequestMessageCompleted postResponse ->
+                        ( { model | sectionState = Loaded (ContactUsSection newContactUsModel) }, Cmd.none )
+
+                    _ ->
                         ( { model | sectionState = Loaded (ContactUsSection newContactUsModel) }, Cmd.none )
 
 

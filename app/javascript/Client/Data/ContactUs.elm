@@ -54,4 +54,4 @@ decodeMessage : Decoder ResponseMessage
 decodeMessage =
     decode ResponseMessage
         |> optional "message" (Decode.map Just Decode.string) Nothing
-        |> optional "error" (Decode.map Just Decode.string) Nothing
+        |> optional "errors" (Decode.map Just Decode.string) Nothing
