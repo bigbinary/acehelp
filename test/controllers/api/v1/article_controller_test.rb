@@ -42,14 +42,15 @@ module Api
         assert_equal @article.title, json.first.second.first["title"]
       end
 
-      def test_index_article_failure
-        get api_v1_article_index_url, params: { url: nil }
+      def test_suggested_articles_for_invalid_url
+        get api_v1_article_index_url, params: { url: "Ramdom Url" }
 
-        assert_response :bad_request
-
-        get api_v1_article_index_url, params: { url: "random_url" }
-
-        assert_response :not_found
+        assert_response :success
+        json = JSON.parse(response.body)
+        assert_equal(
+          json["articles"].map{|article| article["title"]},
+          ["Happiest day of your life", "Ruby on rails", "How to do search with elasticsearch"]
+        )
       end
 
       def test_search_article
