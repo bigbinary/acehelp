@@ -32,6 +32,7 @@ type Page
     | CategoryCreate CategoryCreate.Model
     | UrlList UrlList.Model
     | UrlCreate UrlCreate.Model
+    | Dashboard
     | NotFound
 
 
@@ -154,6 +155,9 @@ convertPageToHash page =
         CategoryCreate categoryCreateModel ->
             "/admin/categories/new"
 
+        Dashboard ->
+            "/admin/dashboard"
+
         NotFound ->
             "/404"
 
@@ -213,6 +217,9 @@ retrivePage pathname =
             in
                 ( CategoryCreate pageModel, Cmd.map CategoryCreateMsg pageCmd )
 
+        "/admin/dashboard" ->
+            ( Dashboard, Cmd.none )
+
         _ ->
             ( NotFound, Cmd.none )
 
@@ -258,6 +265,9 @@ view model =
                 CategoryCreate categoryCreateModel ->
                     Html.map CategoryCreateMsg
                         (CategoryCreate.view categoryCreateModel)
+
+                Dashboard ->
+                    div [] [ text "Dashboard" ]
 
                 _ ->
                     div [] [ text "Not Found" ]
