@@ -1,4 +1,16 @@
-module Request.Helpers exposing (apiUrl, constructUrl, httpGet, ApiKey, ApiErrorMessage, Url, QueryParameters, Context(..), NodeEnv)
+module Request.Helpers
+    exposing
+        ( apiUrl
+        , constructUrl
+        , httpGet
+        , httpPost
+        , ApiKey
+        , ApiErrorMessage
+        , Url
+        , QueryParameters
+        , Context(..)
+        , NodeEnv
+        )
 
 import Http exposing (request, encodeUri, header, Header)
 import Json.Decode exposing (Decoder)
@@ -46,7 +58,7 @@ constructUrl baseUrl queryParams =
         [] ->
             baseUrl
 
-        -- NOTE: removed encodeUri for value part of query parameter to get things working and since we do not decode server side at the moment
+        -- NOTE: since we do not decode server side at the moment - removed encodeUri for value part of query parameter to get things working
         _ ->
             baseUrl ++ "?" ++ String.join "&" (List.map (\( key, value ) -> encodeUri key ++ "=" ++ value) queryParams)
 
@@ -80,6 +92,29 @@ httpGet apiKey context url queryParams decoder =
             , headers = headers
             , url = callUrl
             , body = Http.emptyBody
+            , expect = Http.expectJson decoder
+            , timeout = Nothing
+            , withCredentials = False
+            }
+
+
+httpPost : ApiKey -> Url -> Http.Body -> Decoder a -> Http.Request a
+httpPost apiKey url body decoder =
+    let
+        headers =
+            List.concat
+                [ defaultRequestHeaders
+                , [ header "api-key" apiKey ]
+                ]
+
+        callUrl =
+            constructUrl url []
+    in
+        request
+            { method = "POST"
+            , headers = headers
+            , url = callUrl
+            , body = body
             , expect = Http.expectJson decoder
             , timeout = Nothing
             , withCredentials = False

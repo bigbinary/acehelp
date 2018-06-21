@@ -16,6 +16,7 @@ import Views.Loading exposing (sectionLoadingView)
 import Views.Tabs as Tabs
 import Data.Article exposing (..)
 import Data.Category exposing (..)
+import Request.ContactUs exposing (..)
 import Request.Helpers exposing (NodeEnv, Context(..))
 import Utils exposing (getUrlPathData)
 import Animation
@@ -161,6 +162,7 @@ type Msg
     | UrlChange Navigation.Location
     | GoBack
     | TabMsg Tabs.Msg
+    | ContactUsMsg ContactUsSection.Msg
 
 
 
@@ -189,7 +191,7 @@ getSectionView section =
             Html.map ArticleListMsg <| ArticleListSection.view model
 
         ContactUsSection model ->
-            ContactUsSection.view model
+            Html.map ContactUsMsg <| ContactUsSection.view model
 
 
 getSection : SectionState -> Section
@@ -312,15 +314,13 @@ update msg model =
                                     getSection model.sectionState
                                 )
 
-                        getCategoryListModel =
-                            (\section ->
-                                case section of
-                                    CategoryListSection model ->
-                                        Just model
+                        getCategoryListModel section =
+                            case section of
+                                CategoryListSection model ->
+                                    Just model
 
-                                    _ ->
-                                        Nothing
-                            )
+                                _ ->
+                                    Nothing
                     in
                         case currentArticles of
                             Just articles ->
@@ -362,6 +362,30 @@ update msg model =
 
         ArticleMsg ->
             ( model, Cmd.none )
+
+        ContactUsMsg contactUsMsg ->
+            case contactUsMsg of
+                ContactUsSection.SendMessage payload ->
+                    ( { model | sectionState = transitionFromSection model.sectionState }, Cmd.map ContactUsMsg <| Task.attempt ContactUsSection.RequestMessageCompleted (Reader.run requestContactUs ( model.nodeEnv, "", { name = payload.name, email = payload.email, message = payload.message } )) )
+
+                ContactUsSection.RequestMessageCompleted postResponse ->
+                    let
+                        currentContactUsModel =
+                            getContactUsModel <|
+                                getSection model.sectionState
+
+                        getContactUsModel section =
+                            case section of
+                                ContactUsSection model ->
+                                    model
+
+                                _ ->
+                                    ContactUsSection.init
+
+                        ( newContactUsModel, _ ) =
+                            ContactUsSection.update contactUsMsg currentContactUsModel
+                    in
+                        ( { model | sectionState = Loaded (ContactUsSection newContactUsModel) }, Cmd.none )
 
 
 onTabChange : Tabs.Tabs -> Model -> ( Model, Cmd Msg )
