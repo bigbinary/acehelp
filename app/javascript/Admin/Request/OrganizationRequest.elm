@@ -4,7 +4,7 @@ import Http
 import Json.Decode as JD exposing (field)
 import Json.Encode as JE
 import Request.RequestHelper exposing (..)
-import Data.OrganizationData as AD exposing (..)
+import Data.Organization as AD exposing (..)
 
 
 organizationUrl : NodeEnv -> OrganizationId -> Url
