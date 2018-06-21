@@ -78,8 +78,16 @@ update msg model =
 
         ArticleListMsg alMsg ->
             let
+                currentPageModel =
+                    case model.currentPage of
+                        ArticleList articleListModel ->
+                            articleListModel
+
+                        _ ->
+                            ArticleList.initModel
+
                 ( articleListModel, articleListCmd ) =
-                    ArticleList.update alMsg ArticleList.initModel
+                    ArticleList.update alMsg currentPageModel
             in
                 ( { model | currentPage = (ArticleList articleListModel) }
                 , Cmd.map ArticleListMsg articleListCmd
@@ -87,17 +95,33 @@ update msg model =
 
         ArticleCreateMsg caMsg ->
             let
-                ( createArticleModel, createArticleCmd ) =
-                    ArticleCreate.update caMsg ArticleCreate.initModel
+                currentPageModel =
+                    case model.currentPage of
+                        ArticleCreate articleCreateModel ->
+                            articleCreateModel
+
+                        _ ->
+                            ArticleCreate.initModel
+
+                ( articleCreateModel, createArticleCmd ) =
+                    ArticleCreate.update caMsg currentPageModel
             in
-                ( { model | currentPage = (ArticleCreate createArticleModel) }
+                ( { model | currentPage = (ArticleCreate articleCreateModel) }
                 , Cmd.map ArticleCreateMsg createArticleCmd
                 )
 
         UrlCreateMsg cuMsg ->
             let
+                currentPageModel =
+                    case model.currentPage of
+                        UrlCreate urlCreateModel ->
+                            urlCreateModel
+
+                        _ ->
+                            UrlCreate.initModel
+
                 ( createUrlModel, createUrlCmds ) =
-                    UrlCreate.update cuMsg UrlCreate.initModel
+                    UrlCreate.update cuMsg currentPageModel
             in
                 ( { model | currentPage = (UrlCreate createUrlModel) }
                 , Cmd.map UrlCreateMsg createUrlCmds
@@ -105,8 +129,16 @@ update msg model =
 
         UrlListMsg ulMsg ->
             let
+                currentPageModel =
+                    case model.currentPage of
+                        UrlList urlListModel ->
+                            urlListModel
+
+                        _ ->
+                            UrlList.initModel
+
                 ( urlListModel, urlListCmds ) =
-                    UrlList.update ulMsg UrlList.initModel
+                    UrlList.update ulMsg currentPageModel
             in
                 ( { model | currentPage = (UrlList urlListModel) }
                 , Cmd.map UrlListMsg urlListCmds
@@ -114,8 +146,16 @@ update msg model =
 
         CategoryListMsg clMsg ->
             let
+                currentPageModel =
+                    case model.currentPage of
+                        CategoryList categoryListModel ->
+                            categoryListModel
+
+                        _ ->
+                            CategoryList.initModel
+
                 ( categoryListModel, categoryListCmd ) =
-                    CategoryList.update clMsg CategoryList.initModel
+                    CategoryList.update clMsg currentPageModel
             in
                 ( { model | currentPage = (CategoryList categoryListModel) }
                 , Cmd.map CategoryListMsg categoryListCmd
@@ -123,8 +163,16 @@ update msg model =
 
         CategoryCreateMsg ccMsg ->
             let
+                currentPageModel =
+                    case model.currentPage of
+                        CategoryCreate categoryCreateModel ->
+                            categoryCreateModel
+
+                        _ ->
+                            CategoryCreate.initModel
+
                 ( categoryCreateModel, categoryCreateCmd ) =
-                    CategoryCreate.update ccMsg CategoryCreate.initModel
+                    CategoryCreate.update ccMsg currentPageModel
             in
                 ( { model
                     | currentPage = (CategoryCreate categoryCreateModel)
