@@ -26,6 +26,7 @@ type alias Flags =
 
 type alias Model =
     { currentPage : Page
+    , nodeEnv : NodeEnv
     }
 
 
@@ -48,6 +49,7 @@ init flags location =
 
         initModel =
             { currentPage = pageModel
+            , nodeEnv = Debug.log "" flags.node_env
             }
     in
         ( initModel, pageCmd )
