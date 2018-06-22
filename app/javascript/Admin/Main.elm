@@ -253,7 +253,7 @@ retrivePage env location =
         "/admin/articles" ->
             let
                 ( pageModel, pageCmd ) =
-                    ArticleList.init
+                    ArticleList.init "" "" ""
             in
                 ( ArticleList pageModel, Cmd.map ArticleListMsg pageCmd )
 

@@ -6,10 +6,6 @@ import Html.Attributes exposing (..)
 import Request.ArticleRequest exposing (..)
 import Data.CommonData exposing (..)
 import Page.Common.View exposing (renderError)
-
-
---import Html.Events exposing (..)
-
 import Data.ArticleData exposing (..)
 
 
@@ -29,8 +25,8 @@ initModel =
     }
 
 
-init : ( Model, Cmd Msg )
-init =
+init : String -> String -> String -> ( Model, Cmd Msg )
+init env url key =
     ( initModel, fetchArticlesList )
 
 
