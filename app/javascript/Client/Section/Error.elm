@@ -48,7 +48,7 @@ view error =
                     in
                         ( toString response.status.code, response.status.message, "" )
     in
-        div [ id "something-went-wrong" ]
+        div [ id "something-went-wrong", class "centered-content" ]
             [ div [ class "error" ] []
             , div [ class "text boldExclamationText" ] [ text boldExclamationText ]
             , div [ class "text friendlyMessage" ] [ text friendlyMessage ]

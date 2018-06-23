@@ -100,6 +100,14 @@
         @include clickAnimation();
       }
 
+      .centered-content{
+        display: flex;
+        height: 100%;
+        align-items: center;
+        justify-content: center;
+        flex-direction: column;
+      }
+
       #tab-group {
         display: flex;
         overflow: hidden;
@@ -157,7 +165,6 @@
 
       #content-wrapper {
           padding: 0 50px;
-          overflow-x: auto;
           height: 100%;
 
           .article-wrapper {
