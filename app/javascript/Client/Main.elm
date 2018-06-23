@@ -381,13 +381,19 @@ update msg model =
                     ContactUsSection.update contactUsMsg currentContactUsModel
             in
                 case contactUsMsg of
-                    ContactUsSection.SendMessage payload ->
-                        case (ContactUsSection.isModelSubmittable payload) of
+                    ContactUsSection.SendMessage ->
+                        case (ContactUsSection.isModelSubmittable newContactUsModel) of
                             True ->
-                                ( { model | sectionState = TransitioningFrom (ContactUsSection payload) }, Cmd.map ContactUsMsg <| Task.attempt ContactUsSection.RequestMessageCompleted (Reader.run requestContactUs ( model.nodeEnv, "", ContactUsSection.modelToRequestMessage payload )) )
+                                ( { model
+                                    | sectionState =
+                                        TransitioningFrom (ContactUsSection newContactUsModel)
+                                  }
+                                , Cmd.map ContactUsMsg <|
+                                    Task.attempt ContactUsSection.RequestMessageCompleted (Reader.run requestContactUs ( model.nodeEnv, "", ContactUsSection.modelToRequestMessage newContactUsModel ))
+                                )
 
                             False ->
-                                ( { model | sectionState = Loaded (ContactUsSection payload) }, Cmd.none )
+                                ( { model | sectionState = Loaded (ContactUsSection newContactUsModel) }, Cmd.none )
 
                     ContactUsSection.RequestMessageCompleted postResponse ->
                         ( { model | sectionState = Loaded (ContactUsSection newContactUsModel) }, Cmd.none )

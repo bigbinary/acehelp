@@ -49,7 +49,7 @@ init =
 
 
 type Msg
-    = SendMessage Model
+    = SendMessage
     | RequestMessageCompleted (Result Http.Error ResponseMessage)
     | NameInput String
     | EmailInput String
@@ -198,8 +198,8 @@ update msg model =
             in
                 ( { model | userNotification = errorMessage }, Cmd.none )
 
-        SendMessage model ->
-            ( model, Cmd.none )
+        SendMessage ->
+            ( validateModel model, Cmd.none )
 
         NameInput name ->
             ( { model | name = Field Nothing name }, Cmd.none )
@@ -250,7 +250,7 @@ formView model message =
 
             -- , input [ type_ "text", class "contact-subject", placeholder "Subject" ] []
             , span [ class "contact-message" ] [ textarea [ placeholder "How can we help?", onInput MessageInput ] [], fieldErrorDom model.message ]
-            , div [ class "regular-button", style [ ( "background-color", "rgb(60, 170, 249)" ) ], onClick (SendMessage (validateModel model)) ] [ text "Send Message" ]
+            , div [ class "regular-button", style [ ( "background-color", "rgb(60, 170, 249)" ) ], onClick SendMessage ] [ text "Send Message" ]
             ]
 
 
