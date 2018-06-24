@@ -1,3 +1,5 @@
+@import "mixins";
+
 #acehelp-hook {
     font-family: "proxima-nova", Arial, sans-serif;
     font-size: 14px;
@@ -74,6 +76,7 @@
             svg {
               width: 18px;
               height: 18px;
+              @include clickAnimation();
             }
           }
 
@@ -87,6 +90,22 @@
             }
           }
         }
+      }
+
+      .regular-button{
+        display: inline-block;
+        padding: 10px 20px;
+        border-radius: 5px;
+        color: #fff;
+        @include clickAnimation();
+      }
+
+      .centered-content{
+        display: flex;
+        height: 100%;
+        align-items: center;
+        justify-content: center;
+        flex-direction: column;
       }
 
       #tab-group {
@@ -108,8 +127,7 @@
           text-transform: uppercase;
           align-items: center;
           justify-content: center;
-          cursor: pointer;
-          transition: transform .2s ease-in-out;
+          @include clickAnimation();
 
           &:hover{
             transform: scale(1.08)
@@ -147,8 +165,7 @@
 
       #content-wrapper {
           padding: 0 50px;
-          overflow-x: auto;
-          max-height: calc(100vh - 57px);
+          height: 100%;
 
           .article-wrapper {
             padding: 30px 0 0;

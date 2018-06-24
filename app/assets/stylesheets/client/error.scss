@@ -5,11 +5,6 @@
  * http://stackoverflow.com/q/14446677/1397351
  */
  #something-went-wrong{
-    display: flex;
-    height: 100%;
-    align-items: center;
-    justify-content: center;
-    flex-direction: column;
     animation: ah-slide-from-bottom-and-pop-in 400ms 1;
     animation-timing-function: cubic-bezier(0, 0, 0.2, 1);
 

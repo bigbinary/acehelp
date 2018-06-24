@@ -10,11 +10,13 @@ import Section.CategoryList as CategoryListSection
 import Section.Article as ArticleSection
 import Section.ArticleList as ArticleListSection
 import Section.Error as ErrorSection
+import Section.ContactUs as ContactUsSection
 import Views.Container exposing (topBar)
 import Views.Loading exposing (sectionLoadingView)
 import Views.Tabs as Tabs
 import Data.Article exposing (..)
 import Data.Category exposing (..)
+import Request.ContactUs exposing (..)
 import Request.Helpers exposing (NodeEnv, Context(..))
 import Utils exposing (getUrlPathData)
 import Animation
@@ -42,6 +44,7 @@ type Section
     | CategoryListSection CategoryListSection.Model
     | ArticleSection ArticleSection.Model
     | ArticleListSection ArticleListSection.Model
+    | ContactUsSection ContactUsSection.Model
 
 
 type SectionState
@@ -159,6 +162,7 @@ type Msg
     | UrlChange Navigation.Location
     | GoBack
     | TabMsg Tabs.Msg
+    | ContactUsMsg ContactUsSection.Msg
 
 
 
@@ -185,6 +189,9 @@ getSectionView section =
 
         ArticleListSection model ->
             Html.map ArticleListMsg <| ArticleListSection.view model
+
+        ContactUsSection model ->
+            Html.map ContactUsMsg <| ContactUsSection.view model
 
 
 getSection : SectionState -> Section
@@ -307,15 +314,13 @@ update msg model =
                                     getSection model.sectionState
                                 )
 
-                        getCategoryListModel =
-                            (\section ->
-                                case section of
-                                    CategoryListSection model ->
-                                        Just model
+                        getCategoryListModel section =
+                            case section of
+                                CategoryListSection model ->
+                                    Just model
 
-                                    _ ->
-                                        Nothing
-                            )
+                                _ ->
+                                    Nothing
                     in
                         case currentArticles of
                             Just articles ->
@@ -358,6 +363,44 @@ update msg model =
         ArticleMsg ->
             ( model, Cmd.none )
 
+        ContactUsMsg contactUsMsg ->
+            let
+                currentContactUsModel =
+                    getContactUsModel <|
+                        getSection model.sectionState
+
+                getContactUsModel section =
+                    case section of
+                        ContactUsSection model ->
+                            model
+
+                        _ ->
+                            ContactUsSection.init
+
+                ( newContactUsModel, _ ) =
+                    ContactUsSection.update contactUsMsg currentContactUsModel
+            in
+                case contactUsMsg of
+                    ContactUsSection.SendMessage ->
+                        case (ContactUsSection.isModelSubmittable newContactUsModel) of
+                            True ->
+                                ( { model
+                                    | sectionState =
+                                        TransitioningFrom (ContactUsSection newContactUsModel)
+                                  }
+                                , Cmd.map ContactUsMsg <|
+                                    Task.attempt ContactUsSection.RequestMessageCompleted (Reader.run requestContactUs ( model.nodeEnv, "", ContactUsSection.modelToRequestMessage newContactUsModel ))
+                                )
+
+                            False ->
+                                ( { model | sectionState = Loaded (ContactUsSection newContactUsModel) }, Cmd.none )
+
+                    ContactUsSection.RequestMessageCompleted postResponse ->
+                        ( { model | sectionState = Loaded (ContactUsSection newContactUsModel) }, Cmd.none )
+
+                    _ ->
+                        ( { model | sectionState = Loaded (ContactUsSection newContactUsModel) }, Cmd.none )
+
 
 onTabChange : Tabs.Tabs -> Model -> ( Model, Cmd Msg )
 onTabChange tab model =
@@ -373,7 +416,7 @@ onTabChange tab model =
             )
 
         Tabs.ContactUs ->
-            ( model, Cmd.none )
+            ( { model | sectionState = Loaded (ContactUsSection ContactUsSection.init) }, Cmd.none )
 
 
 cmdForSuggestedArticles : Model -> Cmd Msg

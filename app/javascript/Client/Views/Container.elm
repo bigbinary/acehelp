@@ -3,8 +3,6 @@ module Views.Container exposing (..)
 import Html exposing (..)
 import Html.Attributes exposing (id, style, class, classList)
 import Html.Events exposing (onClick)
-import Svg
-import Svg.Attributes
 import Animation
 import Color exposing (rgb)
 import FontAwesome.Solid as SolidIcon
