@@ -40,6 +40,9 @@ baseUrl env =
         "production" ->
             "https://staging.acehelp.com/"
 
+        "development" ->
+            ""
+
         _ ->
             ""
 

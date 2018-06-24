@@ -27,7 +27,7 @@ initModel =
 
 init : String -> String -> String -> ( Model, Cmd Msg )
 init env url key =
-    ( initModel, fetchArticlesList )
+    ( initModel, fetchArticlesList env url key )
 
 
 
@@ -40,9 +40,12 @@ type Msg
     | LoadArticle ArticleId
 
 
-update : Msg -> Model -> ( Model, Cmd Msg )
-update msg model =
+update : String -> String -> String -> Msg -> Model -> ( Model, Cmd Msg )
+update nodeEnv url organizationKey msg model =
     case msg of
+        FetchArticles ->
+            ( model, (fetchArticlesList nodeEnv url organizationKey) )
+
         ArticleLoaded (Ok articlesList) ->
             ( { model | articles = articlesList }, Cmd.none )
 
@@ -92,11 +95,11 @@ rows article =
         ]
 
 
-fetchArticlesList : Cmd Msg
-fetchArticlesList =
+fetchArticlesList : String -> String -> String -> Cmd Msg
+fetchArticlesList nodeEnv url organizationKey =
     let
         request =
-            requestArticles "dev" "http://aceinvoice.com/getting-started" "96b66a612c703f573913"
+            requestArticles nodeEnv url organizationKey
 
         cmd =
             Http.send ArticleLoaded request

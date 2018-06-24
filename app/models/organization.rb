@@ -4,6 +4,8 @@ class Organization < ApplicationRecord
   has_many :urls
   has_many :articles
 
+  has_one :owner, class_name: 'User', foreign_key: 'user_id'
+
   validates :name, presence: true
   validates_uniqueness_of :name, case_sensitive: false
 

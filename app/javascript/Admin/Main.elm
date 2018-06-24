@@ -21,12 +21,16 @@ import Request.Helpers exposing (NodeEnv)
 
 type alias Flags =
     { node_env : String
+    , organization_key : String
+    , url : String
     }
 
 
 type alias Model =
     { currentPage : Page
-    , nodeEnv : NodeEnv
+    , nodeEnv : String
+    , organizationKey : String
+    , url : String
     }
 
 
@@ -47,7 +51,6 @@ init flags location =
     let
         ( pageModel, pageCmd ) =
             retrivePage flags.node_env location
-
         initModel =
             { currentPage = pageModel
             , nodeEnv = "dev"
@@ -95,7 +98,7 @@ update msg model =
                             ArticleList.initModel
 
                 ( articleListModel, articleListCmd ) =
-                    ArticleList.update alMsg currentPageModel
+                    ArticleList.update model.nodeEnv model.url model.organizationKey alMsg ArticleList.initModel
             in
                 ( { model | currentPage = (ArticleList articleListModel) }
                 , Cmd.map ArticleListMsg articleListCmd
@@ -242,7 +245,7 @@ urlLocationToMsg : Model -> Location -> Msg
 urlLocationToMsg model location =
     let
         ( pageModel, pageCmd ) =
-            retrivePage model.nodeEnv location
+            retrivePage location.pathname model.nodeEnv model.url model.organizationKey
     in
         ChangePage pageModel pageCmd
 
@@ -253,7 +256,7 @@ retrivePage env location =
         "/admin/articles" ->
             let
                 ( pageModel, pageCmd ) =
-                    ArticleList.init "" "" ""
+                    ArticleList.init env url key
             in
                 ( ArticleList pageModel, Cmd.map ArticleListMsg pageCmd )
 
@@ -267,7 +270,7 @@ retrivePage env location =
         "/admin/urls" ->
             let
                 ( pageModel, pageCmd ) =
-                    UrlList.init
+                    UrlList.init env key
             in
                 ( UrlList pageModel, Cmd.map UrlListMsg pageCmd )
 

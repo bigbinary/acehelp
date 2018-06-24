@@ -13,7 +13,12 @@ import "../../assets/stylesheets/admin/index.scss";
 
 document.addEventListener("DOMContentLoaded", () => {
   var node = document.getElementById("admin-hook");
+  var organization_key = document.getElementById("organization_key").dataset
+    .organizationKey;
+  var url = document.getElementById("url").dataset.url;
   Elm.Main.embed(node, {
-    node_env: process.env.NODE_ENV
+    node_env: process.env.NODE_ENV,
+    organization_key: organization_key,
+    url: url
   });
 });
