@@ -51,6 +51,7 @@ view model =
                     [ onClick <| LoadCategory category.id
                     , class "clickable selectable-row"
                     ]
+                    [ text category.name ]
             )
             model
         )
