@@ -51,6 +51,7 @@ init flags location =
     let
         ( pageModel, pageCmd ) =
             retrivePage flags.node_env location
+
         initModel =
             { currentPage = pageModel
             , nodeEnv = "dev"
@@ -98,7 +99,7 @@ update msg model =
                             ArticleList.initModel
 
                 ( articleListModel, articleListCmd ) =
-                    ArticleList.update model.nodeEnv model.url model.organizationKey alMsg ArticleList.initModel
+                    ArticleList.update alMsg ArticleList.initModel
             in
                 ( { model | currentPage = (ArticleList articleListModel) }
                 , Cmd.map ArticleListMsg articleListCmd

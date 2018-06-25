@@ -40,12 +40,9 @@ type Msg
     | LoadArticle ArticleId
 
 
-update : String -> String -> String -> Msg -> Model -> ( Model, Cmd Msg )
-update nodeEnv url organizationKey msg model =
+update : Msg -> Model -> ( Model, Cmd Msg )
+update msg model =
     case msg of
-        FetchArticles ->
-            ( model, (fetchArticlesList nodeEnv url organizationKey) )
-
         ArticleLoaded (Ok articlesList) ->
             ( { model | articles = articlesList }, Cmd.none )
 
