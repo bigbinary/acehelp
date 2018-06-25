@@ -52,7 +52,7 @@ view model =
                     [ onClick <| LoadCategory category.id
                     , class "clickable selectable-row"
                     ]
-                    [ span [ class "row-icon" ] [ SolidIcon.file_alt ]
+                    [ span [ class "row-icon" ] [ SolidIcon.folder ]
                     , span [ class "row-title" ] [ text category.name ]
                     ]
             )
