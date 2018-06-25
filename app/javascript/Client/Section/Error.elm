@@ -1,4 +1,4 @@
-module Page.Error exposing (..)
+module Section.Error exposing (..)
 
 import Html exposing (..)
 import Html.Attributes exposing (..)

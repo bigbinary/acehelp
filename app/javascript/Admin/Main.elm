@@ -13,7 +13,6 @@ import Page.Category.Create as CategoryCreate
 import Page.Organization.Display as OrganizationDisplay
 import Data.Organization exposing (OrganizationId)
 import UrlParser as Url exposing (..)
-import Request.Helpers exposing (ApiKey, Context, NodeEnv)
 
 
 -- MODEL
@@ -26,7 +25,6 @@ type alias Flags =
 
 type alias Model =
     { currentPage : Page
-    , nodeEnv : NodeEnv
     }
 
 
@@ -38,6 +36,7 @@ type Page
     | UrlList UrlList.Model
     | UrlCreate UrlCreate.Model
     | OrganizationDisplay OrganizationDisplay.Model
+    | Dashboard
     | NotFound
 
 
@@ -45,11 +44,10 @@ init : Flags -> Location -> ( Model, Cmd Msg )
 init flags location =
     let
         ( pageModel, pageCmd ) =
-            retrivePage location flags.node_env
+            retrivePage location
 
         initModel =
             { currentPage = pageModel
-            , nodeEnv = Debug.log "" flags.node_env
             }
     in
         ( initModel, pageCmd )
@@ -174,6 +172,9 @@ convertPageToHash page =
         OrganizationDisplay organizationDisplayModel->
             "/admin/organization/1"
 
+        Dashboard ->
+            "/admin/dashboard"
+
         NotFound ->
             "/404"
 
@@ -182,13 +183,13 @@ urlLocationToMsg : Location -> Msg
 urlLocationToMsg location =
     let
         ( pageModel, pageCmd ) =
-            retrivePage location "dev"
+            retrivePage location
     in
         ChangePage pageModel pageCmd
 
 
-retrivePage : Location -> NodeEnv -> ( Page, Cmd Msg )
-retrivePage location env =
+retrivePage : Location -> ( Page, Cmd Msg )
+retrivePage location =
     case ( extractStaticPath location ) of
         "/admin/articles" ->
             let
@@ -235,9 +236,12 @@ retrivePage location env =
         "/admin/organization" ->
             let
                 ( pageModel, pageCmd ) =
-                    OrganizationDisplay.init ( retriveOrganizationFromUrl location ) env
+                    OrganizationDisplay.init ( retriveOrganizationFromUrl location )
             in
                 ( OrganizationDisplay pageModel, Cmd.map OrganizationDisplayMsg pageCmd )
+
+        "/admin/dashboard" ->
+            ( Dashboard, Cmd.none )
 
         _ ->
             ( NotFound, Cmd.none )
@@ -320,6 +324,9 @@ view model =
                 OrganizationDisplay organizationDisplayModel->
                     Html.map OrganizationDisplayMsg
                         (OrganizationDisplay.view organizationDisplayModel)
+
+                Dashboard ->
+                    div [] [ text "Dashboard" ]
 
                 _ ->
                     div [] [ text "Not Found" ]

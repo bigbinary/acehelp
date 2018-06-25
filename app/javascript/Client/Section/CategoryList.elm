@@ -1,4 +1,4 @@
-module Page.CategoryList exposing (init, initAnim, Msg(..), Model, view, getCategoryWithId)
+module Section.CategoryList exposing (init, initAnim, Msg(..), Model, view, getCategoryWithId)
 
 import Data.Category exposing (..)
 import Request.Category exposing (..)
@@ -6,7 +6,7 @@ import Request.Helpers exposing (ApiKey, Context, NodeEnv)
 import Views.Container exposing (popInInitialAnim)
 import Html exposing (..)
 import Html.Events exposing (onClick)
-import Html.Attributes exposing (class)
+import Html.Attributes exposing (id, class)
 import Http
 import Task
 import Animation
@@ -44,13 +44,12 @@ type Msg
 
 view : Model -> Html Msg
 view model =
-    div
-        []
+    div [ id "content-wrapper" ]
         (List.map
             (\category ->
                 div
                     [ onClick <| LoadCategory category.id
-                    , class "clickable"
+                    , class "clickable selectable-row"
                     ]
                     [ text category.name ]
             )
