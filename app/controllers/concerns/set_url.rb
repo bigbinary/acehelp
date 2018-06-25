@@ -1,5 +1,6 @@
-#frozen_string_literal: true
+# frozen_string_literal: true
 
+# This is temporary, remove this concern once mapping between user and organization is created
 module SetUrl
   extend ActiveSupport::Concern
 
