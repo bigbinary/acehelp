@@ -2,8 +2,6 @@ module Request.CategoryRequest exposing (..)
 
 import Http
 import Data.CategoryData exposing (..)
-import Json.Decode as JD exposing (field)
-import Json.Encode as JE
 import Request.RequestHelper exposing (..)
 
 

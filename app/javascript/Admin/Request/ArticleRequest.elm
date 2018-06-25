@@ -1,10 +1,10 @@
 module Request.ArticleRequest exposing (..)
 
 import Http
-import Json.Decode as JD exposing (field)
-import Json.Encode as JE
+import Json.Decode as JsonDecoder exposing (field)
+import Json.Encode as JsonEncoder
 import Request.RequestHelper exposing (..)
-import Data.ArticleData as AD exposing (..)
+import Data.ArticleData exposing (..)
 
 
 articleListUrl : NodeEnv -> Url
@@ -34,7 +34,7 @@ requestArticles env orgUrl apiKey =
         httpRequest requestData articles
 
 
-requestCreateArticle : NodeEnv -> ApiKey -> JE.Value -> Http.Request String
+requestCreateArticle : NodeEnv -> ApiKey -> JsonEncoder.Value -> Http.Request String
 requestCreateArticle env apiKey body =
     let
         requestData =
@@ -47,6 +47,6 @@ requestCreateArticle env apiKey body =
             }
 
         decoder =
-            field "_id" JD.string
+            field "_id" JsonDecoder.string
     in
         httpRequest requestData decoder
