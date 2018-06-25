@@ -11,6 +11,7 @@ import Http
 import Task
 import Animation
 import Reader
+import FontAwesome.Solid as SolidIcon
 
 
 -- MODEL
@@ -51,7 +52,9 @@ view model =
                     [ onClick <| LoadCategory category.id
                     , class "clickable selectable-row"
                     ]
-                    [ text category.name ]
+                    [ span [ class "row-icon" ] [ SolidIcon.folder ]
+                    , span [ class "row-title" ] [ text category.name ]
+                    ]
             )
             model
         )
