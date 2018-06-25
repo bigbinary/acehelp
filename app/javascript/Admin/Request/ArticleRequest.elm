@@ -20,50 +20,29 @@ articleCreateUrl env =
 requestArticles : NodeEnv -> Url -> ApiKey -> Http.Request ArticleListResponse
 requestArticles env orgUrl apiKey =
     let
-        url =
-            (articleListUrl env) ++ "?url=" ++ orgUrl
-
-        headers =
-            List.concat
-                [ defaultRequestHeaders
-                , [ (Http.header "api-key" apiKey) ]
-                ]
-
-        decoder =
-            field "_id" JD.string
-    in
-        Http.request
+        requestData =
             { method = "GET"
-            , headers = headers
-            , url = url
+            , url = articleListUrl env
+            , params =
+                [ ( "url", orgUrl )
+                ]
             , body = Http.emptyBody
-            , expect = Http.expectJson articles
-            , timeout = Nothing
-            , withCredentials = False
             }
+    in
+        httpRequest env apiKey requestData articles
 
 
 requestCreateArticle : NodeEnv -> ApiKey -> JE.Value -> Http.Request String
 requestCreateArticle env apiKey body =
     let
-        url =
-            articleCreateUrl env
-
-        headers =
-            List.concat
-                [ defaultRequestHeaders
-                , [ Http.header "api-key" apiKey ]
-                ]
+        requestData =
+            { url = articleCreateUrl env
+            , method = "POST"
+            , params = []
+            , body = Http.jsonBody <| body
+            }
 
         decoder =
             field "_id" JD.string
     in
-        Http.request
-            { method = "POST"
-            , headers = headers
-            , url = url
-            , body = Http.jsonBody <| body
-            , expect = Http.expectJson decoder
-            , timeout = Nothing
-            , withCredentials = False
-            }
+        httpRequest env apiKey requestData decoder

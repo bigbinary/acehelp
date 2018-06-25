@@ -20,35 +20,27 @@ urlCreate nodeEnv =
 requestUrls : NodeEnv -> ApiKey -> Http.Request UrlsListResponse
 requestUrls nodeEnv apiKey =
     let
-        headers =
-            urlHeaders [ Http.header "api-key" apiKey ]
-    in
-        Http.request
+        requestData =
             { method = "GET"
-            , headers = headers
-            , url = (urlList nodeEnv)
+            , url = urlList nodeEnv
+            , params = []
             , body = Http.emptyBody
-            , expect = Http.expectJson urlListDecoder
-            , timeout = Nothing
-            , withCredentials = False
             }
+    in
+        httpRequest nodeEnv apiKey requestData urlListDecoder
 
 
 createUrl : NodeEnv -> ApiKey -> JE.Value -> Http.Request String
 createUrl nodeEnv apiKey body =
     let
-        headers =
-            urlHeaders [ Http.header "api-key" apiKey ]
+        requestData =
+            { method = "POST"
+            , url = urlCreate nodeEnv
+            , params = []
+            , body = Http.jsonBody <| body
+            }
 
         decoder =
             field "_id" JD.string
     in
-        Http.request
-            { method = "POST"
-            , url = (urlCreate nodeEnv)
-            , headers = headers
-            , body = Http.jsonBody <| body
-            , expect = Http.expectJson decoder
-            , timeout = Nothing
-            , withCredentials = False
-            }
+        httpRequest nodeEnv apiKey requestData decoder

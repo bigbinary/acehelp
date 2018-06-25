@@ -15,21 +15,11 @@ categoryListUrl env =
 requestCategories : NodeEnv -> ApiKey -> Http.Request CategoryList
 requestCategories env apiKey =
     let
-        url =
-            categoryListUrl env
-
-        headers =
-            List.concat
-                [ defaultRequestHeaders
-                , [ Http.header "api-key" apiKey ]
-                ]
-    in
-        Http.request
+        requestData =
             { method = "GET"
-            , url = url
-            , headers = headers
+            , params = []
+            , url = categoryListUrl env
             , body = Http.emptyBody
-            , expect = Http.expectJson categoryListDecoder
-            , timeout = Nothing
-            , withCredentials = False
             }
+    in
+        httpRequest env apiKey requestData categoryListDecoder
