@@ -6,7 +6,7 @@ import Html.Attributes exposing (..)
 import Request.OrganizationRequest exposing (..)
 import Data.ArticleData exposing (ArticleSummary)
 import Data.Organization exposing (..)
-import Request.Helpers exposing (ApiKey, Context, NodeEnv)
+import Request.Helpers exposing (NodeEnv)
 
 --import Html.Events exposing (..)
 
@@ -27,9 +27,9 @@ initModel =
     }
 
 
-init : OrganizationId -> ( Model, Cmd Msg )
-init organizationId =
-    ( initModel, ( fetchOrganization organizationId  ) )
+init : NodeEnv -> OrganizationId -> ( Model, Cmd Msg )
+init env organizationId =
+    ( initModel, ( fetchOrganization env organizationId ) )
 
 
 
@@ -81,11 +81,11 @@ renderArticles articles =
 
 
 
-fetchOrganization : OrganizationId -> Cmd Msg
-fetchOrganization organiztionId =
+fetchOrganization : NodeEnv -> OrganizationId -> Cmd Msg
+fetchOrganization env organiztionId =
     let
         request =
-            requestOrganization "" "" organiztionId
+            requestOrganization env "" organiztionId
 
         cmd =
             Http.send OrganizationLoaded request
