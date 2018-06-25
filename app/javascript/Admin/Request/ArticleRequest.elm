@@ -27,9 +27,11 @@ requestArticles env orgUrl apiKey =
                 [ ( "url", orgUrl )
                 ]
             , body = Http.emptyBody
+            , nodeEnv = env
+            , organizationApiKey = apiKey
             }
     in
-        httpRequest env apiKey requestData articles
+        httpRequest requestData articles
 
 
 requestCreateArticle : NodeEnv -> ApiKey -> JE.Value -> Http.Request String
@@ -40,9 +42,11 @@ requestCreateArticle env apiKey body =
             , method = "POST"
             , params = []
             , body = Http.jsonBody <| body
+            , nodeEnv = env
+            , organizationApiKey = apiKey
             }
 
         decoder =
             field "_id" JD.string
     in
-        httpRequest env apiKey requestData decoder
+        httpRequest requestData decoder

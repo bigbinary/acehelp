@@ -25,9 +25,11 @@ requestUrls nodeEnv apiKey =
             , url = urlList nodeEnv
             , params = []
             , body = Http.emptyBody
+            , nodeEnv = nodeEnv
+            , organizationApiKey = apiKey
             }
     in
-        httpRequest nodeEnv apiKey requestData urlListDecoder
+        httpRequest requestData urlListDecoder
 
 
 createUrl : NodeEnv -> ApiKey -> JE.Value -> Http.Request String
@@ -38,9 +40,11 @@ createUrl nodeEnv apiKey body =
             , url = urlCreate nodeEnv
             , params = []
             , body = Http.jsonBody <| body
+            , nodeEnv = nodeEnv
+            , organizationApiKey = apiKey
             }
 
         decoder =
             field "_id" JD.string
     in
-        httpRequest nodeEnv apiKey requestData decoder
+        httpRequest requestData decoder

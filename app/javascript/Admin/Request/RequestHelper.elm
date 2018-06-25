@@ -29,6 +29,8 @@ type alias RequestData =
     , url : Url
     , params : QueryParameters
     , body : Http.Body
+    , nodeEnv : NodeEnv
+    , organizationApiKey : ApiKey
     }
 
 
@@ -59,13 +61,13 @@ constructUrl url params =
             url ++ "?" ++ String.join "&" (List.map (\( key, value ) -> Http.encodeUri key ++ "=" ++ value) params)
 
 
-httpRequest : NodeEnv -> ApiKey -> RequestData -> Decoder a -> Http.Request a
-httpRequest env organizationKey requestData decoder =
+httpRequest : RequestData -> Decoder a -> Http.Request a
+httpRequest requestData decoder =
     let
         headers =
             List.concat
                 [ defaultRequestHeaders
-                , [ Http.header "api-key" organizationKey ]
+                , [ Http.header "api-key" requestData.organizationApiKey ]
                 ]
 
         callUrl =

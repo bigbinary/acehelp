@@ -20,6 +20,8 @@ requestCategories env apiKey =
             , params = []
             , url = categoryListUrl env
             , body = Http.emptyBody
+            , nodeEnv = env
+            , organizationApiKey = apiKey
             }
     in
-        httpRequest env apiKey requestData categoryListDecoder
+        httpRequest requestData categoryListDecoder
