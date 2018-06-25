@@ -14,6 +14,7 @@ import Section.ContactUs as ContactUsSection
 import Views.Container exposing (topBar)
 import Views.Loading exposing (sectionLoadingView)
 import Views.Tabs as Tabs
+import Views.Search as SearchBar
 import Data.Article exposing (..)
 import Data.Category exposing (..)
 import Request.ContactUs exposing (..)
@@ -132,6 +133,7 @@ maximizedView model =
             )
             [ topBar showBackButton GoBack (SetAppState Minimized)
             , Html.map TabMsg <| Tabs.view model.tabModel
+            , SearchBar.searchBar "rgb(60, 170, 249)"
             , getSectionView <| getSection model.sectionState
             ]
 
