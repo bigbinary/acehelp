@@ -11,13 +11,13 @@ module Api
 
       def index
         if params[:url].present?
-          url = Url.find_by(url: params[:url])
+          url = Url.find_by!(url: params[:url])
         end
 
         if url.present?
           render json: url.articles, root: "articles"
         else
-          render json: Article.all, root: "articles"
+          render_bad_request "Bad request"
         end
       end
 
