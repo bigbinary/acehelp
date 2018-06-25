@@ -1,10 +1,10 @@
 module Request.ArticleRequest exposing (..)
 
 import Http
-import Json.Decode as JD exposing (field)
-import Json.Encode as JE
+import Json.Decode as JsonDecoder exposing (field)
+import Json.Encode as JsonEncoder
 import Request.RequestHelper exposing (..)
-import Data.ArticleData as AD exposing (..)
+import Data.ArticleData exposing (..)
 
 
 articleListUrl : NodeEnv -> Url
@@ -20,50 +20,33 @@ articleCreateUrl env =
 requestArticles : NodeEnv -> Url -> ApiKey -> Http.Request ArticleListResponse
 requestArticles env orgUrl apiKey =
     let
-        url =
-            (articleListUrl env) ++ "?url=" ++ orgUrl
-
-        headers =
-            List.concat
-                [ defaultRequestHeaders
-                , [ (Http.header "api-key" apiKey) ]
-                ]
-
-        decoder =
-            field "_id" JD.string
-    in
-        Http.request
+        requestData =
             { method = "GET"
-            , headers = headers
-            , url = url
+            , url = articleListUrl env
+            , params =
+                [ ( "url", orgUrl )
+                ]
             , body = Http.emptyBody
-            , expect = Http.expectJson articles
-            , timeout = Nothing
-            , withCredentials = False
+            , nodeEnv = env
+            , organizationApiKey = apiKey
             }
+    in
+        httpRequest requestData articles
 
 
-requestCreateArticle : NodeEnv -> ApiKey -> JE.Value -> Http.Request String
+requestCreateArticle : NodeEnv -> ApiKey -> JsonEncoder.Value -> Http.Request String
 requestCreateArticle env apiKey body =
     let
-        url =
-            articleCreateUrl env
-
-        headers =
-            List.concat
-                [ defaultRequestHeaders
-                , [ Http.header "api-key" apiKey ]
-                ]
+        requestData =
+            { url = articleCreateUrl env
+            , method = "POST"
+            , params = []
+            , body = Http.jsonBody <| body
+            , nodeEnv = env
+            , organizationApiKey = apiKey
+            }
 
         decoder =
-            field "_id" JD.string
+            field "_id" JsonDecoder.string
     in
-        Http.request
-            { method = "POST"
-            , headers = headers
-            , url = url
-            , body = Http.jsonBody <| body
-            , expect = Http.expectJson decoder
-            , timeout = Nothing
-            , withCredentials = False
-            }
+        httpRequest requestData decoder

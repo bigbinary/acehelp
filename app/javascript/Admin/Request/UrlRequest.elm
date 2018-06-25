@@ -1,8 +1,8 @@
 module Request.UrlRequest exposing (..)
 
 import Http
-import Json.Decode as JD exposing (field)
-import Json.Encode as JE
+import Json.Decode as JsonDecoder exposing (field)
+import Json.Encode as JsonEncoder
 import Request.RequestHelper exposing (..)
 import Data.UrlData exposing (..)
 
@@ -20,35 +20,31 @@ urlCreate nodeEnv =
 requestUrls : NodeEnv -> ApiKey -> Http.Request UrlsListResponse
 requestUrls nodeEnv apiKey =
     let
-        headers =
-            urlHeaders [ Http.header "api-key" apiKey ]
-    in
-        Http.request
+        requestData =
             { method = "GET"
-            , headers = headers
-            , url = (urlList nodeEnv)
+            , url = urlList nodeEnv
+            , params = []
             , body = Http.emptyBody
-            , expect = Http.expectJson urlListDecoder
-            , timeout = Nothing
-            , withCredentials = False
+            , nodeEnv = nodeEnv
+            , organizationApiKey = apiKey
             }
+    in
+        httpRequest requestData urlListDecoder
 
 
-createUrl : NodeEnv -> ApiKey -> JE.Value -> Http.Request String
+createUrl : NodeEnv -> ApiKey -> JsonEncoder.Value -> Http.Request String
 createUrl nodeEnv apiKey body =
     let
-        headers =
-            urlHeaders [ Http.header "api-key" apiKey ]
+        requestData =
+            { method = "POST"
+            , url = urlCreate nodeEnv
+            , params = []
+            , body = Http.jsonBody <| body
+            , nodeEnv = nodeEnv
+            , organizationApiKey = apiKey
+            }
 
         decoder =
-            field "_id" JD.string
+            field "_id" JsonDecoder.string
     in
-        Http.request
-            { method = "POST"
-            , url = (urlCreate nodeEnv)
-            , headers = headers
-            , body = Http.jsonBody <| body
-            , expect = Http.expectJson decoder
-            , timeout = Nothing
-            , withCredentials = False
-            }
+        httpRequest requestData decoder
