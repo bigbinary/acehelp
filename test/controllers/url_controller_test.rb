@@ -41,10 +41,9 @@ class UrlControllerTest < ActionDispatch::IntegrationTest
 
   def test_update_success
     params = { url: { url: "https://amazon.com" } }
+    put url_path(-345), params: params, headers: @headers
 
-    assert_raises(ActiveRecord::RecordNotFound) do
-      put url_path(-345), params: params, headers: @headers
-    end
+    assert_response :not_found
 
     put url_path(@url.id), params: params, headers: @headers
 

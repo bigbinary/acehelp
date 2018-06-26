@@ -84,9 +84,9 @@ class ArticleControllerTest < ActionDispatch::IntegrationTest
 
     assert_response :unauthorized
 
-    assert_raises(ActiveRecord::RecordNotFound) do
-      put article_path(-345), params: params, headers: headers
-    end
+    put article_path(-345), params: params, headers: headers
+
+    assert_response :not_found
 
     put article_path(@article.id), params: params, headers: headers
 

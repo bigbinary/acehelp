@@ -10,6 +10,10 @@ import Page.Url.List as UrlList
 import Page.Url.Create as UrlCreate
 import Page.Category.List as CategoryList
 import Page.Category.Create as CategoryCreate
+import Page.Organization.Display as OrganizationDisplay
+import Data.Organization exposing (OrganizationId)
+import UrlParser as Url exposing (..)
+import Request.Helpers exposing (NodeEnv)
 
 
 -- MODEL
@@ -22,6 +26,7 @@ type alias Flags =
 
 type alias Model =
     { currentPage : Page
+    , nodeEnv : NodeEnv
     }
 
 
@@ -32,6 +37,7 @@ type Page
     | CategoryCreate CategoryCreate.Model
     | UrlList UrlList.Model
     | UrlCreate UrlCreate.Model
+    | OrganizationDisplay OrganizationDisplay.Model
     | Dashboard
     | NotFound
 
@@ -40,14 +46,14 @@ init : Flags -> Location -> ( Model, Cmd Msg )
 init flags location =
     let
         ( pageModel, pageCmd ) =
-            retrivePage location.pathname
+            retrivePage flags.node_env location
 
         initModel =
             { currentPage = pageModel
+            , nodeEnv = "dev"
             }
     in
         ( initModel, pageCmd )
-
 
 
 -- MSG
@@ -62,7 +68,8 @@ type Msg
     | UrlListMsg UrlList.Msg
     | CategoryListMsg CategoryList.Msg
     | CategoryCreateMsg CategoryCreate.Msg
-
+    | OrganizationDisplayMsg OrganizationDisplay.Msg
+    | UrlLocationChange Navigation.Location
 
 
 -- UPDATE
@@ -181,6 +188,24 @@ update msg model =
                 , Cmd.map CategoryCreateMsg categoryCreateCmd
                 )
 
+        OrganizationDisplayMsg osMsg ->
+            let
+                ( organizationDisplayModel, organizationDisplayCmd ) =
+                    OrganizationDisplay.update osMsg OrganizationDisplay.initModel
+            in
+                ( { model
+                    | currentPage = OrganizationDisplay organizationDisplayModel
+                  }
+                , Cmd.map OrganizationDisplayMsg organizationDisplayCmd
+                )
+
+        UrlLocationChange location ->
+            let
+                msg =
+                    urlLocationToMsg model location
+            in
+                update msg model
+
 
 convertPageToHash : Page -> String
 convertPageToHash page =
@@ -203,6 +228,9 @@ convertPageToHash page =
         CategoryCreate categoryCreateModel ->
             "/admin/categories/new"
 
+        OrganizationDisplay organizationDisplayModel->
+            "/admin/organization/1"
+
         Dashboard ->
             "/admin/dashboard"
 
@@ -210,19 +238,18 @@ convertPageToHash page =
             "/404"
 
 
-urlLocationToMsg : Location -> Msg
-urlLocationToMsg location =
+urlLocationToMsg : Model -> Location -> Msg
+urlLocationToMsg model location =
     let
         ( pageModel, pageCmd ) =
-            location.pathname
-                |> retrivePage
+            retrivePage model.nodeEnv location
     in
         ChangePage pageModel pageCmd
 
 
-retrivePage : String -> ( Page, Cmd Msg )
-retrivePage pathname =
-    case pathname of
+retrivePage : NodeEnv -> Location -> ( Page, Cmd Msg )
+retrivePage env location =
+    case ( extractStaticPath location ) of
         "/admin/articles" ->
             let
                 ( pageModel, pageCmd ) =
@@ -265,11 +292,50 @@ retrivePage pathname =
             in
                 ( CategoryCreate pageModel, Cmd.map CategoryCreateMsg pageCmd )
 
+        "/admin/organization" ->
+            let
+                ( pageModel, pageCmd ) =
+                    OrganizationDisplay.init env ( retriveOrganizationFromUrl location )
+            in
+                ( OrganizationDisplay pageModel, Cmd.map OrganizationDisplayMsg pageCmd )
+
         "/admin/dashboard" ->
             ( Dashboard, Cmd.none )
 
         _ ->
             ( NotFound, Cmd.none )
+
+
+extractStaticPath : Location -> String
+extractStaticPath location =
+        let
+            staticPath = parsePath ( s "admin" </> s "organization" </> string ) location
+        in
+            case staticPath of
+                    Nothing ->
+                        location.pathname
+
+                    Just staticPath ->
+                        "/admin/organization"
+
+
+
+retriveOrganizationFromUrl : Location -> OrganizationId
+retriveOrganizationFromUrl location =
+    let
+        org = parsePath ( s "admin" </> s "organization" </> int ) location
+    in
+        getOrganizationId ( org )
+
+
+getOrganizationId : Maybe Int -> OrganizationId
+getOrganizationId orgId =
+    case orgId of
+        Just orgId ->
+          orgId
+
+        Nothing ->
+          -1
 
 
 
@@ -314,6 +380,10 @@ view model =
                     Html.map CategoryCreateMsg
                         (CategoryCreate.view categoryCreateModel)
 
+                OrganizationDisplay organizationDisplayModel->
+                    Html.map OrganizationDisplayMsg
+                        (OrganizationDisplay.view organizationDisplayModel)
+
                 Dashboard ->
                     div [] [ text "Dashboard" ]
 
@@ -337,13 +407,12 @@ adminHeader model =
         ]
 
 
-
 -- MAIN
 
 
 main : Program Flags Model Msg
 main =
-    Navigation.programWithFlags urlLocationToMsg
+    Navigation.programWithFlags UrlLocationChange
         { init = init
         , update = update
         , view = view
