@@ -29,9 +29,9 @@
     }
   }
 
-  @keyframes ah-slide-from-left {
+  @keyframes ah-slide-from-top {
     0% {
-        transform: translate(60px, 0);
+        transform: translate(0, -20px);
         opacity: 0;
     }  
     100% {
