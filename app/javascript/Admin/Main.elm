@@ -134,7 +134,7 @@ update msg model =
                             UrlCreate.initModel
 
                 ( createUrlModel, createUrlCmds ) =
-                    UrlCreate.update cuMsg currentPageModel
+                    UrlCreate.update cuMsg currentPageModel model.nodeEnv model.organizationKey
             in
                 ( { model | currentPage = (UrlCreate createUrlModel) }
                 , Cmd.map UrlCreateMsg createUrlCmds

@@ -138,14 +138,7 @@ urlsDropdown model =
 
 fetchArticlesList : String -> String -> String -> Cmd Msg
 fetchArticlesList nodeEnv url organizationKey =
-    let
-        request =
-            requestArticles nodeEnv url organizationKey
-
-        cmd =
-            Http.send ArticleLoaded request
-    in
-        cmd
+    Http.send ArticleLoaded (requestArticles nodeEnv url organizationKey)
 
 
 fetchUrlList : String -> String -> Cmd Msg

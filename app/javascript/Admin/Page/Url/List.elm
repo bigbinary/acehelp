@@ -104,11 +104,4 @@ urlRow url =
 
 fetchUrlList : String -> String -> Cmd Msg
 fetchUrlList env key =
-    let
-        request =
-            requestUrls env key
-
-        cmd =
-            Http.send UrlLoaded request
-    in
-        cmd
+    Http.send UrlLoaded (requestUrls env key)
