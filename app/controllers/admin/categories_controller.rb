@@ -1,8 +1,6 @@
 class Admin::CategoriesController < ApplicationController
-  include SetOrganization
-  include SetUrl
 
-  before_action :ensure_user_is_logged_in
+  before_action :ensure_user_is_logged_in, :set_organization
 
   def index
     render

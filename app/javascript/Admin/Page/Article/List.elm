@@ -3,10 +3,14 @@ module Page.Article.List exposing (..)
 import Http
 import Html exposing (..)
 import Html.Attributes exposing (..)
+import Html.Events exposing (..)
 import Request.ArticleRequest exposing (..)
+import Request.UrlRequest exposing (..)
 import Data.CommonData exposing (..)
 import Page.Common.View exposing (renderError)
 import Data.ArticleData exposing (..)
+import Data.UrlData exposing (..)
+import Json.Decode as Json
 
 
 -- Model
@@ -14,6 +18,8 @@ import Data.ArticleData exposing (..)
 
 type alias Model =
     { articles : ArticleListResponse
+    , urlList : UrlsListResponse
+    , url : String
     , error : Error
     }
 
@@ -21,13 +27,15 @@ type alias Model =
 initModel : Model
 initModel =
     { articles = { articles = [] }
+    , urlList = { urls = [] }
+    , url = ""
     , error = Nothing
     }
 
 
-init : String -> String -> String -> ( Model, Cmd Msg )
-init env url key =
-    ( initModel, fetchArticlesList env url key )
+init : String -> String -> ( Model, Cmd Msg )
+init env key =
+    ( initModel, fetchUrlList env key )
 
 
 
@@ -35,9 +43,9 @@ init env url key =
 
 
 type Msg
-    = FetchArticles
+    = UrlSelected String
+    | UrlLoaded (Result Http.Error UrlsListResponse)
     | ArticleLoaded (Result Http.Error ArticleListResponse)
-    | LoadArticle ArticleId
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -49,8 +57,14 @@ update msg model =
         ArticleLoaded (Err err) ->
             ( { model | error = Just (toString err) }, Cmd.none )
 
-        _ ->
-            ( model, Cmd.none )
+        UrlLoaded (Ok urlList) ->
+            ( { model | urlList = urlList }, Cmd.none )
+
+        UrlLoaded (Err err) ->
+            ( { model | error = Just (toString err) }, Cmd.none )
+
+        UrlSelected url ->
+            ( { model | url = url }, Cmd.none )
 
 
 
@@ -65,6 +79,8 @@ view model =
         [ div
             []
             [ text (renderError model.error) ]
+        , div []
+            [ urlsDropdown model ]
         , div
             [ class "buttonDiv" ]
             [ a
@@ -92,6 +108,30 @@ rows article =
         ]
 
 
+urlsDropdown : Model -> Html Msg
+urlsDropdown model =
+    div
+        [ class "dropdown" ]
+        [ select
+            [ on "change" (Json.map UrlSelected targetValue) ]
+            (List.concat
+                [ [ option
+                        [ value "Select URL" ]
+                        [ text "Select URL" ]
+                  ]
+                , (List.map
+                    (\url ->
+                        option
+                            [ value url.url ]
+                            [ text url.url ]
+                    )
+                    model.urlList.urls
+                  )
+                ]
+            )
+        ]
+
+
 fetchArticlesList : String -> String -> String -> Cmd Msg
 fetchArticlesList nodeEnv url organizationKey =
     let
@@ -102,3 +142,8 @@ fetchArticlesList nodeEnv url organizationKey =
             Http.send ArticleLoaded request
     in
         cmd
+
+
+fetchUrlList : String -> String -> Cmd Msg
+fetchUrlList nodeEnv organizationKey =
+    Http.send UrlLoaded (requestUrls nodeEnv organizationKey)
