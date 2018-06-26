@@ -1,5 +1,4 @@
 $blueThemeColor: rgb(60, 170, 249);
-$background_color_1: #f9f9f9;
 
 #admin-hook {
   //colors
@@ -90,24 +89,5 @@ $background_color_1: #f9f9f9;
         //Instead of the line below you could use @include border-radius($radius, $vertical-radius)
         border-radius: 5px;
         padding: 20px;
-    }
-
-    .dropdown {
-        position: relative;
-        display: inline-block;
-        &:hover {
-            .dropdown-content {
-                display: block;
-            }
-        }
-    }
-    .dropdown-content {
-        display: none;
-        position: absolute;
-        background-color: $background_color_1;
-        min-width: 160px;
-        box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
-        padding: 12px 16px;
-        z-index: 1;
     }
 }

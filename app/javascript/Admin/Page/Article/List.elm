@@ -11,6 +11,7 @@ import Page.Common.View exposing (renderError)
 import Data.ArticleData exposing (..)
 import Data.UrlData exposing (..)
 import Json.Decode as Json
+import Request.Helpers exposing (NodeEnv, ApiKey)
 
 
 -- Model
@@ -48,8 +49,8 @@ type Msg
     | ArticleLoaded (Result Http.Error ArticleListResponse)
 
 
-update : Msg -> Model -> ( Model, Cmd Msg )
-update msg model =
+update : Msg -> Model -> ApiKey -> NodeEnv -> ( Model, Cmd Msg )
+update msg model organizationKey nodeEnv =
     case msg of
         ArticleLoaded (Ok articlesList) ->
             ( { model | articles = articlesList }, Cmd.none )
@@ -64,7 +65,10 @@ update msg model =
             ( { model | error = Just (toString err) }, Cmd.none )
 
         UrlSelected url ->
-            ( { model | url = url }, Cmd.none )
+            if url == "select_url" then
+                ( { model | articles = { articles = [] } }, Cmd.none )
+            else
+                ( { model | url = url }, fetchArticlesList nodeEnv url organizationKey )
 
 
 
@@ -116,7 +120,7 @@ urlsDropdown model =
             [ on "change" (Json.map UrlSelected targetValue) ]
             (List.concat
                 [ [ option
-                        [ value "Select URL" ]
+                        [ value "select_url" ]
                         [ text "Select URL" ]
                   ]
                 , (List.map

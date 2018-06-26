@@ -100,7 +100,7 @@ update msg model =
                             ArticleList.initModel
 
                 ( articleListModel, articleListCmd ) =
-                    ArticleList.update alMsg currentPageModel
+                    ArticleList.update alMsg currentPageModel model.organizationKey model.nodeEnv
             in
                 ( { model | currentPage = (ArticleList articleListModel) }
                 , Cmd.map ArticleListMsg articleListCmd
