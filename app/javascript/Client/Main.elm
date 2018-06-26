@@ -14,10 +14,11 @@ import Section.ContactUs as ContactUsSection
 import Views.Container exposing (topBar)
 import Views.Loading exposing (sectionLoadingView)
 import Views.Tabs as Tabs
-import Data.Article exposing (..)
+import Section.Search as SearchBar
+import Data.Article exposing (ArticleResponse, ArticleListResponse)
 import Data.Category exposing (..)
 import Request.ContactUs exposing (..)
-import Request.Helpers exposing (NodeEnv, Context(..))
+import Request.Helpers exposing (ApiKey, NodeEnv, Context(..))
 import Utils exposing (getUrlPathData)
 import Animation
 import Navigation
@@ -54,11 +55,13 @@ type SectionState
 
 type alias Model =
     { nodeEnv : NodeEnv
+    , apiKey : ApiKey
     , sectionState : SectionState
     , containerAnimation : Animation.State
     , currentAppState : AppState
     , context : Context
     , tabModel : Tabs.Model
+    , searchQuery : SearchBar.Model
     , history : ModelHistory
     }
 
@@ -82,11 +85,13 @@ initAnimation =
 init : Flags -> Navigation.Location -> ( Model, Cmd Msg )
 init flags location =
     ( { nodeEnv = flags.node_env
+      , apiKey = ""
       , sectionState = Loaded Blank
       , containerAnimation = Animation.style initAnimation
       , currentAppState = Minimized
       , context = Context <| getUrlPathData location
       , tabModel = Tabs.modelWithTabs Tabs.allTabs
+      , searchQuery = ""
       , history = NoHistory
       }
     , Cmd.none
@@ -132,6 +137,7 @@ maximizedView model =
             )
             [ topBar showBackButton GoBack (SetAppState Minimized)
             , Html.map TabMsg <| Tabs.view model.tabModel
+            , Html.map SearchBarMsg <| SearchBar.view model.searchQuery "rgb(60, 170, 249)"
             , getSectionView <| getSection model.sectionState
             ]
 
@@ -163,6 +169,7 @@ type Msg
     | GoBack
     | TabMsg Tabs.Msg
     | ContactUsMsg ContactUsSection.Msg
+    | SearchBarMsg SearchBar.Msg
 
 
 
@@ -339,7 +346,7 @@ update msg model =
             case articleListMsg of
                 ArticleListSection.LoadArticle articleId ->
                     ( { model | sectionState = transitionFromSection model.sectionState, history = ModelHistory model }
-                    , Task.attempt ArticleLoaded (Reader.run ArticleSection.init ( model.nodeEnv, "", model.context, articleId ))
+                    , Task.attempt ArticleLoaded (Reader.run ArticleSection.init ( model.nodeEnv, model.apiKey, model.context, articleId ))
                     )
 
         ArticleListLoaded (Ok articleList) ->
@@ -362,6 +369,30 @@ update msg model =
 
         ArticleMsg ->
             ( model, Cmd.none )
+
+        SearchBarMsg searchBarMsg ->
+            case searchBarMsg of
+                SearchBar.OnSearch ->
+                    let
+                        ( searchModel, _ ) =
+                            SearchBar.update searchBarMsg model.searchQuery
+                    in
+                        ( { model | sectionState = transitionFromSection model.sectionState }
+                        , Cmd.map SearchBarMsg <|
+                            Task.attempt SearchBar.SearchResultsReceived <|
+                                Reader.run SearchBar.requestSearch ( model.nodeEnv, model.apiKey, searchModel )
+                        )
+
+                SearchBar.SearchResultsReceived (Ok articleListResponse) ->
+                    ( { model | sectionState = Loaded (ArticleListSection { id = Nothing, articles = articleListResponse.articles }) }, Cmd.none )
+
+                SearchBar.SearchResultsReceived (Err error) ->
+                    ( { model | sectionState = Loaded (ErrorSection error) }, Cmd.none )
+
+                _ ->
+                    SearchBar.update searchBarMsg model.searchQuery
+                        |> Tuple.mapFirst (\updatedModel -> ({ model | searchQuery = updatedModel }))
+                        |> Tuple.mapSecond (Cmd.map SearchBarMsg)
 
         ContactUsMsg contactUsMsg ->
             let
@@ -389,7 +420,7 @@ update msg model =
                                         TransitioningFrom (ContactUsSection newContactUsModel)
                                   }
                                 , Cmd.map ContactUsMsg <|
-                                    Task.attempt ContactUsSection.RequestMessageCompleted (Reader.run requestContactUs ( model.nodeEnv, "", ContactUsSection.modelToRequestMessage newContactUsModel ))
+                                    Task.attempt ContactUsSection.RequestMessageCompleted (Reader.run requestContactUs ( model.nodeEnv, model.apiKey, ContactUsSection.modelToRequestMessage newContactUsModel ))
                                 )
 
                             False ->
@@ -421,12 +452,12 @@ onTabChange tab model =
 
 cmdForSuggestedArticles : Model -> Cmd Msg
 cmdForSuggestedArticles model =
-    Task.attempt ArticleListLoaded (Reader.run ArticleListSection.init ( model.nodeEnv, "", model.context ))
+    Task.attempt ArticleListLoaded (Reader.run ArticleListSection.init ( model.nodeEnv, model.apiKey, model.context ))
 
 
 cmdForLibrary : Model -> Cmd Msg
 cmdForLibrary model =
-    Task.attempt CategoryListLoaded (Reader.run CategoryListSection.init ( model.nodeEnv, "" ))
+    Task.attempt CategoryListLoaded (Reader.run CategoryListSection.init ( model.nodeEnv, model.apiKey ))
 
 
 

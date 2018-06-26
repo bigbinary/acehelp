@@ -1,0 +1,26 @@
+#acehelp-hook{
+    #max-view{
+        .ah-search-bar{
+            display: flex;
+            height: 50px;
+            justify-items: center;
+            justify-content: center;
+
+            input[type=text]{
+                max-width: 84%;
+                flex-grow: 1;
+            }
+
+            span {
+                width: 20px;
+                padding: 10px 10px;
+                color: #fff;
+                display: block;
+                @include clickAnimation();
+            }
+        }
+
+        
+    }
+    
+}
