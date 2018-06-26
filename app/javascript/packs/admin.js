@@ -13,8 +13,8 @@ import "../../assets/stylesheets/admin/index.scss";
 
 document.addEventListener("DOMContentLoaded", () => {
   var node = document.getElementById("admin-hook");
-  var organization_key = document.getElementById("organization_key").dataset
-    .organizationKey;
+  var organization_key_element = document.getElementById("organization_key");
+  var organization_key = organization_key_element.dataset.organizationKey;
   Elm.Main.embed(node, {
     node_env: process.env.NODE_ENV,
     organization_key: organization_key
