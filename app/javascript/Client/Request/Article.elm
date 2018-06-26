@@ -29,3 +29,11 @@ requestArticle =
                     decodeArticleResponse
                 )
         )
+
+
+requestSearchArticles : Reader ( NodeEnv, ApiKey, String ) (Task Http.Error ArticleListResponse)
+requestSearchArticles =
+    Reader.Reader
+        (\( env, apiKey, searchTerm ) ->
+            Http.toTask (httpGet apiKey Request.Helpers.NoContext (apiUrl env "articles/search") [ ( "query", searchTerm ) ] decodeArticles)
+        )
