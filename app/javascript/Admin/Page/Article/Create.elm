@@ -303,13 +303,17 @@ validateKeyword model =
 
 validateCategoryId : Model -> Model
 validateCategoryId model =
-    if String.isEmpty model.categoryId || model.categoryId == "0" then
+    if String.isEmpty model.categoryId then
         { model
-            | categoryIdError = Just "Please select CategoryID"
+            | categoryIdError = Just "category ID required"
+        }
+    else if model.categoryId == "0" then
+        { model
+            | categoryIdError = Just "Please select category"
         }
     else
         { model
-            | categoryIdError = Just "executing else condition"
+            | categoryIdError = Nothing
         }
 
 
