@@ -25,7 +25,7 @@ module Api
 
         assert_response :success
         json = JSON.parse(response.body)
-        assert_equal @article.title, json.first.second["title"]
+        assert_equal @article.title, json["article"]["title"]
       end
 
       def test_show_article_failure
@@ -39,7 +39,7 @@ module Api
 
         assert_response :success
         json = JSON.parse(response.body)
-        assert_equal @article.title, json.first.second.first["title"]
+        assert_equal @article.title, json["articles"].first["title"]
       end
 
       def test_index_article_failure
@@ -55,11 +55,17 @@ module Api
       def test_search_article
         Article.reindex
 
+        get api_v1_articles_search_url, params: {}
+
+        assert_response :success
+        json = JSON.parse(response.body)
+        assert_equal json["articles"].size, 0
+
         get api_v1_articles_search_url, params: { query: "search" }
 
         assert_response :success
         json = JSON.parse(response.body)
-        assert_equal "How to do search with elasticsearch", json.first.second.first["title"]
+        assert_equal "How to do search with elasticsearch", json["articles"].first["title"]
       end
     end
   end
