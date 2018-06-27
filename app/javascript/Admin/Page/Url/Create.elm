@@ -6,6 +6,7 @@ import Html.Events exposing (..)
 import Http
 import Json.Encode as JE
 import Request.UrlRequest exposing (..)
+import Request.Helpers exposing (NodeEnv, ApiKey)
 import Data.CommonData exposing (Error)
 
 
@@ -51,8 +52,8 @@ type Msg
     | SaveUrlResponse (Result Http.Error String)
 
 
-update : Msg -> Model -> ( Model, Cmd Msg )
-update msg model =
+update : Msg -> Model -> NodeEnv -> ApiKey -> ( Model, Cmd Msg )
+update msg model nodeEnv organizationKey =
     case msg of
         UrlInput url ->
             ( { model | url = url }, Cmd.none )
@@ -66,7 +67,7 @@ update msg model =
                     validate model
             in
                 if isValid updatedModel then
-                    save updatedModel
+                    save updatedModel nodeEnv organizationKey
                 else
                     ( updatedModel, Cmd.none )
 
@@ -181,13 +182,6 @@ urlEncoder { url } =
         ]
 
 
-save : Model -> ( Model, Cmd Msg )
-save model =
-    let
-        request =
-            createUrl "dev" "3c60b69a34f8cdfc76a0" (urlEncoder model)
-
-        cmd =
-            Http.send SaveUrlResponse request
-    in
-        ( model, cmd )
+save : Model -> NodeEnv -> ApiKey -> ( Model, Cmd Msg )
+save model nodeEnv organizationKey =
+    ( model, Http.send SaveUrlResponse (createUrl nodeEnv organizationKey (urlEncoder model)) )

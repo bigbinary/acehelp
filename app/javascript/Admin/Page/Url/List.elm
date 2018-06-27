@@ -27,10 +27,10 @@ initModel =
     }
 
 
-init : ( Model, Cmd Msg )
-init =
+init : String -> String -> ( Model, Cmd Msg )
+init env organizationKey =
     ( initModel
-    , (fetchUrlList)
+    , (fetchUrlList env organizationKey)
     )
 
 
@@ -102,13 +102,6 @@ urlRow url =
         [ text url.url ]
 
 
-fetchUrlList : Cmd Msg
-fetchUrlList =
-    let
-        request =
-            requestUrls "dev" "96b66a612c703f573913"
-
-        cmd =
-            Http.send UrlLoaded request
-    in
-        cmd
+fetchUrlList : String -> String -> Cmd Msg
+fetchUrlList env key =
+    Http.send UrlLoaded (requestUrls env key)

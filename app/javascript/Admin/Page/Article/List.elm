@@ -3,14 +3,15 @@ module Page.Article.List exposing (..)
 import Http
 import Html exposing (..)
 import Html.Attributes exposing (..)
+import Html.Events exposing (..)
 import Request.ArticleRequest exposing (..)
+import Request.UrlRequest exposing (..)
 import Data.CommonData exposing (..)
 import Page.Common.View exposing (renderError)
-
-
---import Html.Events exposing (..)
-
 import Data.ArticleData exposing (..)
+import Data.UrlData exposing (..)
+import Json.Decode as Json
+import Request.Helpers exposing (NodeEnv, ApiKey)
 
 
 -- Model
@@ -18,6 +19,8 @@ import Data.ArticleData exposing (..)
 
 type alias Model =
     { articles : ArticleListResponse
+    , urlList : UrlsListResponse
+    , url : String
     , error : Error
     }
 
@@ -25,13 +28,15 @@ type alias Model =
 initModel : Model
 initModel =
     { articles = { articles = [] }
+    , urlList = { urls = [] }
+    , url = ""
     , error = Nothing
     }
 
 
-init : ( Model, Cmd Msg )
-init =
-    ( initModel, fetchArticlesList )
+init : String -> String -> ( Model, Cmd Msg )
+init env key =
+    ( initModel, fetchUrlList env key )
 
 
 
@@ -39,13 +44,13 @@ init =
 
 
 type Msg
-    = FetchArticles
+    = UrlSelected String
+    | UrlLoaded (Result Http.Error UrlsListResponse)
     | ArticleLoaded (Result Http.Error ArticleListResponse)
-    | LoadArticle ArticleId
 
 
-update : Msg -> Model -> ( Model, Cmd Msg )
-update msg model =
+update : Msg -> Model -> ApiKey -> NodeEnv -> ( Model, Cmd Msg )
+update msg model organizationKey nodeEnv =
     case msg of
         ArticleLoaded (Ok articlesList) ->
             ( { model | articles = articlesList }, Cmd.none )
@@ -53,8 +58,17 @@ update msg model =
         ArticleLoaded (Err err) ->
             ( { model | error = Just (toString err) }, Cmd.none )
 
-        _ ->
-            ( model, Cmd.none )
+        UrlLoaded (Ok urlList) ->
+            ( { model | urlList = urlList }, Cmd.none )
+
+        UrlLoaded (Err err) ->
+            ( { model | error = Just (toString err) }, Cmd.none )
+
+        UrlSelected url ->
+            if url == "select_url" then
+                ( { model | articles = { articles = [] } }, Cmd.none )
+            else
+                ( { model | url = url }, fetchArticlesList nodeEnv url organizationKey )
 
 
 
@@ -69,6 +83,8 @@ view model =
         [ div
             []
             [ text (renderError model.error) ]
+        , div []
+            [ urlsDropdown model ]
         , div
             [ class "buttonDiv" ]
             [ a
@@ -96,13 +112,35 @@ rows article =
         ]
 
 
-fetchArticlesList : Cmd Msg
-fetchArticlesList =
-    let
-        request =
-            requestArticles "dev" "http://aceinvoice.com/getting-started" "96b66a612c703f573913"
+urlsDropdown : Model -> Html Msg
+urlsDropdown model =
+    div
+        [ class "dropdown" ]
+        [ select
+            [ on "change" (Json.map UrlSelected targetValue) ]
+            (List.concat
+                [ [ option
+                        [ value "select_url" ]
+                        [ text "Select URL" ]
+                  ]
+                , (List.map
+                    (\url ->
+                        option
+                            [ value url.url ]
+                            [ text url.url ]
+                    )
+                    model.urlList.urls
+                  )
+                ]
+            )
+        ]
 
-        cmd =
-            Http.send ArticleLoaded request
-    in
-        cmd
+
+fetchArticlesList : String -> String -> String -> Cmd Msg
+fetchArticlesList nodeEnv url organizationKey =
+    Http.send ArticleLoaded (requestArticles nodeEnv url organizationKey)
+
+
+fetchUrlList : String -> String -> Cmd Msg
+fetchUrlList nodeEnv organizationKey =
+    Http.send UrlLoaded (requestUrls nodeEnv organizationKey)
