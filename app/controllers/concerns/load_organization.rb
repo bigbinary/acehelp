@@ -8,7 +8,12 @@ module LoadOrganization
   end
 
   def load_organization
-    @organization = Organization.find_by(api_key: request.headers["api-key"])
+    if Rails.env.development?
+      @organization = Organization.first
+    else
+      @organization = Organization.find_by(api_key: request.headers["api-key"])
+    end
+
     render_unauthorized("Unauthorized request") && return unless @organization
   end
 end
