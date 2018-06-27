@@ -122,6 +122,9 @@ urlsDropdown model =
                 [ [ option
                         [ value "select_url" ]
                         [ text "Select URL" ]
+                  , option
+                        [ value "" ]
+                        [ text "All" ]
                   ]
                 , (List.map
                     (\url ->
