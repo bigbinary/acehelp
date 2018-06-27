@@ -31,7 +31,9 @@ module Api
           order: { _score: :desc }
         }
 
-        render json: Article.search(params[:query], search_query_filter)
+        render json: { articles: Article.search(
+          params[:query],
+          search_query_filter).map { |article| article.slice("id", "title", "desc") } }
       end
 
       private
