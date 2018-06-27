@@ -28,7 +28,7 @@ bundle exec rails server
 Once we see `webpack: Compiled successfully.` message in terminal,
 we can visit the app at http://localhost:3000.
 
-To create data e.g. Article, Urls etc. you must login as user.
+To create data e.g. Article, URLs etc. you must login as a user.
 To login as a user, please visit http://localhost:3000/users/sign_in
 
 ```
@@ -38,10 +38,13 @@ sam@example.com / welcome
 
 Webpack will automatically compile if a file inside `app/javascript/` directory is modified in development mode.
 
+## GraphQL is enabled
+Once servers are up and running, visit `localhost:3000/graphql/playground` to play around GraphQL queries and mutations.
+
 ## Heroku Review
 
 [Heroku Review](https://devcenter.heroku.com/articles/github-integration-review-apps)
-is enabled on this application. It means when a PR is sent then heroku
+is enabled on this application. It means when a PR is sent then Heroku
 automatically deploys an application for that branch.
 
 ## Continuous deployment when PR is merged to master
