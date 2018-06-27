@@ -13,6 +13,7 @@ import Http
 import Task exposing (Task)
 import Reader exposing (Reader)
 import FontAwesome.Solid as SolidIcon
+import Section.Error exposing (errorMessageView)
 
 
 -- MODEL
@@ -45,6 +46,7 @@ initAnim =
 
 type Msg
     = LoadArticle ArticleId
+    | OpenLibrary
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -62,9 +64,10 @@ view : Model -> Html Msg
 view model =
     case model.articles of
         [] ->
-            div [ class "header-right" ]
-            [ text "OOPS! No suggested Articles"
-            ]
+            errorMessageView
+                (text "")
+                (text "We could not find relevant articles for you at this moment")
+                (span [] [ text "You can check out our ", a [ onClick OpenLibrary ] [ text "Library" ], text " or Search for an article" ])
 
         _ ->
             div [ id "content-wrapper" ]

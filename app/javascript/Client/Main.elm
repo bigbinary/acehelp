@@ -349,6 +349,9 @@ update msg model =
                     , Task.attempt ArticleLoaded (Reader.run ArticleSection.init ( model.nodeEnv, model.apiKey, model.context, articleId ))
                     )
 
+                ArticleListSection.OpenLibrary ->
+                    update (TabMsg (Tabs.TabSelected Tabs.Library)) model
+
         ArticleListLoaded (Ok articleList) ->
             ( { model | sectionState = Loaded (ArticleListSection { id = Nothing, articles = articleList.articles }) }, Cmd.none )
 
@@ -371,11 +374,12 @@ update msg model =
                         case response.status.code of
                             404 ->
                                 ( { model | sectionState = Loaded (ArticleListSection { id = Nothing, articles = [] }) }, Cmd.none )
+
                             _ ->
                                 ( errModel, errCmd )
+
                     _ ->
                         ( errModel, errCmd )
-
 
         ArticleLoaded (Err error) ->
             ( { model | sectionState = Loaded (ErrorSection error) }, Cmd.none )
