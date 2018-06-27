@@ -60,16 +60,23 @@ update msg model =
 
 view : Model -> Html Msg
 view model =
-    div [ id "content-wrapper" ]
-        (List.map
-            (\article ->
-                div
-                    [ onClick <| LoadArticle article.id
-                    , class "selectable-row"
-                    ]
-                    [ span [ class "row-icon" ] [ SolidIcon.file_alt ]
-                    , span [ class "row-title" ] [ text article.title ]
-                    ]
-            )
-            model.articles
-        )
+    case model.articles of
+        [] ->
+            div [ class "header-right" ]
+            [ text "OOPS! No suggested Articles"
+            ]
+
+        _ ->
+            div [ id "content-wrapper" ]
+                (List.map
+                    (\article ->
+                        div
+                            [ onClick <| LoadArticle article.id
+                            , class "selectable-row"
+                            ]
+                            [ span [ class "row-icon" ] [ SolidIcon.file_alt ]
+                            , span [ class "row-title" ] [ text article.title ]
+                            ]
+                    )
+                    model.articles
+                )

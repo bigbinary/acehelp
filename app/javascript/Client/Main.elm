@@ -362,7 +362,20 @@ update msg model =
             ( { model | context = Context (getUrlPathData location) }, Cmd.none )
 
         ArticleListLoaded (Err error) ->
-            ( { model | sectionState = Loaded (ErrorSection error) }, Cmd.none )
+            let
+                ( errModel, errCmd ) =
+                    ( { model | sectionState = Loaded (ErrorSection error) }, Cmd.none )
+            in
+                case error of
+                    Http.BadStatus response ->
+                        case response.status.code of
+                            404 ->
+                                ( { model | sectionState = Loaded (ArticleListSection { id = Nothing, articles = [] }) }, Cmd.none )
+                            _ ->
+                                ( errModel, errCmd )
+                    _ ->
+                        ( errModel, errCmd )
+
 
         ArticleLoaded (Err error) ->
             ( { model | sectionState = Loaded (ErrorSection error) }, Cmd.none )
