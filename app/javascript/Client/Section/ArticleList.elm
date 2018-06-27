@@ -13,6 +13,7 @@ import Http
 import Task exposing (Task)
 import Reader exposing (Reader)
 import FontAwesome.Solid as SolidIcon
+import Section.Error exposing (errorMessageView)
 
 
 -- MODEL
@@ -45,6 +46,7 @@ initAnim =
 
 type Msg
     = LoadArticle ArticleId
+    | OpenLibrary
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -60,16 +62,24 @@ update msg model =
 
 view : Model -> Html Msg
 view model =
-    div [ id "content-wrapper" ]
-        (List.map
-            (\article ->
-                div
-                    [ onClick <| LoadArticle article.id
-                    , class "selectable-row"
-                    ]
-                    [ span [ class "row-icon" ] [ SolidIcon.file_alt ]
-                    , span [ class "row-title" ] [ text article.title ]
-                    ]
-            )
-            model.articles
-        )
+    case model.articles of
+        [] ->
+            errorMessageView
+                (text "")
+                (text "We could not find relevant articles for you at this moment")
+                (span [] [ text "You can check out our ", a [ onClick OpenLibrary ] [ text "Library" ], text " or Search for an article" ])
+
+        _ ->
+            div [ id "content-wrapper" ]
+                (List.map
+                    (\article ->
+                        div
+                            [ onClick <| LoadArticle article.id
+                            , class "selectable-row"
+                            ]
+                            [ span [ class "row-icon" ] [ SolidIcon.file_alt ]
+                            , span [ class "row-title" ] [ text article.title ]
+                            ]
+                    )
+                    model.articles
+                )
