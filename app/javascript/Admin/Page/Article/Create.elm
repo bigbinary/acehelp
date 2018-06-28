@@ -240,19 +240,6 @@ save model nodeEnv organizationKey =
         ( model, cmd )
 
 
-post : String -> List Http.Header -> Http.Body -> JsonDecoder.Decoder a -> Http.Request a
-post url headers body decoder =
-    Http.request
-        { method = "POST"
-        , headers = headers
-        , url = url
-        , body = body
-        , expect = Http.expectJson decoder
-        , timeout = Nothing
-        , withCredentials = False
-        }
-
-
 validate : Model -> Model
 validate model =
     model
