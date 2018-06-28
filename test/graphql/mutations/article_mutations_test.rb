@@ -58,7 +58,6 @@ class Mutations::ArticleMutationsTest < ActiveSupport::TestCase
               }
             GRAPHQL
 
-
     result = AceHelp::Client.execute(query, input: { title: "", desc: "New article creation", category_id: @category.id })
     assert_nil result.data.add_article.article
   end

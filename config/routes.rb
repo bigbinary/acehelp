@@ -23,6 +23,13 @@ Rails.application.routes.draw do
       get "/articles/search", to: "article#search"
 
       resource :contacts, only: :create
+
+      get "/organization/:organization_id/data", to: "organization#data"
+
+      namespace :admin do
+        resources :articles, only: [:create]
+      end
+
     end
   end
 
@@ -36,6 +43,6 @@ Rails.application.routes.draw do
   end
 
   if Rails.env.development?
-    mount GraphqlPlayground::Rails::Engine, at: '/graphql/playground', graphql_path: '/graphql'
+    mount GraphqlPlayground::Rails::Engine, at: "/graphql/playground", graphql_path: "/graphql"
   end
 end
