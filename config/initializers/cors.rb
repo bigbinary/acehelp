@@ -2,13 +2,34 @@
 
 # enable cors
 Rails.application.config.middleware.insert_before 0, Rack::Cors do
+
   allow do
-    origins "http://staging.acehelp.com"
-    resource "*", headers: :any, methods: [:get, :post, :put, :delete, :options]
+    origins "*"
+    resource "/api/*/all", headers: :any, methods: [:get, :post, :put, :delete, :options, :head]
   end
 
   allow do
-    origins "https://staging.acehelp.com"
-    resource "*", headers: :any, methods: [:get, :post, :put, :delete, :options]
+    origins "*"
+    resource "/api/*/article", headers: :any, methods: [:get, :post, :put, :delete, :options, :head]
+  end
+
+  allow do
+    origins "*"
+    resource "/api/*/article/*", headers: :any, methods: [:get, :post, :put, :delete, :options, :head]
+  end
+
+  allow do
+    origins "*"
+    resource "/api/*/articles/*", headers: :any, methods: [:get, :post, :put, :delete, :options, :head]
+  end
+
+  allow do
+    origins "*"
+    resource "/api/*/contacts", headers: :any, methods: [:get, :post, :put, :delete, :options, :head]
+  end
+
+  allow do
+    origins '*'
+    resource '/public/*', headers: :any, methods: :get
   end
 end

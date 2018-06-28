@@ -30,6 +30,7 @@ import FontAwesome.Solid as SolidIcon
 
 type alias Flags =
     { node_env : String
+    , api_key : String
     }
 
 
@@ -85,7 +86,7 @@ initAnimation =
 init : Flags -> Navigation.Location -> ( Model, Cmd Msg )
 init flags location =
     ( { nodeEnv = flags.node_env
-      , apiKey = ""
+      , apiKey = flags.api_key
       , sectionState = Loaded Blank
       , containerAnimation = Animation.style initAnimation
       , currentAppState = Minimized

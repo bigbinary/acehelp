@@ -11,13 +11,20 @@ import Elm from "../Client/Main";
 import "../../assets/stylesheets/application.css";
 import "../../assets/stylesheets/client/index.scss";
 
-document.addEventListener("DOMContentLoaded", () => {
-  var domId = "acehelp-hook";
-  var node = document.getElementById("acehelp-hook");
-  node = node || document.createElement("div");
-  node.id = domId;
-  Elm.Main.embed(node, {
-    node_env: process.env.NODE_ENV
-  });
-  document.body.appendChild(node);
-});
+window._ace = (function() {
+  function insertWidget({ apiKey }) {
+    var domId = "acehelp-hook";
+    var node = document.getElementById("acehelp-hook");
+    node = node || document.createElement("div");
+    node.id = domId;
+    Elm.Main.embed(node, {
+      node_env: process.env.NODE_ENV,
+      api_key: apiKey
+    });
+    document.body.appendChild(node);
+  }
+
+  return {
+    insertWidget: insertWidget
+  };
+})();

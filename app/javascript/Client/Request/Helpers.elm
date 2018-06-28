@@ -48,6 +48,9 @@ type alias ApiErrorMessage =
 apiUrl : String -> String -> String
 apiUrl env str =
     case env of
+        "production" ->
+            "http://staging.acehelp.com/api/v1/" ++ str
+
         _ ->
             "/api/v1/" ++ str
 
