@@ -21,5 +21,7 @@ class EmbedControllerTest < ActionDispatch::IntegrationTest
     get embed_js_url
 
     assert_response :bad_request
+    json_response = JSON.parse(response.body)
+    assert_equal "Api key is missing. Please provide in api_key parameter.", json_response["errors"]
   end
 end
