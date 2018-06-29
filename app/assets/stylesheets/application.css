@@ -99,11 +99,12 @@ input[type=submit] {
 }
 
 .code {
-  max-width: 700px;
-  white-space: pre-wrap;
-  word-wrap: break-word;
-  background-color: #000;
-  color: #ffffff;
-  padding: 1.25rem 1.25rem 0;
+  width: 95%;
+  height: 17rem;
+  font-size: .95rem;
+}
 
+.disabled {
+  background-color: #adadad;
+  color: #000;
 }
