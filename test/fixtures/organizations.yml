@@ -7,3 +7,7 @@ bigbinary:
 zindi:
   name: Zindi
   api_key: MyString
+
+aceinvoice:
+  name: AceInvoice
+  api_key: "aceinvoice_api_key"
