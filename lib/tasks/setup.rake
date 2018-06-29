@@ -39,12 +39,28 @@ task setup_sample_data: [:environment] do
   delete_all_records_from_all_tables
   system "rake db:seed"
 
-  create_user
+  create_user!
+  create_org_info!
 
   puts "sample data was added successfully"
 end
 
-def create_user(options = {})
+def create_org_info!
+  organization = Organization.create!(name: "CareForever")
+
+  getting_started = organization.categories.create! name: "Getting Started"
+  user_permissions_and_access_control = organization.categories.create! name: "User Permissions and Access Control"
+  care_plan = organization.categories.create! name: "CarePlan"
+
+  article1 = Article.create! name: "How do I add a new Care Recipient?",
+                             organization: organization, category: getting_started
+  article2 = Article.create! name: "How do users I invite to join CareGeneral set up their account the first time?",
+                             organization: organization, category: user_permissions_and_access_control
+  article3 = Article.create! name: "How do I create a task?",
+                            organization: organization, category: care_plan
+end
+
+def create_user!(options = {})
   user_attributes = { email: "sam@example.com",
                       first_name: "Sam",
                       last_name: "Smith",
