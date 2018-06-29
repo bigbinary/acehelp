@@ -117,7 +117,7 @@ update msg model =
                             ArticleCreate.initModel
 
                 ( articleCreateModel, createArticleCmd ) =
-                    ArticleCreate.update caMsg currentPageModel
+                    ArticleCreate.update caMsg currentPageModel model.nodeEnv model.organizationKey
             in
                 ( { model | currentPage = (ArticleCreate articleCreateModel) }
                 , Cmd.map ArticleCreateMsg createArticleCmd
@@ -265,7 +265,7 @@ retrivePage env location organizationKey =
         "/admin/articles/new" ->
             let
                 ( pageModel, pageCmd ) =
-                    (ArticleCreate.init)
+                    (ArticleCreate.init env organizationKey)
             in
                 ( ArticleCreate pageModel, Cmd.map ArticleCreateMsg pageCmd )
 

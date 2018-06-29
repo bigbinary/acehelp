@@ -3,48 +3,59 @@ module Page.Article.Create exposing (..)
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
+
+
+-- import Html.Events.Extra exposing (targetValueIntParse)
+
 import Data.ArticleData exposing (..)
 import Http
-import Json.Encode as JE
-import Json.Decode as JD exposing (field)
+import Json.Encode as JsonEncoder
+import Json.Decode as JsonDecoder exposing (field)
 import Request.ArticleRequest exposing (..)
+import Request.CategoryRequest exposing (..)
+import Request.Helpers exposing (NodeEnv, ApiKey)
 import Data.CommonData exposing (Error)
+import Data.CategoryData exposing (..)
 
 
 -- Model
 
 
 type alias Model =
-    { article : Maybe Article
-    , title : String
+    { title : String
     , titleError : Error
     , desc : String
     , descError : Error
     , keywords : String
     , keywordError : Error
     , articleId : ArticleId
+    , categoryList : CategoryList
+    , categoryId : String
+    , categoryIdError : Error
     , error : Error
     }
 
 
 initModel : Model
 initModel =
-    { article = Nothing
-    , title = ""
+    { title = ""
     , titleError = Nothing
     , desc = ""
     , descError = Nothing
     , keywords = ""
     , keywordError = Nothing
     , articleId = 0
+    , categoryList = { categories = [] }
+    , categoryId = "0"
+    , categoryIdError = Nothing
     , error = Nothing
     }
 
 
-init : ( Model, Cmd Msg )
-init =
+init : NodeEnv -> ApiKey -> ( Model, Cmd Msg )
+init nodeEnv organizationKey =
     ( initModel
-    , Cmd.none
+    , (fetchCategories nodeEnv organizationKey)
     )
 
 
@@ -60,10 +71,12 @@ type Msg
     | KeywordsInput String
     | SaveArticle
     | SaveArticleResponse (Result Http.Error String)
+    | CategoriesLoaded (Result Http.Error CategoryList)
+    | CategorySelected String
 
 
-update : Msg -> Model -> ( Model, Cmd Msg )
-update msg model =
+update : Msg -> Model -> NodeEnv -> ApiKey -> ( Model, Cmd Msg )
+update msg model nodeEnv organizationKey =
     case msg of
         TitleInput title ->
             ( { model | title = title }, Cmd.none )
@@ -80,7 +93,7 @@ update msg model =
                     validate model
             in
                 if isValid validArticleModel then
-                    save validArticleModel
+                    save validArticleModel nodeEnv organizationKey
                 else
                     ( model, Cmd.none )
 
@@ -111,6 +124,15 @@ update msg model =
                   }
                 , Cmd.none
                 )
+
+        CategoriesLoaded (Ok categories) ->
+            ( { model | categoryList = categories }, Cmd.none )
+
+        CategoriesLoaded (Err err) ->
+            ( { model | error = Just (toString err) }, Cmd.none )
+
+        CategorySelected categoryId ->
+            ( { model | categoryId = categoryId }, Cmd.none )
 
         _ ->
             ( model, Cmd.none )
@@ -155,6 +177,9 @@ view model =
                     []
                 ]
             , div []
+                [ categoryListDropdown model
+                ]
+            , div []
                 [ button
                     [ type_ "submit"
                     , class "button primary"
@@ -165,42 +190,54 @@ view model =
         ]
 
 
+categoryListDropdown : Model -> Html Msg
+categoryListDropdown model =
+    div
+        []
+        [ select
+            [ onInput CategorySelected ]
+            (List.concat
+                [ [ option
+                        [ value "0" ]
+                        [ text "Select Category" ]
+                  ]
+                , (List.map
+                    (\category ->
+                        option
+                            [ value (toString category.id) ]
+                            [ text category.name ]
+                    )
+                    model.categoryList.categories
+                  )
+                ]
+            )
+        ]
+
+
 url : String
 url =
     "http://localhost:3000/article"
 
 
-articleEncoder : Model -> JE.Value
-articleEncoder { title, desc } =
-    JE.object
-        [ ( "title", JE.string title )
-        , ( "desc", JE.string desc )
+articleEncoder : Model -> JsonEncoder.Value
+articleEncoder { title, desc, categoryId } =
+    JsonEncoder.object
+        [ ( "title", JsonEncoder.string title )
+        , ( "desc", JsonEncoder.string desc )
+        , ( "category_id", JsonEncoder.string categoryId )
         ]
 
 
-save : Model -> ( Model, Cmd Msg )
-save model =
+save : Model -> NodeEnv -> ApiKey -> ( Model, Cmd Msg )
+save model nodeEnv organizationKey =
     let
         request =
-            requestCreateArticle "dev" "3c60b69a34f8cdfc76a0" (articleEncoder model)
+            requestCreateArticle nodeEnv organizationKey (articleEncoder model)
 
         cmd =
             Http.send SaveArticleResponse request
     in
         ( model, cmd )
-
-
-post : String -> List Http.Header -> Http.Body -> JD.Decoder a -> Http.Request a
-post url headers body decoder =
-    Http.request
-        { method = "POST"
-        , headers = headers
-        , url = url
-        , body = body
-        , expect = Http.expectJson decoder
-        , timeout = Nothing
-        , withCredentials = False
-        }
 
 
 validate : Model -> Model
@@ -209,6 +246,7 @@ validate model =
         |> validateTitle
         |> validateDesc
         |> validateKeyword
+        |> validateCategoryId
 
 
 validateTitle : Model -> Model
@@ -250,6 +288,22 @@ validateKeyword model =
         }
 
 
+validateCategoryId : Model -> Model
+validateCategoryId model =
+    if String.isEmpty model.categoryId then
+        { model
+            | categoryIdError = Just "category ID required"
+        }
+    else if model.categoryId == "0" then
+        { model
+            | categoryIdError = Just "Please select category"
+        }
+    else
+        { model
+            | categoryIdError = Nothing
+        }
+
+
 isValid : Model -> Bool
 isValid model =
     model.titleError
@@ -258,8 +312,10 @@ isValid model =
         == Nothing
         && model.keywordError
         == Nothing
+        && model.categoryIdError
+        == Nothing
 
 
-
---createArticleRequest : Model -> Cmd Msg
---createArticleRequest model =
+fetchCategories : NodeEnv -> ApiKey -> Cmd Msg
+fetchCategories nodeEnv organizationKey =
+    Http.send CategoriesLoaded (requestCategories nodeEnv organizationKey)
