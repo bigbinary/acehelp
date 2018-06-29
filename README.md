@@ -4,12 +4,7 @@
 
 ## Install dependencies
 
-- Ruby(2.5.1)
-- Rails(5.2.0)
 - node(8+)
-- PostgreSQL(9+)
-- ElasticSearch(`brew install elasticsearch` on macOS)
-
 
 ## Local Development setup
 
@@ -18,6 +13,9 @@
 
 # Database setup and populate sample data
 cp config/database.yml.postgresql config/database.yml
+
+brew install elasticsearch
+brew services start elasticsearch
 
 ./bin/rails db:setup
 
