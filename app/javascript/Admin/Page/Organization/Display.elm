@@ -8,8 +8,6 @@ import Data.ArticleData exposing (ArticleSummary)
 import Data.Organization exposing (..)
 import Request.Helpers exposing (NodeEnv)
 
---import Html.Events exposing (..)
-
 
 -- Model
 
@@ -29,7 +27,7 @@ initModel =
 
 init : NodeEnv -> OrganizationId -> ( Model, Cmd Msg )
 init env organizationId =
-    ( initModel, ( fetchOrganization env organizationId ) )
+    ( initModel, (fetchOrganization env organizationId) )
 
 
 
@@ -65,20 +63,20 @@ view model =
         , div [] (renderArticles model.organization.articles)
         ]
 
+
 renderArticle : ArticleSummary -> Html msg
 renderArticle article =
     let
         children =
-          [ li [] [ text article.title ]
-          ]
+            [ li [] [ text article.title ]
+            ]
     in
         ul [] children
 
 
 renderArticles : List ArticleSummary -> List (Html msg)
 renderArticles articles =
-     List.map renderArticle articles
-
+    List.map renderArticle articles
 
 
 fetchOrganization : NodeEnv -> OrganizationId -> Cmd Msg
