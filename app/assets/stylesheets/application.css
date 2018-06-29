@@ -97,3 +97,14 @@ input[type=submit] {
     border-radius: 5px;
     padding: 20px;
 }
+
+.code {
+  width: 95%;
+  height: 17rem;
+  font-size: .95rem;
+}
+
+.disabled {
+  background-color: #adadad;
+  color: #000;
+}

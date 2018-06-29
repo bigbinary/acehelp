@@ -10,6 +10,7 @@ Rails.application.routes.draw do
   get "/getting-started", to: "home#getting_started"
   get "/integrations", to: "home#integrations"
   get "/pricing", to: "home#pricing"
+  get "/embed/js", to: "embed#index"
 
   resources :article, except: [:show, :new]
   resources :url, except: [:show, :new]
