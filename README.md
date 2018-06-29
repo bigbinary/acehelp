@@ -8,7 +8,7 @@
 - Rails(5.2.0)
 - node(8+)
 - PostgreSQL(9+)
-- ElasticSearch(`brew install elasticsearch`)
+- ElasticSearch(`brew install elasticsearch` on macOS)
 
 
 ## Local Development setup
