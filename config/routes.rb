@@ -25,8 +25,6 @@ Rails.application.routes.draw do
 
       resource :contacts, only: :create
 
-      get "/organization/:organization_id/data", to: "organization#data"
-
       namespace :admin do
         resources :articles, only: [:create]
       end
