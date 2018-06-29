@@ -38,8 +38,9 @@ class Mutations::UrlMutationsTest < ActiveSupport::TestCase
               }
             GRAPHQL
 
-    result = AceHelp::Client.execute(query, input: { url: "wrong_url" })
-    assert_nil result.data.add_url.url
+    assert_raises(Graphlient::Errors::ExecutionError) do
+      AceHelp::Client.execute(query, input: { url: "wrong_url" })
+    end
   end
 
   test "update url mutations" do
@@ -71,8 +72,9 @@ class Mutations::UrlMutationsTest < ActiveSupport::TestCase
               }
             GRAPHQL
 
-    result = AceHelp::Client.execute(query, input: { id: @url.id, url: { url: "wrong url" }})
-    assert_nil result.data.update_url.url
+    assert_raises(Graphlient::Errors::ExecutionError) do
+      AceHelp::Client.execute(query, input: { id: @url.id, url: { url: "wrong url" }})
+    end
   end
 
   test "delete url mutations" do

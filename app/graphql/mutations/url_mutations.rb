@@ -7,19 +7,16 @@ class Mutations::UrlMutations
     input_field :url, !types.String
 
     return_field :url, Types::UrlType
-    return_field :errors, types[Types::ErrorType]
 
     resolve ->(object, inputs, context) {
       new_url = Url.new(url: inputs[:url])
       new_url.organization = context[:organization]
 
       if new_url.save
-        url = new_url
+        { url: new_url }
       else
-        errors = Utils::ErrorHandler.generate_detailed_error_hash(new_url, context)
+        raise GraphQL::ExecutionError.new(Utils::ErrorHandler.new.object_error_full_messages(new_url))
       end
-
-      { url: url, errors: errors}
     }
   end
 
@@ -34,21 +31,18 @@ class Mutations::UrlMutations
     input_field :url, !UrlInputObjectType
 
     return_field :url, Types::UrlType
-    return_field :errors, types[Types::ErrorType]
 
     resolve ->(object, inputs, context) {
       url = Url.find_by(id: inputs[:id], organization_id: context[:organization].id)
       if url.nil?
-        errors = Utils::ErrorHandler.generate_error_hash('Url not found', context)
+        raise GraphQL::ExecutionError.new("Url not found")
       else
         if url.update_attributes(inputs[:url].to_h)
-          updated_url = url
+          { url: url }
         else
-          errors = errors = Utils::ErrorHandler.generate_detailed_error_hash(url, context)
+          raise GraphQL::ExecutionError.new(Utils::ErrorHandler.new.object_error_full_messages(url))
         end
       end
-
-      {url: updated_url, errors: errors}
     }
   end
 
@@ -58,21 +52,18 @@ class Mutations::UrlMutations
     input_field :id, !types.ID
 
     return_field :deletedId, !types.ID
-    return_field :errors, types[Types::ErrorType]
 
     resolve ->(_obj, inputs, context) {
       url = Url.find_by(id: inputs[:id], organization_id: context[:organization].id)
       if url.nil?
-        errors = Utils::ErrorHandler.generate_error_hash('Url not found', context)
+        raise GraphQL::ExecutionError.new("Url not found")
       else
         if url.destroy
-          deleted_id = inputs[:id]
+          { deletedId: inputs[:id] }
         else
-          errors = Utils::ErrorHandler.generate_detailed_error_hash(url, context)
+          raise GraphQL::ExecutionError.new(Utils::ErrorHandler.new.object_error_full_messages(url))
         end
       end
-
-      {deletedId: deleted_id, errors: errors}
     }
   end
 end

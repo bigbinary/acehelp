@@ -39,9 +39,9 @@ class Mutations::ArticleMutationsTest < ActiveSupport::TestCase
               }
             GRAPHQL
 
-    result = AceHelp::Client.execute(query, input: { title: "Create Article", desc: "New article creation", category_id: "" })
-
-    assert_nil result.data.add_article.article
+    assert_raises(Graphlient::Errors::ExecutionError) do
+      AceHelp::Client.execute(query, input: { title: "Create Article", desc: "New article creation", category_id: "" })
+    end
   end
 
   test "create article invalid title failure" do
@@ -57,8 +57,9 @@ class Mutations::ArticleMutationsTest < ActiveSupport::TestCase
             GRAPHQL
 
 
-    result = AceHelp::Client.execute(query, input: { title: "", desc: "New article creation", category_id: @category.id })
-    assert_nil result.data.add_article.article
+    assert_raises(Graphlient::Errors::ExecutionError) do
+      AceHelp::Client.execute(query, input: {title: "", desc: "New article creation", category_id: @category.id})
+    end
   end
 
 
@@ -70,16 +71,13 @@ class Mutations::ArticleMutationsTest < ActiveSupport::TestCase
                     id
                     title
                   }
-                  errors {
-                    path
-                    message
-                  }
                 }
               }
     GRAPHQL
 
-    result = AceHelp::Client.execute(query, input: { title: "", desc: "New article creation", category_id: @category.id })
-    assert_not_empty result.data.add_article.errors.flat_map(&:path) & ['addArticle', 'title']
+    assert_raises(Graphlient::Errors::ExecutionError) do
+      AceHelp::Client.execute(query, input: { title: "", desc: "New article creation", category_id: @category.id })
+    end
   end
 
 
@@ -112,8 +110,9 @@ class Mutations::ArticleMutationsTest < ActiveSupport::TestCase
               }
             GRAPHQL
 
-    result = AceHelp::Client.execute(query, input: { id: @article.id, article: { title: "", desc: "none", category_id: @category.id } })
-    assert_nil result.data.update_article.article
+    assert_raises(Graphlient::Errors::ExecutionError) do
+      AceHelp::Client.execute(query, input: { id: @article.id, article: { title: "", desc: "none", category_id: @category.id } })
+    end
   end
 
   test "update article failure with errors" do
@@ -124,16 +123,13 @@ class Mutations::ArticleMutationsTest < ActiveSupport::TestCase
                     id
                     title
                   }
-                  errors {
-                    message
-                    path 
-                  }
                 }
               }
     GRAPHQL
 
-    result = AceHelp::Client.execute(query, input: { id: @article.id, article: { title: "", desc: "none", category_id: @category.id } })
-    assert_not_empty result.data.update_article.errors.flat_map(&:path) & ['updateArticle', 'title']
+    assert_raises(Graphlient::Errors::ExecutionError) do
+      AceHelp::Client.execute(query, input: { id: @article.id, article: { title: "", desc: "none", category_id: @category.id } })
+    end
   end
 
   test "delete article mutations" do

@@ -8,7 +8,7 @@ class GraphqlController < ApplicationController
     render json: result
   rescue => e
     show_error_in_development(e)
-    graphql_error = Utils::ErrorHandler.generate_graphql_error_with_root(e.message, path: ['System Exception'])
+    graphql_error = Utils::ErrorHandler.new.generate_graphql_error_with_root(e.message, path: ['System Exception'])
     render json: graphql_error, status: 500
   end
 

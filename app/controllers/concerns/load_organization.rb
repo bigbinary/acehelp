@@ -16,7 +16,6 @@ module LoadOrganization
       render_unauthorized_request(err: :missing_keys) && return if api_key.blank?
       @organization = Organization.find_by(api_key: api_key)
     end
-    api_key = request.headers["api-key"]
 
     render_unauthorized_request(err: :missing_keys) && return if api_key.blank?
     @organization = Organization.find_by(api_key: api_key)
@@ -40,7 +39,7 @@ module LoadOrganization
   end
 
   def render_unauthorized_org_error_graphql(message)
-    render json: Utils::ErrorHandler.generate_graphql_error_with_root(message,
+    render json: Utils::ErrorHandler.new.generate_graphql_error_with_root(message,
                                                          path: 'load_organization',
                                                          extensions: {code: 'UNAUTHORIZED'})
   end
