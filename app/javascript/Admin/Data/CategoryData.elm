@@ -8,9 +8,13 @@ type alias CategoryId =
     Int
 
 
+type alias CategoryName =
+    String
+
+
 type alias Category =
     { id : CategoryId
-    , name : String
+    , name : CategoryName
     }
 
 

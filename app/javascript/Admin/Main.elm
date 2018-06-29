@@ -182,7 +182,7 @@ update msg model =
                             CategoryCreate.initModel
 
                 ( categoryCreateModel, categoryCreateCmd ) =
-                    CategoryCreate.update ccMsg currentPageModel
+                    CategoryCreate.update ccMsg currentPageModel model.nodeEnv model.organizationKey
             in
                 ( { model
                     | currentPage = (CategoryCreate categoryCreateModel)
