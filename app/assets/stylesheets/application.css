@@ -97,3 +97,13 @@ input[type=submit] {
     border-radius: 5px;
     padding: 20px;
 }
+
+.code {
+  max-width: 700px;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  background-color: #000;
+  color: #ffffff;
+  padding: 1.25rem 1.25rem 0;
+
+}
