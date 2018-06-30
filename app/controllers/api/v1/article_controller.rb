@@ -22,23 +22,30 @@ module Api
       end
 
       def search
-        search_query_filter = {
-          fields: ["title^2", "desc"],
-          limit: 10,
-          load: false,
-          operator: "or",
-          select: [:id, :title, :desc],
-          order: { _score: :desc }
-        }
-
-        render json: { articles: Article.search(
-          params[:query],
-          search_query_filter).map { |article| article.slice("id", "title", "desc") } }
+        render json: { articles: search_articles }
       end
 
       private
         def load_article
           @article = Article.find(params[:id])
+        end
+
+        def search_articles
+          search_query_filter = {
+            fields: ["title^2", "desc"],
+            limit: 10,
+            load: false,
+            operator: "or",
+            select: [:id, :title, :desc],
+            order: { _score: :desc }
+          }
+
+          articles = Article.search(
+            params[:query],
+            search_query_filter
+          ).map { |article| article.slice("id", "title", "desc") }
+
+          articles.each { |article| article["id"] = article["id"].to_i }
         end
     end
   end
