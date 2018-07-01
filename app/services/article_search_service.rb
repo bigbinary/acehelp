@@ -8,11 +8,11 @@ class ArticleSearchService
   def process
     Article.search(
         query,
-        query_filter
+        query_options
     )
   end
 
-  def query_filter
+  def query_options
     {
         fields: ["title^2", "desc"],
         limit: 10,
@@ -21,6 +21,5 @@ class ArticleSearchService
         select: [:id, :title, :desc],
         order: { _score: :desc }
     }
-
   end
 end
