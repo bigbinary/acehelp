@@ -73,6 +73,7 @@ group :development, :test do
   # Minitest reporter plugin for CircleCI. Gerates JUnit xml reports from tests. https://github.com/circleci/minitest-ci
   gem "minitest-ci"
   gem "minitest", "5.10.3"
+  gem "awesome_print", "1.8.0"
 end
 
 group :development do

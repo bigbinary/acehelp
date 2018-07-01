@@ -2,6 +2,10 @@
 
 [AceHelp](https://www.acehelp.com) makes online help docs contextual.
 
+## Install dependencies
+
+- node(8+)
+
 ## Local Development setup
 
 ```
@@ -9,6 +13,9 @@
 
 # Database setup and populate sample data
 cp config/database.yml.postgresql config/database.yml
+
+brew install elasticsearch
+brew services start elasticsearch
 
 ./bin/rails db:setup
 
@@ -18,11 +25,7 @@ npm install -g elm
 
 elm-package install
 
-# in one terminal
-./bin/webpack-dev-server
-
-# in another terminal
-bundle exec rails server
+foreman start -f Procfile.dev
 ```
 
 Once we see `webpack: Compiled successfully.` message in terminal,

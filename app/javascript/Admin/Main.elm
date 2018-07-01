@@ -10,7 +10,6 @@ import Page.Url.List as UrlList
 import Page.Url.Create as UrlCreate
 import Page.Category.List as CategoryList
 import Page.Category.Create as CategoryCreate
-import Page.Organization.Display as OrganizationDisplay
 import Data.Organization exposing (OrganizationId)
 import UrlParser as Url exposing (..)
 import Request.Helpers exposing (NodeEnv, ApiKey)
@@ -39,7 +38,6 @@ type Page
     | CategoryCreate CategoryCreate.Model
     | UrlList UrlList.Model
     | UrlCreate UrlCreate.Model
-    | OrganizationDisplay OrganizationDisplay.Model
     | Dashboard
     | NotFound
 
@@ -72,7 +70,6 @@ type Msg
     | UrlListMsg UrlList.Msg
     | CategoryListMsg CategoryList.Msg
     | CategoryCreateMsg CategoryCreate.Msg
-    | OrganizationDisplayMsg OrganizationDisplay.Msg
     | UrlLocationChange Navigation.Location
 
 
@@ -117,7 +114,7 @@ update msg model =
                             ArticleCreate.initModel
 
                 ( articleCreateModel, createArticleCmd ) =
-                    ArticleCreate.update caMsg currentPageModel
+                    ArticleCreate.update caMsg currentPageModel model.nodeEnv model.organizationKey
             in
                 ( { model | currentPage = (ArticleCreate articleCreateModel) }
                 , Cmd.map ArticleCreateMsg createArticleCmd
@@ -193,17 +190,6 @@ update msg model =
                 , Cmd.map CategoryCreateMsg categoryCreateCmd
                 )
 
-        OrganizationDisplayMsg osMsg ->
-            let
-                ( organizationDisplayModel, organizationDisplayCmd ) =
-                    OrganizationDisplay.update osMsg OrganizationDisplay.initModel
-            in
-                ( { model
-                    | currentPage = OrganizationDisplay organizationDisplayModel
-                  }
-                , Cmd.map OrganizationDisplayMsg organizationDisplayCmd
-                )
-
         UrlLocationChange location ->
             let
                 msg =
@@ -232,9 +218,6 @@ convertPageToHash page =
 
         CategoryCreate categoryCreateModel ->
             "/admin/categories/new"
-
-        OrganizationDisplay organizationDisplayModel ->
-            "/admin/organization/1"
 
         Dashboard ->
             "/admin/dashboard"
@@ -265,7 +248,7 @@ retrivePage env location organizationKey =
         "/admin/articles/new" ->
             let
                 ( pageModel, pageCmd ) =
-                    (ArticleCreate.init)
+                    (ArticleCreate.init env organizationKey)
             in
                 ( ArticleCreate pageModel, Cmd.map ArticleCreateMsg pageCmd )
 
@@ -296,13 +279,6 @@ retrivePage env location organizationKey =
                     CategoryCreate.init
             in
                 ( CategoryCreate pageModel, Cmd.map CategoryCreateMsg pageCmd )
-
-        "/admin/organization" ->
-            let
-                ( pageModel, pageCmd ) =
-                    OrganizationDisplay.init env (retriveOrganizationFromUrl location)
-            in
-                ( OrganizationDisplay pageModel, Cmd.map OrganizationDisplayMsg pageCmd )
 
         "/admin/dashboard" ->
             ( Dashboard, Cmd.none )
@@ -385,10 +361,6 @@ view model =
                 CategoryCreate categoryCreateModel ->
                     Html.map CategoryCreateMsg
                         (CategoryCreate.view categoryCreateModel)
-
-                OrganizationDisplay organizationDisplayModel ->
-                    Html.map OrganizationDisplayMsg
-                        (OrganizationDisplay.view organizationDisplayModel)
 
                 Dashboard ->
                     div [] [ text "Dashboard" ]
