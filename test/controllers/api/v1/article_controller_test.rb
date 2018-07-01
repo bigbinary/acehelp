@@ -66,7 +66,6 @@ module Api
         assert_response :success
         json = JSON.parse(response.body)
         assert_equal "How to do search with elasticsearch", json["articles"].first["title"]
-        assert_equal @search_article.id, json["articles"].first["id"]
       end
     end
   end
