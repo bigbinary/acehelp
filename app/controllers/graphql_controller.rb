@@ -28,7 +28,7 @@ class GraphqlController < ApplicationController
 
     def context
       {
-        organization: @organization
+          organization: @organization
       }
     end
 
@@ -49,11 +49,16 @@ class GraphqlController < ApplicationController
       end
     end
 
-  private
-  def show_error_in_development(e)
-    if Rails.env.development?
-      logger.error e.message
-      logger.error e.backtrace.join("\n")
+    def render_unauthorized(message)
+      render json: Utils::ErrorHandler.new.generate_graphql_error_with_root(message,
+                                                                            path: "load_organization",
+                                                                            extensions: {code: "UNAUTHORIZED"})
     end
-  end
+
+    def show_error_in_development(e)
+      if Rails.env.development?
+        logger.error e.message
+        logger.error e.backtrace.join("\n")
+      end
+    end
 end
