@@ -8,6 +8,7 @@ import Html.Attributes exposing (id, class)
 import Http
 import Task
 import Reader exposing (Reader)
+import FontAwesome.Solid as SolidIcon
 
 
 -- MODEL
@@ -35,5 +36,15 @@ view article =
             , div [ class "article-content" ]
                 [ p [] [ text article.content ]
                 ]
+            , didThisHelpView article
             ]
+        ]
+
+
+didThisHelpView : Model -> Html msg
+didThisHelpView model =
+    div [ class "did-this-help" ]
+        [ span [] [ text "Did this help?" ]
+        , div [ class "thumbs thumbs-up" ] [ SolidIcon.thumbs_up ]
+        , div [ class "thumbs thumbs-down" ] [ SolidIcon.thumbs_down ]
         ]
