@@ -3,6 +3,7 @@ module Main exposing (..)
 import Html exposing (Html, div, text, button)
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
+import Http
 import Navigation exposing (..)
 import Page.Article.List as ArticleList
 import Page.Article.Create as ArticleCreate
@@ -12,7 +13,7 @@ import Page.Category.List as CategoryList
 import Page.Category.Create as CategoryCreate
 import Data.Organization exposing (OrganizationId)
 import UrlParser as Url exposing (..)
-import Request.Helpers exposing (NodeEnv, ApiKey)
+import Request.RequestHelper exposing (NodeEnv, ApiKey, logoutRequest)
 
 
 -- MODEL
@@ -50,7 +51,7 @@ init flags location =
 
         initModel =
             { currentPage = pageModel
-            , nodeEnv = "dev"
+            , nodeEnv = flags.node_env
             , organizationKey = flags.organization_key
             }
     in
@@ -71,6 +72,8 @@ type Msg
     | CategoryListMsg CategoryList.Msg
     | CategoryCreateMsg CategoryCreate.Msg
     | UrlLocationChange Navigation.Location
+    | SignOut
+    | SignedOut (Result Http.Error String)
 
 
 
@@ -196,6 +199,12 @@ update msg model =
                     urlLocationToMsg model location
             in
                 update msg model
+
+        SignOut ->
+            ( model, Http.send SignedOut (logoutRequest model.nodeEnv) )
+
+        SignedOut _ ->
+            ( model, load (Request.RequestHelper.baseUrl model.nodeEnv) )
 
 
 convertPageToHash : Page -> String
@@ -381,6 +390,7 @@ adminHeader model =
             [ Html.a [ onClick (Navigate <| ArticleList ArticleList.initModel) ] [ text "Articles" ]
             , Html.a [ onClick (Navigate <| UrlList UrlList.initModel) ] [ text "URL" ]
             , Html.a [ onClick (Navigate <| CategoryList CategoryList.initModel) ] [ text "Category" ]
+            , Html.a [ onClick SignOut ] [ text "Logout" ]
             ]
         ]
 
