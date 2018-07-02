@@ -41,10 +41,10 @@ baseUrl env =
             "https://staging.acehelp.com/"
 
         "development" ->
-            ""
+            "http://localhost:3000/"
 
         _ ->
-            ""
+            "http://localhost:3000/"
 
 
 defaultRequestHeaders : List Http.Header
@@ -85,3 +85,16 @@ httpRequest requestData decoder =
             , timeout = Nothing
             , withCredentials = False
             }
+
+
+logoutRequest : NodeEnv -> Http.Request String
+logoutRequest env =
+    Http.request
+        { method = "DELETE"
+        , headers = []
+        , url = (baseUrl env) ++ "users/sign_out"
+        , body = Http.emptyBody
+        , expect = Http.expectString
+        , timeout = Nothing
+        , withCredentials = False
+        }
