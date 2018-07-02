@@ -1,0 +1,44 @@
+#acehelp-hook{
+
+    .article-wrapper {
+        padding: 30px 0 0;
+
+        h1{
+          font-size: 28px;
+          font-weight: bold;
+          color: #222;
+          margin-bottom: 15px;
+        }
+
+        .article-content {
+          font-size: 16px;
+          line-height: 22px;
+          color: #333;
+
+          p {
+            margin-bottom: 20px;
+          }
+        }
+    }
+
+    .did-this-help{
+        display: flex;
+        justify-content: center;
+        
+        div{
+            margin: 5px;
+        }
+        span{
+            padding-top:22px;
+            margin-right: 5px;
+        }
+
+        .thumbs{
+            width: 30px;
+            height:30px;
+            padding: 10px;
+            background-color: azure;
+            border-radius: 50%;
+        }
+    }
+}
