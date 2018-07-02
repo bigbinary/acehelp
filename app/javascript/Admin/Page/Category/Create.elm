@@ -60,7 +60,7 @@ update msg model nodeEnv organizationKey =
                 if isValid updatedModel then
                     saveCategory updatedModel nodeEnv organizationKey
                 else
-                    ( model, Cmd.none )
+                    ( updatedModel, Cmd.none )
 
         SaveCategoryResponse (Ok id) ->
             ( { model
