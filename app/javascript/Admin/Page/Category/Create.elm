@@ -2,7 +2,11 @@ module Page.Category.Create exposing (..)
 
 import Http
 import Html exposing (..)
+import Html.Attributes exposing (..)
+import Html.Events exposing (..)
+import Data.CategoryData exposing (..)
 import Data.CommonData exposing (Error)
+import Request.Helpers exposing (..)
 
 
 -- MODEL
@@ -11,6 +15,7 @@ import Data.CommonData exposing (Error)
 type alias Model =
     { id : Int
     , name : String
+    , nameError : Maybe String
     , errors : Error
     }
 
@@ -19,6 +24,7 @@ initModel : Model
 initModel =
     { id = 0
     , name = ""
+    , nameError = Nothing
     , errors = Nothing
     }
 
@@ -35,15 +41,26 @@ init =
 
 
 type Msg
-    = SaveCategory
+    = CategoryNameInput CategoryName
+    | SaveCategory
     | SaveCategoryResponse (Result Http.Error String)
 
 
-update : Msg -> Model -> ( Model, Cmd Msg )
-update msg model =
+update : Msg -> Model -> NodeEnv -> ApiKey -> ( Model, Cmd Msg )
+update msg model nodeEnv organizationKey =
     case msg of
+        CategoryNameInput categoryName ->
+            ( { model | name = categoryName }, Cmd.none )
+
         SaveCategory ->
-            ( model, Cmd.none )
+            let
+                updatedModel =
+                    validate model
+            in
+                if isValid updatedModel then
+                    saveCategory updatedModel nodeEnv organizationKey
+                else
+                    ( updatedModel, Cmd.none )
 
         SaveCategoryResponse (Ok id) ->
             ( { model
@@ -77,4 +94,56 @@ update msg model =
 
 view : Model -> Html Msg
 view model =
-    div [] [ text "This is create category page" ]
+    Html.form
+        [ onSubmit SaveCategory ]
+        [ div []
+            [ label [] [ text "Category Name: " ]
+            , input
+                [ type_ "text"
+                , placeholder "Enter name for category..."
+                , value model.name
+                , onInput CategoryNameInput
+                ]
+                []
+            ]
+        , div []
+            [ button
+                [ type_ "submit"
+                , class "button primary"
+                ]
+                [ text "Submit" ]
+            ]
+        ]
+
+
+validate : Model -> Model
+validate model =
+    model
+        |> validateCategoryName
+
+
+validateCategoryName : Model -> Model
+validateCategoryName model =
+    if String.isEmpty model.name then
+        { model
+            | nameError = Just "Category name is required"
+        }
+    else
+        { model
+            | nameError = Nothing
+        }
+
+
+isValid : Model -> Bool
+isValid model =
+    model.nameError
+        == Nothing
+
+
+
+-- TODO: Add request for category create when backend is ready
+
+
+saveCategory : Model -> NodeEnv -> ApiKey -> ( Model, Cmd Msg )
+saveCategory model nodeEnv organizationKey =
+    ( model, Cmd.none )
