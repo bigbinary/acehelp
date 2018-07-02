@@ -390,6 +390,7 @@ adminHeader model =
             [ Html.a [ onClick (Navigate <| ArticleList ArticleList.initModel) ] [ text "Articles" ]
             , Html.a [ onClick (Navigate <| UrlList UrlList.initModel) ] [ text "URL" ]
             , Html.a [ onClick (Navigate <| CategoryList CategoryList.initModel) ] [ text "Category" ]
+            , Html.a [ href ((Request.RequestHelper.baseUrl model.nodeEnv) ++ "/embed/js?api_key=" ++ model.organizationKey) ] [ text "Embed" ]
             , Html.a [ onClick SignOut ] [ text "Logout" ]
             ]
         ]
