@@ -8,7 +8,6 @@
 // layout file, like app/views/layouts/application.html.erb
 
 import Elm from "../Client/Main";
-import "../../assets/stylesheets/application.css";
 import "../../assets/stylesheets/client/index.scss";
 
 window._ace = (function() {
