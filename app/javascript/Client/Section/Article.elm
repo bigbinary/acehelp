@@ -48,3 +48,15 @@ didThisHelpView model =
         , div [ class "thumbs thumbs-up" ] [ SolidIcon.thumbs_up ]
         , div [ class "thumbs thumbs-down" ] [ SolidIcon.thumbs_down ]
         ]
+
+
+yesItDidView : Html msg
+yesItDidView =
+    div [ class "did-this-help" ]
+        [ span [] [ text "Great! Love it!" ] ]
+
+
+noItDidNotView : Html msg
+noItDidNotView =
+    div [ class "did-this-help article-feedback" ]
+        [ span [] [ text "Please tell us what you are looking for. If you enter your email then this would create a support ticket and we would get back to you soon" ] ]
