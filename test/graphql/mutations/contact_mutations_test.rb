@@ -29,12 +29,15 @@ class Mutations::ContactMutationsTest < ActiveSupport::TestCase
                     id
                     name
                   }
+                  errors {
+                    message
+                    path 
+                  }
                 }
               }
             GRAPHQL
-    assert_raises(Graphlient::Errors::ExecutionError) do
-      AceHelp::Client.execute(query, input: { name: "", email: "contact@email.com", message: "Dummy" })
-    end
+    result = AceHelp::Client.execute(query, input: { name: "", email: "contact@email.com", message: "Dummy" })
+    assert_nil result.data.add_contact.contact
   end
 
   test "create contact mutation error failute test" do
@@ -44,13 +47,16 @@ class Mutations::ContactMutationsTest < ActiveSupport::TestCase
                   contact {
                     id
                   }
+                  errors {
+                    message
+                    path 
+                  }
                 }
               }
     GRAPHQL
 
-    assert_raises(Graphlient::Errors::ExecutionError) do
-      AceHelp::Client.execute(query, input: { name: "", email: "contact@email.com", message: "Dummy" })
-    end
+    result = AceHelp::Client.execute(query, input: { name: "", email: "contact@email.com", message: "Dummy" })
+    assert_not_empty result.data.add_contact.errors.flat_map(&:path) & ['addContact', 'name']
   end
 
 end

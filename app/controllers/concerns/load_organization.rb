@@ -23,7 +23,7 @@ module LoadOrganization
   private
 
     def unathorized_error_message
-      "Unauthorized request: Missing our invalid API Key"
+      "Unauthorized request: Missing or invalid API Key"
     end
 
 end

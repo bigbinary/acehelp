@@ -13,7 +13,25 @@ class Utils::ErrorHandler
     }
   end
 
-  def object_error_full_messages(obj)
-    "Invalid Input: #{obj.errors.full_messages.join(', ')}"
+  def generate_error_hash(message, context, attributes: [])
+    [
+      {
+        message: message,
+        path: [context.key] + attributes
+      }
+    ]
   end
+
+  def generate_detailed_error_hash(object, context, general_message: nil)
+    if object.respond_to?(:errors) && object.errors.present?
+      object.errors.map do |attribute, message|
+        attribute = attribute.to_s
+        {
+          path: [context.key, 'attribute', attribute],
+          message: general_message || "#{attribute} #{message}"
+        }
+      end
+    end
+  end
+
 end

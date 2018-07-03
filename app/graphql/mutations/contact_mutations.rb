@@ -9,15 +9,21 @@ class Mutations::ContactMutations
     input_field :message, !types.String
 
     return_field :contact, Types::ContactType
+    return_field :errors, types[Types::ErrorType]
 
     resolve ->(object, inputs, context) {
       new_contact = Contact.new(name: inputs[:name], email: inputs[:email], message: inputs[:message])
 
       if new_contact.save
-        { contact: new_contact }
+        contact = new_contact
       else
-        raise GraphQL::ExecutionError.new(Utils::ErrorHandler.new.object_error_full_messages(new_contact))
+        errors = Utils::ErrorHandler.new.generate_detailed_error_hash(new_contact, context)
       end
+
+      {
+        contact: contact,
+        errors: errors
+      }
     }
   end
 end

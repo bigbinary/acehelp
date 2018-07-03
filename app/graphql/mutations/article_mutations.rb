@@ -9,21 +9,27 @@ class Mutations::ArticleMutations
     input_field :desc, !types.String
 
     return_field :article, Types::ArticleType
+    return_field :errors, types[Types::ErrorType]
 
     resolve ->(object, inputs, context) {
       category = Category.find_by_id(inputs[:category_id])
       if category.nil?
-        raise GraphQL::ExecutionError.new("Category not found")
+        errors = Utils::ErrorHandler.new.generate_error_hash('Category not found', context)
       else
         new_article = category.articles.new(title: inputs[:title], desc: inputs[:desc])
         new_article.organization = context[:organization]
 
         if new_article.save
-          { article: new_article }
+          article = new_article
         else
-          raise GraphQL::ExecutionError.new(Utils::ErrorHandler.new.object_error_full_messages(new_article))
+          errors = Utils::ErrorHandler.new.generate_detailed_error_hash(new_article, context)
         end
       end
+
+      {
+        article: article,
+        errors: errors
+      }
     }
   end
 
@@ -40,18 +46,24 @@ class Mutations::ArticleMutations
     input_field :article, !ArticleInputObjectType
 
     return_field :article, Types::ArticleType
+    return_field :errors, types[Types::ErrorType]
 
     resolve ->(object, inputs, context) {
       article = Article.find_by(id: inputs[:id], organization_id: context[:organization].id)
 
       if article.nil?
-        raise GraphQL::ExecutionError.new("Article not found")
+        errors = Utils::ErrorHandler.new.generate_error_hash('Article not found', context)
       else
         if article.update_attributes(inputs[:article].to_h)
-          { article: article }
+          updated_article = article
         else
-          raise GraphQL::ExecutionError.new(Utils::ErrorHandler.new.object_error_full_messages(article))
+          errors = Utils::ErrorHandler.new.generate_detailed_error_hash(article, context)
         end
+
+        {
+          article: updated_article,
+          errors: errors
+        }
       end
     }
   end
@@ -62,18 +74,24 @@ class Mutations::ArticleMutations
     input_field :id, !types.ID
 
     return_field :deletedId, types.ID
+    return_field :errors, types[Types::ErrorType]
 
     resolve ->(_obj, inputs, context) {
       article = Article.find_by(id: inputs[:id], organization_id: context[:organization].id)
       if !article
-        raise GraphQL::ExecutionError.new("Article not found")
+        errors = Utils::ErrorHandler.new.generate_error_hash('Article not found', context)
       else
         if article.destroy
-          { deletedId: inputs[:id] }
+          deleted_id = inputs[:id]
         else
-          raise GraphQL::ExecutionError.new(Utils::ErrorHandler.new.object_error_full_messages(article))
+          errors = Utils::ErrorHandler.new.generate_detailed_error_hash(article, context)
         end
       end
+
+      {
+        deletedId: deleted_id,
+        errors: errors
+      }
     }
   end
 end
