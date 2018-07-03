@@ -23,7 +23,12 @@ window._ace = (function() {
     document.body.appendChild(node);
   }
 
+  function userInfo({ id, name, email }) {
+    // CONTACT ELM
+  }
+
   return {
-    insertWidget: insertWidget
+    insertWidget: insertWidget,
+    userInfo: userInfo
   };
 })();
