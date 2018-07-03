@@ -15,15 +15,24 @@ import FontAwesome.Solid as SolidIcon
 -- MODEL
 
 
+type alias FeedbackForm =
+    { comment : String
+    , email : String
+    , name : String
+    }
+
+
 type FeedBack
     = Positive
     | Negative
+    | FeedbackSent
     | NoFeedback
 
 
 type alias Model =
     { article : Article
     , feedback : FeedBack
+    , feedbackForm : Maybe FeedbackForm
     }
 
 
@@ -36,6 +45,7 @@ defaultModel : Article -> Model
 defaultModel article =
     { article = article
     , feedback = NoFeedback
+    , feedbackForm = Nothing
     }
 
 
@@ -45,6 +55,7 @@ defaultModel article =
 
 type Msg
     = FeedbackSelected FeedBack
+    | SendFeedback
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -53,6 +64,9 @@ update msg model =
         FeedbackSelected feedback ->
             -- TODO: Make and Http call to register feedback
             ( { model | feedback = feedback }, Cmd.none )
+
+        SendFeedback ->
+            ( { model | feedback = FeedbackSent }, Cmd.none )
 
 
 
@@ -75,6 +89,9 @@ view model =
 
                 NoFeedback ->
                     didThisHelpView
+
+                FeedbackSent ->
+                    feedbackSentView model
     in
         div [ id "content-wrapper" ]
             [ div [ class "article-wrapper" ]
@@ -110,6 +127,33 @@ negativeView =
             , text " If you enter your email then this would create a support ticket and we would get back to you soon"
             ]
         , textarea [ placeholder "Your comments" ] []
-        , input [ type_ "text", placeholder "Your Email" ] []
-        , input [ type_ "text", placeholder "Your Name" ] []
+        , input [ type_ "text", placeholder "Your Email (optional)" ] []
+        , input [ type_ "text", placeholder "Your Name (optional)" ] []
+        , div []
+            [ div
+                [ class "regular-button"
+                , style [ ( "background-color", "rgb(60, 170, 249)" ) ]
+                , onClick SendFeedback
+                ]
+                [ text "Submit" ]
+            ]
+        ]
+
+
+feedbackSentView : Model -> Html msg
+feedbackSentView model =
+    div [ class "did-this-help" ]
+        [ Maybe.withDefault
+            (text "Something went wrong! Please try again")
+          <|
+            Maybe.map
+                (\feedbackform ->
+                    case feedbackform.email of
+                        "" ->
+                            text "Thanks for your feedback. We will try to improve this documenet"
+
+                        _ ->
+                            text "Support ticket has been created. Someone will get back to you soon. Thanks"
+                )
+                model.feedbackForm
         ]
