@@ -357,7 +357,12 @@ update msg model =
             ( { model | sectionState = Loaded (ArticleListSection { id = Nothing, articles = articleList.articles }) }, Cmd.none )
 
         ArticleLoaded (Ok articleResponse) ->
-            ( { model | sectionState = Loaded (ArticleSection articleResponse.article) }, Cmd.none )
+            ( { model
+                | sectionState =
+                    Loaded <| ArticleSection <| ArticleSection.defaultModel articleResponse.article
+              }
+            , Cmd.none
+            )
 
         GoBack ->
             ( getPreviousValidState model, Cmd.none )
