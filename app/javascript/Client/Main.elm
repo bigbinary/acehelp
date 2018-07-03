@@ -164,7 +164,7 @@ type Msg
     | CategoryListLoaded (Result Http.Error Categories)
     | ArticleListMsg ArticleListSection.Msg
     | ArticleListLoaded (Result Http.Error ArticleListResponse)
-    | ArticleMsg
+    | ArticleMsg ArticleSection.Msg
     | ArticleLoaded (Result Http.Error ArticleResponse)
     | UrlChange Navigation.Location
     | GoBack
@@ -193,7 +193,7 @@ getSectionView section =
             Html.map CategoryListMsg <| CategoryListSection.view model
 
         ArticleSection model ->
-            ArticleSection.view model
+            Html.map ArticleMsg <| ArticleSection.view model
 
         ArticleListSection model ->
             Html.map ArticleListMsg <| ArticleListSection.view model
@@ -390,8 +390,24 @@ update msg model =
         ArticleLoaded (Err error) ->
             ( { model | sectionState = Loaded (ErrorSection error) }, Cmd.none )
 
-        ArticleMsg ->
-            ( model, Cmd.none )
+        ArticleMsg articleMsg ->
+            let
+                currentArticleModel =
+                    getArticleModel <|
+                        getSection model.sectionState
+
+                getArticleModel section =
+                    case section of
+                        ArticleSection model ->
+                            model
+
+                        _ ->
+                            ArticleSection.defaultModel { id = 0, title = "", content = "" }
+
+                ( newArticleModel, cmd ) =
+                    ArticleSection.update articleMsg currentArticleModel
+            in
+                ( { model | sectionState = Loaded (ArticleSection newArticleModel) }, Cmd.none )
 
         SearchBarMsg searchBarMsg ->
             case searchBarMsg of
