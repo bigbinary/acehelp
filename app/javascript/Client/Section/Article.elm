@@ -1,10 +1,11 @@
-module Section.Article exposing (init, Model, view, defaultModel)
+module Section.Article exposing (init, Model, view, defaultModel, Msg, update)
 
 import Data.Article exposing (..)
 import Request.Article exposing (..)
 import Request.Helpers exposing (ApiKey, Context, NodeEnv)
 import Html exposing (..)
 import Html.Attributes exposing (..)
+import Html.Events exposing (..)
 import Http
 import Task
 import Reader exposing (Reader)
@@ -40,10 +41,25 @@ defaultModel article =
 
 
 -- UPDATE
+
+
+type Msg
+    = FeedbackSelected FeedBack
+
+
+update : Msg -> Model -> ( Model, Cmd Msg )
+update msg model =
+    case msg of
+        FeedbackSelected feedback ->
+            -- TODO: Make and Http call to register feedback
+            ( { model | feedback = feedback }, Cmd.none )
+
+
+
 -- VIEW
 
 
-view : Model -> Html msg
+view : Model -> Html Msg
 view model =
     let
         article =
@@ -71,12 +87,12 @@ view model =
             ]
 
 
-didThisHelpView : Html msg
+didThisHelpView : Html Msg
 didThisHelpView =
     div [ class "did-this-help" ]
         [ span [] [ text "Did this help?" ]
-        , div [ class "thumbs thumbs-up" ] [ SolidIcon.thumbs_up ]
-        , div [ class "thumbs thumbs-down" ] [ SolidIcon.thumbs_down ]
+        , div [ class "thumbs thumbs-up", onClick (FeedbackSelected Positive) ] [ SolidIcon.thumbs_up ]
+        , div [ class "thumbs thumbs-down", onClick (FeedbackSelected Negative) ] [ SolidIcon.thumbs_down ]
         ]
 
 
@@ -86,7 +102,7 @@ positiveView =
         [ span [] [ text "Great! Love it!" ] ]
 
 
-negativeView : Html msg
+negativeView : Html Msg
 negativeView =
     div [ class "did-this-help article-feedback" ]
         [ span []
