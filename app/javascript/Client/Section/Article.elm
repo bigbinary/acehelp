@@ -10,6 +10,8 @@ import Http
 import Task
 import Reader exposing (Reader)
 import FontAwesome.Solid as SolidIcon
+import Json.Encode as Encode
+import Json.Decode as Decode
 
 
 -- MODEL
@@ -59,14 +61,22 @@ type Msg
     | Vote (Result Http.Error String)
 
 
-update : Msg -> Model -> ( Model, Cmd Msg )
-update msg model =
+httpVote : Encode.Value -> Decode.Decoder String -> NodeEnv -> Cmd Msg
+httpVote encode decode env =
+    Http.send Vote <| Http.post (graphqlUrl env) (Http.jsonBody encode) decode
+
+
+update : NodeEnv -> Msg -> Model -> ( Model, Cmd Msg )
+update env msg model =
     case msg of
         FeedbackSelected feedback ->
             -- TODO: Make and Http call to register feedback
             case feedback of
                 Positive ->
-                    ( { model | feedback = feedback }, Http.send Vote <| Http.post (graphqlUrl "dev") (Http.jsonBody (encodeUpvote model.article.id)) decodeUpvote )
+                    ( { model | feedback = feedback }, httpVote (encodeUpvote model.article.id) decodeUpvote env )
+
+                Negative ->
+                    ( { model | feedback = feedback }, httpVote (encodeDownvote model.article.id) decodeDownvote env )
 
                 _ ->
                     ( { model | feedback = feedback }, Cmd.none )
