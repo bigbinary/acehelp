@@ -23,6 +23,7 @@ import Utils exposing (getUrlPathData)
 import Animation
 import Navigation
 import FontAwesome.Solid as SolidIcon
+import Ports exposing (..)
 
 
 -- MODEL
@@ -64,6 +65,7 @@ type alias Model =
     , tabModel : Tabs.Model
     , searchQuery : SearchBar.Model
     , history : ModelHistory
+    , userInfo : UserInfo
     }
 
 
@@ -94,6 +96,7 @@ init flags location =
       , tabModel = Tabs.modelWithTabs Tabs.allTabs
       , searchQuery = ""
       , history = NoHistory
+      , userInfo = { name = "", email = "" }
       }
     , Cmd.none
     )
@@ -171,6 +174,7 @@ type Msg
     | TabMsg Tabs.Msg
     | ContactUsMsg ContactUsSection.Msg
     | SearchBarMsg SearchBar.Msg
+    | ReceivedUserInfo UserInfo
 
 
 
@@ -450,6 +454,9 @@ update msg model =
                     _ ->
                         ( { model | sectionState = Loaded (ContactUsSection newContactUsModel) }, Cmd.none )
 
+        ReceivedUserInfo userInfo ->
+            ( { model | userInfo = userInfo }, Cmd.none )
+
 
 onTabChange : Tabs.Tabs -> Model -> ( Model, Cmd Msg )
 onTabChange tab model =
@@ -484,7 +491,10 @@ cmdForLibrary model =
 
 subscriptions : Model -> Sub Msg
 subscriptions model =
-    Animation.subscription Animate [ model.containerAnimation ]
+    Sub.batch
+        [ Animation.subscription Animate [ model.containerAnimation ]
+        , userInfo ReceivedUserInfo
+        ]
 
 
 
