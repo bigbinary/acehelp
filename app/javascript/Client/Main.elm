@@ -405,7 +405,7 @@ update msg model =
                             ArticleSection.defaultModel { id = 0, title = "", content = "" }
 
                 ( newArticleModel, cmd ) =
-                    ArticleSection.update articleMsg currentArticleModel
+                    ArticleSection.update model.nodeEnv articleMsg currentArticleModel
             in
                 ( { model | sectionState = Loaded (ArticleSection newArticleModel) }, Cmd.map ArticleMsg <| cmd )
 

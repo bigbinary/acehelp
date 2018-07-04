@@ -47,12 +47,30 @@ encodeUpvote articleId =
             ]
 
 
+encodeDownvote : ArticleId -> Encode.Value
+encodeDownvote articleId =
+    let
+        query =
+            "mutation downvote { downvoteArticle(input: {id: " ++ (toString articleId) ++ "}) {article {id downvotes_count } }}"
+    in
+        Encode.object
+            [ ( "operationName", Encode.string "downvote" )
+            , ( "query", Encode.string query )
+            , ( "variables", Encode.object [] )
+            ]
+
+
 
 -- DECODERS
 
 
 decodeUpvote : Decoder String
 decodeUpvote =
+    string
+
+
+decodeDownvote : Decoder String
+decodeDownvote =
     string
 
 
