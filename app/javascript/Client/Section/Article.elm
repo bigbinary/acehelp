@@ -2,7 +2,7 @@ module Section.Article exposing (init, Model, view, defaultModel, Msg, update)
 
 import Data.Article exposing (..)
 import Request.Article exposing (..)
-import Request.Helpers exposing (ApiKey, Context, NodeEnv)
+import Request.Helpers exposing (ApiKey, Context, NodeEnv, graphqlUrl)
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
@@ -56,6 +56,7 @@ defaultModel article =
 type Msg
     = FeedbackSelected FeedBack
     | SendFeedback
+    | Vote (Result Http.Error String)
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -63,10 +64,18 @@ update msg model =
     case msg of
         FeedbackSelected feedback ->
             -- TODO: Make and Http call to register feedback
-            ( { model | feedback = feedback }, Cmd.none )
+            case feedback of
+                Positive ->
+                    ( { model | feedback = feedback }, Http.send Vote <| Http.post (graphqlUrl "dev") (Http.jsonBody (encodeUpvote model.article.id)) decodeUpvote )
+
+                _ ->
+                    ( { model | feedback = feedback }, Cmd.none )
 
         SendFeedback ->
             ( { model | feedback = FeedbackSent }, Cmd.none )
+
+        Vote _ ->
+            ( model, Cmd.none )
 
 
 
