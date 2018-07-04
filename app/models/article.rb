@@ -15,4 +15,9 @@ class Article < ApplicationRecord
   def increment_upvote
     self.update(upvotes_count: self.upvotes_count + 1)
   end
+
+  def increment_downvote
+    self.update(downvotes_count: self.downvotes_count + 1)
+  end
+
 end

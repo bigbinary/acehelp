@@ -7,6 +7,9 @@ class GraphqlController < ApplicationController
     result = AcehelpSchema.execute(query, variables: variables, context: context, operation_name: operation_name)
     render json: result
   rescue => e
+    logger.error e.message
+    logger.error e.backtrace.join("\n")
+    
     render json: { error:  e.message }, status: 500
   end
 
