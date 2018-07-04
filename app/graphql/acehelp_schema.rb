@@ -6,4 +6,7 @@ AcehelpSchema = GraphQL::Schema.define do
 
   use GraphQL::Batch
   enable_preloading
+
+  max_depth(8)
+
 end
