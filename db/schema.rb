@@ -12,7 +12,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2018_06_07_115511) do
+ActiveRecord::Schema.define(version: 2018_07_03_185350) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -33,6 +33,7 @@ ActiveRecord::Schema.define(version: 2018_06_07_115511) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.bigint "organization_id"
+    t.integer "upvotes_count", default: 0
     t.index ["category_id"], name: "index_articles_on_category_id"
     t.index ["organization_id"], name: "index_articles_on_organization_id"
   end
