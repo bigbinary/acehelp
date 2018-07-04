@@ -11,6 +11,7 @@ import Page.Url.List as UrlList
 import Page.Url.Create as UrlCreate
 import Page.Category.List as CategoryList
 import Page.Category.Create as CategoryCreate
+import Page.Integration as Integration
 import Data.Organization exposing (OrganizationId)
 import UrlParser as Url exposing (..)
 import Request.RequestHelper exposing (NodeEnv, ApiKey, logoutRequest)
@@ -39,6 +40,7 @@ type Page
     | CategoryCreate CategoryCreate.Model
     | UrlList UrlList.Model
     | UrlCreate UrlCreate.Model
+    | Integration Integration.Model
     | Dashboard
     | NotFound
 
@@ -71,6 +73,7 @@ type Msg
     | UrlListMsg UrlList.Msg
     | CategoryListMsg CategoryList.Msg
     | CategoryCreateMsg CategoryCreate.Msg
+    | IntegrationMsg Integration.Msg
     | UrlLocationChange Navigation.Location
     | SignOut
     | SignedOut (Result Http.Error String)
@@ -84,7 +87,7 @@ update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
         Navigate page ->
-            ( model, newUrl <| convertPageToHash page )
+            ( model, newUrl <| convertPageToHash page model.organizationKey )
 
         ChangePage page cmd ->
             ( { model | currentPage = page }, cmd )
@@ -193,6 +196,25 @@ update msg model =
                 , Cmd.map CategoryCreateMsg categoryCreateCmd
                 )
 
+        IntegrationMsg integrationMsg ->
+            let
+                currentPageModel =
+                    case model.currentPage of
+                        Integration integrationPageModel ->
+                            integrationPageModel
+
+                        _ ->
+                            Integration.initModel model.organizationKey
+
+                ( integrationModel, integrationCmd ) =
+                    Integration.update integrationMsg currentPageModel
+            in
+                ( { model
+                    | currentPage = (Integration integrationModel)
+                  }
+                , Cmd.map IntegrationMsg integrationCmd
+                )
+
         UrlLocationChange location ->
             let
                 msg =
@@ -207,8 +229,8 @@ update msg model =
             ( model, load (Request.RequestHelper.baseUrl model.nodeEnv) )
 
 
-convertPageToHash : Page -> String
-convertPageToHash page =
+convertPageToHash : Page -> ApiKey -> String
+convertPageToHash page organizationKey =
     case page of
         ArticleList articleListModel ->
             "/admin/articles"
@@ -228,6 +250,9 @@ convertPageToHash page =
         CategoryCreate categoryCreateModel ->
             "/admin/categories/new"
 
+        Integration integrationModel ->
+            "/admin/integrations?api_key=" ++ organizationKey
+
         Dashboard ->
             "/admin/dashboard"
 
@@ -246,54 +271,62 @@ urlLocationToMsg model location =
 
 retrivePage : NodeEnv -> Location -> ApiKey -> ( Page, Cmd Msg )
 retrivePage env location organizationKey =
-    case (extractStaticPath location) of
-        "/admin/articles" ->
-            let
-                ( pageModel, pageCmd ) =
-                    ArticleList.init env organizationKey
-            in
-                ( ArticleList pageModel, Cmd.map ArticleListMsg pageCmd )
+    let
+        integrationsUrl =
+            "/admin/integrations?api_key=" ++ organizationKey
+    in
+        case (extractStaticPath location) of
+            "/admin/articles" ->
+                let
+                    ( pageModel, pageCmd ) =
+                        ArticleList.init env organizationKey
+                in
+                    ( ArticleList pageModel, Cmd.map ArticleListMsg pageCmd )
 
-        "/admin/articles/new" ->
-            let
-                ( pageModel, pageCmd ) =
-                    (ArticleCreate.init env organizationKey)
-            in
-                ( ArticleCreate pageModel, Cmd.map ArticleCreateMsg pageCmd )
+            "/admin/articles/new" ->
+                let
+                    ( pageModel, pageCmd ) =
+                        (ArticleCreate.init env organizationKey)
+                in
+                    ( ArticleCreate pageModel, Cmd.map ArticleCreateMsg pageCmd )
 
-        "/admin/urls" ->
-            let
-                ( pageModel, pageCmd ) =
-                    UrlList.init env organizationKey
-            in
-                ( UrlList pageModel, Cmd.map UrlListMsg pageCmd )
+            "/admin/urls" ->
+                let
+                    ( pageModel, pageCmd ) =
+                        UrlList.init env organizationKey
+                in
+                    ( UrlList pageModel, Cmd.map UrlListMsg pageCmd )
 
-        "/admin/urls/new" ->
-            let
-                ( pageModel, pageCmd ) =
-                    UrlCreate.init
-            in
-                ( UrlCreate pageModel, Cmd.map UrlCreateMsg pageCmd )
+            "/admin/urls/new" ->
+                let
+                    ( pageModel, pageCmd ) =
+                        UrlCreate.init
+                in
+                    ( UrlCreate pageModel, Cmd.map UrlCreateMsg pageCmd )
 
-        "/admin/categories" ->
-            let
-                ( pageModel, pageCmd ) =
-                    CategoryList.init
-            in
-                ( CategoryList pageModel, Cmd.map CategoryListMsg pageCmd )
+            "/admin/categories" ->
+                let
+                    ( pageModel, pageCmd ) =
+                        CategoryList.init
+                in
+                    ( CategoryList pageModel, Cmd.map CategoryListMsg pageCmd )
 
-        "/admin/categories/new" ->
-            let
-                ( pageModel, pageCmd ) =
-                    CategoryCreate.init
-            in
-                ( CategoryCreate pageModel, Cmd.map CategoryCreateMsg pageCmd )
+            "/admin/categories/new" ->
+                let
+                    ( pageModel, pageCmd ) =
+                        CategoryCreate.init
+                in
+                    ( CategoryCreate pageModel, Cmd.map CategoryCreateMsg pageCmd )
 
-        "/admin/dashboard" ->
-            ( Dashboard, Cmd.none )
+            "/admin/dashboard" ->
+                ( Dashboard, Cmd.none )
 
-        _ ->
-            ( NotFound, Cmd.none )
+            integrationsUrl ->
+                let
+                    ( pageModel, pageCmd ) =
+                        Integration.init organizationKey
+                in
+                    ( Integration pageModel, Cmd.map IntegrationMsg pageCmd )
 
 
 extractStaticPath : Location -> String
@@ -371,6 +404,10 @@ view model =
                     Html.map CategoryCreateMsg
                         (CategoryCreate.view categoryCreateModel)
 
+                Integration integrationModel ->
+                    Html.map IntegrationMsg
+                        (Integration.view integrationModel)
+
                 Dashboard ->
                     div [] [ text "Dashboard" ]
 
@@ -390,6 +427,7 @@ adminHeader model =
             [ Html.a [ onClick (Navigate <| ArticleList ArticleList.initModel) ] [ text "Articles" ]
             , Html.a [ onClick (Navigate <| UrlList UrlList.initModel) ] [ text "URL" ]
             , Html.a [ onClick (Navigate <| CategoryList CategoryList.initModel) ] [ text "Category" ]
+            , Html.a [ onClick (Navigate <| Integration (Integration.initModel model.organizationKey)) ] [ text "Integrations" ]
             , Html.a [ onClick SignOut ] [ text "Logout" ]
             ]
         ]
