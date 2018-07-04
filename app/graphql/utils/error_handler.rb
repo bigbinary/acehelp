@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class Utils::ErrorHandler
   def generate_graphql_error_with_root(message, path:, extensions: {})
     path = [path] if path.is_a?(String)

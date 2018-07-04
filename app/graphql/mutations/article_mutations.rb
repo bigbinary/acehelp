@@ -14,7 +14,7 @@ class Mutations::ArticleMutations
     resolve ->(object, inputs, context) {
       category = Category.find_by_id(inputs[:category_id])
       if category.nil?
-        errors = Utils::ErrorHandler.new.generate_error_hash('Category not found', context)
+        errors = Utils::ErrorHandler.new.generate_error_hash("Category not found", context)
       else
         new_article = category.articles.new(title: inputs[:title], desc: inputs[:desc])
         new_article.organization = context[:organization]
@@ -52,7 +52,7 @@ class Mutations::ArticleMutations
       article = Article.find_by(id: inputs[:id], organization_id: context[:organization].id)
 
       if article.nil?
-        errors = Utils::ErrorHandler.new.generate_error_hash('Article not found', context)
+        errors = Utils::ErrorHandler.new.generate_error_hash("Article not found", context)
       else
         if article.update_attributes(inputs[:article].to_h)
           updated_article = article
@@ -79,7 +79,7 @@ class Mutations::ArticleMutations
     resolve ->(_obj, inputs, context) {
       article = Article.find_by(id: inputs[:id], organization_id: context[:organization].id)
       if !article
-        errors = Utils::ErrorHandler.new.generate_error_hash('Article not found', context)
+        errors = Utils::ErrorHandler.new.generate_error_hash("Article not found", context)
       else
         if article.destroy
           deleted_id = inputs[:id]

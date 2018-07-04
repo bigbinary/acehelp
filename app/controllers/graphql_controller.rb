@@ -6,10 +6,10 @@ class GraphqlController < ApplicationController
   def execute
     result = AcehelpSchema.execute(query, variables: variables, context: context, operation_name: operation_name)
     render json: result
-  # rescue => e
-  #   show_error_in_development(e)
-  #   graphql_error = Utils::ErrorHandler.new.generate_graphql_error_with_root(e.message, path: ['System Exception'])
-  #   render json: graphql_error, status: 500
+  rescue => e
+    show_error_in_development(e)
+    graphql_error = Utils::ErrorHandler.new.generate_graphql_error_with_root(e.message, path: ["System Exception"])
+    render json: graphql_error, status: 500
   end
 
   private
@@ -52,7 +52,7 @@ class GraphqlController < ApplicationController
     def render_unauthorized(message)
       render json: Utils::ErrorHandler.new.generate_graphql_error_with_root(message,
                                                                             path: "load_organization",
-                                                                            extensions: {code: "UNAUTHORIZED"})
+                                                                            extensions: { code: "UNAUTHORIZED" })
     end
 
     def show_error_in_development(e)

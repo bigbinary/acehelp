@@ -42,7 +42,7 @@ class Mutations::UrlMutations
     resolve ->(object, inputs, context) {
       url = Url.find_by(id: inputs[:id], organization_id: context[:organization].id)
       if url.nil?
-        errors = Utils::ErrorHandler.new.generate_error_hash('Url not found', context)
+        errors = Utils::ErrorHandler.new.generate_error_hash("Url not found", context)
       else
         if url.update_attributes(inputs[:url].to_h)
           updated_url = url
@@ -69,7 +69,7 @@ class Mutations::UrlMutations
     resolve ->(_obj, inputs, context) {
       url = Url.find_by(id: inputs[:id], organization_id: context[:organization].id)
       if url.nil?
-        errors = Utils::ErrorHandler.new.generate_error_hash('Url not found', context)
+        errors = Utils::ErrorHandler.new.generate_error_hash("Url not found", context)
       else
         if url.destroy
           deleted_id = inputs[:id]

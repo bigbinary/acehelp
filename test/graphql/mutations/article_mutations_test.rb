@@ -81,7 +81,7 @@ class Mutations::ArticleMutationsTest < ActiveSupport::TestCase
     GRAPHQL
 
     result = AceHelp::Client.execute(query, input: { title: "", desc: "New article creation", category_id: @category.id })
-    assert_not_empty result.data.add_article.errors.flat_map(&:path) & ['addArticle', 'title']
+    assert_not_empty result.data.add_article.errors.flat_map(&:path) & ["addArticle", "title"]
   end
 
 
@@ -135,7 +135,7 @@ class Mutations::ArticleMutationsTest < ActiveSupport::TestCase
     GRAPHQL
 
     result = AceHelp::Client.execute(query, input: { id: @article.id, article: { title: "", desc: "none", category_id: @category.id } })
-    assert_not_empty result.data.update_article.errors.flat_map(&:path) & ['updateArticle', 'title']
+    assert_not_empty result.data.update_article.errors.flat_map(&:path) & ["updateArticle", "title"]
   end
 
   test "delete article mutations" do
