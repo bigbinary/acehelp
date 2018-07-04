@@ -72,4 +72,24 @@ class Mutations::ArticleMutations
       end
     }
   end
+
+  Upvote = GraphQL::Relay::Mutation.define do
+    name "Upvote"
+
+    input_field :id, !types.ID
+
+    return_field :article, Types::ArticleType
+    return_field :errors, types.String
+
+    resolve ->(object, inputs, context) {
+      article = Article.find_by(id: inputs[:id], organization_id: context[:organization].id)
+      return { errors: "Article not found" } if article.nil?
+
+      if article.increment_upvote
+        { article: article }
+      else
+        GraphQL::ExecutionError.new("Invalid input: #{article.errors.full_messages.join(', ')}")
+      end
+    }
+  end
 end
