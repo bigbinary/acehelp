@@ -407,7 +407,7 @@ update msg model =
                 ( newArticleModel, cmd ) =
                     ArticleSection.update articleMsg currentArticleModel
             in
-                ( { model | sectionState = Loaded (ArticleSection newArticleModel) }, Cmd.none )
+                ( { model | sectionState = Loaded (ArticleSection newArticleModel) }, Cmd.map ArticleMsg <| cmd )
 
         SearchBarMsg searchBarMsg ->
             case searchBarMsg of

@@ -1,5 +1,6 @@
 module Data.Article exposing (..)
 
+import Json.Encode as Encode
 import Json.Decode exposing (int, string, float, nullable, list, Decoder)
 import Json.Decode.Pipeline exposing (decode, required, optional, hardcoded)
 
@@ -31,7 +32,28 @@ type alias ArticleSummary =
 
 
 -- ENCODERS
+
+
+encodeUpvote : ArticleId -> Encode.Value
+encodeUpvote articleId =
+    let
+        query =
+            "mutation upvote {upvoteArticle(input: {id: " ++ (toString articleId) ++ "}) {article {id upvotes_count}}}"
+    in
+        Encode.object
+            [ ( "operationName", Encode.string "upvote" )
+            , ( "query", Encode.string query )
+            , ( "variables", Encode.object [] )
+            ]
+
+
+
 -- DECODERS
+
+
+decodeUpvote : Decoder String
+decodeUpvote =
+    string
 
 
 decodeArticles : Decoder ArticleListResponse
