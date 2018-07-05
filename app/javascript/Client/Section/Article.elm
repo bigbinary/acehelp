@@ -70,7 +70,6 @@ update : NodeEnv -> Msg -> Model -> ( Model, Cmd Msg )
 update env msg model =
     case msg of
         FeedbackSelected feedback ->
-            -- TODO: Make and Http call to register feedback
             case feedback of
                 Positive ->
                     ( { model | feedback = feedback }, httpVote (encodeUpvote model.article.id) decodeUpvote env )
