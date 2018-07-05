@@ -4,7 +4,7 @@ import "../../assets/stylesheets/client/index.scss";
 /**
  * The AceHelp namespace provides APIs that allow users to configure and control the AceHelp widget
  */
-var AceHelp = (function () {
+var AceHelp = (function() {
     var internal = {};
     var _app;
 
@@ -40,7 +40,7 @@ var AceHelp = (function () {
         _internal: internal,
 
         /**
-         * Provide user information such as name and email to the widget
+         * Provide user information such as name and email to the widget. This will auto fill certain forms
          *
          * @param {Object} user An object with the user name and email strings
          *

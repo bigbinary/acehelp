@@ -1,25 +1,25 @@
 var req = new XMLHttpRequest();
-var script = document.createElement("script");
-var link = document.createElement("link");
 var baseUrl = "";
 var apiKey = "YOURAPIKEY";
 
+var script = document.createElement("script");
 script.type = "text/javascript";
 script.async = true;
-script.onload = function () {
+script.onload = function() {
     var _ace = window.AceHelp;
     if (_ace) {
         _ace._internal.insertWidget({ apiKey: apiKey });
     }
 };
 
+var link = document.createElement("link");
 link.rel = "stylesheet";
 link.type = "text/css";
 link.media = "all";
 
 req.responseType = "json";
 req.open("GET", baseUrl + "/packs/manifest.json", true);
-req.onload = function () {
+req.onload = function() {
     var t = document.getElementsByTagName("script")[0];
     var manifest = req.response;
     link.href = baseUrl + manifest["client.css"];
