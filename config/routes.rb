@@ -23,13 +23,6 @@ Rails.application.routes.draw do
       get "/articles/search", to: "article#search"
 
       resource :contacts, only: :create
-
-      get "/organization/:organization_id/data", to: "organization#data"
-
-      namespace :admin do
-        resources :articles, only: [:create]
-      end
-
     end
   end
 

@@ -13,22 +13,22 @@ class Mutations::OrganizationMutations
 
     resolve -> (object, inputs, context) {
       user = User.find_by_id(inputs[:user_id])
-      if !user
-        errors = Utils::ErrorHandler.new.generate_error_hash("User not found", context)
-      else
-        valid_params = inputs.to_h.slice("name", "email", "user_id")
-        new_org = user.add_organization(valid_params)
+      if user
+        sanitized_params = inputs.to_h.slice(*inputs.keys)
+        new_org = user.add_organization(sanitized_params)
+
         if new_org
           organization = new_org
         else
           errors = Utils::ErrorHandler.new.generate_detailed_error_hash(new_org, context)
         end
-
-        {
-          organization: organization,
-          errors: errors
-        }
+      else
+        errors = Utils::ErrorHandler.new.generate_error_hash("User not found", context)
       end
+      {
+        organization: organization,
+        errors: errors
+      }
     }
   end
 end

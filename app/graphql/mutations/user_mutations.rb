@@ -14,7 +14,8 @@ class Mutations::UserMutations
     return_field :errors, types[Types::ErrorType]
 
     resolve ->(object, inputs, context) {
-      new_user = User.new(inputs.to_h)
+      sanitized_params = inputs.to_h.slice(*inputs.keys)
+      new_user = User.new(sanitized_params)
 
       if new_user.save
         user = new_user

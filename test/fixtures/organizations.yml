@@ -3,11 +3,14 @@
 bigbinary:
   name: BigBinary
   api_key: "orgoneapikey"
+  email: "sample@bigbinary.com"
 
 zindi:
   name: Zindi
   api_key: MyString
+  email: "sample+zindi@bigbinary.com"
 
 aceinvoice:
   name: AceInvoice
   api_key: "aceinvoice_api_key"
+  email: "sample+aceinvoice@bigbinary.com"

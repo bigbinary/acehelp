@@ -8,7 +8,6 @@ class User < ApplicationRecord
 
   validates :first_name, presence: true
 
-  # Associations
   belongs_to :organization, autosave: true, dependent: :destroy, required: false
 
   def name
@@ -17,6 +16,8 @@ class User < ApplicationRecord
 
   def add_organization(args)
     user = self
-    user.create_organization(email: args["email"], name: args["name"])
+    user.organization = Organization.new(email: args["email"], name: args["name"])
+    user.save
+    user.organization
   end
 end
