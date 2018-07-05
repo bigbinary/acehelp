@@ -500,7 +500,7 @@ subscriptions : Model -> Sub Msg
 subscriptions model =
     Sub.batch
         [ Animation.subscription Animate [ model.containerAnimation ]
-        , userInfo ReceivedUserInfo
+        , userInfo <| decodeUserInfo >> ReceivedUserInfo
         ]
 
 

@@ -20,14 +20,19 @@ var AceHelp = (function() {
         document.body.appendChild(node);
     }
 
-    function _userInfo({ name, email }) {
+    function _userInfo(user) {
         if (!_app) throw new Error("AceHelp: Widget has not been initialized");
-        if (typeof name !== "string" && typeof email !== "string") {
+        if (!user) throw new Error("AceHelp:userInfo: expecting one parameter");
+        if (user.name && typeof user.name !== "string")
             throw new Error(
-                "AceHelp:userInfo: name and email are required to be of string type"
+                "AceHelp:userInfo: name is required to be of string type"
             );
-        }
-        _app.ports.userInfo.send({ name, email });
+        if (user.email && typeof user.email !== "string")
+            throw new Error(
+                "AceHelp:userInfo: email is required to be of string type"
+            );
+
+        _app.ports.userInfo.send(user);
     }
 
     internal.insertWidget = _insertWidget;
