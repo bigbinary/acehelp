@@ -1,6 +1,7 @@
 module Section.Article exposing (init, Model, view, defaultModel, Msg, update)
 
 import Data.Article exposing (..)
+import Data.ContactUs exposing (GQLDataContact, encodeContactUs, decodeGQLDataContact)
 import Request.Article exposing (..)
 import Request.Helpers exposing (ApiKey, Context, NodeEnv, graphqlUrl)
 import Html exposing (..)
@@ -29,6 +30,7 @@ type FeedBack
     | Negative
     | FeedbackSent
     | NoFeedback
+    | ErroredFeedback
 
 
 type alias Model =
@@ -51,6 +53,14 @@ defaultModel article =
     }
 
 
+emptyForm : FeedbackForm
+emptyForm =
+    { comment = ""
+    , email = ""
+    , name = ""
+    }
+
+
 
 -- UPDATE
 
@@ -59,6 +69,10 @@ type Msg
     = FeedbackSelected FeedBack
     | SendFeedback
     | Vote (Result Http.Error String)
+    | SentFeedbackResponse (Result Http.Error GQLDataContact)
+    | NameInput String
+    | EmailInput String
+    | CommentInput String
 
 
 httpVote : Encode.Value -> Decode.Decoder String -> NodeEnv -> Cmd Msg
@@ -75,16 +89,56 @@ update env msg model =
                     ( { model | feedback = feedback }, httpVote (encodeUpvote model.article.id) decodeUpvote env )
 
                 Negative ->
-                    ( { model | feedback = feedback }, httpVote (encodeDownvote model.article.id) decodeDownvote env )
+                    ( { model | feedback = feedback, feedbackForm = Just emptyForm }, httpVote (encodeDownvote model.article.id) decodeDownvote env )
 
                 _ ->
                     ( { model | feedback = feedback }, Cmd.none )
 
         SendFeedback ->
-            ( { model | feedback = FeedbackSent }, Cmd.none )
+            ( { model | feedback = FeedbackSent }
+            , Maybe.withDefault Cmd.none <|
+                Maybe.map
+                    (\form ->
+                        Http.send SentFeedbackResponse <|
+                            Http.post (graphqlUrl env) (Http.jsonBody (encodeContactUs { name = form.name, email = form.email, message = form.comment })) decodeGQLDataContact
+                    )
+                    model.feedbackForm
+            )
 
         Vote _ ->
             ( model, Cmd.none )
+
+        SentFeedbackResponse (Ok response) ->
+            case response.data.addContact.errors of
+                [] ->
+                    ( model, Cmd.none )
+
+                _ ->
+                    ( { model | feedback = ErroredFeedback }, Cmd.none )
+
+        SentFeedbackResponse (Err response) ->
+            ( { model | feedback = ErroredFeedback }, Cmd.none )
+
+        NameInput name ->
+            let
+                newForm =
+                    Maybe.map (\currentForm -> { currentForm | name = name }) model.feedbackForm
+            in
+                ( { model | feedbackForm = newForm }, Cmd.none )
+
+        EmailInput email ->
+            let
+                newForm =
+                    Maybe.map (\currentForm -> { currentForm | email = email }) model.feedbackForm
+            in
+                ( { model | feedbackForm = newForm }, Cmd.none )
+
+        CommentInput comment ->
+            let
+                newForm =
+                    Maybe.map (\currentForm -> { currentForm | comment = comment }) model.feedbackForm
+            in
+                ( { model | feedbackForm = newForm }, Cmd.none )
 
 
 
@@ -110,6 +164,9 @@ view model =
 
                 FeedbackSent ->
                     feedbackSentView model
+
+                ErroredFeedback ->
+                    erroredFeedBack
     in
         div [ id "content-wrapper" ]
             [ div [ class "article-wrapper" ]
@@ -144,9 +201,9 @@ negativeView =
             [ text "Please tell us what you are looking for."
             , text " If you enter your email then this would create a support ticket and we would get back to you soon"
             ]
-        , textarea [ placeholder "Your comments" ] []
-        , input [ type_ "text", placeholder "Your Email (optional)" ] []
-        , input [ type_ "text", placeholder "Your Name (optional)" ] []
+        , textarea [ placeholder "Your comments", onInput CommentInput ] []
+        , input [ type_ "text", placeholder "Your Email (optional)", onInput EmailInput ] []
+        , input [ type_ "text", placeholder "Your Name (optional)", onInput NameInput ] []
         , div []
             [ div
                 [ class "regular-button"
@@ -175,3 +232,9 @@ feedbackSentView model =
                 )
                 model.feedbackForm
         ]
+
+
+erroredFeedBack : Html msg
+erroredFeedBack =
+    div [ class "did-this-help" ]
+        [ (text "Something went wrong! Please try again") ]
