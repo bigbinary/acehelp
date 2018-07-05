@@ -428,7 +428,7 @@ update msg model =
                             model
 
                         _ ->
-                            ContactUsSection.init
+                            ContactUsSection.init model.userInfo.name model.userInfo.email
 
                 ( newContactUsModel, _ ) =
                     ContactUsSection.update contactUsMsg currentContactUsModel
@@ -472,7 +472,14 @@ onTabChange tab model =
             )
 
         Tabs.ContactUs ->
-            ( { model | sectionState = Loaded (ContactUsSection ContactUsSection.init) }, Cmd.none )
+            ( { model
+                | sectionState =
+                    Loaded <|
+                        ContactUsSection <|
+                            ContactUsSection.init model.userInfo.name model.userInfo.email
+              }
+            , Cmd.none
+            )
 
 
 cmdForSuggestedArticles : Model -> Cmd Msg

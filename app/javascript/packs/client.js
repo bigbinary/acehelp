@@ -6,20 +6,31 @@ import "../../assets/stylesheets/client/index.scss";
  */
 var AceHelp = (function () {
     var internal = {};
+    var _app;
 
-    function insertWidget({ apiKey }) {
+    function _insertWidget({ apiKey }) {
         var domId = "acehelp-hook";
         var node = document.getElementById("acehelp-hook");
         node = node || document.createElement("div");
         node.id = domId;
-        Elm.Main.embed(node, {
+        _app = Elm.Main.embed(node, {
             node_env: process.env.NODE_ENV,
             api_key: apiKey
         });
         document.body.appendChild(node);
     }
 
-    internal.insertWidget = insertWidget;
+    function _userInfo({ name, email }) {
+        if (!_app) throw new Error("AceHelp: Widget has not been initialized");
+        if (typeof name !== "string" && typeof email !== "string") {
+            throw new Error(
+                "AceHelp:userInfo: name and email are required to be of string type"
+            );
+        }
+        _app.ports.userInfo.send({ name, email });
+    }
+
+    internal.insertWidget = _insertWidget;
 
     return {
         /**
@@ -37,15 +48,7 @@ var AceHelp = (function () {
          *
          * window.AceHelp.userInfo({ name: "John Doe", email: "john@doe.com"})
          */
-        userInfo: function ({ name, email }) {
-            if (typeof name === "string" && typeof email === "string") {
-                Elm.ports.userInfo.send({ name, email });
-            } else {
-                throw new Error(
-                    "AceHelp: Name and email are required to be of string type"
-                );
-            }
-        }
+        userInfo: _userInfo
     };
 })();
 

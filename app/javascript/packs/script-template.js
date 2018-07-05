@@ -7,9 +7,9 @@ var apiKey = "YOURAPIKEY";
 script.type = "text/javascript";
 script.async = true;
 script.onload = function () {
-    var _ace = window._ace;
+    var _ace = window.AceHelp;
     if (_ace) {
-        _ace.insertWidget({ apiKey: apiKey });
+        _ace._internal.insertWidget({ apiKey: apiKey });
     }
 };
 

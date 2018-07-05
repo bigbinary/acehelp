@@ -2,7 +2,7 @@ module Section.ContactUs exposing (..)
 
 import Http
 import Html exposing (..)
-import Html.Attributes exposing (class, classList, id, type_, placeholder, style)
+import Html.Attributes exposing (class, classList, id, type_, placeholder, style, defaultValue)
 import Html.Events exposing (onClick, onInput)
 import Data.ContactUs exposing (RequestMessage, ResponseMessage, decodeMessage)
 import Json.Decode
@@ -26,19 +26,15 @@ type Field
 type alias Model =
     { name : Field
     , email : Field
-
-    -- , title : String
     , message : Field
     , userNotification : UserNotification
     }
 
 
-init : Model
-init =
-    { name = Field Nothing ""
-    , email = Field Nothing ""
-
-    -- , title = ""
+init : String -> String -> Model
+init name email =
+    { name = Field Nothing name
+    , email = Field Nothing email
     , message = Field Nothing ""
     , userNotification = NoNotification
     }
@@ -165,7 +161,7 @@ update msg model =
                         ( Nothing, Nothing ) ->
                             NoNotification
             in
-                ( { init | userNotification = notification }, Cmd.none )
+                ( { model | message = Field Nothing "", userNotification = notification }, Cmd.none )
 
         RequestMessageCompleted (Err error) ->
             let
@@ -244,8 +240,26 @@ formView model message =
             [ userNotificationDom
             , h2 [] [ text "Send us a message" ]
             , div [ class "contact-user" ]
-                [ span [ class "contact-name" ] [ input [ type_ "text", placeholder "Your Name", onInput NameInput ] [], fieldErrorDom model.name ]
-                , span [ class "contact-email" ] [ input [ type_ "text", placeholder "Your Email", onInput EmailInput ] [], fieldErrorDom model.email ]
+                [ span [ class "contact-name" ]
+                    [ input
+                        [ type_ "text"
+                        , placeholder "Your Name"
+                        , onInput NameInput
+                        , defaultValue (fieldValue model.name)
+                        ]
+                        []
+                    , fieldErrorDom model.name
+                    ]
+                , span [ class "contact-email" ]
+                    [ input
+                        [ type_ "text"
+                        , placeholder "Your Email"
+                        , onInput EmailInput
+                        , defaultValue (fieldValue model.email)
+                        ]
+                        []
+                    , fieldErrorDom model.email
+                    ]
                 ]
 
             -- , input [ type_ "text", class "contact-subject", placeholder "Subject" ] []
