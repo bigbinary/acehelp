@@ -101,17 +101,23 @@ class Mutations::ArticleMutations
     input_field :id, !types.ID
 
     return_field :article, Types::ArticleType
-    return_field :errors, types.String
+    return_field :errors, types[Types::ErrorType]
 
     resolve ->(object, inputs, context) {
       article = Article.find_by(id: inputs[:id], organization_id: context[:organization].id)
-      return { errors: "Article not found" } if article.nil?
-
-      if article.increment_upvote
-        { article: article }
+      if article
+        if article.increment_upvote
+          upvoted_article = article
+        else
+          errors = Utils::ErrorHandler.new.generate_detailed_error_hash(article, context)
+        end
       else
-        GraphQL::ExecutionError.new("Invalid input: #{article.errors.full_messages.join(', ')}")
+        errors = Utils::ErrorHandler.new.generate_error_hash("Article not found", context)
       end
+      {
+        article: upvoted_article,
+        errors: errors
+      }
     }
   end
 
@@ -121,59 +127,28 @@ class Mutations::ArticleMutations
     input_field :id, !types.ID
 
     return_field :article, Types::ArticleType
-    return_field :errors, types.String
+    return_field :errors, types[Types::ErrorType]
 
     resolve ->(object, inputs, context) {
       article = Article.find_by(id: inputs[:id], organization_id: context[:organization].id)
-      return { errors: "Article not found" } if article.nil?
 
-      if article.increment_downvote
-        { article: article }
+      if article
+        if article.increment_downvote
+          downvoted_article = article
+        else
+          errors = Utils::ErrorHandler.new.generate_detailed_error_hash(article, context)
+        end
       else
-        GraphQL::ExecutionError.new("Invalid input: #{article.errors.full_messages.join(', ')}")
+        errors = Utils::ErrorHandler.new.generate_error_hash("Article not found", context)
       end
+
+      {
+        article: downvoted_article,
+        errors: errors
+      }
     }
   end
 
-  Upvote = GraphQL::Relay::Mutation.define do
-    name "Upvote"
-
-    input_field :id, !types.ID
-
-    return_field :article, Types::ArticleType
-    return_field :errors, types.String
-
-    resolve ->(object, inputs, context) {
-      article = Article.find_by(id: inputs[:id], organization_id: context[:organization].id)
-      return { errors: "Article not found" } if article.nil?
-
-      if article.increment_upvote
-        { article: article }
-      else
-        GraphQL::ExecutionError.new("Invalid input: #{article.errors.full_messages.join(', ')}")
-      end
-    }
-  end
-
-  Downvote = GraphQL::Relay::Mutation.define do
-    name "Downvote"
-
-    input_field :id, !types.ID
-
-    return_field :article, Types::ArticleType
-    return_field :errors, types.String
-
-    resolve ->(object, inputs, context) {
-      article = Article.find_by(id: inputs[:id], organization_id: context[:organization].id)
-      return { errors: "Article not found" } if article.nil?
-
-      if article.increment_downvote
-        { article: article }
-      else
-        GraphQL::ExecutionError.new("Invalid input: #{article.errors.full_messages.join(', ')}")
-      end
-    }
-  end
 
 
 end
