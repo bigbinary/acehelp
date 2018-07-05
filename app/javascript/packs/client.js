@@ -1,34 +1,52 @@
-/* eslint no-console:0 */
-// This file is automatically compiled by Webpack, along with any other files
-// present in this directory. You're encouraged to place your actual application logic in
-// a relevant structure within app/javascript and only use these pack files to reference
-// that code so it'll be compiled.
-//
-// To reference this file, add <%= javascript_pack_tag 'application' %> to the appropriate
-// layout file, like app/views/layouts/application.html.erb
-
 import Elm from "../Client/Main";
 import "../../assets/stylesheets/client/index.scss";
 
-window._ace = (function() {
-  function insertWidget({ apiKey }) {
-    var domId = "acehelp-hook";
-    var node = document.getElementById("acehelp-hook");
-    node = node || document.createElement("div");
-    node.id = domId;
-    Elm.Main.embed(node, {
-      node_env: process.env.NODE_ENV,
-      api_key: apiKey
-    });
-    document.body.appendChild(node);
-  }
+/**
+ * The AceHelp namespace provides APIs that allow users to configure and control the AceHelp widget
+ */
+var AceHelp = (function () {
+    var internal = {};
 
-  function userInfo({ id, name, email }) {
-    // CONTACT ELM
-  }
+    function insertWidget({ apiKey }) {
+        var domId = "acehelp-hook";
+        var node = document.getElementById("acehelp-hook");
+        node = node || document.createElement("div");
+        node.id = domId;
+        Elm.Main.embed(node, {
+            node_env: process.env.NODE_ENV,
+            api_key: apiKey
+        });
+        document.body.appendChild(node);
+    }
 
-  return {
-    insertWidget: insertWidget,
-    userInfo: userInfo
-  };
+    internal.insertWidget = insertWidget;
+
+    return {
+        /**
+         * _internal is a sub-namespace that holds methods that are to be used internally
+         * @ignore
+         */
+        _internal: internal,
+
+        /**
+         * Provide user information such as name and email to the widget
+         *
+         * @param {Object} user An object with the user name and email strings
+         *
+         * @example
+         *
+         * window.AceHelp.userInfo({ name: "John Doe", email: "john@doe.com"})
+         */
+        userInfo: function ({ name, email }) {
+            if (typeof name === "string" && typeof email === "string") {
+                Elm.ports.userInfo.send({ name, email });
+            } else {
+                throw new Error(
+                    "AceHelp: Name and email are required to be of string type"
+                );
+            }
+        }
+    };
 })();
+
+window.AceHelp = AceHelp;
