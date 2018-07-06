@@ -1,8 +1,9 @@
 module Section.Article exposing (init, Model, view, defaultModel, Msg, update)
 
+import Data.Common exposing (GQLError)
 import Data.Article exposing (..)
-import Data.ContactUs exposing (GQLDataContact, encodeContactUs, decodeGQLDataContact)
 import Request.Article exposing (..)
+import Request.ContactUs exposing (requestAddContactMutation)
 import Request.Helpers exposing (ApiKey, Context, NodeEnv, graphqlUrl)
 import Html exposing (..)
 import Html.Attributes exposing (..)
@@ -11,8 +12,6 @@ import Http
 import Task
 import Reader exposing (Reader)
 import FontAwesome.Solid as SolidIcon
-import Json.Encode as Encode
-import Json.Decode as Decode
 import Section.Helpers exposing (..)
 import GraphQL.Client.Http as GQLClient
 
@@ -71,7 +70,7 @@ type Msg
     = FeedbackSelected FeedBack
     | SendFeedback
     | Vote (Result GQLClient.Error ArticleSummary)
-    | SentFeedbackResponse (Result Http.Error GQLDataContact)
+    | SentFeedbackResponse (Result GQLClient.Error (Maybe (List GQLError)))
     | NameInput String
     | EmailInput String
     | CommentInput String
@@ -83,38 +82,47 @@ update msg model =
         FeedbackSelected feedback ->
             case feedback of
                 Positive ->
-                    ( { model | feedback = feedback }, Just <| Reader.map (Task.attempt Vote) <| upvoteMutateRequest model.article.id )
+                    ( { model | feedback = feedback }, Just <| Reader.map (Task.attempt Vote) <| requestUpvoteMutation model.article.id )
 
                 Negative ->
-                    ( { model | feedback = feedback, feedbackForm = Just emptyForm }, Just <| Reader.map (Task.attempt Vote) <| downvoteMutateRequest model.article.id )
+                    ( { model | feedback = feedback, feedbackForm = Just emptyForm }, Just <| Reader.map (Task.attempt Vote) <| requestDownvoteMutation model.article.id )
 
                 _ ->
                     ( { model | feedback = feedback }, Nothing )
 
         SendFeedback ->
             ( { model | feedback = FeedbackSent }
-            , Nothing
-              -- , Maybe.map
-              --         (\form ->
-              --             Http.send SentFeedbackResponse <|
-              --                 Http.post (graphqlUrl "env") (Http.jsonBody (encodeContactUs { name = form.name, email = form.email, message = form.comment })) decodeGQLDataContact
-              --         )
-              --         model.feedbackForm
+            , Maybe.map
+                (\form ->
+                    Reader.map (Task.attempt SentFeedbackResponse) <| requestAddContactMutation { name = form.name, email = form.email, message = form.comment }
+                )
+                model.feedbackForm
             )
 
         Vote _ ->
             ( model, Nothing )
 
         SentFeedbackResponse (Ok response) ->
-            case response.data.addContact.errors of
-                [] ->
-                    ( model, Nothing )
+            Maybe.withDefault ( model, Nothing ) <|
+                Maybe.map
+                    (\errors ->
+                        case errors of
+                            [] ->
+                                ( model, Nothing )
 
-                _ ->
-                    ( { model | feedback = ErroredFeedback }, Nothing )
+                            _ ->
+                                ( { model | feedback = ErroredFeedback }, Nothing )
+                    )
+                    response
 
         SentFeedbackResponse (Err response) ->
-            ( { model | feedback = ErroredFeedback }, Nothing )
+            let
+                res =
+                    case Debug.log "" response of
+                        _ ->
+                            Nothing
+            in
+                ( { model | feedback = ErroredFeedback }, res )
 
         NameInput name ->
             let

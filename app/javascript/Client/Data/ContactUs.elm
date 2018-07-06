@@ -1,8 +1,12 @@
-module Data.ContactUs exposing (GQLDataContact, ResponseMessage, RequestMessage, getEncodedContact, decodeMessage, encodeContactUs, decodeGQLDataContact)
+module Data.ContactUs exposing (ResponseMessage, RequestMessage, getEncodedContact, decodeMessage, addContactMutation)
 
 import Json.Encode as Encode
 import Json.Decode as Decode exposing (Decoder)
 import Json.Decode.Pipeline exposing (decode, required, optional)
+import GraphQL.Request.Builder as GQLBuilder
+import GraphQL.Request.Builder.Arg as Arg
+import GraphQL.Request.Builder.Variable as Var
+import Data.Common exposing (..)
 
 
 type alias ResponseMessage =
@@ -19,24 +23,6 @@ type alias RequestMessage =
     { name : String
     , email : String
     , message : String
-    }
-
-
-type alias GQLError =
-    { message : String }
-
-
-type alias GQLDataContact =
-    { data : GQLContact }
-
-
-type alias GQLContact =
-    { addContact : GQLErrors
-    }
-
-
-type alias GQLErrors =
-    { errors : List GQLError
     }
 
 
@@ -64,20 +50,59 @@ encodeMessage requestMessage =
         ]
 
 
-encodeContactUs : RequestMessage -> Encode.Value
-encodeContactUs { name, email, message } =
+addContactMutation : GQLBuilder.Document GQLBuilder.Mutation (Maybe (List GQLError)) RequestMessage
+addContactMutation =
     let
-        query =
-            "mutation addContact { addContact(input: { name: \"" ++ name ++ "\" email: \"" ++ email ++ "\" message : \"" ++ message ++ "\"}){ errors{ message path }}}"
+        nameVar =
+            Var.required "name" .name Var.string
+
+        emailVar =
+            Var.required "email" .email Var.string
+
+        messageVar =
+            Var.required "message" .message Var.string
+
+        article =
+            GQLBuilder.extract <|
+                GQLBuilder.field "errors"
+                    []
+                    (GQLBuilder.nullable
+                        (GQLBuilder.list
+                            (GQLBuilder.object GQLError
+                                |> GQLBuilder.with (GQLBuilder.field "message" [] GQLBuilder.string)
+                            )
+                        )
+                    )
+
+        queryRoot =
+            GQLBuilder.extract
+                (GQLBuilder.field "addContact"
+                    [ ( "input"
+                      , Arg.object
+                            [ ( "name", Arg.variable nameVar )
+                            , ( "email", Arg.variable emailVar )
+                            , ( "message", Arg.variable messageVar )
+                            ]
+                      )
+                    ]
+                    article
+                )
     in
-        Encode.object
-            [ ( "operationName", Encode.string "addContact" )
-            , ( "query", Encode.string query )
-            , ( "variables", Encode.object [] )
-            ]
+        GQLBuilder.mutationDocument queryRoot
 
 
 
+-- encodeContactUs : RequestMessage -> Encode.Value
+-- encodeContactUs { name, email, message } =
+--     let
+--         query =
+--             "mutation addContact { addContact(input: { name: \"" ++ name ++ "\" email: \"" ++ email ++ "\" message : \"" ++ message ++ "\"}){ errors{ message path }}}"
+--     in
+--         Encode.object
+--             [ ( "operationName", Encode.string "addContact" )
+--             , ( "query", Encode.string query )
+--             , ( "variables", Encode.object [] )
+--             ]
 -- DECODERS
 
 
@@ -88,25 +113,20 @@ decodeMessage =
         |> optional "errors" (Decode.map Just Decode.string) Nothing
 
 
-decodeGQLDataContact : Decoder GQLDataContact
-decodeGQLDataContact =
-    decode GQLDataContact
-        |> required "data" decodeGQLContact
 
-
-decodeGQLContact : Decoder GQLContact
-decodeGQLContact =
-    decode GQLContact
-        |> required "addContact" decodeGQLErrors
-
-
-decodeGQLErrors : Decoder GQLErrors
-decodeGQLErrors =
-    decode GQLErrors
-        |> optional "errors" (Decode.list decodeGQLError) []
-
-
-decodeGQLError : Decoder GQLError
-decodeGQLError =
-    decode GQLError
-        |> required "message" Decode.string
+-- decodeGQLDataContact : Decoder GQLDataContact
+-- decodeGQLDataContact =
+--     decode GQLDataContact
+--         |> required "data" decodeGQLContact
+-- decodeGQLContact : Decoder GQLContact
+-- decodeGQLContact =
+--     decode GQLContact
+--         |> required "addContact" decodeGQLErrors
+-- decodeGQLErrors : Decoder GQLErrors
+-- decodeGQLErrors =
+--     decode GQLErrors
+--         |> optional "errors" (Decode.list decodeGQLError) []
+-- decodeGQLError : Decoder GQLError
+-- decodeGQLError =
+--     decode GQLError
+--         |> required "message" Decode.string

@@ -45,8 +45,8 @@ requestSearchArticles =
 -- GRAPHQL
 
 
-upvoteMutateRequest : ArticleId -> Reader NodeEnv (Task GQLClient.Error ArticleSummary)
-upvoteMutateRequest articleId =
+requestUpvoteMutation : ArticleId -> Reader NodeEnv (Task GQLClient.Error ArticleSummary)
+requestUpvoteMutation articleId =
     Reader.Reader
         (\env ->
             GQLClient.sendMutation (graphqlUrl env) <|
@@ -54,8 +54,8 @@ upvoteMutateRequest articleId =
         )
 
 
-downvoteMutateRequest : ArticleId -> Reader NodeEnv (Task GQLClient.Error ArticleSummary)
-downvoteMutateRequest articleId =
+requestDownvoteMutation : ArticleId -> Reader NodeEnv (Task GQLClient.Error ArticleSummary)
+requestDownvoteMutation articleId =
     Reader.Reader
         (\env ->
             GQLClient.sendMutation (graphqlUrl env) <|
