@@ -405,9 +405,9 @@ update msg model =
                             ArticleSection.defaultModel { id = 0, title = "", content = "" }
 
                 ( newArticleModel, cmd ) =
-                    ArticleSection.update model.nodeEnv articleMsg currentArticleModel
+                    ArticleSection.update articleMsg currentArticleModel
             in
-                ( { model | sectionState = Loaded (ArticleSection newArticleModel) }, Cmd.map ArticleMsg <| cmd )
+                ( { model | sectionState = Loaded (ArticleSection newArticleModel) }, Maybe.withDefault Cmd.none <| Maybe.map (Cmd.map ArticleMsg) <| Maybe.map (flip Reader.run model.nodeEnv) cmd )
 
         SearchBarMsg searchBarMsg ->
             case searchBarMsg of

@@ -13,6 +13,8 @@ import Reader exposing (Reader)
 import FontAwesome.Solid as SolidIcon
 import Json.Encode as Encode
 import Json.Decode as Decode
+import Section.Helpers exposing (..)
+import GraphQL.Client.Http as GQLClient
 
 
 -- MODEL
@@ -68,77 +70,72 @@ emptyForm =
 type Msg
     = FeedbackSelected FeedBack
     | SendFeedback
-    | Vote (Result Http.Error String)
+    | Vote (Result GQLClient.Error ArticleSummary)
     | SentFeedbackResponse (Result Http.Error GQLDataContact)
     | NameInput String
     | EmailInput String
     | CommentInput String
 
 
-httpVote : Encode.Value -> Decode.Decoder String -> NodeEnv -> Cmd Msg
-httpVote encode decode env =
-    Http.send Vote <| Http.post (graphqlUrl env) (Http.jsonBody encode) decode
-
-
-update : NodeEnv -> Msg -> Model -> ( Model, Cmd Msg )
-update env msg model =
+update : Msg -> Model -> ( Model, SectionCmd Msg )
+update msg model =
     case msg of
         FeedbackSelected feedback ->
             case feedback of
                 Positive ->
-                    ( { model | feedback = feedback }, httpVote (encodeUpvote model.article.id) decodeUpvote env )
+                    ( { model | feedback = feedback }, Just <| Reader.map (Task.attempt Vote) <| upvoteMutateRequest model.article.id )
 
                 Negative ->
-                    ( { model | feedback = feedback, feedbackForm = Just emptyForm }, httpVote (encodeDownvote model.article.id) decodeDownvote env )
+                    ( { model | feedback = feedback, feedbackForm = Just emptyForm }, Just <| Reader.map (Task.attempt Vote) <| downvoteMutateRequest model.article.id )
 
                 _ ->
-                    ( { model | feedback = feedback }, Cmd.none )
+                    ( { model | feedback = feedback }, Nothing )
 
         SendFeedback ->
             ( { model | feedback = FeedbackSent }
-            , Maybe.withDefault Cmd.none <|
-                Maybe.map
-                    (\form ->
-                        Http.send SentFeedbackResponse <|
-                            Http.post (graphqlUrl env) (Http.jsonBody (encodeContactUs { name = form.name, email = form.email, message = form.comment })) decodeGQLDataContact
-                    )
-                    model.feedbackForm
+            , Nothing
+              -- , Maybe.map
+              --         (\form ->
+              --             Http.send SentFeedbackResponse <|
+              --                 Http.post (graphqlUrl "env") (Http.jsonBody (encodeContactUs { name = form.name, email = form.email, message = form.comment })) decodeGQLDataContact
+              --         )
+              --         model.feedbackForm
             )
 
         Vote _ ->
-            ( model, Cmd.none )
+            ( model, Nothing )
 
         SentFeedbackResponse (Ok response) ->
             case response.data.addContact.errors of
                 [] ->
-                    ( model, Cmd.none )
+                    ( model, Nothing )
 
                 _ ->
-                    ( { model | feedback = ErroredFeedback }, Cmd.none )
+                    ( { model | feedback = ErroredFeedback }, Nothing )
 
         SentFeedbackResponse (Err response) ->
-            ( { model | feedback = ErroredFeedback }, Cmd.none )
+            ( { model | feedback = ErroredFeedback }, Nothing )
 
         NameInput name ->
             let
                 newForm =
                     Maybe.map (\currentForm -> { currentForm | name = name }) model.feedbackForm
             in
-                ( { model | feedbackForm = newForm }, Cmd.none )
+                ( { model | feedbackForm = newForm }, Nothing )
 
         EmailInput email ->
             let
                 newForm =
                     Maybe.map (\currentForm -> { currentForm | email = email }) model.feedbackForm
             in
-                ( { model | feedbackForm = newForm }, Cmd.none )
+                ( { model | feedbackForm = newForm }, Nothing )
 
         CommentInput comment ->
             let
                 newForm =
                     Maybe.map (\currentForm -> { currentForm | comment = comment }) model.feedbackForm
             in
-                ( { model | feedbackForm = newForm }, Cmd.none )
+                ( { model | feedbackForm = newForm }, Nothing )
 
 
 

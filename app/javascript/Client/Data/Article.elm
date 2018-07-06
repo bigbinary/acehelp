@@ -1,8 +1,10 @@
 module Data.Article exposing (..)
 
-import Json.Encode as Encode
 import Json.Decode exposing (int, string, float, nullable, list, Decoder)
 import Json.Decode.Pipeline exposing (decode, required, optional, hardcoded)
+import GraphQL.Request.Builder as GQLBuilder
+import GraphQL.Request.Builder.Arg as Arg
+import GraphQL.Request.Builder.Variable as Var
 
 
 type alias ArticleId =
@@ -34,44 +36,43 @@ type alias ArticleSummary =
 -- ENCODERS
 
 
-encodeUpvote : ArticleId -> Encode.Value
-encodeUpvote articleId =
+voteMutation : String -> GQLBuilder.Document GQLBuilder.Mutation ArticleSummary { vars | articleId : ArticleId }
+voteMutation voteType =
     let
-        query =
-            "mutation upvote {upvoteArticle(input: {id: " ++ (toString articleId) ++ "}) {article {id upvotes_count}}}"
+        articleIdVar =
+            Var.required "articleId" (toString << .articleId) Var.id
+
+        article =
+            GQLBuilder.extract <|
+                GQLBuilder.field "article"
+                    []
+                    (GQLBuilder.object ArticleSummary
+                        |> GQLBuilder.with (GQLBuilder.field "id" [] GQLBuilder.int)
+                        |> GQLBuilder.with (GQLBuilder.field "title" [] GQLBuilder.string)
+                    )
+
+        queryRoot =
+            GQLBuilder.extract
+                (GQLBuilder.field voteType
+                    [ ( "input", Arg.object [ ( "id", Arg.variable articleIdVar ) ] ) ]
+                    article
+                )
     in
-        Encode.object
-            [ ( "operationName", Encode.string "upvote" )
-            , ( "query", Encode.string query )
-            , ( "variables", Encode.object [] )
-            ]
+        GQLBuilder.mutationDocument queryRoot
 
 
-encodeDownvote : ArticleId -> Encode.Value
-encodeDownvote articleId =
-    let
-        query =
-            "mutation downvote { downvoteArticle(input: {id: " ++ (toString articleId) ++ "}) {article {id downvotes_count } }}"
-    in
-        Encode.object
-            [ ( "operationName", Encode.string "downvote" )
-            , ( "query", Encode.string query )
-            , ( "variables", Encode.object [] )
-            ]
+upvoteMutation : GQLBuilder.Document GQLBuilder.Mutation ArticleSummary { vars | articleId : ArticleId }
+upvoteMutation =
+    voteMutation "upvoteArticle"
+
+
+downvoteMutation : GQLBuilder.Document GQLBuilder.Mutation ArticleSummary { vars | articleId : ArticleId }
+downvoteMutation =
+    voteMutation "downvoteArticle"
 
 
 
 -- DECODERS
-
-
-decodeUpvote : Decoder String
-decodeUpvote =
-    string
-
-
-decodeDownvote : Decoder String
-decodeDownvote =
-    string
 
 
 decodeArticles : Decoder ArticleListResponse

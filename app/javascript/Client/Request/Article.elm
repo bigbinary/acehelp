@@ -3,8 +3,10 @@ module Request.Article exposing (..)
 import Http
 import Task exposing (Task)
 import Reader exposing (Reader)
-import Request.Helpers exposing (apiUrl, httpGet, ApiKey, Context, NodeEnv)
-import Data.Article exposing (ArticleId, ArticleResponse, ArticleListResponse, ArticleSummary, decodeArticles, decodeArticleResponse)
+import Request.Helpers exposing (apiUrl, graphqlUrl, httpGet, ApiKey, Context, NodeEnv)
+import Data.Article exposing (ArticleId, ArticleResponse, ArticleListResponse, ArticleSummary, decodeArticles, decodeArticleResponse, upvoteMutation, downvoteMutation)
+import GraphQL.Client.Http as GQLClient
+import GraphQL.Request.Builder as GQLBuilder
 
 
 requestArticleList : Reader ( NodeEnv, ApiKey, Context ) (Task Http.Error ArticleListResponse)
@@ -36,4 +38,26 @@ requestSearchArticles =
     Reader.Reader
         (\( env, apiKey, searchTerm ) ->
             Http.toTask (httpGet apiKey Request.Helpers.NoContext (apiUrl env "articles/search") [ ( "query", searchTerm ) ] decodeArticles)
+        )
+
+
+
+-- GRAPHQL
+
+
+upvoteMutateRequest : ArticleId -> Reader NodeEnv (Task GQLClient.Error ArticleSummary)
+upvoteMutateRequest articleId =
+    Reader.Reader
+        (\env ->
+            GQLClient.sendMutation (graphqlUrl env) <|
+                GQLBuilder.request { articleId = articleId } upvoteMutation
+        )
+
+
+downvoteMutateRequest : ArticleId -> Reader NodeEnv (Task GQLClient.Error ArticleSummary)
+downvoteMutateRequest articleId =
+    Reader.Reader
+        (\env ->
+            GQLClient.sendMutation (graphqlUrl env) <|
+                GQLBuilder.request { articleId = articleId } downvoteMutation
         )
