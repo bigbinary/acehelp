@@ -26,11 +26,11 @@
         flex-direction: column;
         padding: 0 16%;
 
-        textarea{
+        .comment-box{
             height: 100px;
         }
 
-        textarea, input[type=text] {
+        .comment-box, .text-input {
             width: 100%;
         }
     }
@@ -38,16 +38,14 @@
     .did-this-help{
         display: flex;
         justify-content: center;
-        
-        div{
-            margin: 5px;
-        }
-        span{
+       
+        .text-label{
             padding-top:22px;
             margin-right: 5px;
         }
 
         .thumbs{
+            margin: 5px;
             width: 30px;
             height:30px;
             padding: 10px;

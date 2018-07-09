@@ -187,7 +187,7 @@ view model =
 didThisHelpView : Html Msg
 didThisHelpView =
     div [ class "did-this-help" ]
-        [ span [] [ text "Did this help?" ]
+        [ span [ class "text-label" ] [ text "Did this help?" ]
         , div [ class "thumbs thumbs-up", onClick (FeedbackSelected Positive) ] [ SolidIcon.thumbs_up ]
         , div [ class "thumbs thumbs-down", onClick (FeedbackSelected Negative) ] [ SolidIcon.thumbs_down ]
         ]
@@ -196,19 +196,19 @@ didThisHelpView =
 positiveView : Html msg
 positiveView =
     div [ class "did-this-help" ]
-        [ span [] [ text "Great! Love it!" ] ]
+        [ span [ class "text-label" ] [ text "Great! Love it!" ] ]
 
 
 negativeView : Html Msg
 negativeView =
     div [ class "did-this-help article-feedback" ]
-        [ span []
+        [ span [ class "text-label" ]
             [ text "Please tell us what you are looking for."
             , text " If you enter your email then this would create a support ticket and we would get back to you soon"
             ]
-        , textarea [ placeholder "Your comments", onInput CommentInput ] []
-        , input [ type_ "text", placeholder "Your Email (optional)", onInput EmailInput ] []
-        , input [ type_ "text", placeholder "Your Name (optional)", onInput NameInput ] []
+        , textarea [ class "comment-box", placeholder "Your comments", onInput CommentInput ] []
+        , input [ class "text-input", type_ "text", placeholder "Your Email (optional)", onInput EmailInput ] []
+        , input [ class "text-input", type_ "text", placeholder "Your Name (optional)", onInput NameInput ] []
         , div []
             [ div
                 [ class "regular-button"
