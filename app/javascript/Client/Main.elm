@@ -23,6 +23,7 @@ import Utils exposing (getUrlPathData)
 import Animation
 import Navigation
 import FontAwesome.Solid as SolidIcon
+import Ports exposing (..)
 
 
 -- MODEL
@@ -64,6 +65,7 @@ type alias Model =
     , tabModel : Tabs.Model
     , searchQuery : SearchBar.Model
     , history : ModelHistory
+    , userInfo : UserInfo
     }
 
 
@@ -94,6 +96,7 @@ init flags location =
       , tabModel = Tabs.modelWithTabs Tabs.allTabs
       , searchQuery = ""
       , history = NoHistory
+      , userInfo = { name = "", email = "" }
       }
     , Cmd.none
     )
@@ -171,6 +174,7 @@ type Msg
     | TabMsg Tabs.Msg
     | ContactUsMsg ContactUsSection.Msg
     | SearchBarMsg SearchBar.Msg
+    | ReceivedUserInfo UserInfo
 
 
 
@@ -424,7 +428,7 @@ update msg model =
                             model
 
                         _ ->
-                            ContactUsSection.init
+                            ContactUsSection.init model.userInfo.name model.userInfo.email
 
                 ( newContactUsModel, _ ) =
                     ContactUsSection.update contactUsMsg currentContactUsModel
@@ -450,6 +454,9 @@ update msg model =
                     _ ->
                         ( { model | sectionState = Loaded (ContactUsSection newContactUsModel) }, Cmd.none )
 
+        ReceivedUserInfo userInfo ->
+            ( { model | userInfo = userInfo }, Cmd.none )
+
 
 onTabChange : Tabs.Tabs -> Model -> ( Model, Cmd Msg )
 onTabChange tab model =
@@ -465,7 +472,14 @@ onTabChange tab model =
             )
 
         Tabs.ContactUs ->
-            ( { model | sectionState = Loaded (ContactUsSection ContactUsSection.init) }, Cmd.none )
+            ( { model
+                | sectionState =
+                    Loaded <|
+                        ContactUsSection <|
+                            ContactUsSection.init model.userInfo.name model.userInfo.email
+              }
+            , Cmd.none
+            )
 
 
 cmdForSuggestedArticles : Model -> Cmd Msg
@@ -484,7 +498,10 @@ cmdForLibrary model =
 
 subscriptions : Model -> Sub Msg
 subscriptions model =
-    Animation.subscription Animate [ model.containerAnimation ]
+    Sub.batch
+        [ Animation.subscription Animate [ model.containerAnimation ]
+        , userInfo <| decodeUserInfo >> ReceivedUserInfo
+        ]
 
 
 
