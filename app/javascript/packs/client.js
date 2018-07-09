@@ -17,6 +17,7 @@ var AceHelp = (function() {
             node_env: process.env.NODE_ENV,
             api_key: apiKey
         });
+        _bindDataElements();
         document.body.appendChild(node);
     }
 
@@ -35,6 +36,20 @@ var AceHelp = (function() {
         _app.ports.userInfo.send(user);
     }
 
+    function _onDataElementClick(e) {
+        var articleId = e.target.getAttribute("data-acehelp-article");
+        _app.ports.openArticle(articleId);
+    }
+
+    function _bindDataElements() {
+        var aceDataElements = document.querySelectorAll(
+            "[data-acehelp-article]"
+        );
+        aceDataElements.forEach(function(elem) {
+            elem.onclick = _onDataElementClick;
+        });
+    }
+
     internal.insertWidget = _insertWidget;
 
     return {
@@ -50,7 +65,6 @@ var AceHelp = (function() {
          * @param {Object} user An object with the user name and email strings
          *
          * @example
-         *
          * window.AceHelp.userInfo({ name: "John Doe", email: "john@doe.com"})
          */
         userInfo: _userInfo
