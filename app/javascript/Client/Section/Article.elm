@@ -41,7 +41,7 @@ type alias Model =
     }
 
 
-init : Reader ( NodeEnv, ApiKey, Context, ArticleId ) (Task.Task Http.Error ArticleResponse)
+init : ArticleId -> Reader ( NodeEnv, ApiKey, Context ) (Task.Task Http.Error ArticleResponse)
 init =
     requestArticle
 

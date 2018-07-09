@@ -38,9 +38,14 @@ var AceHelp = (function() {
 
     function _onDataElementClick(e) {
         var articleId = e.target.getAttribute("data-acehelp-article");
-        _app.ports.openArticle(articleId);
+        if (_app && articleId) _app.ports.openArticle.send(parseInt(articleId));
     }
 
+    /*
+    * This function is called by insertWidget. It looks for elements with the attribute "data-acehelp-article"
+    * It makes it such that onclick of this element the widget will load up an article with a article id,
+    * The article id needs to be specified as the value to the attribute "data-acehelp-article"
+    */
     function _bindDataElements() {
         var aceDataElements = document.querySelectorAll(
             "[data-acehelp-article]"

@@ -33,6 +33,7 @@ type alias ArticleSummary =
 
 
 
+-- TODO: USE GRAPHQL
 -- ENCODERS
 
 

@@ -3,6 +3,7 @@ port module Ports exposing (..)
 import Json.Encode exposing (Value)
 import Json.Decode as Decode
 import Json.Decode.Pipeline exposing (decode, required, optional)
+import Data.Article exposing (ArticleId)
 
 
 type alias UserInfo =
@@ -16,6 +17,9 @@ type alias UserInfo =
 
 
 port userInfo : (Value -> msg) -> Sub msg
+
+
+port openArticle : (ArticleId -> msg) -> Sub msg
 
 
 
