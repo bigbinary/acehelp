@@ -10,9 +10,10 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2018_07_04_122137) do
+ActiveRecord::Schema.define(version: 2018_07_08_091809) do
 
   # These are extensions that must be enabled in order to support this database
+  enable_extension "pgcrypto"
   enable_extension "plpgsql"
 
   create_table "article_urls", force: :cascade do |t|
@@ -20,8 +21,7 @@ ActiveRecord::Schema.define(version: 2018_07_04_122137) do
     t.integer "url_id", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.index ["article_id"], name: "index_article_urls_on_article_id"
-    t.index ["url_id"], name: "index_article_urls_on_url_id"
+    t.uuid "uuid", null: false
   end
 
   create_table "articles", force: :cascade do |t|
@@ -34,6 +34,7 @@ ActiveRecord::Schema.define(version: 2018_07_04_122137) do
     t.integer "upvotes_count", default: 0
     t.integer "downvotes_count", default: 0
     t.index ["category_id"], name: "index_articles_on_category_id"
+    t.uuid "uuid", null: false
     t.index ["organization_id"], name: "index_articles_on_organization_id"
   end
 
@@ -41,6 +42,7 @@ ActiveRecord::Schema.define(version: 2018_07_04_122137) do
     t.string "name", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.uuid "uuid", null: false
   end
 
   create_table "contacts", force: :cascade do |t|
@@ -49,6 +51,7 @@ ActiveRecord::Schema.define(version: 2018_07_04_122137) do
     t.text "message"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.uuid "uuid", null: false
   end
 
   create_table "organizations", force: :cascade do |t|
@@ -56,6 +59,7 @@ ActiveRecord::Schema.define(version: 2018_07_04_122137) do
     t.string "api_key", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.uuid "uuid", null: false
   end
 
   create_table "urls", force: :cascade do |t|
@@ -63,6 +67,7 @@ ActiveRecord::Schema.define(version: 2018_07_04_122137) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.bigint "organization_id"
+    t.uuid "uuid", null: false
     t.index ["organization_id"], name: "index_urls_on_organization_id"
   end
 
@@ -82,10 +87,9 @@ ActiveRecord::Schema.define(version: 2018_07_04_122137) do
     t.string "role"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.uuid "uuid", null: false
     t.index ["email"], name: "index_users_on_email", unique: true
     t.index ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true
   end
 
-  add_foreign_key "articles", "organizations"
-  add_foreign_key "urls", "organizations"
 end
