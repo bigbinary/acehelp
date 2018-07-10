@@ -6,7 +6,7 @@ module Api
   module V1
     class ArticleControllerTest < ActionDispatch::IntegrationTest
       setup do
-        @article = articles :ror
+        @article = articles :life
         @url = urls :google
         @organization = organizations :bigbinary
         @category = categories :autobiography
