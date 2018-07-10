@@ -2,6 +2,8 @@
 
 google:
   url: "http://google.com"
+  organization: aceinvoice
 
 bigbinary:
   url: "http://bigbinary.com"
+  organization: bigbinary

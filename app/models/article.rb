@@ -1,7 +1,6 @@
 # frozen_string_literal: true
 
 class Article < ApplicationRecord
-  default_scope -> { order("created_at ASC") }
   searchkick
 
   belongs_to :category

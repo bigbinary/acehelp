@@ -1,7 +1,6 @@
 # frozen_string_literal: tru
 
 class Organization < ApplicationRecord
-  default_scope -> { order("created_at ASC") }
   has_many :urls
   has_many :articles
 
