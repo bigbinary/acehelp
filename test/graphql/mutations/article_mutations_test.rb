@@ -149,6 +149,6 @@ class Mutations::ArticleMutationsTest < ActiveSupport::TestCase
 
     result = AceHelp::Client.execute(query, input: { id: @article.id })
 
-    assert_equal result.data.destroy_article.deleted_id.to_i, @article.id
+    assert_equal result.data.destroy_article.deleted_id, @article.id
   end
 end
