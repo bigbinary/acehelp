@@ -82,7 +82,7 @@ httpGet apiKey context url queryParams decoder =
     let
         -- NOTE: This should not be hardcoded or needed at all. It is right now hardcoded since this is the only entry we have in db
         tempBase =
-            "http://aceinvoice.com"
+            "http://aceinvoice.com/pricing"
 
         headers =
             List.concat

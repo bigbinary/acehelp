@@ -23,13 +23,13 @@ a5 = c3.articles.create! title: "Do I need to put credit card to try it out?", d
 a6 = c3.articles.create! title: "Do you offer custom plan?", desc: "coming soon", organization_id: org2.id
 a7 = c3.articles.create! title: "Do you offer discount on yearly plan?", desc: "coming soon", organization_id: org1.id
 
-u1 = org1.urls.create! url: "http://aceinvoice.com/getting-started"
-u2 = org1.urls.create! url: "http://aceinvoice.com/integrations"
-u3 = org1.urls.create! url: "http://aceinvoice.com/pricing"
+u1 = org1.urls.create! url: "http://aceinvoice.com/getting-started/"
+u2 = org1.urls.create! url: "http://aceinvoice.com/integrations/"
+u3 = org1.urls.create! url: "http://aceinvoice.com/pricing/"
 
-u5 = org2.urls.create! url: "http://healthcity.com/getting-started"
-u6 = org2.urls.create! url: "http://healthcity.com/integrations"
-u7 = org2.urls.create! url: "http://healthcity.com/pricing"
+u5 = org2.urls.create! url: "http://healthcity.com/getting-started/"
+u6 = org2.urls.create! url: "http://healthcity.com/integrations/"
+u7 = org2.urls.create! url: "http://healthcity.com/pricing/"
 
 ArticleUrl.create! article_id: a1.id, url_id: u1.id
 ArticleUrl.create! article_id: a3.id, url_id: u1.id
