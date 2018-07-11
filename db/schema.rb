@@ -29,11 +29,9 @@ ActiveRecord::Schema.define(version: 2018_07_08_102747) do
     t.uuid "category_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.uuid "organization_id"
     t.integer "upvotes_count", default: 0
     t.integer "downvotes_count", default: 0
-    t.index ["category_id"], name: "index_articles_on_category_id"
-    t.uuid "uuid", null: false
-    t.uuid "organization_id"
     t.index ["organization_id"], name: "index_articles_on_organization_id"
   end
 

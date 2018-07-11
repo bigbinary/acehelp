@@ -74,7 +74,7 @@ class Mutations::ArticleMutations
     input_field :id, !types.String
 
     return_field :deletedId, !types.String
-    return_field :errors, types.String
+    return_field :errors, types[Types::ErrorType]
 
     resolve ->(_obj, inputs, context) {
       article = Article.find_by(id: inputs[:id], organization_id: context[:organization].id)
