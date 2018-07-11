@@ -3,7 +3,7 @@
 class Resolvers::ArticlesSearch < GraphQL::Function
   type !types[Types::ArticleType]
 
-  argument :id, types.ID
+  argument :id, types.String
 
   def call(obj, args, context)
     if args[:id].present?

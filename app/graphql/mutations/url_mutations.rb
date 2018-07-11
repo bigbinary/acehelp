@@ -33,7 +33,7 @@ class Mutations::UrlMutations
       name "UrlInput"
       input_field :url, !types.String
     end
-    input_field :id, !types.ID
+    input_field :id, !types.String
     input_field :url, !UrlInputObjectType
 
     return_field :url, Types::UrlType
@@ -61,10 +61,10 @@ class Mutations::UrlMutations
   Destroy = GraphQL::Relay::Mutation.define do
     name "DestroyUrl"
 
-    input_field :id, !types.ID
+    input_field :id, !types.String
 
-    return_field :deletedId, !types.ID
-    return_field :errors, types[Types::ErrorType]
+    return_field :deletedId, !types.String
+    return_field :errors, types.String
 
     resolve ->(_obj, inputs, context) {
       url = Url.find_by(id: inputs[:id], organization_id: context[:organization].id)
@@ -84,5 +84,5 @@ class Mutations::UrlMutations
       }
     }
   end
-  
+
 end
