@@ -92,17 +92,6 @@ addContactMutation =
 
 
 
--- encodeContactUs : RequestMessage -> Encode.Value
--- encodeContactUs { name, email, message } =
---     let
---         query =
---             "mutation addContact { addContact(input: { name: \"" ++ name ++ "\" email: \"" ++ email ++ "\" message : \"" ++ message ++ "\"}){ errors{ message path }}}"
---     in
---         Encode.object
---             [ ( "operationName", Encode.string "addContact" )
---             , ( "query", Encode.string query )
---             , ( "variables", Encode.object [] )
---             ]
 -- DECODERS
 
 
@@ -111,22 +100,3 @@ decodeMessage =
     decode ResponseMessage
         |> optional "message" (Decode.map Just Decode.string) Nothing
         |> optional "errors" (Decode.map Just Decode.string) Nothing
-
-
-
--- decodeGQLDataContact : Decoder GQLDataContact
--- decodeGQLDataContact =
---     decode GQLDataContact
---         |> required "data" decodeGQLContact
--- decodeGQLContact : Decoder GQLContact
--- decodeGQLContact =
---     decode GQLContact
---         |> required "addContact" decodeGQLErrors
--- decodeGQLErrors : Decoder GQLErrors
--- decodeGQLErrors =
---     decode GQLErrors
---         |> optional "errors" (Decode.list decodeGQLError) []
--- decodeGQLError : Decoder GQLError
--- decodeGQLError =
---     decode GQLError
---         |> required "message" Decode.string
