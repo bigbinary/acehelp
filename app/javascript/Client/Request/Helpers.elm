@@ -1,6 +1,7 @@
 module Request.Helpers
     exposing
         ( apiUrl
+        , graphqlUrl
         , constructUrl
         , httpGet
         , httpPost
@@ -53,6 +54,16 @@ apiUrl env str =
 
         _ ->
             "/api/v1/" ++ str
+
+
+graphqlUrl : String -> String
+graphqlUrl env =
+    case env of
+        "production" ->
+            "https://staging.acehelp.com/graphql/"
+
+        _ ->
+            "/graphql/"
 
 
 constructUrl : String -> List ( String, String ) -> String

@@ -1,8 +1,12 @@
-module Data.ContactUs exposing (ResponseMessage, RequestMessage, getEncodedContact, decodeMessage)
+module Data.ContactUs exposing (ResponseMessage, RequestMessage, getEncodedContact, decodeMessage, addContactMutation)
 
 import Json.Encode as Encode
 import Json.Decode as Decode exposing (Decoder)
 import Json.Decode.Pipeline exposing (decode, required, optional)
+import GraphQL.Request.Builder as GQLBuilder
+import GraphQL.Request.Builder.Arg as Arg
+import GraphQL.Request.Builder.Variable as Var
+import Data.Common exposing (..)
 
 
 type alias ResponseMessage =
@@ -44,6 +48,47 @@ encodeMessage requestMessage =
         , ( "email", Encode.string requestMessage.email )
         , ( "message", Encode.string requestMessage.message )
         ]
+
+
+addContactMutation : GQLBuilder.Document GQLBuilder.Mutation (Maybe (List GQLError)) RequestMessage
+addContactMutation =
+    let
+        nameVar =
+            Var.required "name" .name Var.string
+
+        emailVar =
+            Var.required "email" .email Var.string
+
+        messageVar =
+            Var.required "message" .message Var.string
+
+        article =
+            GQLBuilder.extract <|
+                GQLBuilder.field "errors"
+                    []
+                    (GQLBuilder.nullable
+                        (GQLBuilder.list
+                            (GQLBuilder.object GQLError
+                                |> GQLBuilder.with (GQLBuilder.field "message" [] GQLBuilder.string)
+                            )
+                        )
+                    )
+
+        queryRoot =
+            GQLBuilder.extract
+                (GQLBuilder.field "addContact"
+                    [ ( "input"
+                      , Arg.object
+                            [ ( "name", Arg.variable nameVar )
+                            , ( "email", Arg.variable emailVar )
+                            , ( "message", Arg.variable messageVar )
+                            ]
+                      )
+                    ]
+                    article
+                )
+    in
+        GQLBuilder.mutationDocument queryRoot
 
 
 

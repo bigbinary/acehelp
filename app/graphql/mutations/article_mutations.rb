@@ -94,4 +94,61 @@ class Mutations::ArticleMutations
       }
     }
   end
+
+  Upvote = GraphQL::Relay::Mutation.define do
+    name "Upvote"
+
+    input_field :id, !types.ID
+
+    return_field :article, Types::ArticleType
+    return_field :errors, types[Types::ErrorType]
+
+    resolve ->(object, inputs, context) {
+      article = Article.find_by(id: inputs[:id], organization_id: context[:organization].id)
+      if article
+        if article.increment_upvote
+          upvoted_article = article
+        else
+          errors = Utils::ErrorHandler.new.generate_detailed_error_hash(article, context)
+        end
+      else
+        errors = Utils::ErrorHandler.new.generate_error_hash("Article not found", context)
+      end
+      {
+        article: upvoted_article,
+        errors: errors
+      }
+    }
+  end
+
+  Downvote = GraphQL::Relay::Mutation.define do
+    name "Downvote"
+
+    input_field :id, !types.ID
+
+    return_field :article, Types::ArticleType
+    return_field :errors, types[Types::ErrorType]
+
+    resolve ->(object, inputs, context) {
+      article = Article.find_by(id: inputs[:id], organization_id: context[:organization].id)
+
+      if article
+        if article.increment_downvote
+          downvoted_article = article
+        else
+          errors = Utils::ErrorHandler.new.generate_detailed_error_hash(article, context)
+        end
+      else
+        errors = Utils::ErrorHandler.new.generate_error_hash("Article not found", context)
+      end
+
+      {
+        article: downvoted_article,
+        errors: errors
+      }
+    }
+  end
+
+
+
 end

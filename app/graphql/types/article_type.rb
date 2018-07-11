@@ -5,6 +5,8 @@ Types::ArticleType = GraphQL::ObjectType.define do
   field :id, !types.ID
   field :title, !types.String
   field :desc, !types.String
+  field :upvotes_count, !types.Int
+  field :downvotes_count, !types.Int
 
   field :category, -> { Types::CategoryType } do
     preload :category

@@ -1,0 +1,81 @@
+@import "mixins";
+#acehelp-hook{
+
+    .article-wrapper {
+        padding: 30px 0 0;
+
+        h1{
+          font-size: 28px;
+          font-weight: bold;
+          color: #222;
+          margin-bottom: 15px;
+        }
+
+        .article-content {
+          font-size: 16px;
+          line-height: 22px;
+          color: #333;
+
+          p {
+            margin-bottom: 20px;
+          }
+        }
+    }
+
+    .article-feedback {
+        flex-direction: column;
+        padding: 0 16%;
+
+        .comment-box{
+            height: 100px;
+        }
+
+        .comment-box, .text-input {
+            width: 100%;
+        }
+    }
+
+    .did-this-help{
+        display: flex;
+        justify-content: center;
+       
+        .text-label{
+            padding-top:22px;
+            margin-right: 5px;
+        }
+
+        .thumbs{
+            margin: 5px;
+            width: 30px;
+            height:30px;
+            padding: 10px;
+            background-color: azure;
+            border-radius: 50%;
+        
+            svg {
+                @include clickAnimation;
+            }
+
+            &.selected{
+                svg {
+                    background-color: #fff;
+                }
+            }
+        }
+
+        .thumbs-down {
+            margin-top: 4px;
+
+            &.selected {
+                background-color: #64ebac;
+            }
+        }
+        .thumbs-up {
+            margin-top: -4px;
+
+            &.selected {
+                background-color: #eb6464
+            }
+        }
+    }
+}
