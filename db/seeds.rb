@@ -10,6 +10,14 @@
 org1 = Organization.create! name: "ace-invoice"
 org2 = Organization.create! name: "healthcity"
 
+u1 = org1.urls.create! url: "http://aceinvoice.com/getting-started"
+u2 = org1.urls.create! url: "http://aceinvoice.com/integrations"
+u3 = org1.urls.create! url: "http://aceinvoice.com/pricing"
+
+u5 = org2.urls.create! url: "http://healthcity.com/getting-started"
+u6 = org2.urls.create! url: "http://healthcity.com/integrations"
+u7 = org2.urls.create! url: "http://healthcity.com/pricing"
+
 c1 = Category.create! name: "Getting Started"
 a1 = c1.articles.create! title: "How do I put JavaScript code in my website?", desc: "coming soon", organization_id: org1.id
 a2 = c1.articles.create! title: "Will putting JavaScript code in my website will make my site slower?", desc: "coming soon", organization_id: org2.id
@@ -22,14 +30,6 @@ c3 = Category.create! name: "Pricing"
 a5 = c3.articles.create! title: "Do I need to put credit card to try it out?", desc: "coming soon", organization_id: org1.id
 a6 = c3.articles.create! title: "Do you offer custom plan?", desc: "coming soon", organization_id: org2.id
 a7 = c3.articles.create! title: "Do you offer discount on yearly plan?", desc: "coming soon", organization_id: org1.id
-
-u1 = org1.urls.create! url: "http://aceinvoice.com/getting-started/"
-u2 = org1.urls.create! url: "http://aceinvoice.com/integrations/"
-u3 = org1.urls.create! url: "http://aceinvoice.com/pricing/"
-
-u5 = org2.urls.create! url: "http://healthcity.com/getting-started/"
-u6 = org2.urls.create! url: "http://healthcity.com/integrations/"
-u7 = org2.urls.create! url: "http://healthcity.com/pricing/"
 
 ArticleUrl.create! article_id: a1.id, url_id: u1.id
 ArticleUrl.create! article_id: a3.id, url_id: u1.id
