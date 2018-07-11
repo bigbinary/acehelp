@@ -33,8 +33,28 @@ type alias ArticleSummary =
 
 
 
--- TODO: USE GRAPHQL
--- ENCODERS
+-- QUERIES
+
+
+articleQuery : GQLBuilder.Document GQLBuilder.Query Article { vars | articleId : ArticleId }
+articleQuery =
+    let
+        articleIdVar =
+            Var.required "articleId" .articleId Var.int
+    in
+        GQLBuilder.queryDocument <|
+            GQLBuilder.extract <|
+                GQLBuilder.field "article"
+                    [ ( "id", Arg.variable articleIdVar ) ]
+                    (GQLBuilder.object Article
+                        |> GQLBuilder.with (GQLBuilder.field "id" [] GQLBuilder.int)
+                        |> GQLBuilder.with (GQLBuilder.field "title" [] GQLBuilder.string)
+                        |> GQLBuilder.with (GQLBuilder.field "desc" [] GQLBuilder.string)
+                    )
+
+
+
+-- MUTATIONS
 
 
 voteMutation : String -> GQLBuilder.Document GQLBuilder.Mutation ArticleSummary { vars | articleId : ArticleId }

@@ -41,7 +41,7 @@ type alias Model =
     }
 
 
-init : ArticleId -> Reader ( NodeEnv, ApiKey, Context ) (Task.Task Http.Error ArticleResponse)
+init : ArticleId -> Reader ( NodeEnv, ApiKey ) (Task.Task GQLClient.Error Article)
 init =
     requestArticle
 
@@ -116,13 +116,7 @@ update msg model =
                     response
 
         SentFeedbackResponse (Err response) ->
-            let
-                res =
-                    case Debug.log "" response of
-                        _ ->
-                            Nothing
-            in
-                ( { model | feedback = ErroredFeedback }, res )
+            ( { model | feedback = ErroredFeedback }, Nothing )
 
         NameInput name ->
             let

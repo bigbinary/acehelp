@@ -23,6 +23,7 @@ import Utils exposing (getUrlPathData)
 import Animation
 import Navigation
 import FontAwesome.Solid as SolidIcon
+import GraphQL.Client.Http as GQLClient
 import Ports exposing (..)
 
 
@@ -168,7 +169,7 @@ type Msg
     | ArticleListMsg ArticleListSection.Msg
     | ArticleListLoaded (Result Http.Error ArticleListResponse)
     | ArticleMsg ArticleSection.Msg
-    | ArticleLoaded (Result Http.Error ArticleResponse)
+    | ArticleLoaded (Result GQLClient.Error Data.Article.Article)
     | UrlChange Navigation.Location
     | GoBack
     | TabMsg Tabs.Msg
@@ -357,7 +358,7 @@ update msg model =
             case articleListMsg of
                 ArticleListSection.LoadArticle articleId ->
                     ( { model | sectionState = transitionFromSection model.sectionState, history = ModelHistory model }
-                    , Task.attempt ArticleLoaded (Reader.run (ArticleSection.init articleId) ( model.nodeEnv, model.apiKey, model.context ))
+                    , Task.attempt ArticleLoaded (Reader.run (ArticleSection.init articleId) ( model.nodeEnv, model.apiKey ))
                     )
 
                 ArticleListSection.OpenLibrary ->
@@ -366,10 +367,10 @@ update msg model =
         ArticleListLoaded (Ok articleList) ->
             ( { model | sectionState = Loaded (ArticleListSection { id = Nothing, articles = articleList.articles }) }, Cmd.none )
 
-        ArticleLoaded (Ok articleResponse) ->
+        ArticleLoaded (Ok article) ->
             ( { model
                 | sectionState =
-                    Loaded <| ArticleSection <| ArticleSection.defaultModel articleResponse.article
+                    Loaded <| ArticleSection <| ArticleSection.defaultModel article
               }
             , Cmd.none
             )
@@ -397,8 +398,11 @@ update msg model =
                     _ ->
                         ( errModel, errCmd )
 
-        ArticleLoaded (Err error) ->
+        ArticleLoaded (Err (GQLClient.HttpError error)) ->
             ( { model | sectionState = Loaded (ErrorSection error) }, Cmd.none )
+
+        ArticleLoaded (Err _) ->
+            ( model, Cmd.none )
 
         ArticleMsg articleMsg ->
             let
@@ -417,7 +421,7 @@ update msg model =
                 ( newArticleModel, cmd ) =
                     ArticleSection.update articleMsg currentArticleModel
             in
-                ( { model | sectionState = Loaded (ArticleSection newArticleModel) }, Maybe.withDefault Cmd.none <| Maybe.map (Cmd.map ArticleMsg) <| Maybe.map (flip Reader.run model.nodeEnv) cmd )
+                ( { model | sectionState = Loaded (ArticleSection newArticleModel) }, Maybe.withDefault Cmd.none <| Maybe.map (Cmd.map ArticleMsg) <| Maybe.map (flip Reader.run ( model.nodeEnv, model.apiKey )) cmd )
 
         OpenArticleWithId articleId ->
             let
@@ -425,7 +429,7 @@ update msg model =
                     setAppState Maximized model
             in
                 ( { model | currentAppState = Maximized, containerAnimation = animation, sectionState = newSectionState }
-                , Task.attempt ArticleLoaded <| Reader.run (ArticleSection.init articleId) ( model.nodeEnv, model.apiKey, model.context )
+                , Task.attempt ArticleLoaded <| Reader.run (ArticleSection.init articleId) ( model.nodeEnv, model.apiKey )
                 )
 
         SearchBarMsg searchBarMsg ->
