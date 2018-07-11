@@ -8,7 +8,7 @@ import GraphQL.Request.Builder.Variable as Var
 
 
 type alias ArticleId =
-    Int
+    String
 
 
 type alias ArticleListResponse =
@@ -68,7 +68,7 @@ voteMutation voteType =
                 GQLBuilder.field "article"
                     []
                     (GQLBuilder.object ArticleSummary
-                        |> GQLBuilder.with (GQLBuilder.field "id" [] GQLBuilder.int)
+                        |> GQLBuilder.with (GQLBuilder.field "id" [] GQLBuilder.string)
                         |> GQLBuilder.with (GQLBuilder.field "title" [] GQLBuilder.string)
                     )
 
@@ -105,14 +105,14 @@ decodeArticles =
 decodeArticleSummary : Decoder ArticleSummary
 decodeArticleSummary =
     decode ArticleSummary
-        |> required "id" int
+        |> required "id" string
         |> required "title" string
 
 
 decodeArticle : Decoder Article
 decodeArticle =
     decode Article
-        |> required "id" int
+        |> required "id" string
         |> required "title" string
         |> required "desc" string
 

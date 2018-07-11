@@ -416,7 +416,7 @@ update msg model =
                             model
 
                         _ ->
-                            ArticleSection.defaultModel { id = 0, title = "", content = "" }
+                            ArticleSection.defaultModel { id = "", title = "", content = "" }
 
                 ( newArticleModel, cmd ) =
                     ArticleSection.update articleMsg currentArticleModel
