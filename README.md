@@ -44,6 +44,9 @@ Webpack will automatically compile if a file inside `app/javascript/` directory 
 ## GraphQL is enabled
 Once servers are up and running, visit `localhost:3000/graphql/playground` to play around GraphQL queries and mutations.
 
+Visit https://github.com/bigbinary/acehelp/tree/master/docs/graphql-examples
+to see some examples of how to use GraphQL.
+
 ## Heroku Review
 
 [Heroku Review](https://devcenter.heroku.com/articles/github-integration-review-apps)
