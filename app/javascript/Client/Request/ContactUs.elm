@@ -15,10 +15,10 @@ requestContactUs =
     Reader.Reader (\( env, apiKey, body ) -> Http.toTask (httpPost apiKey (apiUrl env "contacts") (Http.jsonBody <| getEncodedContact body) decodeMessage))
 
 
-requestAddContactMutation : RequestMessage -> Reader NodeEnv (Task GQLClient.Error (Maybe (List GQLError)))
+requestAddContactMutation : RequestMessage -> Reader ( NodeEnv, ApiKey ) (Task GQLClient.Error (Maybe (List GQLError)))
 requestAddContactMutation contactPayload =
     Reader.Reader
-        (\env ->
+        (\( env, apiKey ) ->
             GQLClient.sendMutation (graphqlUrl env) <|
                 GQLBuilder.request contactPayload addContactMutation
         )

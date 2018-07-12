@@ -15,7 +15,7 @@ import Views.Container exposing (topBar)
 import Views.Loading exposing (sectionLoadingView)
 import Views.Tabs as Tabs
 import Section.Search as SearchBar
-import Data.Article exposing (ArticleResponse, ArticleListResponse)
+import Data.Article exposing (ArticleId, ArticleResponse, ArticleListResponse)
 import Data.Category exposing (..)
 import Request.ContactUs exposing (..)
 import Request.Helpers exposing (ApiKey, NodeEnv, Context(..))
@@ -23,6 +23,7 @@ import Utils exposing (getUrlPathData)
 import Animation
 import Navigation
 import FontAwesome.Solid as SolidIcon
+import GraphQL.Client.Http as GQLClient
 import Ports exposing (..)
 
 
@@ -168,13 +169,14 @@ type Msg
     | ArticleListMsg ArticleListSection.Msg
     | ArticleListLoaded (Result Http.Error ArticleListResponse)
     | ArticleMsg ArticleSection.Msg
-    | ArticleLoaded (Result Http.Error ArticleResponse)
+    | ArticleLoaded (Result GQLClient.Error Data.Article.Article)
     | UrlChange Navigation.Location
     | GoBack
     | TabMsg Tabs.Msg
     | ContactUsMsg ContactUsSection.Msg
     | SearchBarMsg SearchBar.Msg
     | ReceivedUserInfo UserInfo
+    | OpenArticleWithId ArticleId
 
 
 
@@ -257,6 +259,30 @@ getPreviousValidState currentModel =
         previousModel
 
 
+setAppState : AppState -> Model -> ( Animation.State, SectionState, Cmd Msg )
+setAppState appState model =
+    case appState of
+        Maximized ->
+            ( Animation.interrupt
+                [ Animation.to
+                    [ Animation.opacity 1
+                    , Animation.right <| Animation.px 0
+                    ]
+                ]
+                model.containerAnimation
+            , transitionFromSection model.sectionState
+            , cmdForSuggestedArticles model
+            )
+
+        Minimized ->
+            ( Animation.interrupt
+                [ Animation.to initAnimation ]
+                model.containerAnimation
+            , Loaded Blank
+            , Cmd.none
+            )
+
+
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
@@ -270,26 +296,7 @@ update msg model =
         SetAppState appState ->
             let
                 ( animation, newSectionState, cmd ) =
-                    case appState of
-                        Maximized ->
-                            ( Animation.interrupt
-                                [ Animation.to
-                                    [ Animation.opacity 1
-                                    , Animation.right <| Animation.px 0
-                                    ]
-                                ]
-                                model.containerAnimation
-                            , transitionFromSection model.sectionState
-                            , cmdForSuggestedArticles model
-                            )
-
-                        Minimized ->
-                            ( Animation.interrupt
-                                [ Animation.to initAnimation ]
-                                model.containerAnimation
-                            , Loaded Blank
-                            , Cmd.none
-                            )
+                    setAppState appState model
             in
                 ( { model | currentAppState = appState, containerAnimation = animation, sectionState = newSectionState }, cmd )
 
@@ -351,7 +358,7 @@ update msg model =
             case articleListMsg of
                 ArticleListSection.LoadArticle articleId ->
                     ( { model | sectionState = transitionFromSection model.sectionState, history = ModelHistory model }
-                    , Task.attempt ArticleLoaded (Reader.run ArticleSection.init ( model.nodeEnv, model.apiKey, model.context, articleId ))
+                    , Task.attempt ArticleLoaded (Reader.run (ArticleSection.init articleId) ( model.nodeEnv, model.apiKey ))
                     )
 
                 ArticleListSection.OpenLibrary ->
@@ -360,10 +367,10 @@ update msg model =
         ArticleListLoaded (Ok articleList) ->
             ( { model | sectionState = Loaded (ArticleListSection { id = Nothing, articles = articleList.articles }) }, Cmd.none )
 
-        ArticleLoaded (Ok articleResponse) ->
+        ArticleLoaded (Ok article) ->
             ( { model
                 | sectionState =
-                    Loaded <| ArticleSection <| ArticleSection.defaultModel articleResponse.article
+                    Loaded <| ArticleSection <| ArticleSection.defaultModel article
               }
             , Cmd.none
             )
@@ -391,8 +398,11 @@ update msg model =
                     _ ->
                         ( errModel, errCmd )
 
-        ArticleLoaded (Err error) ->
+        ArticleLoaded (Err (GQLClient.HttpError error)) ->
             ( { model | sectionState = Loaded (ErrorSection error) }, Cmd.none )
+
+        ArticleLoaded (Err _) ->
+            ( model, Cmd.none )
 
         ArticleMsg articleMsg ->
             let
@@ -411,7 +421,16 @@ update msg model =
                 ( newArticleModel, cmd ) =
                     ArticleSection.update articleMsg currentArticleModel
             in
-                ( { model | sectionState = Loaded (ArticleSection newArticleModel) }, Maybe.withDefault Cmd.none <| Maybe.map (Cmd.map ArticleMsg) <| Maybe.map (flip Reader.run model.nodeEnv) cmd )
+                ( { model | sectionState = Loaded (ArticleSection newArticleModel) }, Maybe.withDefault Cmd.none <| Maybe.map (Cmd.map ArticleMsg) <| Maybe.map (flip Reader.run ( model.nodeEnv, model.apiKey )) cmd )
+
+        OpenArticleWithId articleId ->
+            let
+                ( animation, newSectionState, cmd ) =
+                    setAppState Maximized model
+            in
+                ( { model | currentAppState = Maximized, containerAnimation = animation, sectionState = newSectionState }
+                , Task.attempt ArticleLoaded <| Reader.run (ArticleSection.init articleId) ( model.nodeEnv, model.apiKey )
+                )
 
         SearchBarMsg searchBarMsg ->
             case searchBarMsg of
@@ -522,6 +541,7 @@ subscriptions model =
     Sub.batch
         [ Animation.subscription Animate [ model.containerAnimation ]
         , userInfo <| decodeUserInfo >> ReceivedUserInfo
+        , openArticle <| OpenArticleWithId
         ]
 
 
