@@ -8,3 +8,15 @@ mutation($input: CreateTicketInput!) {
                 }
               }
 ```
+
+In the query variables enter following information.
+
+```
+{
+  "input": {
+    "email": "sudeep@bigbinary.com",
+    "name": "Sudeep",
+    "message": "this is ticket message"
+  }
+}
+```
