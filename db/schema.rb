@@ -10,7 +10,11 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
+<<<<<<< HEAD
 ActiveRecord::Schema.define(version: 2018_07_08_102747) do
+=======
+ActiveRecord::Schema.define(version: 2018_07_12_052529) do
+>>>>>>> change addContact to addTicket
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "pgcrypto"
@@ -41,17 +45,30 @@ ActiveRecord::Schema.define(version: 2018_07_08_102747) do
     t.datetime "updated_at", null: false
   end
 
+<<<<<<< HEAD
   create_table "contacts", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.string "name"
     t.string "email"
     t.text "message"
+=======
+  create_table "organizations", force: :cascade do |t|
+    t.string "name", null: false
+    t.string "api_key", null: false
+>>>>>>> change addContact to addTicket
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
   end
 
+<<<<<<< HEAD
   create_table "organizations", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.string "name", null: false
     t.string "api_key", null: false
+=======
+  create_table "tickets", force: :cascade do |t|
+    t.string "name"
+    t.string "email"
+    t.text "message"
+>>>>>>> change addContact to addTicket
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
   end

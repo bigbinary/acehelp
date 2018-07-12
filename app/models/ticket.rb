@@ -1,5 +1,5 @@
 # frozen_string_literal: true
 
-class Contact < ApplicationRecord
+class Ticket < ApplicationRecord
   validates :name, :email, :message, presence: true
 end
