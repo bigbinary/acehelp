@@ -2,7 +2,14 @@
 
 module Api
   module V1
-    class TicketsController < BaseController
+    class TicketController < BaseController
+
+      before_action :load_ticket, only: :show
+
+      def show
+        render json: @ticket
+      end
+
       def create
         ticket = Ticket.new(ticket_params)
 
@@ -18,6 +25,11 @@ module Api
         def ticket_params
           params.require(:ticket).permit(:name, :email, :message)
         end
+
+        def load_ticket
+          @ticket = Ticket.find(params[:id])
+        end
+
     end
   end
 end
