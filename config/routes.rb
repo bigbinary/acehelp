@@ -21,8 +21,6 @@ Rails.application.routes.draw do
       resources :article, only: [:show, :index]
 
       get "/articles/search", to: "article#search"
-
-      resource :contacts, only: :create
     end
   end
 

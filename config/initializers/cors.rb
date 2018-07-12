@@ -24,11 +24,6 @@ Rails.application.config.middleware.insert_before 0, Rack::Cors do
   end
 
   allow do
-    origins "*"
-    resource "/api/*/contacts", headers: :any, methods: [:get, :post, :put, :delete, :options, :head]
-  end
-
-  allow do
     origins '*'
     resource '/packs/*', headers: :any, methods: :get
   end
