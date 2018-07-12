@@ -3,7 +3,11 @@
 life:
   title: "Happiest day of your life"
   desc: "tells more about life"
+  category: autobiography
+  organization: bigbinary
 
 ror:
   title: "Ruby on rails"
   desc: "Discuss about framework"
+  category: novel
+  organization: zindi

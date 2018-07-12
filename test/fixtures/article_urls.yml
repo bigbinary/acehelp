@@ -4,10 +4,10 @@
 # model remove the '{}' from the fixture names and add the columns immediately
 # below each fixture, per the syntax in the comments below
 #
-one: 
-  article_id: 1
-  url_id: 1
+one:
+  article: life
+  url: google
 
 two:
-  article_id: 2
-  url_id: 2
+  article: ror
+  url: bigbinary

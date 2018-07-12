@@ -6,7 +6,7 @@ import Data.Article exposing (ArticleSummary, decodeArticleSummary)
 
 
 type alias CategoryId =
-    Int
+    String
 
 
 type alias Category =
@@ -39,6 +39,6 @@ decodeCategoryList =
 decodeCategory : Decoder Category
 decodeCategory =
     decode Category
-        |> required "id" int
+        |> required "id" string
         |> required "name" string
         |> required "articles" (list decodeArticleSummary)

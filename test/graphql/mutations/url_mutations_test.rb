@@ -86,6 +86,6 @@ class Mutations::UrlMutationsTest < ActiveSupport::TestCase
 
     result = AceHelp::Client.execute(query, input: { id: @url.id })
 
-    assert_equal result.data.destroy_url.deleted_id.to_i, @url.id
+    assert_equal result.data.destroy_url.deleted_id, @url.id
   end
 end

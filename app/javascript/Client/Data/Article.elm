@@ -8,7 +8,7 @@ import GraphQL.Request.Builder.Variable as Var
 
 
 type alias ArticleId =
-    Int
+    String
 
 
 type alias ArticleListResponse =
@@ -40,14 +40,14 @@ articleQuery : GQLBuilder.Document GQLBuilder.Query Article { vars | articleId :
 articleQuery =
     let
         articleIdVar =
-            Var.required "articleId" .articleId Var.int
+            Var.required "articleId" .articleId Var.string
     in
         GQLBuilder.queryDocument <|
             GQLBuilder.extract <|
                 GQLBuilder.field "article"
                     [ ( "id", Arg.variable articleIdVar ) ]
                     (GQLBuilder.object Article
-                        |> GQLBuilder.with (GQLBuilder.field "id" [] GQLBuilder.int)
+                        |> GQLBuilder.with (GQLBuilder.field "id" [] GQLBuilder.string)
                         |> GQLBuilder.with (GQLBuilder.field "title" [] GQLBuilder.string)
                         |> GQLBuilder.with (GQLBuilder.field "desc" [] GQLBuilder.string)
                     )
@@ -68,7 +68,7 @@ voteMutation voteType =
                 GQLBuilder.field "article"
                     []
                     (GQLBuilder.object ArticleSummary
-                        |> GQLBuilder.with (GQLBuilder.field "id" [] GQLBuilder.int)
+                        |> GQLBuilder.with (GQLBuilder.field "id" [] GQLBuilder.string)
                         |> GQLBuilder.with (GQLBuilder.field "title" [] GQLBuilder.string)
                     )
 
@@ -105,14 +105,14 @@ decodeArticles =
 decodeArticleSummary : Decoder ArticleSummary
 decodeArticleSummary =
     decode ArticleSummary
-        |> required "id" int
+        |> required "id" string
         |> required "title" string
 
 
 decodeArticle : Decoder Article
 decodeArticle =
     decode Article
-        |> required "id" int
+        |> required "id" string
         |> required "title" string
         |> required "desc" string
 

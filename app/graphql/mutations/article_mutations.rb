@@ -4,7 +4,7 @@ class Mutations::ArticleMutations
   Create = GraphQL::Relay::Mutation.define do
     name "CreateArticle"
 
-    input_field :category_id, !types.ID
+    input_field :category_id, !types.String
     input_field :title, !types.String
     input_field :desc, !types.String
 
@@ -38,11 +38,11 @@ class Mutations::ArticleMutations
 
     ArticleInputObjectType = GraphQL::InputObjectType.define do
       name "ArticleInput"
-      input_field :category_id, !types.ID
+      input_field :category_id, !types.String
       input_field :title, !types.String
       input_field :desc, !types.String
     end
-    input_field :id, !types.ID
+    input_field :id, !types.String
     input_field :article, !ArticleInputObjectType
 
     return_field :article, Types::ArticleType
@@ -71,9 +71,9 @@ class Mutations::ArticleMutations
   Destroy = GraphQL::Relay::Mutation.define do
     name "DestroyArticle"
 
-    input_field :id, !types.ID
+    input_field :id, !types.String
 
-    return_field :deletedId, types.ID
+    return_field :deletedId, !types.String
     return_field :errors, types[Types::ErrorType]
 
     resolve ->(_obj, inputs, context) {

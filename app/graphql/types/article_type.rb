@@ -2,7 +2,7 @@
 
 Types::ArticleType = GraphQL::ObjectType.define do
   name "Article"
-  field :id, !types.ID
+  field :id, !types.String
   field :title, !types.String
   field :desc, !types.String
   field :upvotes_count, !types.Int

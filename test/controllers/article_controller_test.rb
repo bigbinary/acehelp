@@ -24,7 +24,7 @@ class ArticleControllerTest < ActionDispatch::IntegrationTest
 
     assert_response :success
     json = JSON.parse(response.body)
-    assert_equal "Ruby on rails", json.first.second.first["title"]
+    assert_equal "Ruby on rails", json.first.second.second["title"]
   end
 
   def test_index_failure
@@ -41,7 +41,7 @@ class ArticleControllerTest < ActionDispatch::IntegrationTest
 
     assert_response :success
     json = JSON.parse(response.body)
-    assert_equal "Ruby on rails", json.first.second.first["title"]
+    assert_equal "Ruby on rails", json.first.second.second["title"]
   end
 
   def test_create_success

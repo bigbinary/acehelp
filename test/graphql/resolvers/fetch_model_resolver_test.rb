@@ -15,7 +15,7 @@ class Resolvers::OrganizationSearchTest < ActiveSupport::TestCase
 
   test "search article data success" do
     query = <<-'GRAPHQL'
-              query($id: Int!) {
+              query($id: String!) {
                 article(id: $id) {
                   id
                   title
@@ -30,7 +30,7 @@ class Resolvers::OrganizationSearchTest < ActiveSupport::TestCase
 
   test "search article data failure" do
     query = <<-'GRAPHQL'
-              query($id: Int!) {
+              query($id: String!) {
                 article(id: $id) {
                   id
                   title
@@ -38,7 +38,7 @@ class Resolvers::OrganizationSearchTest < ActiveSupport::TestCase
               }
             GRAPHQL
 
-    result = AceHelp::Client.execute(query, id: -1)
+    result = AceHelp::Client.execute(query, id: "abcd")
 
     assert_nil result.data.article
   end

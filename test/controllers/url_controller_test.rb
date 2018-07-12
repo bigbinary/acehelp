@@ -22,7 +22,7 @@ class UrlControllerTest < ActionDispatch::IntegrationTest
 
     assert_response :success
     json = JSON.parse(response.body)
-    assert_equal "http://google.com", json.first.second.first["url"]
+    assert_equal "http://google.com", json.first.second.second["url"]
   end
 
   def test_create_success

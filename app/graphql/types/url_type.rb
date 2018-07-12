@@ -2,7 +2,7 @@
 
 Types::UrlType = GraphQL::ObjectType.define do
   name "Url"
-  field :id, !types.ID
+  field :id, !types.String
   field :url, !types.String
 
   field :articles, -> { !types[Types::ArticleType] } do
