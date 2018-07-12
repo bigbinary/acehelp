@@ -40,14 +40,14 @@ articleQuery : GQLBuilder.Document GQLBuilder.Query Article { vars | articleId :
 articleQuery =
     let
         articleIdVar =
-            Var.required "articleId" .articleId Var.int
+            Var.required "articleId" .articleId Var.string
     in
         GQLBuilder.queryDocument <|
             GQLBuilder.extract <|
                 GQLBuilder.field "article"
                     [ ( "id", Arg.variable articleIdVar ) ]
                     (GQLBuilder.object Article
-                        |> GQLBuilder.with (GQLBuilder.field "id" [] GQLBuilder.int)
+                        |> GQLBuilder.with (GQLBuilder.field "id" [] GQLBuilder.string)
                         |> GQLBuilder.with (GQLBuilder.field "title" [] GQLBuilder.string)
                         |> GQLBuilder.with (GQLBuilder.field "desc" [] GQLBuilder.string)
                     )
