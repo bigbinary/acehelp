@@ -4,7 +4,7 @@ class Mutations::TicketMutations
   Create = GraphQL::Relay::Mutation.define do
     name "CreateTicket"
 
-    input_field :name, !types.String
+    input_field :name, types.String
     input_field :email, !types.String
     input_field :message, !types.String
 
