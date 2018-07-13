@@ -6,7 +6,7 @@ import Data.ArticleData exposing (ArticleSummary, decodeArticleSummary)
 
 
 type alias OrganizationId =
-    Int
+    String
 
 
 type alias Organization =
@@ -17,7 +17,7 @@ type alias Organization =
 
 type alias OrganizationResponse =
     { organization : Organization
-    , articles: List ArticleSummary
+    , articles : List ArticleSummary
     }
 
 
@@ -31,5 +31,5 @@ organization =
 organizationDecoder : Decoder Organization
 organizationDecoder =
     decode Organization
-        |> required "id" int
+        |> required "id" string
         |> required "name" string

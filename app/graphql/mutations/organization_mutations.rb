@@ -4,7 +4,7 @@ class Mutations::OrganizationMutations
   Create = GraphQL::Relay::Mutation.define do
     name "CreateOrganization"
 
-    input_field :user_id, !types.ID
+    input_field :user_id, !types.String
     input_field :name, !types.String
     input_field :email, !types.String
 

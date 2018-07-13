@@ -5,7 +5,7 @@ import Json.Decode.Pipeline as Pipeline exposing (decode, required, optional)
 
 
 type alias UrlId =
-    Int
+    String
 
 
 type alias UrlData =
@@ -22,7 +22,7 @@ type alias UrlsListResponse =
 urlDecoder : Decoder UrlData
 urlDecoder =
     decode UrlData
-        |> required "id" int
+        |> required "id" string
         |> required "url" string
 
 
