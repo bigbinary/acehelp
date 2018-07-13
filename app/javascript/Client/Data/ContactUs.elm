@@ -62,18 +62,6 @@ addContactMutation =
         messageVar =
             Var.required "message" .message Var.string
 
-        article =
-            GQLBuilder.extract <|
-                GQLBuilder.field "errors"
-                    []
-                    (GQLBuilder.nullable
-                        (GQLBuilder.list
-                            (GQLBuilder.object GQLError
-                                |> GQLBuilder.with (GQLBuilder.field "message" [] GQLBuilder.string)
-                            )
-                        )
-                    )
-
         queryRoot =
             GQLBuilder.extract
                 (GQLBuilder.field "addContact"
@@ -85,7 +73,7 @@ addContactMutation =
                             ]
                       )
                     ]
-                    article
+                    errorsExtractor
                 )
     in
         GQLBuilder.mutationDocument queryRoot

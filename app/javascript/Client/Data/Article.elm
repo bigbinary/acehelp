@@ -1,5 +1,6 @@
 module Data.Article exposing (..)
 
+import Data.Common exposing (..)
 import Json.Decode exposing (int, string, float, nullable, list, Decoder)
 import Json.Decode.Pipeline exposing (decode, required, optional, hardcoded)
 import GraphQL.Request.Builder as GQLBuilder
@@ -29,6 +30,13 @@ type alias Article =
 type alias ArticleSummary =
     { id : ArticleId
     , title : String
+    }
+
+
+type alias FeedbackForm =
+    { comment : String
+    , email : String
+    , name : String
     }
 
 
@@ -90,6 +98,32 @@ upvoteMutation =
 downvoteMutation : GQLBuilder.Document GQLBuilder.Mutation ArticleSummary { vars | articleId : ArticleId }
 downvoteMutation =
     voteMutation "downvoteArticle"
+
+
+feedbackMutation : GQLBuilder.Document GQLBuilder.Mutation (Maybe (List GQLError)) FeedbackForm
+feedbackMutation =
+    let
+        nameVar =
+            Var.required "name" .name Var.string
+
+        emailVar =
+            Var.required "email" .email Var.string
+
+        messageVar =
+            Var.required "message" .comment Var.string
+    in
+        GQLBuilder.mutationDocument <|
+            GQLBuilder.extract <|
+                GQLBuilder.field "addTicket"
+                    [ ( "input"
+                      , Arg.object
+                            [ ( "name", Arg.variable nameVar )
+                            , ( "email", Arg.variable emailVar )
+                            , ( "message", Arg.variable messageVar )
+                            ]
+                      )
+                    ]
+                    errorsExtractor
 
 
 

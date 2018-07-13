@@ -4,7 +4,8 @@ import Http
 import Task exposing (Task)
 import Reader exposing (Reader)
 import Request.Helpers exposing (apiUrl, graphqlUrl, httpGet, ApiKey, Context, NodeEnv)
-import Data.Article exposing (ArticleId, Article, ArticleListResponse, ArticleSummary, decodeArticles, decodeArticleResponse, articleQuery, upvoteMutation, downvoteMutation)
+import Data.Article exposing (..)
+import Data.Common exposing (..)
 import GraphQL.Client.Http as GQLClient
 import GraphQL.Request.Builder as GQLBuilder
 
@@ -35,8 +36,13 @@ requestSearchArticles =
         )
 
 
-
--- GRAPHQL
+requestFeedbackMutation : FeedbackForm -> Reader ( NodeEnv, ApiKey ) (Task GQLClient.Error (Maybe (List GQLError)))
+requestFeedbackMutation feedbackFrom =
+    Reader.Reader
+        (\( env, apiKey ) ->
+            GQLClient.sendMutation (graphqlUrl env) <|
+                GQLBuilder.request feedbackFrom feedbackMutation
+        )
 
 
 requestUpvoteMutation : ArticleId -> Reader ( NodeEnv, ApiKey ) (Task GQLClient.Error ArticleSummary)
