@@ -7,11 +7,11 @@ import Views.Container exposing (popInInitialAnim)
 import Html exposing (..)
 import Html.Events exposing (onClick)
 import Html.Attributes exposing (id, class)
-import Http
 import Task
 import Animation
 import Reader
 import FontAwesome.Solid as SolidIcon
+import GraphQL.Client.Http as GQLClient
 
 
 -- MODEL
@@ -21,9 +21,9 @@ type alias Model =
     List Category
 
 
-init : Reader.Reader ( NodeEnv, ApiKey ) (Task.Task Http.Error Categories)
+init : Reader.Reader ( NodeEnv, ApiKey ) (Task.Task GQLClient.Error (List Category))
 init =
-    requestCategories
+    requestAllCategories
 
 
 initAnim : Animation.State
