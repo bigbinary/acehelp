@@ -5,6 +5,7 @@ import Html.Attributes exposing (..)
 import Http
 import Json.Decode exposing (string)
 import Json.Decode.Pipeline exposing (decode, required)
+import GraphQL.Client.Http as GQLClient
 
 
 -- MODEL
@@ -15,7 +16,7 @@ type alias ApiErrorMessage =
 
 
 type alias Model =
-    Http.Error
+    GQLClient.Error
 
 
 
@@ -24,9 +25,17 @@ type alias Model =
 
 
 view : Model -> Html msg
-view error =
+view gqlError =
     let
         ( boldExclamationText, friendlyMessage, systemMessage ) =
+            case gqlError of
+                GQLClient.HttpError err ->
+                    messagesForHttpError err
+
+                _ ->
+                    ( "OOPS!", "That should not have happend!", "" )
+
+        messagesForHttpError error =
             case error of
                 Http.BadUrl message ->
                     ( "OOPS!", "That should not have happend!", "" )
