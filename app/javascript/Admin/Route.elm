@@ -1,28 +1,35 @@
 module Route exposing (Route(..), fromLocation, modifyUrl)
 
 import Navigation exposing (Location)
-import UrlParser as Url exposing ((</>), Parser, oneOf, parseHash, s, string)
+import UrlParser as Url exposing ((</>), Parser, oneOf, parsePath, s, string)
 
 
 -- ROUTING --
 
 
 type Route
-    = Home
-    | Articles
-    | Urls
-    | Categories
-    | Integrations
+    = ArticleList
+    | ArticleCreate
+    | CategoryList
+    | CategoryCreate
+    | UrlList
+    | UrlCreate
+    | Integration
+    | Dashboard
+    | NotFound
 
 
-route : Parser (Route -> a) a
-route =
+routeMatcher : Parser (Route -> a) a
+routeMatcher =
     oneOf
-        [ Url.map Home (s "")
-        , Url.map Articles (s "articles")
-        , Url.map Urls (s "urls")
-        , Url.map Categories (s "categories")
-        , Url.map Integrations (s "integrations")
+        [ Url.map Dashboard (s "")
+        , Url.map ArticleList (s "articles")
+        , Url.map UrlList (s "urls")
+        , Url.map CategoryList (s "categories")
+        , Url.map Integration (s "integrations")
+        , Url.map ArticleCreate (s "articles" </> s "new")
+        , Url.map UrlCreate (s "urls" </> s "new")
+        , Url.map CategoryCreate (s "categories" </> s "new")
         ]
 
 
@@ -35,20 +42,32 @@ routeToString page =
     let
         pieces =
             case page of
-                Home ->
+                Dashboard ->
                     []
 
-                Articles ->
+                ArticleList ->
                     [ "articles" ]
 
-                Urls ->
+                UrlList ->
                     [ "urls" ]
 
-                Categories ->
+                CategoryList ->
                     [ "categories" ]
 
-                Integrations ->
+                Integration ->
                     [ "integrations" ]
+
+                ArticleCreate ->
+                    [ "articles", "new" ]
+
+                UrlCreate ->
+                    [ "urls", "new" ]
+
+                CategoryCreate ->
+                    [ "categories", "new" ]
+
+                NotFound ->
+                    []
     in
         "/admin" ++ String.join "/" pieces
 
@@ -58,9 +77,11 @@ modifyUrl =
     routeToString >> Navigation.modifyUrl
 
 
-fromLocation : Location -> Maybe Route
+fromLocation : Location -> Route
 fromLocation location =
-    if String.isEmpty location.hash then
-        Just Home
-    else
-        parseHash route location
+    case (parsePath routeMatcher location) of
+        Just route ->
+            route
+
+        _ ->
+            NotFound
