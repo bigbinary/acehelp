@@ -359,7 +359,7 @@ getOrganizationId orgId =
             orgId
 
         Nothing ->
-            "abcd"
+            ""
 
 
 

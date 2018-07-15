@@ -22,7 +22,7 @@ type alias Model =
 initModel : Model
 initModel =
     { listOfUrls = { urls = [] }
-    , urlId = "abcd"
+    , urlId = ""
     , error = Nothing
     }
 
