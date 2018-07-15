@@ -61,6 +61,25 @@ articleQuery =
                     )
 
 
+articleSummaryExtractor : GQLBuilder.ValueSpec GQLBuilder.NonNull GQLBuilder.ObjectType (List ArticleSummary) vars
+articleSummaryExtractor =
+    GQLBuilder.extract
+        (GQLBuilder.field "articles"
+            []
+            (GQLBuilder.list
+                (GQLBuilder.object ArticleSummary
+                    |> GQLBuilder.with (GQLBuilder.field "id" [] GQLBuilder.string)
+                    |> GQLBuilder.with (GQLBuilder.field "title" [] GQLBuilder.string)
+                )
+            )
+        )
+
+
+articlesQuery : GQLBuilder.Document GQLBuilder.Query (List ArticleSummary) vars
+articlesQuery =
+    GQLBuilder.queryDocument articleSummaryExtractor
+
+
 
 -- MUTATIONS
 

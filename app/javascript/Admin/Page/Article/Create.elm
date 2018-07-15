@@ -10,7 +10,6 @@ import Html.Events exposing (..)
 import Data.ArticleData exposing (..)
 import Http
 import Json.Encode as JsonEncoder
-import Json.Decode as JsonDecoder exposing (field)
 import Request.ArticleRequest exposing (..)
 import Request.CategoryRequest exposing (..)
 import Request.Helpers exposing (NodeEnv, ApiKey)

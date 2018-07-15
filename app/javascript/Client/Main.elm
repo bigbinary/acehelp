@@ -15,7 +15,7 @@ import Views.Container exposing (topBar)
 import Views.Loading exposing (sectionLoadingView)
 import Views.Tabs as Tabs
 import Section.Search as SearchBar
-import Data.Article exposing (ArticleId, ArticleResponse, ArticleListResponse)
+import Data.Article exposing (ArticleId, ArticleResponse, ArticleSummary)
 import Data.Category exposing (..)
 import Request.ContactUs exposing (..)
 import Request.Helpers exposing (ApiKey, NodeEnv, Context(..))
@@ -165,9 +165,9 @@ type Msg
     = Animate Animation.Msg
     | SetAppState AppState
     | CategoryListMsg CategoryListSection.Msg
-    | CategoryListLoaded (Result Http.Error Categories)
+    | CategoryListLoaded (Result GQLClient.Error (List Category))
     | ArticleListMsg ArticleListSection.Msg
-    | ArticleListLoaded (Result Http.Error ArticleListResponse)
+    | ArticleListLoaded (Result GQLClient.Error (List ArticleSummary))
     | ArticleMsg ArticleSection.Msg
     | ArticleLoaded (Result GQLClient.Error Data.Article.Article)
     | UrlChange Navigation.Location
@@ -313,7 +313,7 @@ update msg model =
                 ( { newModel | tabModel = newTabModel }, Cmd.batch [ newCmd, Cmd.map TabMsg tabCmd ] )
 
         CategoryListLoaded (Ok categories) ->
-            ( { model | sectionState = Loaded (CategoryListSection categories.categories) }, Cmd.none )
+            ( { model | sectionState = Loaded (CategoryListSection categories) }, Cmd.none )
 
         CategoryListLoaded (Err error) ->
             ( { model | sectionState = Loaded (ErrorSection error) }, Cmd.none )
@@ -365,7 +365,7 @@ update msg model =
                     update (TabMsg (Tabs.TabSelected Tabs.Library)) model
 
         ArticleListLoaded (Ok articleList) ->
-            ( { model | sectionState = Loaded (ArticleListSection { id = Nothing, articles = articleList.articles }) }, Cmd.none )
+            ( { model | sectionState = Loaded (ArticleListSection { id = Nothing, articles = articleList }) }, Cmd.none )
 
         ArticleLoaded (Ok article) ->
             ( { model
@@ -387,7 +387,7 @@ update msg model =
                     ( { model | sectionState = Loaded (ErrorSection error) }, Cmd.none )
             in
                 case error of
-                    Http.BadStatus response ->
+                    GQLClient.HttpError (Http.BadStatus response) ->
                         case response.status.code of
                             404 ->
                                 ( { model | sectionState = Loaded (ArticleListSection { id = Nothing, articles = [] }) }, Cmd.none )
@@ -398,11 +398,8 @@ update msg model =
                     _ ->
                         ( errModel, errCmd )
 
-        ArticleLoaded (Err (GQLClient.HttpError error)) ->
+        ArticleLoaded (Err error) ->
             ( { model | sectionState = Loaded (ErrorSection error) }, Cmd.none )
-
-        ArticleLoaded (Err _) ->
-            ( model, Cmd.none )
 
         ArticleMsg articleMsg ->
             let
@@ -433,28 +430,24 @@ update msg model =
                 )
 
         SearchBarMsg searchBarMsg ->
-            case searchBarMsg of
-                SearchBar.OnSearch ->
-                    let
-                        ( searchModel, _ ) =
-                            SearchBar.update searchBarMsg model.searchQuery
-                    in
+            let
+                ( searchModel, searchCmd ) =
+                    SearchBar.update searchBarMsg model.searchQuery
+            in
+                case searchBarMsg of
+                    SearchBar.OnSearch ->
                         ( { model | sectionState = transitionFromSection model.sectionState }
-                        , Cmd.map SearchBarMsg <|
-                            Task.attempt SearchBar.SearchResultsReceived <|
-                                Reader.run SearchBar.requestSearch ( model.nodeEnv, model.apiKey, searchModel )
+                        , Maybe.withDefault Cmd.none <| Maybe.map (Cmd.map SearchBarMsg) <| Maybe.map (flip Reader.run ( model.nodeEnv, model.apiKey )) searchCmd
                         )
 
-                SearchBar.SearchResultsReceived (Ok articleListResponse) ->
-                    ( { model | sectionState = Loaded (ArticleListSection { id = Nothing, articles = articleListResponse.articles }) }, Cmd.none )
+                    SearchBar.SearchResultsReceived (Ok articleListResponse) ->
+                        ( { model | sectionState = Loaded (ArticleListSection { id = Nothing, articles = articleListResponse.articles }) }, Cmd.none )
 
-                SearchBar.SearchResultsReceived (Err error) ->
-                    ( { model | sectionState = Loaded (ErrorSection error) }, Cmd.none )
+                    SearchBar.SearchResultsReceived (Err error) ->
+                        ( { model | sectionState = Loaded (ErrorSection (GQLClient.HttpError error)) }, Cmd.none )
 
-                _ ->
-                    SearchBar.update searchBarMsg model.searchQuery
-                        |> Tuple.mapFirst (\updatedModel -> ({ model | searchQuery = updatedModel }))
-                        |> Tuple.mapSecond (Cmd.map SearchBarMsg)
+                    _ ->
+                        ( { model | searchQuery = searchModel }, Cmd.none )
 
         ContactUsMsg contactUsMsg ->
             let
@@ -524,7 +517,7 @@ onTabChange tab model =
 
 cmdForSuggestedArticles : Model -> Cmd Msg
 cmdForSuggestedArticles model =
-    Task.attempt ArticleListLoaded (Reader.run ArticleListSection.init ( model.nodeEnv, model.apiKey, model.context ))
+    Task.attempt ArticleListLoaded (Reader.run (ArticleListSection.init model.context) ( model.nodeEnv, model.apiKey ))
 
 
 cmdForLibrary : Model -> Cmd Msg

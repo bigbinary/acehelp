@@ -4,7 +4,7 @@ Types::QueryType = GraphQL::ObjectType.define do
   name "Query"
 
   field :articles, function: Resolvers::ArticlesSearch.new
-  field :all, function: Resolvers::CategoriesSearch.new
+  field :categories, function: Resolvers::CategoriesSearch.new
   field :urls, function: Resolvers::UrlsSearch.new
 
   field :article, Types::ArticleType,
@@ -21,4 +21,5 @@ Types::QueryType = GraphQL::ObjectType.define do
   field :ticket, Types::TicketType,
                  field: Resolvers::Fields::FetchField.build(type: Types::TicketType,
                                                             model: Ticket)
+  field :category, Types::CategoryType, field: Resolvers::Fields::FetchField.build(type: Types::CategoryType, model: Category)
 end

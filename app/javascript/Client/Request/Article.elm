@@ -10,9 +10,14 @@ import GraphQL.Client.Http as GQLClient
 import GraphQL.Request.Builder as GQLBuilder
 
 
-requestArticleList : Reader ( NodeEnv, ApiKey, Context ) (Task Http.Error ArticleListResponse)
-requestArticleList =
-    Reader.Reader (\( env, apiKey, context ) -> Http.toTask (httpGet apiKey context (apiUrl env "article") [] decodeArticles))
+requestArticleList : Context -> Reader ( NodeEnv, ApiKey ) (Task GQLClient.Error (List ArticleSummary))
+requestArticleList context =
+    -- Reader.Reader (\( env, apiKey ) -> Http.toTask (httpGet apiKey context (apiUrl env "article") [] decodeArticles))
+    Reader.Reader
+        (\( env, apiKey ) ->
+            GQLClient.sendQuery (graphqlUrl env) <|
+                GQLBuilder.request {} articlesQuery
+        )
 
 
 
@@ -28,10 +33,10 @@ requestArticle articleId =
         )
 
 
-requestSearchArticles : Reader ( NodeEnv, ApiKey, String ) (Task Http.Error ArticleListResponse)
-requestSearchArticles =
+requestSearchArticles : String -> Reader ( NodeEnv, ApiKey ) (Task Http.Error ArticleListResponse)
+requestSearchArticles searchTerm =
     Reader.Reader
-        (\( env, apiKey, searchTerm ) ->
+        (\( env, apiKey ) ->
             Http.toTask (httpGet apiKey Request.Helpers.NoContext (apiUrl env "articles/search") [ ( "query", searchTerm ) ] decodeArticles)
         )
 

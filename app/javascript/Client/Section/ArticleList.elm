@@ -1,4 +1,4 @@
-module Section.ArticleList exposing (init, initAnim, Msg(..), Model, view, noArticles)
+module Section.ArticleList exposing (init, initAnim, Msg(..), Model, view)
 
 import Data.Category exposing (CategoryId)
 import Data.Article exposing (..)
@@ -9,11 +9,11 @@ import Html exposing (..)
 import Html.Events exposing (onClick)
 import Html.Attributes exposing (id, class)
 import Animation
-import Http
 import Task exposing (Task)
 import Reader exposing (Reader)
 import FontAwesome.Solid as SolidIcon
 import Section.Error exposing (errorMessageView)
+import GraphQL.Client.Http as GQLClient
 
 
 -- MODEL
@@ -25,12 +25,7 @@ type alias Model =
     }
 
 
-noArticles : List ArticleSummary
-noArticles =
-    []
-
-
-init : Reader ( NodeEnv, ApiKey, Context ) (Task Http.Error ArticleListResponse)
+init : Context -> Reader ( NodeEnv, ApiKey ) (Task GQLClient.Error (List ArticleSummary))
 init =
     requestArticleList
 

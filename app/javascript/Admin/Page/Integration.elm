@@ -2,7 +2,6 @@ module Page.Integration exposing (..)
 
 import Html exposing (..)
 import Html.Attributes exposing (..)
-import Html.Events exposing (..)
 import Request.RequestHelper exposing (ApiKey)
 
 

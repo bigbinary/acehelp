@@ -10,6 +10,7 @@ import Request.Helpers exposing (NodeEnv, ApiKey)
 import FontAwesome.Solid as SolidIcon
 import Reader exposing (Reader, run)
 import Task exposing (Task)
+import Section.Helpers exposing (..)
 
 
 -- MODEL
@@ -41,22 +42,24 @@ view model color =
 -- UPDATE
 
 
-update : Msg -> Model -> ( Model, Cmd Msg )
+update : Msg -> Model -> ( Model, SectionCmd Msg )
 update msg model =
     case msg of
         OnSearch ->
-            ( model, Cmd.none )
+            ( model
+            , Just <| Reader.map (Task.attempt SearchResultsReceived) (requestSearch model)
+            )
 
         OnSearchQueryInput searchQuery ->
-            ( String.trim searchQuery, Cmd.none )
+            ( String.trim searchQuery, Nothing )
 
         SearchResultsReceived (Ok articleListResponse) ->
-            ( model, Cmd.none )
+            ( model, Nothing )
 
         SearchResultsReceived (Err articleListResponse) ->
-            ( model, Cmd.none )
+            ( model, Nothing )
 
 
-requestSearch : Reader ( NodeEnv, ApiKey, Model ) (Task Http.Error ArticleListResponse)
+requestSearch : Model -> Reader ( NodeEnv, ApiKey ) (Task Http.Error ArticleListResponse)
 requestSearch =
     requestSearchArticles
