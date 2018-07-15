@@ -2,7 +2,7 @@
 
 To create ticket through GraphQL visit
 
-`localhost:300/graphql/playground`
+`http://localhost:3000/graphql/playground`
 
 After you visit URL GraphQL playground will be loaded for you.
 
