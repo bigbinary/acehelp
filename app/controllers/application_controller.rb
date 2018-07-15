@@ -7,13 +7,13 @@ class ApplicationController < ActionController::Base
   skip_before_action :verify_authenticity_token
   private
 
-  def ensure_user_is_logged_in
-    unless current_user
-      redirect_to new_user_session_path
+    def ensure_user_is_logged_in
+      unless current_user
+        redirect_to new_user_session_path
+      end
     end
-  end
 
-  def set_organization
-    @organization = Organization.first
-  end
+    def set_organization
+      @organization = Organization.first
+    end
 end

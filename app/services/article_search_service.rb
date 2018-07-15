@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class ArticleSearchService
   attr_reader :query
 
@@ -7,7 +9,7 @@ class ArticleSearchService
 
   def process
     Article.search(
-        query,
+      query,
         query_options
     )
   end

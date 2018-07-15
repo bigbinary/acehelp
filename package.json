@@ -28,6 +28,9 @@
     "*.{js, scss, css}": [
       "prettier --tab-width 4 --write",
       "git add"
-    ]
+    ],
+    "{app,test}/**/*.rb": [
+      "bundle exec rubocop -a",
+      "git add"]
   }
 }

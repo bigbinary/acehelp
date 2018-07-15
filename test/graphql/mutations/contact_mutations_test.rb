@@ -31,7 +31,7 @@ class Mutations::ContactMutationsTest < ActiveSupport::TestCase
                   }
                   errors {
                     message
-                    path 
+                    path
                   }
                 }
               }
@@ -49,14 +49,13 @@ class Mutations::ContactMutationsTest < ActiveSupport::TestCase
                   }
                   errors {
                     message
-                    path 
+                    path
                   }
                 }
               }
     GRAPHQL
 
     result = AceHelp::Client.execute(query, input: { name: "", email: "contact@email.com", message: "Dummy" })
-    assert_not_empty result.data.add_contact.errors.flat_map(&:path) & ['addContact', 'name']
+    assert_not_empty result.data.add_contact.errors.flat_map(&:path) & ["addContact", "name"]
   end
-
 end
