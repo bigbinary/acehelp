@@ -98,7 +98,7 @@ class Mutations::ArticleMutations
   Upvote = GraphQL::Relay::Mutation.define do
     name "Upvote"
 
-    input_field :id, !types.ID
+    input_field :id, !types.String
 
     return_field :article, Types::ArticleType
     return_field :errors, types[Types::ErrorType]
@@ -124,7 +124,7 @@ class Mutations::ArticleMutations
   Downvote = GraphQL::Relay::Mutation.define do
     name "Downvote"
 
-    input_field :id, !types.ID
+    input_field :id, !types.String
 
     return_field :article, Types::ArticleType
     return_field :errors, types[Types::ErrorType]
@@ -148,7 +148,4 @@ class Mutations::ArticleMutations
       }
     }
   end
-
-
-
 end
