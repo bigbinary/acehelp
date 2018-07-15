@@ -23,6 +23,26 @@ class Mutations::TicketMutationsTest < ActiveSupport::TestCase
     assert_equal result.data.add_ticket.ticket.name, "Ticket_name"
   end
 
+  test "create ticket mutations with optinal name input" do
+    query = <<-'GRAPHQL'
+              mutation($input: CreateTicketInput!) {
+                addTicket(input: $input) {
+                  ticket {
+                    id
+                    name
+                    email
+                  }
+                }
+              }
+    GRAPHQL
+
+    result = AceHelp::Client.execute(query, input: {  name: "",
+                                                      email: "contact@email.com",
+                                                      message: "Dummy" })
+
+    assert_equal result.data.add_ticket.ticket.email, "contact@email.com"
+  end
+
   test "create ticket mutations failure" do
     query = <<-'GRAPHQL'
               mutation($input: CreateTicketInput!) {
@@ -39,12 +59,12 @@ class Mutations::TicketMutationsTest < ActiveSupport::TestCase
               }
             GRAPHQL
     result = AceHelp::Client.execute(query, input: {  name: "",
-                                                      email: "contact@email.com",
+                                                      email: "",
                                                       message: "Dummy" })
     assert_nil result.data.add_ticket.ticket
   end
 
-  test "create ticket mutation error failute test" do
+  test "create ticket mutation error failure" do
     query = <<-'GRAPHQL'
               mutation($input: CreateTicketInput!) {
                 addTicket(input: $input) {
@@ -59,8 +79,7 @@ class Mutations::TicketMutationsTest < ActiveSupport::TestCase
               }
     GRAPHQL
 
-    result = AceHelp::Client.execute(query, input: { name: "", email: "contact@email.com", message: "Dummy" })
-    assert_not_empty result.data.add_ticket.errors.flat_map(&:path) & ['addTicket', 'name']
+    result = AceHelp::Client.execute(query, input: { name: "", email: "", message: "Dummy" })
+    assert_not_empty result.data.add_ticket.errors.flat_map(&:path) & ["addTicket", "email"]
   end
-
 end
