@@ -9,7 +9,6 @@ import Html exposing (..)
 import Html.Events exposing (onClick)
 import Html.Attributes exposing (id, class)
 import Animation
-import Http
 import Task exposing (Task)
 import Reader exposing (Reader)
 import FontAwesome.Solid as SolidIcon

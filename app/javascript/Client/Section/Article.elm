@@ -8,7 +8,6 @@ import Request.Helpers exposing (ApiKey, Context, NodeEnv, graphqlUrl)
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
-import Http
 import Task
 import Reader exposing (Reader)
 import FontAwesome.Solid as SolidIcon

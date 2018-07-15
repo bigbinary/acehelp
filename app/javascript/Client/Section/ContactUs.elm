@@ -96,6 +96,7 @@ validEmail =
         |> Regex.caseInsensitive
 
 
+isValidEmail : Field -> Bool
 isValidEmail =
     Regex.contains validEmail << fieldValue
 

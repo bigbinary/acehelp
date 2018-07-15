@@ -1,6 +1,5 @@
 module Request.Category exposing (..)
 
-import Http
 import Task exposing (Task)
 import Reader exposing (Reader)
 import Data.Category exposing (Category, allCategoriesQuery)
