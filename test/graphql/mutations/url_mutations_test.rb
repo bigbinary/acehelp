@@ -71,7 +71,7 @@ class Mutations::UrlMutationsTest < ActiveSupport::TestCase
               }
             GRAPHQL
 
-    result = AceHelp::Client.execute(query, input: { id: @url.id, url: { url: "wrong url" }})
+    result = AceHelp::Client.execute(query, input: { id: @url.id, url: { url: "wrong url" } })
     assert_nil result.data.update_url.url
   end
 

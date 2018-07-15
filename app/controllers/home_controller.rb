@@ -2,7 +2,7 @@
 
 class HomeController < ApplicationController
   def index
-      render
+    render
   end
 
   def getting_started

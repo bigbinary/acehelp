@@ -29,11 +29,10 @@ class Utils::ErrorHandler
       object.errors.map do |attribute, message|
         attribute = attribute.to_s
         {
-          path: [context.key, 'attribute', attribute],
+          path: [context.key, "attribute", attribute],
           message: general_message || "#{attribute} #{message}"
         }
       end
     end
   end
-
 end

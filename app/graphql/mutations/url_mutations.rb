@@ -84,5 +84,4 @@ class Mutations::UrlMutations
       }
     }
   end
-
 end
