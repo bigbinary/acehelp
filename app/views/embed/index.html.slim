@@ -1,0 +1,16 @@
+div
+  b Please enter following code snippet
+  div
+    textarea.code.disabled disabled="disabled"
+      javascript:
+        | var req=new XMLHttpRequest,script=document.createElement("script"),link=document.createElement("link"),baseUrl="",apiKey="#{@api_key}"
+        | script.type="text/javascript",script.async=!0,
+        | script.onload=function(){var e=window.AceHelp;e&&e._internal.insertWidget({apiKey:apiKey})},
+        | link.rel="stylesheet",link.type="text/css",link.media="all",
+        | req.responseType="json",
+        | req.open("GET",baseUrl+"/packs/manifest.json",!0),
+        | req.onload=function(){
+          | var e=document.getElementsByTagName("script")[0],t=req.response;
+          | link.href=baseUrl+t["client.css"],script.src=baseUrl+t["client.js"],e.parentNode.insertBefore(link,e),e.parentNode.insertBefore(script,e)
+        | },
+        | req.send();

@@ -5,7 +5,7 @@ import Json.Decode.Pipeline as Pipeline exposing (required, decode)
 
 
 type alias CategoryId =
-    Int
+    String
 
 
 type alias CategoryName =
@@ -26,7 +26,7 @@ type alias CategoryList =
 categoryDecoder : Decoder Category
 categoryDecoder =
     decode Category
-        |> required "id" int
+        |> required "id" string
         |> required "name" string
 
 

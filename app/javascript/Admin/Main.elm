@@ -347,19 +347,19 @@ retriveOrganizationFromUrl : Location -> OrganizationId
 retriveOrganizationFromUrl location =
     let
         org =
-            parsePath (s "admin" </> s "organization" </> int) location
+            parsePath (s "admin" </> s "organization" </> string) location
     in
         getOrganizationId (org)
 
 
-getOrganizationId : Maybe Int -> OrganizationId
+getOrganizationId : Maybe String -> OrganizationId
 getOrganizationId orgId =
     case orgId of
         Just orgId ->
             orgId
 
         Nothing ->
-            -1
+            ""
 
 
 

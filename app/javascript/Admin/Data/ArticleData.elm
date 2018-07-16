@@ -5,7 +5,7 @@ import Json.Decode.Pipeline as Pipeline exposing (decode, hardcoded, optional, r
 
 
 type alias ArticleId =
-    Int
+    String
 
 
 type alias Article =
@@ -35,7 +35,7 @@ articles =
 articlesDecoder : Decoder Article
 articlesDecoder =
     decode Article
-        |> required "id" int
+        |> required "id" string
         |> required "title" string
         |> required "desc" string
 
@@ -48,5 +48,5 @@ decodeArticles =
 decodeArticleSummary : Decoder ArticleSummary
 decodeArticleSummary =
     decode ArticleSummary
-        |> required "id" int
+        |> required "id" string
         |> required "title" string

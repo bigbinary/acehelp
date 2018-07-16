@@ -46,6 +46,7 @@ ActiveRecord::Schema.define(version: 2018_07_12_052529) do
     t.string "api_key", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "email", null: false
   end
 
   create_table "tickets", force: :cascade do |t|
@@ -80,8 +81,10 @@ ActiveRecord::Schema.define(version: 2018_07_12_052529) do
     t.string "role"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.uuid "organization_id"
     t.index ["email"], name: "index_users_on_email", unique: true
     t.index ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true
   end
 
+  add_foreign_key "users", "organizations"
 end
