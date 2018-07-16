@@ -36,6 +36,6 @@ Rails.application.routes.draw do
   end
 
   if Rails.env.development?
-    mount GraphqlPlayground::Rails::Engine, at: '/graphql/playground', graphql_path: '/graphql'
+    mount GraphqlPlayground::Rails::Engine, at: "/graphql/playground", graphql_path: "/graphql"
   end
 end

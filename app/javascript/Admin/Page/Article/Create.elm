@@ -43,7 +43,7 @@ initModel =
     , descError = Nothing
     , keywords = ""
     , keywordError = Nothing
-    , articleId = 0
+    , articleId = "0"
     , categoryList = { categories = [] }
     , categoryId = "0"
     , categoryIdError = Nothing
