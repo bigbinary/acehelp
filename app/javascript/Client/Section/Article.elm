@@ -3,6 +3,8 @@ module Section.Article exposing (init, Model, view, defaultModel, Msg, update)
 import Data.Common exposing (GQLError)
 import Data.Article exposing (..)
 import Request.Article exposing (..)
+import Data.ContactUs exposing (FeedbackForm)
+import Request.ContactUs exposing (requestAddTicketMutation)
 import Request.Helpers exposing (ApiKey, Context, NodeEnv, graphqlUrl)
 import Html exposing (..)
 import Html.Attributes exposing (..)
@@ -85,7 +87,7 @@ update msg model =
             ( { model | feedback = FeedbackSent }
             , Maybe.map
                 (\form ->
-                    Reader.map (Task.attempt SentFeedbackResponse) <| requestFeedbackMutation form
+                    Reader.map (Task.attempt SentFeedbackResponse) <| requestAddTicketMutation form
                 )
                 model.feedbackForm
             )
@@ -192,7 +194,7 @@ negativeView =
             , text " If you enter your email then this would create a support ticket and we would get back to you soon"
             ]
         , textarea [ class "comment-box", placeholder "Your comments", onInput CommentInput ] []
-        , input [ class "text-input", type_ "text", placeholder "Your Email (optional)", onInput EmailInput ] []
+        , input [ class "text-input", type_ "text", placeholder "Your Email", onInput EmailInput ] []
         , input [ class "text-input", type_ "text", placeholder "Your Name (optional)", onInput NameInput ] []
         , div []
             [ div

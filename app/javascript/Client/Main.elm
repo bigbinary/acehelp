@@ -475,7 +475,7 @@ update msg model =
                                         TransitioningFrom (ContactUsSection newContactUsModel)
                                   }
                                 , Cmd.map ContactUsMsg <|
-                                    Task.attempt ContactUsSection.RequestMessageCompleted (Reader.run requestContactUs ( model.nodeEnv, model.apiKey, ContactUsSection.modelToRequestMessage newContactUsModel ))
+                                    Task.attempt ContactUsSection.RequestMessageCompleted (Reader.run (requestAddTicketMutation (ContactUsSection.modelToRequestMessage newContactUsModel)) ( model.nodeEnv, model.apiKey ))
                                 )
 
                             False ->

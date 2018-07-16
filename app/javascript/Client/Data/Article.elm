@@ -33,13 +33,6 @@ type alias ArticleSummary =
     }
 
 
-type alias FeedbackForm =
-    { comment : String
-    , email : String
-    , name : String
-    }
-
-
 
 -- QUERIES
 
@@ -117,32 +110,6 @@ upvoteMutation =
 downvoteMutation : GQLBuilder.Document GQLBuilder.Mutation ArticleSummary { vars | articleId : ArticleId }
 downvoteMutation =
     voteMutation "downvoteArticle"
-
-
-feedbackMutation : GQLBuilder.Document GQLBuilder.Mutation (Maybe (List GQLError)) FeedbackForm
-feedbackMutation =
-    let
-        nameVar =
-            Var.required "name" .name Var.string
-
-        emailVar =
-            Var.required "email" .email Var.string
-
-        messageVar =
-            Var.required "message" .comment Var.string
-    in
-        GQLBuilder.mutationDocument <|
-            GQLBuilder.extract <|
-                GQLBuilder.field "addTicket"
-                    [ ( "input"
-                      , Arg.object
-                            [ ( "name", Arg.variable nameVar )
-                            , ( "email", Arg.variable emailVar )
-                            , ( "message", Arg.variable messageVar )
-                            ]
-                      )
-                    ]
-                    errorsExtractor
 
 
 
