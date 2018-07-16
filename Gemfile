@@ -21,7 +21,7 @@ gem "puma", "~> 3.11"
 gem "sass-rails", "~> 5.0"
 
 # slim as a templating language
-gem 'slim', "3.0.6"
+gem "slim", "3.0.6"
 
 # Use Uglifier as compressor for JavaScript assets
 gem "uglifier", ">= 1.3.0"
@@ -58,7 +58,7 @@ gem "active_model_serializers", "~> 0.9.4"
 # To build graphql server
 gem "graphql"
 # To resolve N+1 query in Graphql
-gem 'graphql-preload'
+gem "graphql-preload"
 
 # Intelligent search made easy with Rails and Elasticsearch
 gem "searchkick"
@@ -95,7 +95,7 @@ group :development do
   gem "rubocop", require: false
 
   #  For mountable GraphQL Playground endpoint
-  gem 'graphql_playground-rails', '~> 1.0'
+  gem "graphql_playground-rails", "~> 1.0"
 end
 
 group :test do
@@ -107,7 +107,7 @@ group :test do
   # A friendlier Ruby client for consuming GraphQL-based APIs.
   gem "graphlient", "~> 0.3.1"
   # SimpleCov is a code coverage analysis tool for Ruby
-  gem 'simplecov', require: false
+  gem "simplecov", require: false
 end
 
 # Windows does not include zoneinfo files, so bundle the tzinfo-data gem

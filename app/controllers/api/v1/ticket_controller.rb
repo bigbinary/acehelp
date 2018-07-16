@@ -3,7 +3,6 @@
 module Api
   module V1
     class TicketController < BaseController
-
       before_action :load_ticket, only: :show
 
       def show
@@ -29,7 +28,6 @@ module Api
         def load_ticket
           @ticket = Ticket.find(params[:id])
         end
-
     end
   end
 end
