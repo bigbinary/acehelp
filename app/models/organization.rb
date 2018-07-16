@@ -1,4 +1,4 @@
-# frozen_string_literal: tru
+# frozen_string_literal: true
 
 class Organization < ApplicationRecord
   has_many :urls
