@@ -1,4 +1,4 @@
-First visit http://localhost:3000/graphql/playground
+First visit `http://localhost:3000/graphql/playground` and
 and get list of articles.
 
 Note the article id of one of the articles.

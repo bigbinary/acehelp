@@ -15,11 +15,11 @@ class ApplicationController < ActionController::Base
       end
     end
 
-  def set_organization
-    @organization = Organization.first
-  end
+    def set_organization
+      @organization = Organization.first
+    end
 
-  def configure_permitted_parameters
-    devise_parameter_sanitizer.permit(:sign_up, keys: [:first_name])
-  end
+    def configure_permitted_parameters
+      devise_parameter_sanitizer.permit(:sign_up, keys: [:first_name])
+    end
 end

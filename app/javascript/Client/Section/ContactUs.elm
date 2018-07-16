@@ -4,10 +4,12 @@ import Http
 import Html exposing (..)
 import Html.Attributes exposing (class, classList, id, type_, placeholder, style, defaultValue)
 import Html.Events exposing (onClick, onInput)
-import Data.ContactUs exposing (RequestMessage, ResponseMessage, decodeMessage)
+import Data.ContactUs exposing (..)
 import Json.Decode
 import Views.Style exposing (tickShape)
 import Regex exposing (Regex)
+import Data.Common exposing (GQLError)
+import GraphQL.Client.Http as GQLClient
 
 
 -- MODEL
@@ -46,7 +48,7 @@ init name email =
 
 type Msg
     = SendMessage
-    | RequestMessageCompleted (Result Http.Error ResponseMessage)
+    | RequestMessageCompleted (Result GQLClient.Error (Maybe (List GQLError)))
     | NameInput String
     | EmailInput String
     | MessageInput String
@@ -82,11 +84,11 @@ contramapField mapper (Field err value) =
     Field (mapper err) value
 
 
-modelToRequestMessage : Model -> RequestMessage
+modelToRequestMessage : Model -> FeedbackForm
 modelToRequestMessage model =
     { name = fieldValue model.name
     , email = fieldValue model.email
-    , message = fieldValue model.message
+    , comment = fieldValue model.message
     }
 
 
@@ -148,19 +150,15 @@ update msg model =
     case msg of
         RequestMessageCompleted (Ok responseMessage) ->
             let
-                { message, error } =
-                    responseMessage
-
                 notification =
-                    case ( message, error ) of
-                        ( Just userMessage, Nothing ) ->
-                            MessageNotification userMessage
+                    case responseMessage of
+                        Just messages ->
+                            List.map .message messages
+                                |> String.join ", "
+                                |> ErrorNotification
 
-                        ( _, Just userMessage ) ->
-                            ErrorNotification userMessage
-
-                        ( Nothing, Nothing ) ->
-                            NoNotification
+                        Nothing ->
+                            MessageNotification "Thank you for your message. We will contact you soon!"
             in
                 ( { model | message = Field Nothing "", userNotification = notification }, Cmd.none )
 
@@ -184,10 +182,10 @@ update msg model =
 
                 errorMessage =
                     case error of
-                        Http.BadPayload debugMsg response ->
+                        GQLClient.HttpError (Http.BadPayload debugMsg response) ->
                             resultToUserNotification <| decode <| Debug.log "badpayload" response.body
 
-                        Http.BadStatus response ->
+                        GQLClient.HttpError (Http.BadStatus response) ->
                             resultToUserNotification <| decode <| Debug.log "badstatus" response.body
 
                         _ ->

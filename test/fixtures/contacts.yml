@@ -1,6 +1,0 @@
-# Read about fixtures at http://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
-
-otp_issue:
-  name: "aceinvoice"
-  email: "aceinvoice@bigbinary.com"
-  message: "I didn't get the otp. Please look into the matter."

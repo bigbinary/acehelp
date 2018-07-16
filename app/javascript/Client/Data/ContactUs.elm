@@ -1,4 +1,4 @@
-module Data.ContactUs exposing (ResponseMessage, RequestMessage, getEncodedContact, decodeMessage, addContactMutation)
+module Data.ContactUs exposing (FeedbackForm, ResponseMessage, RequestMessage, getEncodedContact, decodeMessage, addTicketMutation)
 
 import Json.Encode as Encode
 import Json.Decode as Decode exposing (Decoder)
@@ -26,6 +26,13 @@ type alias RequestMessage =
     }
 
 
+type alias FeedbackForm =
+    { comment : String
+    , email : String
+    , name : String
+    }
+
+
 
 -- ENCODERS
 
@@ -50,8 +57,8 @@ encodeMessage requestMessage =
         ]
 
 
-addContactMutation : GQLBuilder.Document GQLBuilder.Mutation (Maybe (List GQLError)) RequestMessage
-addContactMutation =
+addTicketMutation : GQLBuilder.Document GQLBuilder.Mutation (Maybe (List GQLError)) FeedbackForm
+addTicketMutation =
     let
         nameVar =
             Var.required "name" .name Var.string
@@ -60,23 +67,11 @@ addContactMutation =
             Var.required "email" .email Var.string
 
         messageVar =
-            Var.required "message" .message Var.string
-
-        article =
+            Var.required "message" .comment Var.string
+    in
+        GQLBuilder.mutationDocument <|
             GQLBuilder.extract <|
-                GQLBuilder.field "errors"
-                    []
-                    (GQLBuilder.nullable
-                        (GQLBuilder.list
-                            (GQLBuilder.object GQLError
-                                |> GQLBuilder.with (GQLBuilder.field "message" [] GQLBuilder.string)
-                            )
-                        )
-                    )
-
-        queryRoot =
-            GQLBuilder.extract
-                (GQLBuilder.field "addContact"
+                GQLBuilder.field "addTicket"
                     [ ( "input"
                       , Arg.object
                             [ ( "name", Arg.variable nameVar )
@@ -85,10 +80,7 @@ addContactMutation =
                             ]
                       )
                     ]
-                    article
-                )
-    in
-        GQLBuilder.mutationDocument queryRoot
+                    errorsExtractor
 
 
 

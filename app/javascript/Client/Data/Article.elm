@@ -1,5 +1,6 @@
 module Data.Article exposing (..)
 
+import Data.Common exposing (..)
 import Json.Decode exposing (int, string, float, nullable, list, Decoder)
 import Json.Decode.Pipeline exposing (decode, required, optional, hardcoded)
 import GraphQL.Request.Builder as GQLBuilder
