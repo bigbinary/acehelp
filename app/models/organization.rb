@@ -7,6 +7,7 @@ class Organization < ApplicationRecord
   has_many :owners, class_name: "User"
 
   validates :name, presence: true
+  validates :email, presence: true
   validates_uniqueness_of :name, case_sensitive: false
 
   before_validation :ensure_api_key_assigned

@@ -7,8 +7,8 @@
 #
 #   movies = Movie.create([{ name: 'Star Wars' }, { name: 'Lord of the Rings' }])
 #   Character.create(name: 'Luke', movie: movies.first)
-org1 = Organization.create! name: "ace-invoice"
-org2 = Organization.create! name: "healthcity"
+org1 = Organization.create! name: "ace-invoice", email: "aceinvoice@example.com"
+org2 = Organization.create! name: "healthcity", email: "healthcity@example.com"
 
 u1 = org1.urls.create! url: "http://aceinvoice.com/getting-started"
 u2 = org1.urls.create! url: "http://aceinvoice.com/integrations"
