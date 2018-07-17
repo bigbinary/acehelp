@@ -15,6 +15,7 @@ import Page.Integration as Integration
 import Data.Organization exposing (OrganizationId)
 import UrlParser as Url exposing (..)
 import Request.RequestHelper exposing (NodeEnv, ApiKey, logoutRequest)
+import Route
 
 
 -- MODEL
@@ -23,13 +24,6 @@ import Request.RequestHelper exposing (NodeEnv, ApiKey, logoutRequest)
 type alias Flags =
     { node_env : String
     , organization_key : String
-    }
-
-
-type alias Model =
-    { currentPage : Page
-    , nodeEnv : String
-    , organizationKey : String
     }
 
 
@@ -43,16 +37,29 @@ type Page
     | Integration Integration.Model
     | Dashboard
     | NotFound
+    | Blank
+
+
+type PageState
+    = Loaded Page
+    | TransitioningTo Page
+
+
+type alias Model =
+    { currentPage : PageState
+    , nodeEnv : String
+    , organizationKey : String
+    }
 
 
 init : Flags -> Location -> ( Model, Cmd Msg )
 init flags location =
     let
         ( pageModel, pageCmd ) =
-            retrivePage flags.node_env location flags.organization_key
+            setRoute location initModel
 
         initModel =
-            { currentPage = pageModel
+            { currentPage = Loaded Blank
             , nodeEnv = flags.node_env
             , organizationKey = flags.organization_key
             }
@@ -65,8 +72,7 @@ init flags location =
 
 
 type Msg
-    = Navigate Page
-    | ChangePage Page (Cmd Msg)
+    = NavigateTo Route.Route
     | ArticleListMsg ArticleList.Msg
     | ArticleCreateMsg ArticleCreate.Msg
     | UrlCreateMsg UrlCreate.Msg
@@ -74,7 +80,7 @@ type Msg
     | CategoryListMsg CategoryList.Msg
     | CategoryCreateMsg CategoryCreate.Msg
     | IntegrationMsg Integration.Msg
-    | UrlLocationChange Navigation.Location
+    | OnLocationChange Navigation.Location
     | SignOut
     | SignedOut (Result Http.Error String)
 
@@ -83,20 +89,81 @@ type Msg
 -- UPDATE
 
 
+getPage : PageState -> Page
+getPage pageState =
+    case pageState of
+        Loaded page ->
+            page
+
+        TransitioningTo page ->
+            page
+
+
+setRoute : Location -> Model -> ( Model, Cmd Msg )
+setRoute location model =
+    let
+        newRoute =
+            Route.fromLocation location
+    in
+        navigateTo newRoute model
+
+
+navigateTo : Route.Route -> Model -> ( Model, Cmd Msg )
+navigateTo newRoute model =
+    let
+        transitionTo page msg =
+            Tuple.mapFirst
+                (\pageModel -> ({ model | currentPage = TransitioningTo (page pageModel) }))
+                >> Tuple.mapSecond
+                    (Cmd.map msg)
+    in
+        case newRoute of
+            Route.ArticleList ->
+                (ArticleList.init model.nodeEnv model.organizationKey)
+                    |> transitionTo ArticleList ArticleListMsg
+
+            Route.ArticleCreate ->
+                (ArticleCreate.init model.nodeEnv model.organizationKey)
+                    |> transitionTo ArticleCreate ArticleCreateMsg
+
+            Route.CategoryList ->
+                (CategoryList.init)
+                    |> transitionTo CategoryList CategoryListMsg
+
+            Route.CategoryCreate ->
+                (CategoryCreate.init)
+                    |> transitionTo CategoryCreate CategoryCreateMsg
+
+            Route.UrlList ->
+                (UrlList.init model.nodeEnv model.organizationKey)
+                    |> transitionTo UrlList UrlListMsg
+
+            Route.UrlCreate ->
+                (UrlCreate.init)
+                    |> transitionTo UrlCreate UrlCreateMsg
+
+            Route.Integration ->
+                (Integration.init model.organizationKey)
+                    |> transitionTo Integration IntegrationMsg
+
+            Route.Dashboard ->
+                ( { model | currentPage = Loaded Blank }, Cmd.none )
+
+            Route.NotFound ->
+                ( { model | currentPage = Loaded NotFound }, Cmd.none )
+
+
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
-        Navigate page ->
-            ( model, newUrl <| convertPageToHash page model.organizationKey )
-
-        ChangePage page cmd ->
-            ( { model | currentPage = page }, cmd )
+        NavigateTo route ->
+            navigateTo route model
 
         ArticleListMsg alMsg ->
             let
                 currentPageModel =
                     case model.currentPage of
-                        ArticleList articleListModel ->
+                        Loaded (ArticleList articleListModel) ->
                             articleListModel
 
                         _ ->
@@ -105,7 +172,7 @@ update msg model =
                 ( articleListModel, articleListCmd ) =
                     ArticleList.update alMsg currentPageModel model.organizationKey model.nodeEnv
             in
-                ( { model | currentPage = (ArticleList articleListModel) }
+                ( { model | currentPage = Loaded (ArticleList articleListModel) }
                 , Cmd.map ArticleListMsg articleListCmd
                 )
 
@@ -113,7 +180,7 @@ update msg model =
             let
                 currentPageModel =
                     case model.currentPage of
-                        ArticleCreate articleCreateModel ->
+                        Loaded (ArticleCreate articleCreateModel) ->
                             articleCreateModel
 
                         _ ->
@@ -122,7 +189,7 @@ update msg model =
                 ( articleCreateModel, createArticleCmd ) =
                     ArticleCreate.update caMsg currentPageModel model.nodeEnv model.organizationKey
             in
-                ( { model | currentPage = (ArticleCreate articleCreateModel) }
+                ( { model | currentPage = Loaded (ArticleCreate articleCreateModel) }
                 , Cmd.map ArticleCreateMsg createArticleCmd
                 )
 
@@ -130,7 +197,7 @@ update msg model =
             let
                 currentPageModel =
                     case model.currentPage of
-                        UrlCreate urlCreateModel ->
+                        Loaded (UrlCreate urlCreateModel) ->
                             urlCreateModel
 
                         _ ->
@@ -139,7 +206,7 @@ update msg model =
                 ( createUrlModel, createUrlCmds ) =
                     UrlCreate.update cuMsg currentPageModel model.nodeEnv model.organizationKey
             in
-                ( { model | currentPage = (UrlCreate createUrlModel) }
+                ( { model | currentPage = Loaded (UrlCreate createUrlModel) }
                 , Cmd.map UrlCreateMsg createUrlCmds
                 )
 
@@ -147,7 +214,7 @@ update msg model =
             let
                 currentPageModel =
                     case model.currentPage of
-                        UrlList urlListModel ->
+                        Loaded (UrlList urlListModel) ->
                             urlListModel
 
                         _ ->
@@ -156,7 +223,7 @@ update msg model =
                 ( urlListModel, urlListCmds ) =
                     UrlList.update ulMsg currentPageModel
             in
-                ( { model | currentPage = (UrlList urlListModel) }
+                ( { model | currentPage = Loaded (UrlList urlListModel) }
                 , Cmd.map UrlListMsg urlListCmds
                 )
 
@@ -164,7 +231,7 @@ update msg model =
             let
                 currentPageModel =
                     case model.currentPage of
-                        CategoryList categoryListModel ->
+                        Loaded (CategoryList categoryListModel) ->
                             categoryListModel
 
                         _ ->
@@ -173,7 +240,7 @@ update msg model =
                 ( categoryListModel, categoryListCmd ) =
                     CategoryList.update clMsg currentPageModel
             in
-                ( { model | currentPage = (CategoryList categoryListModel) }
+                ( { model | currentPage = Loaded (CategoryList categoryListModel) }
                 , Cmd.map CategoryListMsg categoryListCmd
                 )
 
@@ -181,7 +248,7 @@ update msg model =
             let
                 currentPageModel =
                     case model.currentPage of
-                        CategoryCreate categoryCreateModel ->
+                        Loaded (CategoryCreate categoryCreateModel) ->
                             categoryCreateModel
 
                         _ ->
@@ -191,7 +258,7 @@ update msg model =
                     CategoryCreate.update ccMsg currentPageModel model.nodeEnv model.organizationKey
             in
                 ( { model
-                    | currentPage = (CategoryCreate categoryCreateModel)
+                    | currentPage = Loaded (CategoryCreate categoryCreateModel)
                   }
                 , Cmd.map CategoryCreateMsg categoryCreateCmd
                 )
@@ -200,7 +267,7 @@ update msg model =
             let
                 currentPageModel =
                     case model.currentPage of
-                        Integration integrationPageModel ->
+                        Loaded (Integration integrationPageModel) ->
                             integrationPageModel
 
                         _ ->
@@ -210,137 +277,19 @@ update msg model =
                     Integration.update integrationMsg currentPageModel
             in
                 ( { model
-                    | currentPage = (Integration integrationModel)
+                    | currentPage = Loaded (Integration integrationModel)
                   }
                 , Cmd.map IntegrationMsg integrationCmd
                 )
 
-        UrlLocationChange location ->
-            let
-                msg =
-                    urlLocationToMsg model location
-            in
-                update msg model
+        OnLocationChange location ->
+            setRoute location model
 
         SignOut ->
             ( model, Http.send SignedOut (logoutRequest model.nodeEnv) )
 
         SignedOut _ ->
             ( model, load (Request.RequestHelper.baseUrl model.nodeEnv) )
-
-
-convertPageToHash : Page -> ApiKey -> String
-convertPageToHash page organizationKey =
-    case page of
-        ArticleList articleListModel ->
-            "/admin/articles"
-
-        ArticleCreate articleCreateModel ->
-            "/admin/articles/new"
-
-        UrlList urlListModel ->
-            "/admin/urls"
-
-        UrlCreate urlCreateModel ->
-            "/admin/urls/new"
-
-        CategoryList categoryListModel ->
-            "/admin/categories"
-
-        CategoryCreate categoryCreateModel ->
-            "/admin/categories/new"
-
-        Integration integrationModel ->
-            "/admin/integrations?api_key=" ++ organizationKey
-
-        Dashboard ->
-            "/admin/dashboard"
-
-        NotFound ->
-            "/404"
-
-
-urlLocationToMsg : Model -> Location -> Msg
-urlLocationToMsg model location =
-    let
-        ( pageModel, pageCmd ) =
-            retrivePage model.nodeEnv location model.organizationKey
-    in
-        ChangePage pageModel pageCmd
-
-
-retrivePage : NodeEnv -> Location -> ApiKey -> ( Page, Cmd Msg )
-retrivePage env location organizationKey =
-    let
-        integrationsUrl =
-            "/admin/integrations?api_key=" ++ organizationKey
-    in
-        case (extractStaticPath location) of
-            "/admin/articles" ->
-                let
-                    ( pageModel, pageCmd ) =
-                        ArticleList.init env organizationKey
-                in
-                    ( ArticleList pageModel, Cmd.map ArticleListMsg pageCmd )
-
-            "/admin/articles/new" ->
-                let
-                    ( pageModel, pageCmd ) =
-                        (ArticleCreate.init env organizationKey)
-                in
-                    ( ArticleCreate pageModel, Cmd.map ArticleCreateMsg pageCmd )
-
-            "/admin/urls" ->
-                let
-                    ( pageModel, pageCmd ) =
-                        UrlList.init env organizationKey
-                in
-                    ( UrlList pageModel, Cmd.map UrlListMsg pageCmd )
-
-            "/admin/urls/new" ->
-                let
-                    ( pageModel, pageCmd ) =
-                        UrlCreate.init
-                in
-                    ( UrlCreate pageModel, Cmd.map UrlCreateMsg pageCmd )
-
-            "/admin/categories" ->
-                let
-                    ( pageModel, pageCmd ) =
-                        CategoryList.init
-                in
-                    ( CategoryList pageModel, Cmd.map CategoryListMsg pageCmd )
-
-            "/admin/categories/new" ->
-                let
-                    ( pageModel, pageCmd ) =
-                        CategoryCreate.init
-                in
-                    ( CategoryCreate pageModel, Cmd.map CategoryCreateMsg pageCmd )
-
-            "/admin/dashboard" ->
-                ( Dashboard, Cmd.none )
-
-            integrationsUrl ->
-                let
-                    ( pageModel, pageCmd ) =
-                        Integration.init organizationKey
-                in
-                    ( Integration pageModel, Cmd.map IntegrationMsg pageCmd )
-
-
-extractStaticPath : Location -> String
-extractStaticPath location =
-    let
-        staticPath =
-            parsePath (s "admin" </> s "organization" </> string) location
-    in
-        case staticPath of
-            Nothing ->
-                location.pathname
-
-            Just staticPath ->
-                "/admin/organization"
 
 
 retriveOrganizationFromUrl : Location -> OrganizationId
@@ -379,7 +328,7 @@ view : Model -> Html Msg
 view model =
     let
         page =
-            case model.currentPage of
+            case (getPage model.currentPage) of
                 ArticleList articleListModel ->
                     Html.map ArticleListMsg
                         (ArticleList.view articleListModel)
@@ -424,10 +373,10 @@ adminHeader : Model -> Html Msg
 adminHeader model =
     div [ class "header" ]
         [ div [ class "header-right" ]
-            [ Html.a [ onClick (Navigate <| ArticleList ArticleList.initModel) ] [ text "Articles" ]
-            , Html.a [ onClick (Navigate <| UrlList UrlList.initModel) ] [ text "URL" ]
-            , Html.a [ onClick (Navigate <| CategoryList CategoryList.initModel) ] [ text "Category" ]
-            , Html.a [ onClick (Navigate <| Integration (Integration.initModel model.organizationKey)) ] [ text "Integrations" ]
+            [ Html.a [ onClick <| NavigateTo Route.ArticleList ] [ text "Articles" ]
+            , Html.a [ onClick <| NavigateTo Route.UrlList ] [ text "URL" ]
+            , Html.a [ onClick <| NavigateTo Route.CategoryList ] [ text "Category" ]
+            , Html.a [ onClick <| NavigateTo Route.Integration ] [ text "Integrations" ]
             , Html.a [ onClick SignOut ] [ text "Logout" ]
             ]
         ]
@@ -439,7 +388,7 @@ adminHeader model =
 
 main : Program Flags Model Msg
 main =
-    Navigation.programWithFlags UrlLocationChange
+    Navigation.programWithFlags OnLocationChange
         { init = init
         , update = update
         , view = view
