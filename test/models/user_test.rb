@@ -16,4 +16,11 @@ class UserTest < ActiveSupport::TestCase
     @user.email = nil
     assert_not @user.valid?
   end
+
+  test "user valid after adding organization" do
+    args = { email: @user.email, name: 'Organization test' }
+    @user.add_organization(args.with_indifferent_access)
+    assert @user.valid?
+    assert_equal @user.organization.name, args[:name]
+  end
 end

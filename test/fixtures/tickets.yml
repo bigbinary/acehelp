@@ -1,0 +1,6 @@
+# Read about fixtures at http://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+payment_issue_ticket:
+  email: alan@example.com
+  name: Alan
+  message: Not able to do payment
