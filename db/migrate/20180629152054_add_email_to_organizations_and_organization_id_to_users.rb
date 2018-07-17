@@ -3,7 +3,7 @@
 class AddEmailToOrganizationsAndOrganizationIdToUsers < ActiveRecord::Migration[5.2]
   def up
     add_column :organizations, :email, :string
-    add_column :users, :organization_id, :uuid, index: true
+    add_column :users, :organization_id, :int, index: true
     add_foreign_key :users, :organizations
 
     Organization.where(email: nil).each do |org|

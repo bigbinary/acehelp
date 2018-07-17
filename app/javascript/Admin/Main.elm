@@ -12,6 +12,7 @@ import Page.Url.Create as UrlCreate
 import Page.Category.List as CategoryList
 import Page.Category.Create as CategoryCreate
 import Page.Integration as Integration
+import Page.Errors as Errors
 import Data.Organization exposing (OrganizationId)
 import UrlParser as Url exposing (..)
 import Request.RequestHelper exposing (NodeEnv, ApiKey, logoutRequest)
@@ -327,46 +328,70 @@ subscriptions model =
 view : Model -> Html Msg
 view model =
     let
-        page =
-            case (getPage model.currentPage) of
+        ( page, error ) =
+            case model.currentPage of
                 ArticleList articleListModel ->
-                    Html.map ArticleListMsg
+                    ( Html.map ArticleListMsg
                         (ArticleList.view articleListModel)
+                    , False
+                    )
 
                 ArticleCreate articleCreateModel ->
-                    Html.map ArticleCreateMsg
+                    ( Html.map ArticleCreateMsg
                         (ArticleCreate.view articleCreateModel)
+                    , False
+                    )
 
                 UrlCreate urlCreateModel ->
-                    Html.map UrlCreateMsg
+                    ( Html.map UrlCreateMsg
                         (UrlCreate.view urlCreateModel)
+                    , False
+                    )
 
                 UrlList urlListModel ->
-                    Html.map UrlListMsg
+                    ( Html.map UrlListMsg
                         (UrlList.view urlListModel)
+                    , False
+                    )
 
                 CategoryList categoryListModel ->
-                    Html.map CategoryListMsg
+                    ( Html.map CategoryListMsg
                         (CategoryList.view categoryListModel)
+                    , False
+                    )
 
                 CategoryCreate categoryCreateModel ->
-                    Html.map CategoryCreateMsg
+                    ( Html.map CategoryCreateMsg
                         (CategoryCreate.view categoryCreateModel)
+                    , False
+                    )
 
                 Integration integrationModel ->
-                    Html.map IntegrationMsg
+                    ( Html.map IntegrationMsg
                         (Integration.view integrationModel)
+                    , False
+                    )
 
                 Dashboard ->
-                    div [] [ text "Dashboard" ]
+                    ( div [] [ text "Dashboard" ], False )
 
                 _ ->
-                    div [] [ text "Not Found" ]
+                    ( div [] [ Errors.notFound ], True )
     in
-        div []
-            [ adminHeader model
-            , page
-            ]
+        if error == True then
+            div []
+                [ page
+                , Html.a
+                    [ class "button primary"
+                    , href "/"
+                    ]
+                    [ text "Home" ]
+                ]
+        else
+            div []
+                [ adminHeader model
+                , page
+                ]
 
 
 adminHeader : Model -> Html Msg
