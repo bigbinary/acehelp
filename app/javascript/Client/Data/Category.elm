@@ -25,6 +25,13 @@ type alias Categories =
 -- QUERIES
 
 
+articlesExtractor : GQLBuilder.ValueSpec GQLBuilder.NonNull GQLBuilder.ObjectType ArticleSummary vars
+articlesExtractor =
+    GQLBuilder.object ArticleSummary
+        |> GQLBuilder.with (GQLBuilder.field "id" [] GQLBuilder.string)
+        |> GQLBuilder.with (GQLBuilder.field "title" [] GQLBuilder.string)
+
+
 allCategoriesQuery : GQLBuilder.Document GQLBuilder.Query (List Category) vars
 allCategoriesQuery =
     GQLBuilder.queryDocument <|
@@ -36,7 +43,7 @@ allCategoriesQuery =
                     (GQLBuilder.object Category
                         |> GQLBuilder.with (GQLBuilder.field "id" [] GQLBuilder.string)
                         |> GQLBuilder.with (GQLBuilder.field "name" [] GQLBuilder.string)
-                        |> GQLBuilder.with articleSummaryField
+                        |> GQLBuilder.with (GQLBuilder.field "articles" [] (GQLBuilder.list articlesExtractor))
                     )
             )
 

@@ -16,7 +16,7 @@ module LoadOrganization
       render_unauthorized(unathorized_error_message)
     else
       @organization = Organization.find_by(api_key: api_key)
-      render_unauthorized(unathorized_error_message) && return if @organization.blank?
+      (render_unauthorized(unathorized_error_message) && return) if @organization.blank?
     end
   end
 
