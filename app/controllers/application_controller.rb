@@ -4,8 +4,6 @@ class ApplicationController < ActionController::Base
   include ::Concerns::ErrorHandlers
 
   before_action :configure_permitted_parameters, if: :devise_controller?
-  # TODO: Remove following line of code once user and organization functionality is finalized
-  before_action :set_organization
   rescue_from ActiveRecord::RecordNotFound, with: :render_not_found
   skip_before_action :verify_authenticity_token
 
