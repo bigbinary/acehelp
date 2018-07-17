@@ -72,7 +72,8 @@ init flags location =
 
 
 type Msg
-    = ArticleListMsg ArticleList.Msg
+    = NavigateTo Route.Route
+    | ArticleListMsg ArticleList.Msg
     | ArticleCreateMsg ArticleCreate.Msg
     | UrlCreateMsg UrlCreate.Msg
     | UrlListMsg UrlList.Msg
@@ -101,14 +102,20 @@ getPage pageState =
 setRoute : Location -> Model -> ( Model, Cmd Msg )
 setRoute location model =
     let
+        newRoute =
+            Route.fromLocation location
+    in
+        navigateTo newRoute model
+
+
+navigateTo : Route.Route -> Model -> ( Model, Cmd Msg )
+navigateTo newRoute model =
+    let
         transitionTo page msg =
             Tuple.mapFirst
                 (\pageModel -> ({ model | currentPage = TransitioningTo (page pageModel) }))
                 >> Tuple.mapSecond
                     (Cmd.map msg)
-
-        newRoute =
-            Route.fromLocation location
     in
         case newRoute of
             Route.ArticleList ->
@@ -149,6 +156,9 @@ setRoute location model =
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
+        NavigateTo route ->
+            navigateTo route model
+
         ArticleListMsg alMsg ->
             let
                 currentPageModel =
@@ -363,10 +373,10 @@ adminHeader : Model -> Html Msg
 adminHeader model =
     div [ class "header" ]
         [ div [ class "header-right" ]
-            [ Html.a [ href (Route.routeToString Route.ArticleList) ] [ text "Articles" ]
-            , Html.a [ href (Route.routeToString Route.UrlList) ] [ text "URL" ]
-            , Html.a [ href (Route.routeToString Route.CategoryList) ] [ text "Category" ]
-            , Html.a [ href (Route.routeToString Route.Integration) ] [ text "Integrations" ]
+            [ Html.a [ onClick <| NavigateTo Route.ArticleList ] [ text "Articles" ]
+            , Html.a [ onClick <| NavigateTo Route.UrlList ] [ text "URL" ]
+            , Html.a [ onClick <| NavigateTo Route.CategoryList ] [ text "Category" ]
+            , Html.a [ onClick <| NavigateTo Route.Integration ] [ text "Integrations" ]
             , Html.a [ onClick SignOut ] [ text "Logout" ]
             ]
         ]
