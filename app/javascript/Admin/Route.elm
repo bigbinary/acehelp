@@ -1,4 +1,4 @@
-module Route exposing (Route(..), fromLocation, modifyUrl)
+module Route exposing (Route(..), fromLocation, modifyUrl, routeToString)
 
 import Navigation exposing (Location)
 import UrlParser as Url exposing ((</>), Parser, oneOf, parsePath, s, string)
@@ -22,14 +22,14 @@ type Route
 routeMatcher : Parser (Route -> a) a
 routeMatcher =
     oneOf
-        [ Url.map Dashboard (s "")
-        , Url.map ArticleList (s "articles")
-        , Url.map UrlList (s "urls")
-        , Url.map CategoryList (s "categories")
-        , Url.map Integration (s "integrations")
-        , Url.map ArticleCreate (s "articles" </> s "new")
-        , Url.map UrlCreate (s "urls" </> s "new")
-        , Url.map CategoryCreate (s "categories" </> s "new")
+        [ Url.map Dashboard (s "admin" </> s "")
+        , Url.map ArticleList (s "admin" </> s "articles")
+        , Url.map UrlList (s "admin" </> s "urls")
+        , Url.map CategoryList (s "admin" </> s "categories")
+        , Url.map Integration (s "admin" </> s "integrations")
+        , Url.map ArticleCreate (s "admin" </> s "articles" </> s "new")
+        , Url.map UrlCreate (s "admin" </> s "urls" </> s "new")
+        , Url.map CategoryCreate (s "admin" </> s "categories" </> s "new")
         ]
 
 
@@ -69,7 +69,7 @@ routeToString page =
                 NotFound ->
                     []
     in
-        "/admin" ++ String.join "/" pieces
+        "/admin/" ++ String.join "/" pieces
 
 
 modifyUrl : Route -> Cmd msg
@@ -79,7 +79,7 @@ modifyUrl =
 
 fromLocation : Location -> Route
 fromLocation location =
-    case (parsePath routeMatcher location) of
+    case (Debug.log "route:" <| parsePath routeMatcher location) of
         Just route ->
             route
 

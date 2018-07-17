@@ -72,8 +72,7 @@ init flags location =
 
 
 type Msg
-    = Navigate Page
-    | ArticleListMsg ArticleList.Msg
+    = ArticleListMsg ArticleList.Msg
     | ArticleCreateMsg ArticleCreate.Msg
     | UrlCreateMsg UrlCreate.Msg
     | UrlListMsg UrlList.Msg
@@ -150,9 +149,6 @@ setRoute location model =
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
-        Navigate page ->
-            ( model, Cmd.none )
-
         ArticleListMsg alMsg ->
             let
                 currentPageModel =
@@ -320,53 +316,57 @@ subscriptions model =
 
 view : Model -> Html Msg
 view model =
-    div [] []
+    let
+        page =
+            case (getPage model.currentPage) of
+                ArticleList articleListModel ->
+                    Html.map ArticleListMsg
+                        (ArticleList.view articleListModel)
 
+                ArticleCreate articleCreateModel ->
+                    Html.map ArticleCreateMsg
+                        (ArticleCreate.view articleCreateModel)
 
+                UrlCreate urlCreateModel ->
+                    Html.map UrlCreateMsg
+                        (UrlCreate.view urlCreateModel)
 
--- let
---     page =
---         case model.currentPage of
---             ArticleList articleListModel ->
---                 Html.map ArticleListMsg
---                     (ArticleList.view articleListModel)
---             ArticleCreate articleCreateModel ->
---                 Html.map ArticleCreateMsg
---                     (ArticleCreate.view articleCreateModel)
---             UrlCreate urlCreateModel ->
---                 Html.map UrlCreateMsg
---                     (UrlCreate.view urlCreateModel)
---             UrlList urlListModel ->
---                 Html.map UrlListMsg
---                     (UrlList.view urlListModel)
---             CategoryList categoryListModel ->
---                 Html.map CategoryListMsg
---                     (CategoryList.view categoryListModel)
---             CategoryCreate categoryCreateModel ->
---                 Html.map CategoryCreateMsg
---                     (CategoryCreate.view categoryCreateModel)
---             Integration integrationModel ->
---                 Html.map IntegrationMsg
---                     (Integration.view integrationModel)
---             Dashboard ->
---                 div [] [ text "Dashboard" ]
---             _ ->
---                 div [] [ text "Not Found" ]
--- in
---     div []
---         [ adminHeader model
---         , page
---         ]
+                UrlList urlListModel ->
+                    Html.map UrlListMsg
+                        (UrlList.view urlListModel)
+
+                CategoryList categoryListModel ->
+                    Html.map CategoryListMsg
+                        (CategoryList.view categoryListModel)
+
+                CategoryCreate categoryCreateModel ->
+                    Html.map CategoryCreateMsg
+                        (CategoryCreate.view categoryCreateModel)
+
+                Integration integrationModel ->
+                    Html.map IntegrationMsg
+                        (Integration.view integrationModel)
+
+                Dashboard ->
+                    div [] [ text "Dashboard" ]
+
+                _ ->
+                    div [] [ text "Not Found" ]
+    in
+        div []
+            [ adminHeader model
+            , page
+            ]
 
 
 adminHeader : Model -> Html Msg
 adminHeader model =
     div [ class "header" ]
         [ div [ class "header-right" ]
-            [ Html.a [ onClick (Navigate <| ArticleList ArticleList.initModel) ] [ text "Articles" ]
-            , Html.a [ onClick (Navigate <| UrlList UrlList.initModel) ] [ text "URL" ]
-            , Html.a [ onClick (Navigate <| CategoryList CategoryList.initModel) ] [ text "Category" ]
-            , Html.a [ onClick (Navigate <| Integration (Integration.initModel model.organizationKey)) ] [ text "Integrations" ]
+            [ Html.a [ href (Route.routeToString Route.ArticleList) ] [ text "Articles" ]
+            , Html.a [ href (Route.routeToString Route.UrlList) ] [ text "URL" ]
+            , Html.a [ href (Route.routeToString Route.CategoryList) ] [ text "Category" ]
+            , Html.a [ href (Route.routeToString Route.Integration) ] [ text "Integrations" ]
             , Html.a [ onClick SignOut ] [ text "Logout" ]
             ]
         ]
