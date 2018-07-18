@@ -17,7 +17,7 @@ cp config/database.yml.postgresql config/database.yml
 brew install elasticsearch
 brew services start elasticsearch
 
-./bin/rails db:setup
+./bin/rails setup
 
 ./bin/yarn install
 
