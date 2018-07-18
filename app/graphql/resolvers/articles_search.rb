@@ -7,16 +7,6 @@ class Resolvers::ArticlesSearch < GraphQL::Function
   argument :url, types.String
 
   def call(obj, args, context)
-    if args[:id].present?
-      if args[:url].present?
-        Url.find_by(url: args[:url]).articles.where(id: args[:id]).for_organization(context[:organization])
-      else
-        Article.where(id: args[:id]).for_organization(context[:organization])
-      end
-    elsif args[:url].present?
-      Url.find_by(url: args[:url]).articles.for_organization(context[:organization])
-    else
-      Article.for_organization(context[:organization])
-    end
+    Article.search_using(args[:id], args[:url], context[:organization])
   end
 end
