@@ -2,6 +2,7 @@ class ChangeForeignKeysFromUuidToId < ActiveRecord::Migration[5.2]
   def up
     def up
       id_to_uuid("urls", "organization", "organizations")
+      id_to_uuid("users", "organization", "organizations")
       id_to_uuid("articles", "category", "categories")
       id_to_uuid("articles", "organization", "organizations")
       id_to_uuid("article_urls", "url", "urls")
