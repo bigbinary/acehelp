@@ -3,6 +3,9 @@ module Page.Category.List exposing (..)
 import Http
 import Html exposing (..)
 import Html.Attributes exposing (..)
+import Html.Events exposing (..)
+import Navigation exposing (..)
+import Page.Category.Create as CategoryCreate
 import Data.CategoryData exposing (..)
 import Request.CategoryRequest exposing (..)
 import Data.CommonData exposing (Error)
@@ -35,8 +38,13 @@ init =
 -- UPDATE
 
 
+type Page
+    = CategoryCreate CategoryCreate.Model
+
+
 type Msg
     = CategoriesLoaded (Result Http.Error CategoryList)
+    | Navigate Page
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -65,6 +73,9 @@ update msg model =
                 , Cmd.none
                 )
 
+        Navigate page ->
+            model ! [ Navigation.newUrl (pageUrl page) ]
+
 
 
 -- VIEW
@@ -76,8 +87,8 @@ view model =
         []
         [ div
             [ class "buttonDiv" ]
-            [ a
-                [ href "/admin/categories/new"
+            [ Html.a
+                [ onClick (Navigate <| CategoryCreate CategoryCreate.initModel)
                 , class "button primary"
                 ]
                 [ text "New Category" ]
@@ -109,3 +120,10 @@ fetchCategories =
             Http.send CategoriesLoaded request
     in
         cmd
+
+
+pageUrl : Page -> String
+pageUrl page =
+    case page of
+        CategoryCreate categoryCreateModel ->
+            "/admin/categories/new"

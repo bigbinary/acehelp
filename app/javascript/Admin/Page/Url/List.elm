@@ -3,6 +3,9 @@ module Page.Url.List exposing (..)
 import Http
 import Html exposing (..)
 import Html.Attributes exposing (..)
+import Html.Events exposing (..)
+import Navigation exposing (..)
+import Page.Url.Create as UrlCreate
 import Request.UrlRequest exposing (..)
 import Data.UrlData exposing (..)
 import Data.CommonData exposing (Error)
@@ -38,9 +41,14 @@ init env organizationKey =
 -- UPDATE
 
 
+type Page
+    = UrlCreate UrlCreate.Model
+
+
 type Msg
     = LoadUrl UrlId
     | UrlLoaded (Result Http.Error UrlsListResponse)
+    | Navigate Page
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -54,6 +62,9 @@ update msg model =
 
         UrlLoaded (Err err) ->
             ( { model | error = Just (toString err) }, Cmd.none )
+
+        Navigate page ->
+            model ! [ Navigation.newUrl (pageUrl page) ]
 
 
 
@@ -79,12 +90,11 @@ view model =
             ]
         , div
             [ class "buttonDiv" ]
-            [ a
-                [ href "/admin/urls/new"
+            [ Html.a
+                [ onClick (Navigate <| UrlCreate UrlCreate.initModel)
                 , class "button primary"
                 ]
-                [ text "New Url"
-                ]
+                [ text "New Url" ]
             ]
         , div []
             (List.map
@@ -105,3 +115,10 @@ urlRow url =
 fetchUrlList : String -> String -> Cmd Msg
 fetchUrlList env key =
     Http.send UrlLoaded (requestUrls env key)
+
+
+pageUrl : Page -> String
+pageUrl page =
+    case page of
+        UrlCreate urlCreateModel ->
+            "/admin/urls/new"
