@@ -8,6 +8,7 @@
 // layout file, like app/views/layouts/application.html.erb
 
 import Elm from "../Admin/Main";
+import "bulma/css/bulma.css";
 import "../../assets/stylesheets/application.css";
 import "../../assets/stylesheets/admin/index.scss";
 

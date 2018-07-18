@@ -3,6 +3,7 @@
   "private": true,
   "dependencies": {
     "@rails/webpacker": "3.5",
+    "bulma": "^0.7.1",
     "elm": "0.18.0",
     "elm-webpack-loader": "4.5.0"
   },
@@ -31,6 +32,7 @@
     ],
     "{app,test}/**/*.rb": [
       "bundle exec rubocop -a",
-      "git add"]
+      "git add"
+    ]
   }
 }
