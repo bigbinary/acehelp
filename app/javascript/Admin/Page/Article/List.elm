@@ -6,6 +6,7 @@ import Html.Attributes exposing (..)
 import Html.Events exposing (..)
 import Page.Article.Create as ArticleCreate
 import Navigation exposing (..)
+import Page.Common.Routing exposing (..)
 import Request.ArticleRequest exposing (..)
 import Request.UrlRequest exposing (..)
 import Data.CommonData exposing (..)
@@ -43,10 +44,6 @@ init env key =
 
 
 -- Update
-
-
-type Page
-    = ArticleCreate ArticleCreate.Model
 
 
 type Msg
@@ -157,10 +154,3 @@ fetchArticlesList nodeEnv url organizationKey =
 fetchUrlList : String -> String -> Cmd Msg
 fetchUrlList nodeEnv organizationKey =
     Http.send UrlLoaded (requestUrls nodeEnv organizationKey)
-
-
-pageUrl : Page -> String
-pageUrl page =
-    case page of
-        ArticleCreate articleCreateModel ->
-            "/admin/articles/new"

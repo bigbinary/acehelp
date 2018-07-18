@@ -5,6 +5,7 @@ import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
 import Navigation exposing (..)
+import Page.Common.Routing exposing (..)
 import Page.Url.Create as UrlCreate
 import Request.UrlRequest exposing (..)
 import Data.UrlData exposing (..)
@@ -39,10 +40,6 @@ init env organizationKey =
 
 
 -- UPDATE
-
-
-type Page
-    = UrlCreate UrlCreate.Model
 
 
 type Msg
@@ -115,10 +112,3 @@ urlRow url =
 fetchUrlList : String -> String -> Cmd Msg
 fetchUrlList env key =
     Http.send UrlLoaded (requestUrls env key)
-
-
-pageUrl : Page -> String
-pageUrl page =
-    case page of
-        UrlCreate urlCreateModel ->
-            "/admin/urls/new"

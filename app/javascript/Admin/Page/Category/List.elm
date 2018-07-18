@@ -5,6 +5,7 @@ import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
 import Navigation exposing (..)
+import Page.Common.Routing exposing (..)
 import Page.Category.Create as CategoryCreate
 import Data.CategoryData exposing (..)
 import Request.CategoryRequest exposing (..)
@@ -36,10 +37,6 @@ init =
 
 
 -- UPDATE
-
-
-type Page
-    = CategoryCreate CategoryCreate.Model
 
 
 type Msg
@@ -120,10 +117,3 @@ fetchCategories =
             Http.send CategoriesLoaded request
     in
         cmd
-
-
-pageUrl : Page -> String
-pageUrl page =
-    case page of
-        CategoryCreate categoryCreateModel ->
-            "/admin/categories/new"
