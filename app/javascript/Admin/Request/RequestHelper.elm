@@ -64,6 +64,16 @@ constructUrl url params =
             url ++ "?" ++ String.join "&" (List.map (\( key, value ) -> Http.encodeUri key ++ "=" ++ value) params)
 
 
+graphqlUrl : String -> String
+graphqlUrl env =
+    case env of
+        "production" ->
+            "https://staging.acehelp.com/graphql/"
+
+        _ ->
+            "/graphql/"
+
+
 httpRequest : RequestData -> Decoder a -> Http.Request a
 httpRequest requestData decoder =
     let

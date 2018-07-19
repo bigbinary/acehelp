@@ -4,7 +4,11 @@ import Http
 import Json.Decode as JsonDecoder exposing (field)
 import Json.Encode as JsonEncoder
 import Request.RequestHelper exposing (..)
+import Reader exposing (Reader)
+import Task exposing (Task)
 import Data.ArticleData exposing (..)
+import GraphQL.Client.Http as GQLClient
+import GraphQL.Request.Builder as GQLBuilder
 
 
 articleListUrl : NodeEnv -> Url
@@ -17,21 +21,13 @@ articleCreateUrl env =
     (baseUrl env) ++ "/article"
 
 
-requestArticles : NodeEnv -> Url -> ApiKey -> Http.Request ArticleListResponse
-requestArticles env orgUrl apiKey =
-    let
-        requestData =
-            { method = "GET"
-            , url = articleListUrl env
-            , params =
-                [ ( "url", orgUrl )
-                ]
-            , body = Http.emptyBody
-            , nodeEnv = env
-            , organizationApiKey = apiKey
-            }
-    in
-        httpRequest requestData articles
+requestArticles : Reader ( NodeEnv, ApiKey ) (Task GQLClient.Error (List ArticleSummary))
+requestArticles =
+    Reader.Reader
+        (\( nodeEnv, apiKey ) ->
+            GQLClient.sendQuery (graphqlUrl nodeEnv) <|
+                GQLBuilder.request {} requestArticlesQuery
+        )
 
 
 requestCreateArticle : NodeEnv -> ApiKey -> JsonEncoder.Value -> Http.Request String

@@ -23,6 +23,11 @@ type alias CategoryList =
     }
 
 
+type alias CreateCategoryInputs =
+    { name : CategoryName
+    }
+
+
 categoryDecoder : Decoder Category
 categoryDecoder =
     decode Category

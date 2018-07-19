@@ -15,13 +15,16 @@ import Data.ArticleData exposing (..)
 import Data.UrlData exposing (..)
 import Json.Decode as Json
 import Request.Helpers exposing (NodeEnv, ApiKey)
+import Task exposing (Task)
+import Reader exposing (Reader)
+import GraphQL.Client.Http as GQLClient
 
 
 -- Model
 
 
 type alias Model =
-    { articles : ArticleListResponse
+    { articles : List ArticleSummary
     , urlList : UrlsListResponse
     , url : String
     , error : Error
@@ -30,7 +33,7 @@ type alias Model =
 
 initModel : Model
 initModel =
-    { articles = { articles = [] }
+    { articles = []
     , urlList = { urls = [] }
     , url = ""
     , error = Nothing
@@ -49,7 +52,7 @@ init env key =
 type Msg
     = UrlSelected String
     | UrlLoaded (Result Http.Error UrlsListResponse)
-    | ArticleLoaded (Result Http.Error ArticleListResponse)
+    | ArticleLoaded (Result GQLClient.Error (List ArticleSummary))
     | Navigate Route.Route
 
 
@@ -70,9 +73,9 @@ update msg model organizationKey nodeEnv =
 
         UrlSelected url ->
             if url == "select_url" then
-                ( { model | articles = { articles = [] } }, Cmd.none )
+                ( { model | articles = [] }, Cmd.none )
             else
-                ( { model | url = url }, fetchArticlesList nodeEnv url organizationKey )
+                ( { model | url = url }, fetchArticlesList nodeEnv organizationKey )
 
         Navigate page ->
             model ! [ Navigation.newUrl (Route.routeToString page) ]
@@ -106,12 +109,12 @@ view model =
                 (\article ->
                     rows article
                 )
-                model.articles.articles
+                model.articles
             )
         ]
 
 
-rows : Article -> Html Msg
+rows : ArticleSummary -> Html Msg
 rows article =
     div
         []
@@ -146,9 +149,9 @@ urlsDropdown model =
         ]
 
 
-fetchArticlesList : String -> String -> String -> Cmd Msg
-fetchArticlesList nodeEnv url organizationKey =
-    Http.send ArticleLoaded (requestArticles nodeEnv url organizationKey)
+fetchArticlesList : NodeEnv -> ApiKey -> Cmd Msg
+fetchArticlesList nodeEnv apiKey =
+    Task.attempt ArticleLoaded (Reader.run (requestArticles) ( nodeEnv, apiKey ))
 
 
 fetchUrlList : String -> String -> Cmd Msg

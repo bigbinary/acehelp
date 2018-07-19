@@ -14,6 +14,11 @@ type alias UrlData =
     }
 
 
+type alias CreateUrlInput =
+    { url : String
+    }
+
+
 type alias UrlsListResponse =
     { urls : List UrlData
     }
