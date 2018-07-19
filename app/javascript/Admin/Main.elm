@@ -116,7 +116,7 @@ navigateTo newRoute model =
     let
         transitionTo page msg =
             Tuple.mapFirst
-                (\pageModel -> ({ model | currentPage = TransitioningTo (page pageModel) }))
+                (\pageModel -> ({ model | currentPage = TransitioningTo (page pageModel), route = newRoute }))
                 >> Tuple.mapSecond
                     (Cmd.map msg)
     in
@@ -161,6 +161,8 @@ update msg model =
     case msg of
         NavigateTo route ->
             navigateTo route model
+                |> Tuple.mapSecond
+                    (\cmd -> Cmd.batch <| cmd :: [ modifyUrl <| Route.routeToString route ])
 
         ArticleListMsg alMsg ->
             let
@@ -402,16 +404,48 @@ adminHeader model =
         [ ul
             [ class "navbar-nav mr-auto mt-2 mt-lg-0 " ]
             [ li [ class "nav-item" ]
-                [ Html.a [ classList [ ( "nav-link", True ), ( "active", (model.route == Route.ArticleList) || (model.route == Route.ArticleCreate) ) ], href "#", onClick <| NavigateTo Route.ArticleList ] [ text "Articles" ] ]
+                [ Html.a
+                    [ classList
+                        [ ( "nav-link", True )
+                        , ( "active", (model.route == Route.ArticleList) || (model.route == Route.ArticleCreate) )
+                        ]
+                    , onClick <| NavigateTo Route.ArticleList
+                    ]
+                    [ text "Articles" ]
+                ]
             , li [ class "nav-item" ]
-                [ Html.a [ classList [ ( "nav-link", True ), ( "active", (model.route == Route.UrlList) || (model.route == Route.UrlCreate) ) ], href "#", onClick <| NavigateTo Route.UrlList ] [ text "URL" ] ]
+                [ Html.a
+                    [ classList
+                        [ ( "nav-link", True )
+                        , ( "active", (model.route == Route.UrlList) || (model.route == Route.UrlCreate) )
+                        ]
+                    , onClick <| NavigateTo Route.UrlList
+                    ]
+                    [ text "URL" ]
+                ]
             , li [ class "nav-item" ]
-                [ Html.a [ classList [ ( "nav-link", True ), ( "active", (model.route == Route.CategoryList) || (model.route == Route.CategoryCreate) ) ], href "#", onClick <| NavigateTo Route.CategoryList ] [ text "Category" ] ]
+                [ Html.a
+                    [ classList
+                        [ ( "nav-link", True )
+                        , ( "active", (model.route == Route.CategoryList) || (model.route == Route.CategoryCreate) )
+                        ]
+                    , onClick <| NavigateTo Route.CategoryList
+                    ]
+                    [ text "Category" ]
+                ]
             , li [ class "nav-item" ]
-                [ Html.a [ classList [ ( "nav-link", True ), ( "active", model.route == Route.Integration ) ], href "#", onClick <| NavigateTo Route.Integration ] [ text "Integrations" ] ]
+                [ Html.a
+                    [ classList
+                        [ ( "nav-link", True )
+                        , ( "active", model.route == Route.Integration )
+                        ]
+                    , onClick <| NavigateTo Route.Integration
+                    ]
+                    [ text "Integrations" ]
+                ]
             ]
         , ul [ class "navbar-nav ml-auto" ]
-            [ li [ class "nav-item " ] [ Html.a [ class "nav-link", href "#", onClick SignOut ] [ text "Logout" ] ] ]
+            [ li [ class "nav-item " ] [ Html.a [ class "nav-link", onClick SignOut ] [ text "Logout" ] ] ]
         ]
 
 

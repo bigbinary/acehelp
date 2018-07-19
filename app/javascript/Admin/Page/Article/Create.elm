@@ -3,10 +3,6 @@ module Page.Article.Create exposing (..)
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
-
-
--- import Html.Events.Extra exposing (targetValueIntParse)
-
 import Data.ArticleData exposing (..)
 import Http
 import Json.Encode as JsonEncoder
@@ -211,11 +207,6 @@ categoryListDropdown model =
                 ]
             )
         ]
-
-
-url : String
-url =
-    "http://localhost:3000/article"
 
 
 articleEncoder : Model -> JsonEncoder.Value
