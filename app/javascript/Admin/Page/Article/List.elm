@@ -1,10 +1,8 @@
 module Page.Article.List exposing (..)
 
-import Http
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
-import Page.Article.Create as ArticleCreate
 import Navigation exposing (..)
 import Route
 import Request.ArticleRequest exposing (..)
@@ -25,7 +23,7 @@ import GraphQL.Client.Http as GQLClient
 
 type alias Model =
     { articles : List ArticleSummary
-    , urlList : UrlsListResponse
+    , urlList : List UrlData
     , url : String
     , error : Error
     }
@@ -34,7 +32,7 @@ type alias Model =
 initModel : Model
 initModel =
     { articles = []
-    , urlList = { urls = [] }
+    , urlList = []
     , url = ""
     , error = Nothing
     }
@@ -51,7 +49,7 @@ init env key =
 
 type Msg
     = UrlSelected String
-    | UrlLoaded (Result Http.Error UrlsListResponse)
+    | UrlLoaded (Result GQLClient.Error (List UrlData))
     | ArticleLoaded (Result GQLClient.Error (List ArticleSummary))
     | Navigate Route.Route
 
@@ -142,7 +140,7 @@ urlsDropdown model =
                             [ value url.url ]
                             [ text url.url ]
                     )
-                    model.urlList.urls
+                    model.urlList
                   )
                 ]
             )
@@ -156,4 +154,4 @@ fetchArticlesList nodeEnv apiKey =
 
 fetchUrlList : String -> String -> Cmd Msg
 fetchUrlList nodeEnv organizationKey =
-    Http.send UrlLoaded (requestUrls nodeEnv organizationKey)
+    Task.attempt UrlLoaded (Reader.run (requestUrls) ( nodeEnv, organizationKey ))

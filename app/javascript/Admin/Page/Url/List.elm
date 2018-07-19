@@ -1,23 +1,24 @@
 module Page.Url.List exposing (..)
 
-import Http
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
 import Navigation exposing (..)
 import Route
-import Page.Url.Create as UrlCreate
 import Request.UrlRequest exposing (..)
 import Data.UrlData exposing (..)
 import Data.CommonData exposing (Error)
 import Page.Common.View exposing (renderError)
+import Reader exposing (Reader)
+import Task exposing (Task)
+import GraphQL.Client.Http as GQLClient
 
 
 -- MODEL
 
 
 type alias Model =
-    { listOfUrls : UrlsListResponse
+    { listOfUrls : List UrlData
     , urlId : UrlId
     , error : Error
     }
@@ -25,7 +26,7 @@ type alias Model =
 
 initModel : Model
 initModel =
-    { listOfUrls = { urls = [] }
+    { listOfUrls = []
     , urlId = ""
     , error = Nothing
     }
@@ -44,7 +45,7 @@ init env organizationKey =
 
 type Msg
     = LoadUrl UrlId
-    | UrlLoaded (Result Http.Error UrlsListResponse)
+    | UrlLoaded (Result GQLClient.Error (List UrlData))
     | Navigate Route.Route
 
 
@@ -98,7 +99,7 @@ view model =
                 (\url ->
                     urlRow url
                 )
-                model.listOfUrls.urls
+                model.listOfUrls
             )
         ]
 
@@ -111,4 +112,4 @@ urlRow url =
 
 fetchUrlList : String -> String -> Cmd Msg
 fetchUrlList env key =
-    Http.send UrlLoaded (requestUrls env key)
+    Task.attempt UrlLoaded (Reader.run (requestUrls) ( env, key ))
