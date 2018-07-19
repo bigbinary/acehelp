@@ -3,8 +3,6 @@ module Page.Url.Create exposing (..)
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
-import Http
-import Json.Encode as JE
 import Request.UrlRequest exposing (..)
 import Request.Helpers exposing (NodeEnv, ApiKey)
 import Data.CommonData exposing (Error)
@@ -19,7 +17,7 @@ import GraphQL.Client.Http as GQLClient
 
 type alias Model =
     { error : Error
-    , id : Int
+    , id : String
     , url : String
     , urlError : Error
     , urlTitle : String
@@ -30,7 +28,7 @@ type alias Model =
 initModel : Model
 initModel =
     { error = Nothing
-    , id = 0
+    , id = "0"
     , url = ""
     , urlError = Nothing
     , urlTitle = ""

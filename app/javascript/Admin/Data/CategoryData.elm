@@ -1,7 +1,5 @@
 module Data.CategoryData exposing (..)
 
-import Json.Decode as JD exposing (..)
-import Json.Decode.Pipeline as Pipeline exposing (required, decode)
 import GraphQL.Request.Builder as GQLBuilder
 import GraphQL.Request.Builder.Variable as Var
 import GraphQL.Request.Builder.Arg as Arg
@@ -29,19 +27,6 @@ type alias CategoryList =
 type alias CreateCategoryInputs =
     { name : CategoryName
     }
-
-
-categoryDecoder : Decoder Category
-categoryDecoder =
-    decode Category
-        |> required "id" string
-        |> required "name" string
-
-
-categoryListDecoder : Decoder CategoryList
-categoryListDecoder =
-    decode CategoryList
-        |> required "categories" (list categoryDecoder)
 
 
 categoriesQuery : GQLBuilder.Document GQLBuilder.Query (List Category) vars

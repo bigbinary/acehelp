@@ -1,7 +1,5 @@
 module Data.UrlData exposing (..)
 
-import Json.Decode as JD exposing (..)
-import Json.Decode.Pipeline as Pipeline exposing (decode, required, optional)
 import GraphQL.Request.Builder as GQLBuilder
 import GraphQL.Request.Builder.Arg as Arg
 import GraphQL.Request.Builder.Variable as Var
@@ -25,19 +23,6 @@ type alias CreateUrlInput =
 type alias UrlsListResponse =
     { urls : List UrlData
     }
-
-
-urlDecoder : Decoder UrlData
-urlDecoder =
-    decode UrlData
-        |> required "id" string
-        |> required "url" string
-
-
-urlListDecoder : Decoder UrlsListResponse
-urlListDecoder =
-    decode UrlsListResponse
-        |> required "urls" (list urlDecoder)
 
 
 requestUrlsQuery : GQLBuilder.Document GQLBuilder.Query (List UrlData) vars

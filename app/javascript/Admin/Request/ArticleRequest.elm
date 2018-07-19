@@ -8,11 +8,6 @@ import GraphQL.Client.Http as GQLClient
 import GraphQL.Request.Builder as GQLBuilder
 
 
-articleCreateUrl : NodeEnv -> Url
-articleCreateUrl env =
-    (baseUrl env) ++ "/article"
-
-
 requestArticles : String -> Reader NodeEnv (Task GQLClient.Error (List ArticleSummary))
 requestArticles url =
     Reader.Reader

@@ -8,11 +8,6 @@ import GraphQL.Client.Http as GQLClient
 import GraphQL.Request.Builder as GQLBuilder
 
 
-categoryListUrl : NodeEnv -> Url
-categoryListUrl env =
-    (baseUrl env) ++ "/api/v1/all"
-
-
 requestCategories : Reader ( NodeEnv, ApiKey ) (Task GQLClient.Error (List Category))
 requestCategories =
     Reader.Reader

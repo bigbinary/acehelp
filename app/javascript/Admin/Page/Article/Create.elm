@@ -197,8 +197,8 @@ categoryListDropdown model =
         ]
 
 
-articleEncoder : Model -> CreateArticleInputs
-articleEncoder { title, desc, categoryId } =
+articleInputs : Model -> CreateArticleInputs
+articleInputs { title, desc, categoryId } =
     { title = title
     , desc = desc
     , category_id = categoryId
@@ -208,11 +208,8 @@ articleEncoder { title, desc, categoryId } =
 save : Model -> NodeEnv -> ApiKey -> ( Model, Cmd Msg )
 save model nodeEnv organizationKey =
     let
-        articleInputs =
-            (articleEncoder model)
-
         cmd =
-            Task.attempt SaveArticleResponse (Reader.run (requestCreateArticle) ( nodeEnv, articleInputs ))
+            Task.attempt SaveArticleResponse (Reader.run (requestCreateArticle) ( nodeEnv, (articleInputs model) ))
     in
         ( model, cmd )
 
