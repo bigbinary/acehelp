@@ -4,6 +4,9 @@ import Http
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
+import Page.Article.Create as ArticleCreate
+import Navigation exposing (..)
+import Route
 import Request.ArticleRequest exposing (..)
 import Request.UrlRequest exposing (..)
 import Data.CommonData exposing (..)
@@ -47,6 +50,7 @@ type Msg
     = UrlSelected String
     | UrlLoaded (Result Http.Error UrlsListResponse)
     | ArticleLoaded (Result Http.Error ArticleListResponse)
+    | Navigate Route.Route
 
 
 update : Msg -> Model -> ApiKey -> NodeEnv -> ( Model, Cmd Msg )
@@ -70,6 +74,9 @@ update msg model organizationKey nodeEnv =
             else
                 ( { model | url = url }, fetchArticlesList nodeEnv url organizationKey )
 
+        Navigate page ->
+            model ! [ Navigation.newUrl (Route.routeToString page) ]
+
 
 
 -- View
@@ -87,8 +94,8 @@ view model =
             [ urlsDropdown model ]
         , div
             [ class "buttonDiv" ]
-            [ a
-                [ href "/admin/articles/new"
+            [ Html.a
+                [ onClick (Navigate <| Route.ArticleCreate)
                 , class "button primary"
                 ]
                 [ text "New Article" ]

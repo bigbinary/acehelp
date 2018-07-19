@@ -3,6 +3,10 @@ module Page.Url.List exposing (..)
 import Http
 import Html exposing (..)
 import Html.Attributes exposing (..)
+import Html.Events exposing (..)
+import Navigation exposing (..)
+import Route
+import Page.Url.Create as UrlCreate
 import Request.UrlRequest exposing (..)
 import Data.UrlData exposing (..)
 import Data.CommonData exposing (Error)
@@ -41,6 +45,7 @@ init env organizationKey =
 type Msg
     = LoadUrl UrlId
     | UrlLoaded (Result Http.Error UrlsListResponse)
+    | Navigate Route.Route
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -54,6 +59,9 @@ update msg model =
 
         UrlLoaded (Err err) ->
             ( { model | error = Just (toString err) }, Cmd.none )
+
+        Navigate page ->
+            model ! [ Navigation.newUrl (Route.routeToString page) ]
 
 
 
@@ -79,12 +87,11 @@ view model =
             ]
         , div
             [ class "buttonDiv" ]
-            [ a
-                [ href "/admin/urls/new"
+            [ Html.a
+                [ onClick (Navigate <| Route.UrlCreate)
                 , class "button primary"
                 ]
-                [ text "New Url"
-                ]
+                [ text "New Url" ]
             ]
         , div []
             (List.map
