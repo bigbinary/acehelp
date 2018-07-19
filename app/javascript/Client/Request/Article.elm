@@ -41,16 +41,6 @@ requestSearchArticles searchTerm =
         )
 
 
-
--- requestFeedbackMutation : FeedbackForm -> Reader ( NodeEnv, ApiKey ) (Task GQLClient.Error (Maybe (List GQLError)))
--- requestFeedbackMutation feedbackFrom =
---     Reader.Reader
---         (\( env, apiKey ) ->
---             GQLClient.sendMutation (graphqlUrl env) <|
---                 GQLBuilder.request feedbackFrom feedbackMutation
---         )
-
-
 requestUpvoteMutation : ArticleId -> Reader ( NodeEnv, ApiKey ) (Task GQLClient.Error ArticleSummary)
 requestUpvoteMutation articleId =
     Reader.Reader
