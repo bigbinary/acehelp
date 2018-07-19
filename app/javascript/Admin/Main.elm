@@ -130,7 +130,7 @@ navigateTo newRoute model =
                     |> transitionTo ArticleCreate ArticleCreateMsg
 
             Route.CategoryList ->
-                (CategoryList.init)
+                (CategoryList.init model.nodeEnv model.organizationKey)
                     |> transitionTo CategoryList CategoryListMsg
 
             Route.CategoryCreate ->

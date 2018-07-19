@@ -6,32 +6,35 @@ import Html.Attributes exposing (..)
 import Html.Events exposing (..)
 import Navigation exposing (..)
 import Route
-import Page.Category.Create as CategoryCreate
 import Data.CategoryData exposing (..)
 import Request.CategoryRequest exposing (..)
+import Request.RequestHelper exposing (..)
 import Data.CommonData exposing (Error)
+import Task exposing (Task)
+import Reader exposing (Reader)
+import GraphQL.Client.Http as GQLClient
 
 
 -- MODEL
 
 
 type alias Model =
-    { categoryList : CategoryList
+    { categories : List Category
     , errors : Error
     }
 
 
 initModel : Model
 initModel =
-    { categoryList = { categories = [] }
+    { categories = []
     , errors = Nothing
     }
 
 
-init : ( Model, Cmd Msg )
-init =
+init : NodeEnv -> ApiKey -> ( Model, Cmd Msg )
+init env key =
     ( initModel
-    , fetchCategories
+    , fetchCategories env key
     )
 
 
@@ -40,7 +43,7 @@ init =
 
 
 type Msg
-    = CategoriesLoaded (Result Http.Error CategoryList)
+    = CategoriesLoaded (Result GQLClient.Error (List Category))
     | Navigate Route.Route
 
 
@@ -49,26 +52,13 @@ update msg model =
     case msg of
         CategoriesLoaded (Ok categories) ->
             ( { model
-                | categoryList = categories
+                | categories = categories
               }
             , Cmd.none
             )
 
         CategoriesLoaded (Err error) ->
-            let
-                errorMsg =
-                    case error of
-                        Http.BadStatus response ->
-                            response.body
-
-                        _ ->
-                            "Error while fetching category list"
-            in
-                ( { model
-                    | errors = Just errorMsg
-                  }
-                , Cmd.none
-                )
+            ( { model | errors = Just (toString error) }, Cmd.none )
 
         Navigate page ->
             model ! [ Navigation.newUrl (Route.routeToString page) ]
@@ -96,7 +86,7 @@ view model =
                 (\category ->
                     categoryRow category
                 )
-                model.categoryList.categories
+                model.categories
             )
         ]
 
@@ -107,13 +97,6 @@ categoryRow category =
         [ text category.name ]
 
 
-fetchCategories : Cmd Msg
-fetchCategories =
-    let
-        request =
-            requestCategories "dev" "3c60b69a34f8cdfc76a0"
-
-        cmd =
-            Http.send CategoriesLoaded request
-    in
-        cmd
+fetchCategories : NodeEnv -> ApiKey -> Cmd Msg
+fetchCategories env key =
+    Task.attempt CategoriesLoaded (Reader.run (requestCategories) ( env, key ))

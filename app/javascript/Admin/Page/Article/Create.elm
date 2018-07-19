@@ -11,6 +11,9 @@ import Request.CategoryRequest exposing (..)
 import Request.Helpers exposing (NodeEnv, ApiKey)
 import Data.CommonData exposing (Error)
 import Data.CategoryData exposing (..)
+import Reader exposing (Reader)
+import Task exposing (Task)
+import GraphQL.Client.Http as GQLClient
 
 
 -- Model
@@ -24,7 +27,7 @@ type alias Model =
     , keywords : String
     , keywordError : Error
     , articleId : ArticleId
-    , categoryList : CategoryList
+    , categories : List Category
     , categoryId : String
     , categoryIdError : Error
     , error : Error
@@ -40,7 +43,7 @@ initModel =
     , keywords = ""
     , keywordError = Nothing
     , articleId = "0"
-    , categoryList = { categories = [] }
+    , categories = []
     , categoryId = "0"
     , categoryIdError = Nothing
     , error = Nothing
@@ -66,7 +69,7 @@ type Msg
     | KeywordsInput String
     | SaveArticle
     | SaveArticleResponse (Result Http.Error String)
-    | CategoriesLoaded (Result Http.Error CategoryList)
+    | CategoriesLoaded (Result GQLClient.Error (List Category))
     | CategorySelected String
 
 
@@ -121,7 +124,7 @@ update msg model nodeEnv organizationKey =
                 )
 
         CategoriesLoaded (Ok categories) ->
-            ( { model | categoryList = categories }, Cmd.none )
+            ( { model | categories = categories }, Cmd.none )
 
         CategoriesLoaded (Err err) ->
             ( { model | error = Just (toString err) }, Cmd.none )
@@ -202,7 +205,7 @@ categoryListDropdown model =
                             [ value (toString category.id) ]
                             [ text category.name ]
                     )
-                    model.categoryList.categories
+                    model.categories
                   )
                 ]
             )
@@ -307,5 +310,5 @@ isValid model =
 
 
 fetchCategories : NodeEnv -> ApiKey -> Cmd Msg
-fetchCategories nodeEnv organizationKey =
-    Http.send CategoriesLoaded (requestCategories nodeEnv organizationKey)
+fetchCategories nodeEnv key =
+    Task.attempt CategoriesLoaded (Reader.run (requestCategories) ( nodeEnv, key ))
