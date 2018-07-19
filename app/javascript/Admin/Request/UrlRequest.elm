@@ -21,10 +21,10 @@ urlCreate nodeEnv =
     (baseUrl nodeEnv) ++ "/url"
 
 
-requestUrls : Reader ( NodeEnv, ApiKey ) (Task GQLClient.Error (List UrlData))
+requestUrls : Reader NodeEnv (Task GQLClient.Error (List UrlData))
 requestUrls =
     Reader.Reader
-        (\( nodeEnv, apiKey ) ->
+        (\nodeEnv ->
             (GQLClient.sendQuery (graphqlUrl nodeEnv) <|
                 GQLBuilder.request {} requestUrlsQuery
             )

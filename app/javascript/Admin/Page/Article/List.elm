@@ -40,7 +40,7 @@ initModel =
 
 init : String -> String -> ( Model, Cmd Msg )
 init env key =
-    ( initModel, fetchUrlList env key )
+    ( initModel, fetchUrlList env )
 
 
 
@@ -73,7 +73,7 @@ update msg model organizationKey nodeEnv =
             if url == "select_url" then
                 ( { model | articles = [] }, Cmd.none )
             else
-                ( { model | url = url }, fetchArticlesList nodeEnv organizationKey )
+                ( { model | url = url }, fetchArticlesList nodeEnv )
 
         Navigate page ->
             model ! [ Navigation.newUrl (Route.routeToString page) ]
@@ -147,11 +147,11 @@ urlsDropdown model =
         ]
 
 
-fetchArticlesList : NodeEnv -> ApiKey -> Cmd Msg
-fetchArticlesList nodeEnv apiKey =
-    Task.attempt ArticleLoaded (Reader.run (requestArticles) ( nodeEnv, apiKey ))
+fetchArticlesList : NodeEnv -> Cmd Msg
+fetchArticlesList nodeEnv =
+    Task.attempt ArticleLoaded (Reader.run (requestArticles) (nodeEnv))
 
 
-fetchUrlList : String -> String -> Cmd Msg
-fetchUrlList nodeEnv organizationKey =
-    Task.attempt UrlLoaded (Reader.run (requestUrls) ( nodeEnv, organizationKey ))
+fetchUrlList : NodeEnv -> Cmd Msg
+fetchUrlList nodeEnv =
+    Task.attempt UrlLoaded (Reader.run (requestUrls) (nodeEnv))

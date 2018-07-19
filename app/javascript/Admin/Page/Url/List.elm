@@ -6,6 +6,7 @@ import Html.Events exposing (..)
 import Navigation exposing (..)
 import Route
 import Request.UrlRequest exposing (..)
+import Request.RequestHelper exposing (..)
 import Data.UrlData exposing (..)
 import Data.CommonData exposing (Error)
 import Page.Common.View exposing (renderError)
@@ -32,10 +33,10 @@ initModel =
     }
 
 
-init : String -> String -> ( Model, Cmd Msg )
-init env organizationKey =
+init : NodeEnv -> ApiKey -> ( Model, Cmd Msg )
+init env key =
     ( initModel
-    , (fetchUrlList env organizationKey)
+    , (fetchUrlList env)
     )
 
 
@@ -110,6 +111,6 @@ urlRow url =
         [ text url.url ]
 
 
-fetchUrlList : String -> String -> Cmd Msg
-fetchUrlList env key =
-    Task.attempt UrlLoaded (Reader.run (requestUrls) ( env, key ))
+fetchUrlList : NodeEnv -> Cmd Msg
+fetchUrlList env =
+    Task.attempt UrlLoaded (Reader.run (requestUrls) (env))
