@@ -21,7 +21,7 @@ type alias Article =
 type alias CreateArticleInputs =
     { title : String
     , desc : String
-    , category_id : Int
+    , category_id : String
     }
 
 
@@ -88,18 +88,26 @@ createArticleMutation =
             Var.required "desc" .desc Var.string
 
         categoryIdVar =
-            Var.required "category_id" .category_id Var.int
+            Var.required "category_id" .category_id Var.string
     in
         GQLBuilder.mutationDocument <|
             GQLBuilder.extract
-                (GQLBuilder.field "article"
-                    [ ( "title", Arg.variable titleVar )
-                    , ( "desc", Arg.variable descVar )
-                    , ( "category_id", Arg.variable categoryIdVar )
+                (GQLBuilder.field "addArticle"
+                    [ ( "input"
+                      , Arg.object
+                            [ ( "title", Arg.variable titleVar )
+                            , ( "desc", Arg.variable descVar )
+                            , ( "category_id", Arg.variable categoryIdVar )
+                            ]
+                      )
                     ]
-                    (GQLBuilder.object Article
-                        |> GQLBuilder.with (GQLBuilder.field "id" [] GQLBuilder.string)
-                        |> GQLBuilder.with (GQLBuilder.field "title" [] GQLBuilder.string)
-                        |> GQLBuilder.with (GQLBuilder.field "desc" [] GQLBuilder.string)
+                    (GQLBuilder.extract <|
+                        GQLBuilder.field "article"
+                            []
+                            (GQLBuilder.object Article
+                                |> GQLBuilder.with (GQLBuilder.field "id" [] GQLBuilder.string)
+                                |> GQLBuilder.with (GQLBuilder.field "title" [] GQLBuilder.string)
+                                |> GQLBuilder.with (GQLBuilder.field "desc" [] GQLBuilder.string)
+                            )
                     )
                 )

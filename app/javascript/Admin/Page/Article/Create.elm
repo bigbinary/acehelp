@@ -4,8 +4,6 @@ import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
 import Data.ArticleData exposing (..)
-import Http
-import Json.Encode as JsonEncoder
 import Request.ArticleRequest exposing (..)
 import Request.CategoryRequest exposing (..)
 import Request.Helpers exposing (NodeEnv, ApiKey)
@@ -68,7 +66,7 @@ type Msg
     | DescInput String
     | KeywordsInput String
     | SaveArticle
-    | SaveArticleResponse (Result Http.Error String)
+    | SaveArticleResponse (Result GQLClient.Error Article)
     | CategoriesLoaded (Result GQLClient.Error (List Category))
     | CategorySelected String
 
@@ -108,20 +106,7 @@ update msg model nodeEnv organizationKey =
             )
 
         SaveArticleResponse (Err error) ->
-            let
-                errorMessage =
-                    case error of
-                        Http.BadStatus response ->
-                            response.body
-
-                        _ ->
-                            "Error while creating article"
-            in
-                ( { model
-                    | error = Just errorMessage
-                  }
-                , Cmd.none
-                )
+            ( { model | error = Just (toString error) }, Cmd.none )
 
         CategoriesLoaded (Ok categories) ->
             ( { model | categories = categories }, Cmd.none )
@@ -212,23 +197,22 @@ categoryListDropdown model =
         ]
 
 
-articleEncoder : Model -> JsonEncoder.Value
+articleEncoder : Model -> CreateArticleInputs
 articleEncoder { title, desc, categoryId } =
-    JsonEncoder.object
-        [ ( "title", JsonEncoder.string title )
-        , ( "desc", JsonEncoder.string desc )
-        , ( "category_id", JsonEncoder.string categoryId )
-        ]
+    { title = (toString title)
+    , desc = (toString desc)
+    , category_id = (toString categoryId)
+    }
 
 
 save : Model -> NodeEnv -> ApiKey -> ( Model, Cmd Msg )
 save model nodeEnv organizationKey =
     let
-        request =
-            requestCreateArticle nodeEnv organizationKey (articleEncoder model)
+        articleInputs =
+            (articleEncoder model)
 
         cmd =
-            Http.send SaveArticleResponse request
+            Task.attempt SaveArticleResponse (Reader.run (requestCreateArticle) ( nodeEnv, articleInputs ))
     in
         ( model, cmd )
 
