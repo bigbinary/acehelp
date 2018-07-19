@@ -78,8 +78,8 @@ requestArticlesQuery =
         )
 
 
-createRequestMutation : GQLBuilder.Document GQLBuilder.Mutation Article CreateArticleInputs
-createRequestMutation =
+createArticleMutation : GQLBuilder.Document GQLBuilder.Mutation Article CreateArticleInputs
+createArticleMutation =
     let
         titleVar =
             Var.required "title" .title Var.string
