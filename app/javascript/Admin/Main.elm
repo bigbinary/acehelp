@@ -331,70 +331,64 @@ subscriptions model =
 
 view : Model -> Html Msg
 view model =
-    let
-        page =
-            case (getPage model.currentPage) of
-                ArticleList articleListModel ->
-                    adminLayout model
-                        (Html.map ArticleListMsg
-                            (ArticleList.view articleListModel)
-                        )
+    case (getPage model.currentPage) of
+        ArticleList articleListModel ->
+            adminLayout model
+                (Html.map ArticleListMsg
+                    (ArticleList.view articleListModel)
+                )
 
-                ArticleCreate articleCreateModel ->
-                    adminLayout model
-                        (Html.map ArticleCreateMsg
-                            (ArticleCreate.view articleCreateModel)
-                        )
+        ArticleCreate articleCreateModel ->
+            adminLayout model
+                (Html.map ArticleCreateMsg
+                    (ArticleCreate.view articleCreateModel)
+                )
 
-                UrlCreate urlCreateModel ->
-                    adminLayout model
-                        (Html.map UrlCreateMsg
-                            (UrlCreate.view urlCreateModel)
-                        )
+        UrlCreate urlCreateModel ->
+            adminLayout model
+                (Html.map UrlCreateMsg
+                    (UrlCreate.view urlCreateModel)
+                )
 
-                UrlList urlListModel ->
-                    adminLayout model
-                        (Html.map UrlListMsg
-                            (UrlList.view urlListModel)
-                        )
+        UrlList urlListModel ->
+            adminLayout model
+                (Html.map UrlListMsg
+                    (UrlList.view urlListModel)
+                )
 
-                CategoryList categoryListModel ->
-                    adminLayout model
-                        (Html.map CategoryListMsg
-                            (CategoryList.view categoryListModel)
-                        )
+        CategoryList categoryListModel ->
+            adminLayout model
+                (Html.map CategoryListMsg
+                    (CategoryList.view categoryListModel)
+                )
 
-                CategoryCreate categoryCreateModel ->
-                    adminLayout model
-                        (Html.map CategoryCreateMsg
-                            (CategoryCreate.view categoryCreateModel)
-                        )
+        CategoryCreate categoryCreateModel ->
+            adminLayout model
+                (Html.map CategoryCreateMsg
+                    (CategoryCreate.view categoryCreateModel)
+                )
 
-                Integration integrationModel ->
-                    adminLayout model
-                        (Html.map IntegrationMsg
-                            (Integration.view integrationModel)
-                        )
+        Integration integrationModel ->
+            adminLayout model
+                (Html.map IntegrationMsg
+                    (Integration.view integrationModel)
+                )
 
-                Dashboard ->
-                    div [] [ text "Dashboard" ]
+        Dashboard ->
+            div [] [ text "Dashboard" ]
 
-                NotFound ->
-                    Errors.notFound
+        NotFound ->
+            Errors.notFound
 
-                Blank ->
-                    div [] [ text "blank" ]
-    in
-        div []
-            [ page
-            ]
+        Blank ->
+            div [] [ text "blank" ]
 
 
 adminLayout : Model -> Html Msg -> Html Msg
 adminLayout model page =
     div []
         [ adminHeader model
-        , page
+        , div [ class "container-fluid p-3" ] [ page ]
         ]
 
 
