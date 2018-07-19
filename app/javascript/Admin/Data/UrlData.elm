@@ -63,9 +63,17 @@ createUrlMutation =
     in
         GQLBuilder.mutationDocument <|
             GQLBuilder.extract <|
-                GQLBuilder.field "url"
-                    [ ( "url", Arg.variable urlVar ) ]
-                    (GQLBuilder.object UrlData
-                        |> GQLBuilder.with (GQLBuilder.field "id" [] GQLBuilder.string)
-                        |> GQLBuilder.with (GQLBuilder.field "url" [] GQLBuilder.string)
+                GQLBuilder.field "addUrl"
+                    [ ( "input"
+                      , Arg.object
+                            [ ( "url", Arg.variable urlVar ) ]
+                      )
+                    ]
+                    (GQLBuilder.extract <|
+                        GQLBuilder.field "url"
+                            []
+                            (GQLBuilder.object UrlData
+                                |> GQLBuilder.with (GQLBuilder.field "id" [] GQLBuilder.string)
+                                |> GQLBuilder.with (GQLBuilder.field "url" [] GQLBuilder.string)
+                            )
                     )

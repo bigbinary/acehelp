@@ -8,6 +8,10 @@ import Json.Encode as JE
 import Request.UrlRequest exposing (..)
 import Request.Helpers exposing (NodeEnv, ApiKey)
 import Data.CommonData exposing (Error)
+import Data.UrlData exposing (..)
+import Reader exposing (Reader)
+import Task exposing (Task)
+import GraphQL.Client.Http as GQLClient
 
 
 -- MODEL
@@ -49,7 +53,7 @@ type Msg
     = UrlInput String
     | TitleInput String
     | SaveUrl
-    | SaveUrlResponse (Result Http.Error String)
+    | SaveUrlResponse (Result GQLClient.Error UrlData)
 
 
 update : Msg -> Model -> NodeEnv -> ApiKey -> ( Model, Cmd Msg )
@@ -67,7 +71,7 @@ update msg model nodeEnv organizationKey =
                     validate model
             in
                 if isValid updatedModel then
-                    save updatedModel nodeEnv organizationKey
+                    save updatedModel nodeEnv
                 else
                     ( updatedModel, Cmd.none )
 
@@ -83,20 +87,7 @@ update msg model nodeEnv organizationKey =
             )
 
         SaveUrlResponse (Err error) ->
-            let
-                errorMessage =
-                    case error of
-                        Http.BadStatus response ->
-                            response.body
-
-                        _ ->
-                            "Error while saving URL"
-            in
-                ( { model
-                    | error = Just errorMessage
-                  }
-                , Cmd.none
-                )
+            ( { model | error = Just (toString error) }, Cmd.none )
 
 
 
@@ -171,17 +162,10 @@ isValid model =
         == Nothing
 
 
-urlEncoder : Model -> JE.Value
-urlEncoder { url } =
-    JE.object
-        [ ( "url"
-          , JE.object
-                [ ( "url", JE.string url )
-                ]
-          )
-        ]
-
-
-save : Model -> NodeEnv -> ApiKey -> ( Model, Cmd Msg )
-save model nodeEnv organizationKey =
-    ( model, Http.send SaveUrlResponse (createUrl nodeEnv organizationKey (urlEncoder model)) )
+save : Model -> NodeEnv -> ( Model, Cmd Msg )
+save model nodeEnv =
+    let
+        cmd =
+            Task.attempt SaveUrlResponse (Reader.run (createUrl) ( nodeEnv, { url = model.url } ))
+    in
+        ( model, cmd )

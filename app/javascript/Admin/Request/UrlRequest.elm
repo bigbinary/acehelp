@@ -31,19 +31,11 @@ requestUrls =
         )
 
 
-createUrl : NodeEnv -> ApiKey -> JsonEncoder.Value -> Http.Request String
-createUrl nodeEnv apiKey body =
-    let
-        requestData =
-            { method = "POST"
-            , url = urlCreate nodeEnv
-            , params = []
-            , body = Http.jsonBody <| body
-            , nodeEnv = nodeEnv
-            , organizationApiKey = apiKey
-            }
-
-        decoder =
-            JsonDecoder.field "_id" JsonDecoder.string
-    in
-        httpRequest requestData decoder
+createUrl : Reader ( NodeEnv, CreateUrlInput ) (Task GQLClient.Error UrlData)
+createUrl =
+    Reader.Reader
+        (\( nodeEnv, createUrlInput ) ->
+            (GQLClient.sendMutation (graphqlUrl nodeEnv) <|
+                GQLBuilder.request createUrlInput createUrlMutation
+            )
+        )
