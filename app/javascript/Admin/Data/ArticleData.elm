@@ -62,20 +62,24 @@ decodeArticleSummary =
         |> required "title" string
 
 
-requestArticlesQuery : GQLBuilder.Document GQLBuilder.Query (List ArticleSummary) vars
+requestArticlesQuery : GQLBuilder.Document GQLBuilder.Query (List ArticleSummary) { vars | url : String }
 requestArticlesQuery =
-    GQLBuilder.queryDocument
-        (GQLBuilder.extract
-            (GQLBuilder.field "articles"
-                []
-                (GQLBuilder.list
-                    (GQLBuilder.object ArticleSummary
-                        |> GQLBuilder.with (GQLBuilder.field "id" [] GQLBuilder.string)
-                        |> GQLBuilder.with (GQLBuilder.field "title" [] GQLBuilder.string)
+    let
+        urlVar =
+            Var.required "url" .url Var.string
+    in
+        GQLBuilder.queryDocument
+            (GQLBuilder.extract
+                (GQLBuilder.field "articles"
+                    [ ( "url", Arg.variable urlVar ) ]
+                    (GQLBuilder.list
+                        (GQLBuilder.object ArticleSummary
+                            |> GQLBuilder.with (GQLBuilder.field "id" [] GQLBuilder.string)
+                            |> GQLBuilder.with (GQLBuilder.field "title" [] GQLBuilder.string)
+                        )
                     )
                 )
             )
-        )
 
 
 createArticleMutation : GQLBuilder.Document GQLBuilder.Mutation Article CreateArticleInputs

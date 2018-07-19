@@ -13,12 +13,12 @@ articleCreateUrl env =
     (baseUrl env) ++ "/article"
 
 
-requestArticles : Reader NodeEnv (Task GQLClient.Error (List ArticleSummary))
-requestArticles =
+requestArticles : String -> Reader NodeEnv (Task GQLClient.Error (List ArticleSummary))
+requestArticles url =
     Reader.Reader
         (\nodeEnv ->
             GQLClient.sendQuery (graphqlUrl nodeEnv) <|
-                GQLBuilder.request {} requestArticlesQuery
+                GQLBuilder.request { url = url } requestArticlesQuery
         )
 
 

@@ -73,7 +73,7 @@ update msg model organizationKey nodeEnv =
             if url == "select_url" then
                 ( { model | articles = [] }, Cmd.none )
             else
-                ( { model | url = url }, fetchArticlesList nodeEnv )
+                ( { model | url = url }, fetchArticlesList nodeEnv url )
 
         Navigate page ->
             model ! [ Navigation.newUrl (Route.routeToString page) ]
@@ -147,9 +147,9 @@ urlsDropdown model =
         ]
 
 
-fetchArticlesList : NodeEnv -> Cmd Msg
-fetchArticlesList nodeEnv =
-    Task.attempt ArticleLoaded (Reader.run (requestArticles) (nodeEnv))
+fetchArticlesList : NodeEnv -> String -> Cmd Msg
+fetchArticlesList nodeEnv url =
+    Task.attempt ArticleLoaded (Reader.run (requestArticles url) (nodeEnv))
 
 
 fetchUrlList : NodeEnv -> Cmd Msg
