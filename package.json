@@ -3,6 +3,7 @@
   "private": true,
   "dependencies": {
     "@rails/webpacker": "3.5",
+    "bootstrap": "^4.1.2",
     "elm": "0.18.0",
     "elm-webpack-loader": "4.5.0"
   },
@@ -10,7 +11,9 @@
     "elm-format": "0.6.1-alpha",
     "elm-hot-loader": "0.5.4",
     "husky": "0.14.3",
+    "jquery": "^3.3.1",
     "lint-staged": "7.0.4",
+    "popper.js": "^1.14.3",
     "prettier": "1.13.7",
     "webpack-dev-server": "2.11.2"
   },
@@ -31,6 +34,7 @@
     ],
     "{app,test}/**/*.rb": [
       "bundle exec rubocop -a",
-      "git add"]
+      "git add"
+    ]
   }
 }

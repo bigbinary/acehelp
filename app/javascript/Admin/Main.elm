@@ -1,6 +1,6 @@
 module Main exposing (..)
 
-import Html exposing (Html, div, text, button)
+import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
 import Http
@@ -48,6 +48,7 @@ type PageState
 
 type alias Model =
     { currentPage : PageState
+    , route : Route.Route
     , nodeEnv : String
     , organizationKey : String
     }
@@ -61,6 +62,7 @@ init flags location =
 
         initModel =
             { currentPage = Loaded Blank
+            , route = Route.fromLocation location
             , nodeEnv = flags.node_env
             , organizationKey = flags.organization_key
             }
@@ -114,7 +116,7 @@ navigateTo newRoute model =
     let
         transitionTo page msg =
             Tuple.mapFirst
-                (\pageModel -> ({ model | currentPage = TransitioningTo (page pageModel) }))
+                (\pageModel -> ({ model | currentPage = TransitioningTo (page pageModel), route = newRoute }))
                 >> Tuple.mapSecond
                     (Cmd.map msg)
     in
@@ -159,6 +161,8 @@ update msg model =
     case msg of
         NavigateTo route ->
             navigateTo route model
+                |> Tuple.mapSecond
+                    (\cmd -> Cmd.batch <| cmd :: [ modifyUrl <| Route.routeToString route ])
 
         ArticleListMsg alMsg ->
             let
@@ -297,7 +301,7 @@ retriveOrganizationFromUrl : Location -> OrganizationId
 retriveOrganizationFromUrl location =
     let
         org =
-            parsePath (s "admin" </> s "organization" </> string) location
+            parsePath (Url.s "admin" </> Url.s "organization" </> string) location
     in
         getOrganizationId (org)
 
@@ -327,83 +331,115 @@ subscriptions model =
 
 view : Model -> Html Msg
 view model =
-    let
-        page =
-            case (getPage model.currentPage) of
-                ArticleList articleListModel ->
-                    adminLayout model
-                        (Html.map ArticleListMsg
-                            (ArticleList.view articleListModel)
-                        )
+    case (getPage model.currentPage) of
+        ArticleList articleListModel ->
+            adminLayout model
+                (Html.map ArticleListMsg
+                    (ArticleList.view articleListModel)
+                )
 
-                ArticleCreate articleCreateModel ->
-                    adminLayout model
-                        (Html.map ArticleCreateMsg
-                            (ArticleCreate.view articleCreateModel)
-                        )
+        ArticleCreate articleCreateModel ->
+            adminLayout model
+                (Html.map ArticleCreateMsg
+                    (ArticleCreate.view articleCreateModel)
+                )
 
-                UrlCreate urlCreateModel ->
-                    adminLayout model
-                        (Html.map UrlCreateMsg
-                            (UrlCreate.view urlCreateModel)
-                        )
+        UrlCreate urlCreateModel ->
+            adminLayout model
+                (Html.map UrlCreateMsg
+                    (UrlCreate.view urlCreateModel)
+                )
 
-                UrlList urlListModel ->
-                    adminLayout model
-                        (Html.map UrlListMsg
-                            (UrlList.view urlListModel)
-                        )
+        UrlList urlListModel ->
+            adminLayout model
+                (Html.map UrlListMsg
+                    (UrlList.view urlListModel)
+                )
 
-                CategoryList categoryListModel ->
-                    adminLayout model
-                        (Html.map CategoryListMsg
-                            (CategoryList.view categoryListModel)
-                        )
+        CategoryList categoryListModel ->
+            adminLayout model
+                (Html.map CategoryListMsg
+                    (CategoryList.view categoryListModel)
+                )
 
-                CategoryCreate categoryCreateModel ->
-                    adminLayout model
-                        (Html.map CategoryCreateMsg
-                            (CategoryCreate.view categoryCreateModel)
-                        )
+        CategoryCreate categoryCreateModel ->
+            adminLayout model
+                (Html.map CategoryCreateMsg
+                    (CategoryCreate.view categoryCreateModel)
+                )
 
-                Integration integrationModel ->
-                    adminLayout model
-                        (Html.map IntegrationMsg
-                            (Integration.view integrationModel)
-                        )
+        Integration integrationModel ->
+            adminLayout model
+                (Html.map IntegrationMsg
+                    (Integration.view integrationModel)
+                )
 
-                Dashboard ->
-                    div [] [ text "Dashboard" ]
+        Dashboard ->
+            div [] [ text "Dashboard" ]
 
-                NotFound ->
-                    Errors.notFound
+        NotFound ->
+            Errors.notFound
 
-                Blank ->
-                    div [] [ text "blank" ]
-    in
-        div []
-            [ page
-            ]
+        Blank ->
+            div [] [ text "blank" ]
 
 
 adminLayout : Model -> Html Msg -> Html Msg
 adminLayout model page =
     div []
         [ adminHeader model
-        , page
+        , div [ class "container-fluid p-3" ] [ page ]
         ]
 
 
 adminHeader : Model -> Html Msg
 adminHeader model =
-    div [ class "header" ]
-        [ div [ class "header-right" ]
-            [ Html.a [ onClick <| NavigateTo Route.ArticleList ] [ text "Articles" ]
-            , Html.a [ onClick <| NavigateTo Route.UrlList ] [ text "URL" ]
-            , Html.a [ onClick <| NavigateTo Route.CategoryList ] [ text "Category" ]
-            , Html.a [ onClick <| NavigateTo Route.Integration ] [ text "Integrations" ]
-            , Html.a [ onClick SignOut ] [ text "Logout" ]
+    nav [ class "navbar navbar-dark bg-primary navbar-expand flex-column flex-md-row" ]
+        [ ul
+            [ class "navbar-nav mr-auto mt-2 mt-lg-0 " ]
+            [ li [ class "nav-item" ]
+                [ Html.a
+                    [ classList
+                        [ ( "nav-link", True )
+                        , ( "active", (model.route == Route.ArticleList) || (model.route == Route.ArticleCreate) )
+                        ]
+                    , onClick <| NavigateTo Route.ArticleList
+                    ]
+                    [ text "Articles" ]
+                ]
+            , li [ class "nav-item" ]
+                [ Html.a
+                    [ classList
+                        [ ( "nav-link", True )
+                        , ( "active", (model.route == Route.UrlList) || (model.route == Route.UrlCreate) )
+                        ]
+                    , onClick <| NavigateTo Route.UrlList
+                    ]
+                    [ text "URL" ]
+                ]
+            , li [ class "nav-item" ]
+                [ Html.a
+                    [ classList
+                        [ ( "nav-link", True )
+                        , ( "active", (model.route == Route.CategoryList) || (model.route == Route.CategoryCreate) )
+                        ]
+                    , onClick <| NavigateTo Route.CategoryList
+                    ]
+                    [ text "Category" ]
+                ]
+            , li [ class "nav-item" ]
+                [ Html.a
+                    [ classList
+                        [ ( "nav-link", True )
+                        , ( "active", model.route == Route.Integration )
+                        ]
+                    , onClick <| NavigateTo Route.Integration
+                    ]
+                    [ text "Integrations" ]
+                ]
             ]
+        , ul [ class "navbar-nav ml-auto" ]
+            [ li [ class "nav-item " ] [ Html.a [ class "nav-link", onClick SignOut ] [ text "Logout" ] ] ]
         ]
 
 

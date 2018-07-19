@@ -8,7 +8,7 @@
 // layout file, like app/views/layouts/application.html.erb
 
 import Elm from "../Admin/Main";
-import "../../assets/stylesheets/application.css";
+import "bootstrap";
 import "../../assets/stylesheets/admin/index.scss";
 
 document.addEventListener("DOMContentLoaded", () => {
