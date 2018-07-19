@@ -1,6 +1,6 @@
 module Main exposing (..)
 
-import Html exposing (Html, div, text, button)
+import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
 import Http
@@ -48,6 +48,7 @@ type PageState
 
 type alias Model =
     { currentPage : PageState
+    , route : Route.Route
     , nodeEnv : String
     , organizationKey : String
     }
@@ -61,6 +62,7 @@ init flags location =
 
         initModel =
             { currentPage = Loaded Blank
+            , route = Route.fromLocation location
             , nodeEnv = flags.node_env
             , organizationKey = flags.organization_key
             }
@@ -297,7 +299,7 @@ retriveOrganizationFromUrl : Location -> OrganizationId
 retriveOrganizationFromUrl location =
     let
         org =
-            parsePath (s "admin" </> s "organization" </> string) location
+            parsePath (Url.s "admin" </> Url.s "organization" </> string) location
     in
         getOrganizationId (org)
 
@@ -396,14 +398,20 @@ adminLayout model page =
 
 adminHeader : Model -> Html Msg
 adminHeader model =
-    div [ class "header" ]
-        [ div [ class "header-right" ]
-            [ Html.a [ onClick <| NavigateTo Route.ArticleList ] [ text "Articles" ]
-            , Html.a [ onClick <| NavigateTo Route.UrlList ] [ text "URL" ]
-            , Html.a [ onClick <| NavigateTo Route.CategoryList ] [ text "Category" ]
-            , Html.a [ onClick <| NavigateTo Route.Integration ] [ text "Integrations" ]
-            , Html.a [ onClick SignOut ] [ text "Logout" ]
+    nav [ class "navbar navbar-dark bg-primary navbar-expand flex-column flex-md-row" ]
+        [ ul
+            [ class "navbar-nav mr-auto mt-2 mt-lg-0 " ]
+            [ li [ class "nav-item" ]
+                [ Html.a [ classList [ ( "nav-link", True ), ( "active", (model.route == Route.ArticleList) || (model.route == Route.ArticleCreate) ) ], href "#", onClick <| NavigateTo Route.ArticleList ] [ text "Articles" ] ]
+            , li [ class "nav-item" ]
+                [ Html.a [ classList [ ( "nav-link", True ), ( "active", (model.route == Route.UrlList) || (model.route == Route.UrlCreate) ) ], href "#", onClick <| NavigateTo Route.UrlList ] [ text "URL" ] ]
+            , li [ class "nav-item" ]
+                [ Html.a [ classList [ ( "nav-link", True ), ( "active", (model.route == Route.CategoryList) || (model.route == Route.CategoryCreate) ) ], href "#", onClick <| NavigateTo Route.CategoryList ] [ text "Category" ] ]
+            , li [ class "nav-item" ]
+                [ Html.a [ classList [ ( "nav-link", True ), ( "active", model.route == Route.Integration ) ], href "#", onClick <| NavigateTo Route.Integration ] [ text "Integrations" ] ]
             ]
+        , ul [ class "navbar-nav ml-auto" ]
+            [ li [ class "nav-item " ] [ Html.a [ class "nav-link", href "#", onClick SignOut ] [ text "Logout" ] ] ]
         ]
 
 
