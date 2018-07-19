@@ -187,7 +187,7 @@ categoryListDropdown model =
                 , (List.map
                     (\category ->
                         option
-                            [ value (toString category.id) ]
+                            [ value category.id ]
                             [ text category.name ]
                     )
                     model.categories
@@ -199,9 +199,9 @@ categoryListDropdown model =
 
 articleEncoder : Model -> CreateArticleInputs
 articleEncoder { title, desc, categoryId } =
-    { title = (toString title)
-    , desc = (toString desc)
-    , category_id = (toString categoryId)
+    { title = title
+    , desc = desc
+    , category_id = categoryId
     }
 
 
