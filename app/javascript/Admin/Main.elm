@@ -12,6 +12,7 @@ import Page.Url.Create as UrlCreate
 import Page.Category.List as CategoryList
 import Page.Category.Create as CategoryCreate
 import Page.Integration as Integration
+import Page.Errors as Errors
 import Data.Organization exposing (OrganizationId)
 import UrlParser as Url exposing (..)
 import Request.RequestHelper exposing (NodeEnv, ApiKey, logoutRequest)
@@ -330,43 +331,67 @@ view model =
         page =
             case (getPage model.currentPage) of
                 ArticleList articleListModel ->
-                    Html.map ArticleListMsg
-                        (ArticleList.view articleListModel)
+                    adminLayout model
+                        (Html.map ArticleListMsg
+                            (ArticleList.view articleListModel)
+                        )
 
                 ArticleCreate articleCreateModel ->
-                    Html.map ArticleCreateMsg
-                        (ArticleCreate.view articleCreateModel)
+                    adminLayout model
+                        (Html.map ArticleCreateMsg
+                            (ArticleCreate.view articleCreateModel)
+                        )
 
                 UrlCreate urlCreateModel ->
-                    Html.map UrlCreateMsg
-                        (UrlCreate.view urlCreateModel)
+                    adminLayout model
+                        (Html.map UrlCreateMsg
+                            (UrlCreate.view urlCreateModel)
+                        )
 
                 UrlList urlListModel ->
-                    Html.map UrlListMsg
-                        (UrlList.view urlListModel)
+                    adminLayout model
+                        (Html.map UrlListMsg
+                            (UrlList.view urlListModel)
+                        )
 
                 CategoryList categoryListModel ->
-                    Html.map CategoryListMsg
-                        (CategoryList.view categoryListModel)
+                    adminLayout model
+                        (Html.map CategoryListMsg
+                            (CategoryList.view categoryListModel)
+                        )
 
                 CategoryCreate categoryCreateModel ->
-                    Html.map CategoryCreateMsg
-                        (CategoryCreate.view categoryCreateModel)
+                    adminLayout model
+                        (Html.map CategoryCreateMsg
+                            (CategoryCreate.view categoryCreateModel)
+                        )
 
                 Integration integrationModel ->
-                    Html.map IntegrationMsg
-                        (Integration.view integrationModel)
+                    adminLayout model
+                        (Html.map IntegrationMsg
+                            (Integration.view integrationModel)
+                        )
 
                 Dashboard ->
                     div [] [ text "Dashboard" ]
 
-                _ ->
-                    div [] [ text "Not Found" ]
+                NotFound ->
+                    Errors.notFound
+
+                Blank ->
+                    div [] [ text "blank" ]
     in
         div []
-            [ adminHeader model
-            , page
+            [ page
             ]
+
+
+adminLayout : Model -> Html Msg -> Html Msg
+adminLayout model page =
+    div []
+        [ adminHeader model
+        , page
+        ]
 
 
 adminHeader : Model -> Html Msg
