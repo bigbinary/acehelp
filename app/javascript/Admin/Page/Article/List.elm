@@ -6,7 +6,7 @@ import Html.Attributes exposing (..)
 import Html.Events exposing (..)
 import Page.Article.Create as ArticleCreate
 import Navigation exposing (..)
-import Page.Common.Routing exposing (..)
+import Route
 import Request.ArticleRequest exposing (..)
 import Request.UrlRequest exposing (..)
 import Data.CommonData exposing (..)
@@ -50,7 +50,7 @@ type Msg
     = UrlSelected String
     | UrlLoaded (Result Http.Error UrlsListResponse)
     | ArticleLoaded (Result Http.Error ArticleListResponse)
-    | Navigate Page
+    | Navigate Route.Route
 
 
 update : Msg -> Model -> ApiKey -> NodeEnv -> ( Model, Cmd Msg )
@@ -75,7 +75,7 @@ update msg model organizationKey nodeEnv =
                 ( { model | url = url }, fetchArticlesList nodeEnv url organizationKey )
 
         Navigate page ->
-            model ! [ Navigation.newUrl (pageUrl page) ]
+            model ! [ Navigation.newUrl (Route.routeToString page) ]
 
 
 
@@ -95,7 +95,7 @@ view model =
         , div
             [ class "buttonDiv" ]
             [ Html.a
-                [ onClick (Navigate <| ArticleCreate ArticleCreate.initModel)
+                [ onClick (Navigate <| Route.ArticleCreate)
                 , class "button primary"
                 ]
                 [ text "New Article" ]

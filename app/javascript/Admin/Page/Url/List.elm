@@ -5,7 +5,7 @@ import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
 import Navigation exposing (..)
-import Page.Common.Routing exposing (..)
+import Route
 import Page.Url.Create as UrlCreate
 import Request.UrlRequest exposing (..)
 import Data.UrlData exposing (..)
@@ -45,7 +45,7 @@ init env organizationKey =
 type Msg
     = LoadUrl UrlId
     | UrlLoaded (Result Http.Error UrlsListResponse)
-    | Navigate Page
+    | Navigate Route.Route
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -61,7 +61,7 @@ update msg model =
             ( { model | error = Just (toString err) }, Cmd.none )
 
         Navigate page ->
-            model ! [ Navigation.newUrl (pageUrl page) ]
+            model ! [ Navigation.newUrl (Route.routeToString page) ]
 
 
 
@@ -88,7 +88,7 @@ view model =
         , div
             [ class "buttonDiv" ]
             [ Html.a
-                [ onClick (Navigate <| UrlCreate UrlCreate.initModel)
+                [ onClick (Navigate <| Route.UrlCreate)
                 , class "button primary"
                 ]
                 [ text "New Url" ]

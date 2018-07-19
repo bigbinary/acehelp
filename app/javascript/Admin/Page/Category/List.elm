@@ -5,7 +5,7 @@ import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
 import Navigation exposing (..)
-import Page.Common.Routing exposing (..)
+import Route
 import Page.Category.Create as CategoryCreate
 import Data.CategoryData exposing (..)
 import Request.CategoryRequest exposing (..)
@@ -41,7 +41,7 @@ init =
 
 type Msg
     = CategoriesLoaded (Result Http.Error CategoryList)
-    | Navigate Page
+    | Navigate Route.Route
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -71,7 +71,7 @@ update msg model =
                 )
 
         Navigate page ->
-            model ! [ Navigation.newUrl (pageUrl page) ]
+            model ! [ Navigation.newUrl (Route.routeToString page) ]
 
 
 
@@ -85,7 +85,7 @@ view model =
         [ div
             [ class "buttonDiv" ]
             [ Html.a
-                [ onClick (Navigate <| CategoryCreate CategoryCreate.initModel)
+                [ onClick (Navigate <| Route.CategoryCreate)
                 , class "button primary"
                 ]
                 [ text "New Category" ]
