@@ -1,4 +1,4 @@
-##Create Ticket
+## Create Ticket
 
 To create ticket through GraphQL visit
 
