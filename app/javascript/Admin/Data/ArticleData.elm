@@ -15,6 +15,13 @@ type alias Article =
     }
 
 
+type alias CreateArticleInputs =
+    { title : String
+    , desc : String
+    , category_id : Int
+    }
+
+
 type alias ArticleSummary =
     { id : ArticleId
     , title : String
