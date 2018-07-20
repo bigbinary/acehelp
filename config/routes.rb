@@ -31,6 +31,7 @@ Rails.application.routes.draw do
     resources :urls
     resources :organization, only: [:show]
     resources :categories
+    resources :tickets, only: [:index]
   end
 
   if Rails.env.development?
