@@ -14,6 +14,7 @@ type Route
     | CategoryCreate
     | UrlList
     | UrlCreate
+    | TicketList
     | Integration
     | Dashboard
     | NotFound
@@ -26,6 +27,7 @@ routeMatcher =
         , Url.map ArticleList (s "admin" </> s "articles")
         , Url.map UrlList (s "admin" </> s "urls")
         , Url.map CategoryList (s "admin" </> s "categories")
+        , Url.map TicketList (s "admin" </> s "tickets")
         , Url.map Integration (s "admin" </> s "integrations")
         , Url.map ArticleCreate (s "admin" </> s "articles" </> s "new")
         , Url.map UrlCreate (s "admin" </> s "urls" </> s "new")
@@ -53,6 +55,9 @@ routeToString page =
 
                 CategoryList ->
                     [ "categories" ]
+
+                TicketList ->
+                    [ "tickets" ]
 
                 Integration ->
                     [ "integrations" ]

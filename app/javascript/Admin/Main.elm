@@ -10,6 +10,7 @@ import Page.Article.Create as ArticleCreate
 import Page.Url.List as UrlList
 import Page.Url.Create as UrlCreate
 import Page.Category.List as CategoryList
+import Page.Ticket.List as TicketList
 import Page.Category.Create as CategoryCreate
 import Page.Integration as Integration
 import Page.Errors as Errors
@@ -36,6 +37,7 @@ type Page
     | UrlList UrlList.Model
     | UrlCreate UrlCreate.Model
     | Integration Integration.Model
+    | TicketList TicketList.Model
     | Dashboard
     | NotFound
     | Blank
@@ -82,6 +84,7 @@ type Msg
     | UrlListMsg UrlList.Msg
     | CategoryListMsg CategoryList.Msg
     | CategoryCreateMsg CategoryCreate.Msg
+    | TicketListMsg TicketList.Msg
     | IntegrationMsg Integration.Msg
     | OnLocationChange Navigation.Location
     | SignOut
@@ -144,6 +147,10 @@ navigateTo newRoute model =
             Route.UrlCreate ->
                 (UrlCreate.init)
                     |> transitionTo UrlCreate UrlCreateMsg
+
+            Route.TicketList ->
+                (TicketList.init model.nodeEnv model.organizationKey)
+                    |> transitionTo TicketList TicketListMsg
 
             Route.Integration ->
                 (Integration.init model.organizationKey)
@@ -230,6 +237,23 @@ update msg model =
             in
                 ( { model | currentPage = Loaded (UrlList urlListModel) }
                 , Cmd.map UrlListMsg urlListCmds
+                )
+
+        TicketListMsg tlMsg ->
+            let
+                currentPageModel =
+                    case model.currentPage of
+                        Loaded (TicketList ticketListModel) ->
+                            ticketListModel
+
+                        _ ->
+                            TicketList.initModel
+
+                ( ticketListModel, ticketListCmds ) =
+                    TicketList.update tlMsg currentPageModel
+            in
+                ( { model | currentPage = Loaded (TicketList ticketListModel) }
+                , Cmd.map TicketListMsg ticketListCmds
                 )
 
         CategoryListMsg clMsg ->
@@ -374,6 +398,12 @@ view model =
                     (Integration.view integrationModel)
                 )
 
+        TicketList ticketListModel ->
+            adminLayout model
+                (Html.map TicketListMsg
+                    (TicketList.view ticketListModel)
+                )
+
         Dashboard ->
             div [] [ text "Dashboard" ]
 
@@ -426,6 +456,16 @@ adminHeader model =
                     , onClick <| NavigateTo Route.CategoryList
                     ]
                     [ text "Category" ]
+                ]
+            , li [ class "nav-item" ]
+                [ Html.a
+                    [ classList
+                        [ ( "nav-link", True )
+                        , ( "active", (model.route == Route.CategoryList) || (model.route == Route.CategoryCreate) )
+                        ]
+                    , onClick <| NavigateTo Route.CategoryList
+                    ]
+                    [ text "Ticket" ]
                 ]
             , li [ class "nav-item" ]
                 [ Html.a
