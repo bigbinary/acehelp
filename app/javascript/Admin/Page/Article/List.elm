@@ -1,10 +1,8 @@
 module Page.Article.List exposing (..)
 
-import Http
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
-import Page.Article.Create as ArticleCreate
 import Navigation exposing (..)
 import Route
 import Request.ArticleRequest exposing (..)
@@ -25,7 +23,7 @@ import GraphQL.Client.Http as GQLClient
 
 type alias Model =
     { articles : List ArticleSummary
-    , urlList : UrlsListResponse
+    , urlList : List UrlData
     , url : String
     , error : Error
     }
@@ -34,7 +32,7 @@ type alias Model =
 initModel : Model
 initModel =
     { articles = []
-    , urlList = { urls = [] }
+    , urlList = []
     , url = ""
     , error = Nothing
     }
@@ -42,7 +40,7 @@ initModel =
 
 init : String -> String -> ( Model, Cmd Msg )
 init env key =
-    ( initModel, fetchUrlList env key )
+    ( initModel, fetchUrlList env )
 
 
 
@@ -51,7 +49,7 @@ init env key =
 
 type Msg
     = UrlSelected String
-    | UrlLoaded (Result Http.Error UrlsListResponse)
+    | UrlLoaded (Result GQLClient.Error (List UrlData))
     | ArticleLoaded (Result GQLClient.Error (List ArticleSummary))
     | Navigate Route.Route
 
@@ -75,7 +73,7 @@ update msg model organizationKey nodeEnv =
             if url == "select_url" then
                 ( { model | articles = [] }, Cmd.none )
             else
-                ( { model | url = url }, fetchArticlesList nodeEnv organizationKey )
+                ( { model | url = url }, fetchArticlesList nodeEnv url )
 
         Navigate page ->
             model ! [ Navigation.newUrl (Route.routeToString page) ]
@@ -142,18 +140,18 @@ urlsDropdown model =
                             [ value url.url ]
                             [ text url.url ]
                     )
-                    model.urlList.urls
+                    model.urlList
                   )
                 ]
             )
         ]
 
 
-fetchArticlesList : NodeEnv -> ApiKey -> Cmd Msg
-fetchArticlesList nodeEnv apiKey =
-    Task.attempt ArticleLoaded (Reader.run (requestArticles) ( nodeEnv, apiKey ))
+fetchArticlesList : NodeEnv -> String -> Cmd Msg
+fetchArticlesList nodeEnv url =
+    Task.attempt ArticleLoaded (Reader.run (requestArticles url) (nodeEnv))
 
 
-fetchUrlList : String -> String -> Cmd Msg
-fetchUrlList nodeEnv organizationKey =
-    Http.send UrlLoaded (requestUrls nodeEnv organizationKey)
+fetchUrlList : NodeEnv -> Cmd Msg
+fetchUrlList nodeEnv =
+    Task.attempt UrlLoaded (Reader.run (requestUrls) (nodeEnv))

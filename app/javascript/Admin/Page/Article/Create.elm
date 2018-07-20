@@ -4,13 +4,14 @@ import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
 import Data.ArticleData exposing (..)
-import Http
-import Json.Encode as JsonEncoder
 import Request.ArticleRequest exposing (..)
 import Request.CategoryRequest exposing (..)
 import Request.Helpers exposing (NodeEnv, ApiKey)
 import Data.CommonData exposing (Error)
 import Data.CategoryData exposing (..)
+import Reader exposing (Reader)
+import Task exposing (Task)
+import GraphQL.Client.Http as GQLClient
 
 
 -- Model
@@ -24,7 +25,7 @@ type alias Model =
     , keywords : String
     , keywordError : Error
     , articleId : ArticleId
-    , categoryList : CategoryList
+    , categories : List Category
     , categoryId : String
     , categoryIdError : Error
     , error : Error
@@ -40,7 +41,7 @@ initModel =
     , keywords = ""
     , keywordError = Nothing
     , articleId = "0"
-    , categoryList = { categories = [] }
+    , categories = []
     , categoryId = "0"
     , categoryIdError = Nothing
     , error = Nothing
@@ -65,8 +66,8 @@ type Msg
     | DescInput String
     | KeywordsInput String
     | SaveArticle
-    | SaveArticleResponse (Result Http.Error String)
-    | CategoriesLoaded (Result Http.Error CategoryList)
+    | SaveArticleResponse (Result GQLClient.Error Article)
+    | CategoriesLoaded (Result GQLClient.Error (List Category))
     | CategorySelected String
 
 
@@ -105,23 +106,10 @@ update msg model nodeEnv organizationKey =
             )
 
         SaveArticleResponse (Err error) ->
-            let
-                errorMessage =
-                    case error of
-                        Http.BadStatus response ->
-                            response.body
-
-                        _ ->
-                            "Error while creating article"
-            in
-                ( { model
-                    | error = Just errorMessage
-                  }
-                , Cmd.none
-                )
+            ( { model | error = Just (toString error) }, Cmd.none )
 
         CategoriesLoaded (Ok categories) ->
-            ( { model | categoryList = categories }, Cmd.none )
+            ( { model | categories = categories }, Cmd.none )
 
         CategoriesLoaded (Err err) ->
             ( { model | error = Just (toString err) }, Cmd.none )
@@ -199,33 +187,29 @@ categoryListDropdown model =
                 , (List.map
                     (\category ->
                         option
-                            [ value (toString category.id) ]
+                            [ value category.id ]
                             [ text category.name ]
                     )
-                    model.categoryList.categories
+                    model.categories
                   )
                 ]
             )
         ]
 
 
-articleEncoder : Model -> JsonEncoder.Value
-articleEncoder { title, desc, categoryId } =
-    JsonEncoder.object
-        [ ( "title", JsonEncoder.string title )
-        , ( "desc", JsonEncoder.string desc )
-        , ( "category_id", JsonEncoder.string categoryId )
-        ]
+articleInputs : Model -> CreateArticleInputs
+articleInputs { title, desc, categoryId } =
+    { title = title
+    , desc = desc
+    , category_id = categoryId
+    }
 
 
 save : Model -> NodeEnv -> ApiKey -> ( Model, Cmd Msg )
 save model nodeEnv organizationKey =
     let
-        request =
-            requestCreateArticle nodeEnv organizationKey (articleEncoder model)
-
         cmd =
-            Http.send SaveArticleResponse request
+            Task.attempt SaveArticleResponse (Reader.run (requestCreateArticle) ( nodeEnv, (articleInputs model) ))
     in
         ( model, cmd )
 
@@ -307,5 +291,5 @@ isValid model =
 
 
 fetchCategories : NodeEnv -> ApiKey -> Cmd Msg
-fetchCategories nodeEnv organizationKey =
-    Http.send CategoriesLoaded (requestCategories nodeEnv organizationKey)
+fetchCategories nodeEnv key =
+    Task.attempt CategoriesLoaded (Reader.run (requestCategories) ( nodeEnv, key ))
