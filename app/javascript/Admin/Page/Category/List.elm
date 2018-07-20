@@ -31,10 +31,10 @@ initModel =
     }
 
 
-init : NodeEnv -> ApiKey -> ( Model, Cmd Msg )
-init env key =
+init : ( Model, Reader ( NodeEnv, ApiKey ) (Task GQLClient.Error (List Category)) )
+init =
     ( initModel
-    , fetchCategories env key
+    , requestCategories
     )
 
 
@@ -95,8 +95,3 @@ categoryRow : Category -> Html Msg
 categoryRow category =
     div []
         [ text category.name ]
-
-
-fetchCategories : NodeEnv -> ApiKey -> Cmd Msg
-fetchCategories env key =
-    Task.attempt CategoriesLoaded (Reader.run (requestCategories) ( env, key ))

@@ -14,9 +14,14 @@ import Page.Category.Create as CategoryCreate
 import Page.Integration as Integration
 import Page.Errors as Errors
 import Data.Organization exposing (OrganizationId)
+import Data.CategoryData exposing (Category)
 import UrlParser as Url exposing (..)
 import Request.RequestHelper exposing (NodeEnv, ApiKey, logoutRequest)
 import Route
+import Task exposing (Task)
+import GraphQL.Client.Http as GQLClient
+import Reader exposing (Reader)
+import Task exposing (Task)
 
 
 -- MODEL
@@ -82,6 +87,7 @@ type Msg
     | UrlListMsg UrlList.Msg
     | CategoryListMsg CategoryList.Msg
     | CategoryCreateMsg CategoryCreate.Msg
+    | CategoriesLoaded (Result GQLClient.Error (List Category))
     | IntegrationMsg Integration.Msg
     | OnLocationChange Navigation.Location
     | SignOut
@@ -130,8 +136,15 @@ navigateTo newRoute model =
                     |> transitionTo ArticleCreate ArticleCreateMsg
 
             Route.CategoryList ->
-                (CategoryList.init model.nodeEnv model.organizationKey)
-                    |> transitionTo CategoryList CategoryListMsg
+                let
+                    ( categoryListModel, categoriesRequest ) =
+                        CategoryList.init
+
+                    cmd =
+                        Task.attempt CategoriesLoaded (Reader.run (categoriesRequest) ( model.nodeEnv, model.organizationKey ))
+                in
+                    ( categoryListModel, cmd )
+                        |> transitionTo CategoryList CategoryListMsg
 
             Route.CategoryCreate ->
                 (CategoryCreate.init)
@@ -247,6 +260,22 @@ update msg model =
             in
                 ( { model | currentPage = Loaded (CategoryList categoryListModel) }
                 , Cmd.map CategoryListMsg categoryListCmd
+                )
+
+        CategoriesLoaded (Ok categoriesList) ->
+            let
+                currentPageModel =
+                    case model.currentPage of
+                        Loaded (CategoryList categoryListModel) ->
+                            categoryListModel
+
+                        _ ->
+                            CategoryList.initModel
+
+                -- currentPageModel.categories = categoriesList
+            in
+                ( { model | currentPage = Loaded (CategoryList currentPageModel) }
+                , Cmd.none
                 )
 
         CategoryCreateMsg ccMsg ->
