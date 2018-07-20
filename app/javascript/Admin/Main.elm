@@ -250,7 +250,7 @@ update msg model =
                             TicketList.initModel
 
                 ( ticketListModel, ticketListCmds ) =
-                    TicketList.update tlMsg currentPageModel
+                    TicketList.update tlMsg currentPageModel model.nodeEnv model.organizationKey
             in
                 ( { model | currentPage = Loaded (TicketList ticketListModel) }
                 , Cmd.map TicketListMsg ticketListCmds
@@ -461,9 +461,9 @@ adminHeader model =
                 [ Html.a
                     [ classList
                         [ ( "nav-link", True )
-                        , ( "active", (model.route == Route.CategoryList) || (model.route == Route.CategoryCreate) )
+                        , ( "active", (model.route == Route.TicketList) )
                         ]
-                    , onClick <| NavigateTo Route.CategoryList
+                    , onClick <| NavigateTo Route.TicketList
                     ]
                     [ text "Ticket" ]
                 ]
