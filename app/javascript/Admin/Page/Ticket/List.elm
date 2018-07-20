@@ -1,18 +1,26 @@
 module Page.Ticket.List exposing (..)
 
+--import Http
+
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Data.CommonData exposing (..)
 import Page.Common.View exposing (renderError)
+import Request.TicketRequest exposing (..)
+import Request.Helpers exposing (NodeEnv, ApiKey)
+import Task exposing (Task)
+import Reader exposing (Reader)
+import GraphQL.Client.Http as GQLClient
 
 
---import GraphQL.Client.Http as GQLClient
 -- MODEL
 
 
 type alias Ticket =
     { id : String
     , name : String
+    , email : String
+    , message : String
     }
 
 
@@ -29,9 +37,9 @@ initModel =
     }
 
 
-init : String -> String -> Model
-init env organizationKey =
-    ( initModel, (fetchUrlList env organizationKey) )
+init : String -> String -> ( Model, Cmd Msg )
+init env key =
+    ( initModel, (fetchTicketList env key) )
 
 
 
@@ -39,14 +47,17 @@ init env organizationKey =
 
 
 type Msg
-    = TicketLoaded (List Ticket)
+    = TicketLoaded (Result GQLClient.Error (List Ticket))
 
 
-update : Msg -> Model -> ( Model, Cmd Msg )
-update msg model =
+update : Msg -> Model -> ApiKey -> NodeEnv -> ( Model, Cmd Msg )
+update msg model apiKey nodeEnv =
     case msg of
-        TicketLoaded tickets ->
+        TicketLoaded (Ok tickets) ->
             ( { model | ticketList = tickets }, Cmd.none )
+
+        TicketLoaded (Err err) ->
+            ( { model | error = Just (toString err) }, Cmd.none )
 
 
 
@@ -62,7 +73,7 @@ view model =
             []
             [ text (renderError model.error) ]
         , div
-            []
+            [ id "content-wrapper" ]
             (List.map
                 (\ticket ->
                     rows ticket
@@ -75,11 +86,14 @@ view model =
 rows : Ticket -> Html msg
 rows ticket =
     div
-        []
-        [ text ticket.name
+        [ class "ticket-row" ]
+        [ span [ class "row-id" ] [ text ticket.id ]
+        , span [ class "row-name" ] [ text ticket.name ]
+        , span [ class "row-email" ] [ text ticket.email ]
+        , span [ class "row-message" ] [ text ticket.message ]
         ]
 
 
-fetchUrlList : String -> String -> Cmd Msg
-fetchUrlList env key =
-    Http.send TicketLoaded (requestUrls env key)
+fetchTicketList : String -> String -> Cmd Msg
+fetchTicketList nodeEnv apiKey =
+    Task.attempt TicketLoaded (Reader.run (requestTickets) ( nodeEnv, apiKey ))
