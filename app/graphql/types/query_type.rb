@@ -6,6 +6,7 @@ Types::QueryType = GraphQL::ObjectType.define do
   field :articles, function: Resolvers::ArticlesSearch.new
   field :categories, function: Resolvers::CategoriesSearch.new
   field :urls, function: Resolvers::UrlsSearch.new
+  field :tickets, function: Resolvers::TicketsSearch.new
 
   field :article, Types::ArticleType,
                   field: Resolvers::Fields::FetchField.build(type: Types::ArticleType,
