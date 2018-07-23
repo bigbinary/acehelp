@@ -1,6 +1,5 @@
 module Page.Category.List exposing (..)
 
-import Http
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
@@ -20,21 +19,21 @@ import GraphQL.Client.Http as GQLClient
 
 type alias Model =
     { categories : List Category
-    , errors : Error
+    , error : Error
     }
 
 
 initModel : Model
 initModel =
     { categories = []
-    , errors = Nothing
+    , error = Nothing
     }
 
 
-init : NodeEnv -> ApiKey -> ( Model, Cmd Msg )
-init env key =
+init : ( Model, Reader ( NodeEnv, ApiKey ) (Task GQLClient.Error (List Category)) )
+init =
     ( initModel
-    , fetchCategories env key
+    , requestCategories
     )
 
 
@@ -58,7 +57,7 @@ update msg model =
             )
 
         CategoriesLoaded (Err error) ->
-            ( { model | errors = Just (toString error) }, Cmd.none )
+            ( { model | error = Just (toString error) }, Cmd.none )
 
         Navigate page ->
             model ! [ Navigation.newUrl (Route.routeToString page) ]
@@ -95,8 +94,3 @@ categoryRow : Category -> Html Msg
 categoryRow category =
     div []
         [ text category.name ]
-
-
-fetchCategories : NodeEnv -> ApiKey -> Cmd Msg
-fetchCategories env key =
-    Task.attempt CategoriesLoaded (Reader.run (requestCategories) ( env, key ))
