@@ -16,6 +16,7 @@ import Page.Errors as Errors
 import Data.Organization exposing (OrganizationId)
 import Data.CategoryData exposing (Category)
 import Data.UrlData exposing (UrlData)
+import Data.CommonData exposing (Error)
 import UrlParser as Url exposing (..)
 import Request.RequestHelper exposing (NodeEnv, ApiKey, logoutRequest)
 import Route
@@ -57,6 +58,7 @@ type alias Model =
     , route : Route.Route
     , nodeEnv : String
     , organizationKey : String
+    , error : Error
     }
 
 
@@ -71,6 +73,7 @@ init flags location =
             , route = Route.fromLocation location
             , nodeEnv = flags.node_env
             , organizationKey = flags.organization_key
+            , error = Nothing
             }
     in
         ( initModel, pageCmd )
@@ -230,7 +233,16 @@ update msg model =
                 )
 
         ArticlesUrlsLoaded (Err error) ->
-            ( model, Cmd.none )
+            let
+                currentPageModel =
+                    case model.currentPage of
+                        Loaded (ArticleList articleListModel) ->
+                            articleListModel
+
+                        _ ->
+                            ArticleList.initModel
+            in
+                ( { model | currentPage = Loaded (ArticleList { currentPageModel | error = Just (toString error) }) }, Cmd.none )
 
         ArticleCreateMsg caMsg ->
             let
@@ -262,7 +274,7 @@ update msg model =
                 ( { model | currentPage = Loaded (ArticleCreate { currentPageModel | categories = categoriesList }) }, Cmd.none )
 
         ArticleCategoriesLoaded (Err error) ->
-            ( model, Cmd.none )
+            ( { model | error = Just (toString error) }, Cmd.none )
 
         UrlCreateMsg cuMsg ->
             let
