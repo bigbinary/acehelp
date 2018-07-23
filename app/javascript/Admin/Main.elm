@@ -15,7 +15,6 @@ import Page.Integration as Integration
 import Page.Errors as Errors
 import Data.Organization exposing (OrganizationId)
 import Data.CategoryData exposing (Category)
-import Data.ArticleData exposing (ArticleSummary)
 import Data.UrlData exposing (UrlData)
 import UrlParser as Url exposing (..)
 import Request.RequestHelper exposing (NodeEnv, ApiKey, logoutRequest)
@@ -84,8 +83,9 @@ init flags location =
 type Msg
     = NavigateTo Route.Route
     | ArticleListMsg ArticleList.Msg
+    | ArticlesUrlsLoaded (Result GQLClient.Error (List UrlData))
     | ArticleCreateMsg ArticleCreate.Msg
-    | ArticlesLoaded (Result GQLClient.Error (List UrlData))
+    | ArticleCategoriesLoaded (Result GQLClient.Error (List Category))
     | UrlCreateMsg UrlCreate.Msg
     | UrlListMsg UrlList.Msg
     | UrlsLoaded (Result GQLClient.Error (List UrlData))
@@ -137,13 +137,19 @@ navigateTo newRoute model =
                         ArticleList.init
 
                     cmd =
-                        Task.attempt ArticlesLoaded (Reader.run (articleListRequest) (model.nodeEnv))
+                        Task.attempt ArticlesUrlsLoaded (Reader.run (articleListRequest) (model.nodeEnv))
                 in
                     ( { model | currentPage = TransitioningTo (ArticleList articleListModel), route = newRoute }, cmd )
 
             Route.ArticleCreate ->
-                (ArticleCreate.init model.nodeEnv model.organizationKey)
-                    |> transitionTo ArticleCreate ArticleCreateMsg
+                let
+                    ( articleCreateModel, categoriesRequest ) =
+                        ArticleCreate.init
+
+                    cmd =
+                        Task.attempt ArticleCategoriesLoaded (Reader.run (categoriesRequest) ( model.nodeEnv, model.organizationKey ))
+                in
+                    ( { model | currentPage = TransitioningTo (ArticleCreate articleCreateModel), route = newRoute }, cmd )
 
             Route.CategoryList ->
                 let
@@ -209,7 +215,7 @@ update msg model =
                 , Cmd.map ArticleListMsg articleListCmd
                 )
 
-        ArticlesLoaded (Ok urlsList) ->
+        ArticlesUrlsLoaded (Ok urlsList) ->
             let
                 currentPageModel =
                     case model.currentPage of
@@ -223,7 +229,7 @@ update msg model =
                 , Cmd.none
                 )
 
-        ArticlesLoaded (Err error) ->
+        ArticlesUrlsLoaded (Err error) ->
             ( model, Cmd.none )
 
         ArticleCreateMsg caMsg ->
@@ -240,8 +246,23 @@ update msg model =
                     ArticleCreate.update caMsg currentPageModel model.nodeEnv model.organizationKey
             in
                 ( { model | currentPage = Loaded (ArticleCreate articleCreateModel) }
-                , Cmd.map ArticleCreateMsg createArticleCmd
+                , Cmd.none
                 )
+
+        ArticleCategoriesLoaded (Ok categoriesList) ->
+            let
+                currentPageModel =
+                    case model.currentPage of
+                        Loaded (ArticleCreate articleCreateModel) ->
+                            { articleCreateModel | categories = categoriesList }
+
+                        _ ->
+                            ArticleCreate.initModel
+            in
+                ( { model | currentPage = Loaded (ArticleCreate currentPageModel) }, Cmd.none )
+
+        ArticleCategoriesLoaded (Err error) ->
+            ( model, Cmd.none )
 
         UrlCreateMsg cuMsg ->
             let
@@ -274,7 +295,7 @@ update msg model =
                     UrlList.update ulMsg currentPageModel
             in
                 ( { model | currentPage = Loaded (UrlList urlListModel) }
-                , Cmd.map UrlListMsg urlListCmds
+                , Cmd.none
                 )
 
         UrlsLoaded (Ok urlsList) ->
@@ -308,7 +329,7 @@ update msg model =
                     CategoryList.update clMsg currentPageModel
             in
                 ( { model | currentPage = Loaded (CategoryList categoryListModel) }
-                , Cmd.map CategoryListMsg categoryListCmd
+                , Cmd.none
                 )
 
         CategoriesLoaded (Ok categoriesList) ->
@@ -316,12 +337,12 @@ update msg model =
                 currentPageModel =
                     case model.currentPage of
                         Loaded (CategoryList categoryListModel) ->
-                            { categoryListModel | categories = categoriesList }
+                            categoryListModel
 
                         _ ->
                             CategoryList.initModel
             in
-                ( { model | currentPage = Loaded (CategoryList currentPageModel) }
+                ( { model | currentPage = Loaded (CategoryList { currentPageModel | categories = categoriesList }) }
                 , Cmd.none
                 )
 

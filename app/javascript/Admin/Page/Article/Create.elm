@@ -48,10 +48,10 @@ initModel =
     }
 
 
-init : NodeEnv -> ApiKey -> ( Model, Cmd Msg )
-init nodeEnv organizationKey =
+init : ( Model, Reader ( NodeEnv, ApiKey ) (Task GQLClient.Error (List Category)) )
+init =
     ( initModel
-    , (fetchCategories nodeEnv organizationKey)
+    , requestCategories
     )
 
 
@@ -288,8 +288,3 @@ isValid model =
         == Nothing
         && model.categoryIdError
         == Nothing
-
-
-fetchCategories : NodeEnv -> ApiKey -> Cmd Msg
-fetchCategories nodeEnv key =
-    Task.attempt CategoriesLoaded (Reader.run (requestCategories) ( nodeEnv, key ))
