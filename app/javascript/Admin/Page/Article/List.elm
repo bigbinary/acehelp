@@ -38,9 +38,9 @@ initModel =
     }
 
 
-init : String -> String -> ( Model, Cmd Msg )
-init env key =
-    ( initModel, fetchUrlList env )
+init : ( Model, Reader NodeEnv (Task GQLClient.Error (List UrlData)) )
+init =
+    ( initModel, requestUrls )
 
 
 
@@ -150,8 +150,3 @@ urlsDropdown model =
 fetchArticlesList : NodeEnv -> String -> Cmd Msg
 fetchArticlesList nodeEnv url =
     Task.attempt ArticleLoaded (Reader.run (requestArticles url) (nodeEnv))
-
-
-fetchUrlList : NodeEnv -> Cmd Msg
-fetchUrlList nodeEnv =
-    Task.attempt UrlLoaded (Reader.run (requestUrls) (nodeEnv))

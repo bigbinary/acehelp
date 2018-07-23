@@ -19,7 +19,7 @@ import GraphQL.Client.Http as GQLClient
 
 
 type alias Model =
-    { listOfUrls : List UrlData
+    { urls : List UrlData
     , urlId : UrlId
     , error : Error
     }
@@ -27,16 +27,16 @@ type alias Model =
 
 initModel : Model
 initModel =
-    { listOfUrls = []
+    { urls = []
     , urlId = ""
     , error = Nothing
     }
 
 
-init : NodeEnv -> ApiKey -> ( Model, Cmd Msg )
-init env key =
+init : ( Model, Reader NodeEnv (Task GQLClient.Error (List UrlData)) )
+init =
     ( initModel
-    , (fetchUrlList env)
+    , requestUrls
     )
 
 
@@ -57,7 +57,7 @@ update msg model =
             ( { model | urlId = urlId }, Cmd.none )
 
         UrlLoaded (Ok urls) ->
-            ( { model | listOfUrls = urls }, Cmd.none )
+            ( { model | urls = urls }, Cmd.none )
 
         UrlLoaded (Err err) ->
             ( { model | error = Just (toString err) }, Cmd.none )
@@ -100,7 +100,7 @@ view model =
                 (\url ->
                     urlRow url
                 )
-                model.listOfUrls
+                model.urls
             )
         ]
 
@@ -109,8 +109,3 @@ urlRow : UrlData -> Html Msg
 urlRow url =
     div []
         [ text url.url ]
-
-
-fetchUrlList : NodeEnv -> Cmd Msg
-fetchUrlList env =
-    Task.attempt UrlLoaded (Reader.run (requestUrls) (env))

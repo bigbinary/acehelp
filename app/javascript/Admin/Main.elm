@@ -15,6 +15,8 @@ import Page.Integration as Integration
 import Page.Errors as Errors
 import Data.Organization exposing (OrganizationId)
 import Data.CategoryData exposing (Category)
+import Data.ArticleData exposing (ArticleSummary)
+import Data.UrlData exposing (UrlData)
 import UrlParser as Url exposing (..)
 import Request.RequestHelper exposing (NodeEnv, ApiKey, logoutRequest)
 import Route
@@ -83,8 +85,10 @@ type Msg
     = NavigateTo Route.Route
     | ArticleListMsg ArticleList.Msg
     | ArticleCreateMsg ArticleCreate.Msg
+    | ArticlesLoaded (Result GQLClient.Error (List UrlData))
     | UrlCreateMsg UrlCreate.Msg
     | UrlListMsg UrlList.Msg
+    | UrlsLoaded (Result GQLClient.Error (List UrlData))
     | CategoryListMsg CategoryList.Msg
     | CategoryCreateMsg CategoryCreate.Msg
     | CategoriesLoaded (Result GQLClient.Error (List Category))
@@ -128,8 +132,14 @@ navigateTo newRoute model =
     in
         case newRoute of
             Route.ArticleList ->
-                (ArticleList.init model.nodeEnv model.organizationKey)
-                    |> transitionTo ArticleList ArticleListMsg
+                let
+                    ( articleListModel, articleListRequest ) =
+                        ArticleList.init
+
+                    cmd =
+                        Task.attempt ArticlesLoaded (Reader.run (articleListRequest) (model.nodeEnv))
+                in
+                    ( { model | currentPage = TransitioningTo (ArticleList articleListModel), route = newRoute }, cmd )
 
             Route.ArticleCreate ->
                 (ArticleCreate.init model.nodeEnv model.organizationKey)
@@ -143,16 +153,21 @@ navigateTo newRoute model =
                     cmd =
                         Task.attempt CategoriesLoaded (Reader.run (categoriesRequest) ( model.nodeEnv, model.organizationKey ))
                 in
-                    ( categoryListModel, cmd )
-                        |> transitionTo CategoryList CategoryListMsg
+                    ( { model | currentPage = TransitioningTo (CategoryList categoryListModel), route = newRoute }, cmd )
 
             Route.CategoryCreate ->
                 (CategoryCreate.init)
                     |> transitionTo CategoryCreate CategoryCreateMsg
 
             Route.UrlList ->
-                (UrlList.init model.nodeEnv model.organizationKey)
-                    |> transitionTo UrlList UrlListMsg
+                let
+                    ( urlListModel, urlListRequest ) =
+                        UrlList.init
+
+                    cmd =
+                        Task.attempt UrlsLoaded (Reader.run (urlListRequest) (model.nodeEnv))
+                in
+                    ( { model | currentPage = TransitioningTo (UrlList urlListModel), route = newRoute }, cmd )
 
             Route.UrlCreate ->
                 (UrlCreate.init)
@@ -193,6 +208,23 @@ update msg model =
                 ( { model | currentPage = Loaded (ArticleList articleListModel) }
                 , Cmd.map ArticleListMsg articleListCmd
                 )
+
+        ArticlesLoaded (Ok urlsList) ->
+            let
+                currentPageModel =
+                    case model.currentPage of
+                        Loaded (ArticleList articleListModel) ->
+                            { articleListModel | urlList = urlsList }
+
+                        _ ->
+                            ArticleList.initModel
+            in
+                ( { model | currentPage = Loaded (ArticleList currentPageModel) }
+                , Cmd.none
+                )
+
+        ArticlesLoaded (Err error) ->
+            ( model, Cmd.none )
 
         ArticleCreateMsg caMsg ->
             let
@@ -245,6 +277,23 @@ update msg model =
                 , Cmd.map UrlListMsg urlListCmds
                 )
 
+        UrlsLoaded (Ok urlsList) ->
+            let
+                currentPageModel =
+                    case model.currentPage of
+                        Loaded (UrlList urlListModel) ->
+                            { urlListModel | urls = urlsList }
+
+                        _ ->
+                            UrlList.initModel
+            in
+                ( { model | currentPage = Loaded (UrlList currentPageModel) }
+                , Cmd.none
+                )
+
+        UrlsLoaded (Err error) ->
+            ( model, Cmd.none )
+
         CategoryListMsg clMsg ->
             let
                 currentPageModel =
@@ -267,16 +316,17 @@ update msg model =
                 currentPageModel =
                     case model.currentPage of
                         Loaded (CategoryList categoryListModel) ->
-                            categoryListModel
+                            { categoryListModel | categories = categoriesList }
 
                         _ ->
                             CategoryList.initModel
-
-                -- currentPageModel.categories = categoriesList
             in
                 ( { model | currentPage = Loaded (CategoryList currentPageModel) }
                 , Cmd.none
                 )
+
+        CategoriesLoaded (Err err) ->
+            ( model, Cmd.none )
 
         CategoryCreateMsg ccMsg ->
             let
