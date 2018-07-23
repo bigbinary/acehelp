@@ -16,7 +16,7 @@ type alias Model =
     { id : Int
     , name : String
     , nameError : Maybe String
-    , errors : Error
+    , error : Error
     }
 
 
@@ -25,7 +25,7 @@ initModel =
     { id = 0
     , name = ""
     , nameError = Nothing
-    , errors = Nothing
+    , error = Nothing
     }
 
 
@@ -66,7 +66,7 @@ update msg model nodeEnv organizationKey =
             ( { model
                 | id = 0
                 , name = ""
-                , errors = Nothing
+                , error = Nothing
               }
             , Cmd.none
             )
@@ -82,7 +82,7 @@ update msg model nodeEnv organizationKey =
                             "Error while saving Category"
             in
                 ( { model
-                    | errors = Just errorMsg
+                    | error = Just errorMsg
                   }
                 , Cmd.none
                 )

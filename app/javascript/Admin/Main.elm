@@ -220,12 +220,12 @@ update msg model =
                 currentPageModel =
                     case model.currentPage of
                         Loaded (ArticleList articleListModel) ->
-                            { articleListModel | urlList = urlsList }
+                            articleListModel
 
                         _ ->
                             ArticleList.initModel
             in
-                ( { model | currentPage = Loaded (ArticleList currentPageModel) }
+                ( { model | currentPage = Loaded (ArticleList { currentPageModel | urlList = urlsList }) }
                 , Cmd.none
                 )
 
@@ -254,12 +254,12 @@ update msg model =
                 currentPageModel =
                     case model.currentPage of
                         Loaded (ArticleCreate articleCreateModel) ->
-                            { articleCreateModel | categories = categoriesList }
+                            articleCreateModel
 
                         _ ->
                             ArticleCreate.initModel
             in
-                ( { model | currentPage = Loaded (ArticleCreate currentPageModel) }, Cmd.none )
+                ( { model | currentPage = Loaded (ArticleCreate { currentPageModel | categories = categoriesList }) }, Cmd.none )
 
         ArticleCategoriesLoaded (Err error) ->
             ( model, Cmd.none )
@@ -303,12 +303,12 @@ update msg model =
                 currentPageModel =
                     case model.currentPage of
                         Loaded (UrlList urlListModel) ->
-                            { urlListModel | urls = urlsList }
+                            urlListModel
 
                         _ ->
                             UrlList.initModel
             in
-                ( { model | currentPage = Loaded (UrlList currentPageModel) }
+                ( { model | currentPage = Loaded (UrlList { currentPageModel | urls = urlsList }) }
                 , Cmd.none
                 )
 

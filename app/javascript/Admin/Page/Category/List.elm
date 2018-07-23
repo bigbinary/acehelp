@@ -19,14 +19,14 @@ import GraphQL.Client.Http as GQLClient
 
 type alias Model =
     { categories : List Category
-    , errors : Error
+    , error : Error
     }
 
 
 initModel : Model
 initModel =
     { categories = []
-    , errors = Nothing
+    , error = Nothing
     }
 
 
@@ -57,7 +57,7 @@ update msg model =
             )
 
         CategoriesLoaded (Err error) ->
-            ( { model | errors = Just (toString error) }, Cmd.none )
+            ( { model | error = Just (toString error) }, Cmd.none )
 
         Navigate page ->
             model ! [ Navigation.newUrl (Route.routeToString page) ]
