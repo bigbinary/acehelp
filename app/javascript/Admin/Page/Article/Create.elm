@@ -127,73 +127,79 @@ update msg model nodeEnv organizationKey =
 
 view : Model -> Html Msg
 view model =
-    div [ class "container" ]
-        [ Html.form
-            [ onSubmit SaveArticle ]
-            [ div []
-                [ label [] [ text "Title: " ]
-                , input
-                    [ placeholder "Title..."
-                    , onInput TitleInput
-                    , Html.Attributes.value <| Field.value model.title
-                    , type_ "text"
-                    ]
-                    []
+    div [ class "row article-block" ]
+        [ div [ class "col-md-8 article-title-content-block" ]
+            [ div
+                [ class "row article-title" ]
+                [ input [ type_ "text", class "form-control", placeholder "Title" ] []
                 ]
-            , div []
-                [ label [] [ text "Description: " ]
-                , textarea
-                    [ placeholder "Short description about article..."
-                    , onInput DescInput
-                    , Html.Attributes.value <| Field.value model.desc
-                    ]
-                    []
-                ]
-            , div []
-                [ label [] [ text "Keywords: " ]
-                , input
-                    [ placeholder "Keywords..."
-                    , onInput KeywordsInput
-                    , Html.Attributes.value <| Field.value model.keywords
-                    , type_ "text"
-                    ]
-                    []
-                ]
-            , div []
-                [ categoryListDropdown model
-                ]
-            , div []
-                [ button
-                    [ type_ "submit"
-                    , class "button primary"
-                    ]
-                    [ text "Submit" ]
+            , div
+                [ class "row article-content" ]
+                [ node "trix-editor" [ placeholder "Article content goes here.." ] []
                 ]
             ]
+        , div [ class "col-sm article-meta-data-block" ]
+            [ categoryListDropdown model
+            , articleUrls model
+            , articleKeywords model
+            ]
+        ]
+
+
+articleKeywords : Model -> Html Msg
+articleKeywords model =
+    div []
+        [ h6 [] [ text "Keywords:" ]
+        , input
+            [ onInput KeywordsInput
+            , Html.Attributes.value <| Field.value model.keywords
+            , type_ "text"
+            , class "form-control"
+            , placeholder "Article keywords"
+            ]
+            []
+        ]
+
+
+
+-- input
+--             [ placeholder "Keywords..."
+--             , onInput KeywordsInput
+--             , Html.Attributes.value <| Field.value model.keywords
+--             , type_ "text"
+--             ]
+--             []
+
+
+articleUrls : Model -> Html Msg
+articleUrls model =
+    div []
+        [ h6 [] [ text "Linked URLs:" ]
+        , span [ class "badge badge-secondary" ] [ text "/getting-started/this-is-hardcoded" ]
         ]
 
 
 categoryListDropdown : Model -> Html Msg
 categoryListDropdown model =
-    div
-        []
-        [ select
-            [ onInput CategorySelected ]
-            (List.concat
-                [ [ option
-                        [ Html.Attributes.value "0" ]
-                        [ text "Select Category" ]
-                  ]
-                , (List.map
+    div []
+        [ div [ class "dropdown" ]
+            [ a
+                [ class "btn btn-secondary dropdown-toggle"
+                , attribute "role" "button"
+                , attribute "data-toggle" "dropdown"
+                , attribute "aria-haspopup" "true"
+                , attribute "aria-expanded" "false"
+                ]
+                [ text "Select Category" ]
+            , div
+                [ class "dropdown-menu", attribute "aria-labelledby" "dropdownMenuButton" ]
+                (List.map
                     (\category ->
-                        option
-                            [ Html.Attributes.value category.id ]
-                            [ text category.name ]
+                        a [ class "dropdown-item", onClick (CategorySelected category.id) ] [ text category.name ]
                     )
                     model.categories
-                  )
-                ]
-            )
+                )
+            ]
         ]
 
 
