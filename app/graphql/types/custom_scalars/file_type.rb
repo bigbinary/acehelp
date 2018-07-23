@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
-Scalars::FileType = GraphQL::ScalarType.define do
-  name "File Upload"
+Types::CustomScalars::FileType = GraphQL::ScalarType.define do
+  name "FileUpload"
   description "action_dispatch_uploaded_file"
   coerce_input lambda { |file, _ctx|
     ActionDispatch::Http::UploadedFile.new(
