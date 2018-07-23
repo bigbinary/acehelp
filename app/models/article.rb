@@ -7,6 +7,7 @@ class Article < ApplicationRecord
   belongs_to :organization
   has_many :article_urls
   has_many :urls, through: :article_urls
+  has_many_attached :images
 
   validates :title, uniqueness: { scope: [:organization_id, :category_id] }, presence: true
 

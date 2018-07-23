@@ -7,6 +7,11 @@ class Mutations::ArticleMutations
     input_field :category_id, !types.String
     input_field :title, !types.String
     input_field :desc, !types.String
+    field :images, [Types::CustomScalars::FileType] do
+      resolve -> (article, _args, _ctx) {
+        article.images
+      }
+    end
 
     return_field :article, Types::ArticleType
     return_field :errors, types[Types::ErrorType]
@@ -41,6 +46,11 @@ class Mutations::ArticleMutations
       input_field :category_id, !types.String
       input_field :title, !types.String
       input_field :desc, !types.String
+      field :images, [Types::CustomScalars::FileType] do
+        resolve -> (article, _args, _ctx) {
+          article.images
+        }
+      end
     end
     input_field :id, !types.String
     input_field :article, !ArticleInputObjectType
