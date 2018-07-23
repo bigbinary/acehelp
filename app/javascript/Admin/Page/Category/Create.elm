@@ -5,7 +5,6 @@ import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
 import Data.CategoryData exposing (..)
-import Data.CommonData exposing (Error)
 import Request.Helpers exposing (..)
 
 
@@ -16,7 +15,7 @@ type alias Model =
     { id : Int
     , name : String
     , nameError : Maybe String
-    , error : Error
+    , error : Maybe String
     }
 
 

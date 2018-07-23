@@ -7,10 +7,12 @@ import Data.ArticleData exposing (..)
 import Request.ArticleRequest exposing (..)
 import Request.CategoryRequest exposing (..)
 import Request.Helpers exposing (NodeEnv, ApiKey)
-import Data.CommonData exposing (Error)
 import Data.CategoryData exposing (..)
 import Reader exposing (Reader)
 import Task exposing (Task)
+import Field exposing (..)
+import Field.ValidationResult exposing (..)
+import Helpers exposing (..)
 import GraphQL.Client.Http as GQLClient
 
 
@@ -18,32 +20,37 @@ import GraphQL.Client.Http as GQLClient
 
 
 type alias Model =
-    { title : String
-    , titleError : Error
-    , desc : String
-    , descError : Error
-    , keywords : String
-    , keywordError : Error
-    , articleId : ArticleId
+    { title : Field String String
+    , desc : Field String String
+    , keywords : Field String String
+    , articleId : Maybe ArticleId
     , categories : List Category
-    , categoryId : String
-    , categoryIdError : Error
-    , error : Error
+    , categoryId : Field String String
+    , error : Maybe String
     }
 
 
 initModel : Model
 initModel =
-    { title = ""
-    , titleError = Nothing
-    , desc = ""
-    , descError = Nothing
-    , keywords = ""
-    , keywordError = Nothing
-    , articleId = "0"
+    { title = Field (validateEmpty "Title") ""
+    , desc = Field (validateEmpty "Article Content") ""
+    , keywords = Field (validateEmpty "Keywords") ""
+    , articleId = Nothing
     , categories = []
-    , categoryId = "0"
-    , categoryIdError = Nothing
+    , categoryId =
+        Field
+            (\cId ->
+                case cId of
+                    "" ->
+                        Failed "categpry Id cannot be empty"
+
+                    "0" ->
+                        Failed "Please select a categpryId"
+
+                    _ ->
+                        Passed cId
+            )
+            "0"
     , error = Nothing
     }
 
@@ -75,32 +82,25 @@ update : Msg -> Model -> NodeEnv -> ApiKey -> ( Model, Cmd Msg )
 update msg model nodeEnv organizationKey =
     case msg of
         TitleInput title ->
-            ( { model | title = title }, Cmd.none )
+            ( { model | title = Field.update model.title title }, Cmd.none )
 
         DescInput desc ->
-            ( { model | desc = desc }, Cmd.none )
+            ( { model | desc = Field.update model.desc desc }, Cmd.none )
 
         KeywordsInput keywords ->
-            ( { model | keywords = keywords }, Cmd.none )
+            ( { model | keywords = Field.update model.keywords keywords }, Cmd.none )
 
         SaveArticle ->
-            let
-                validArticleModel =
-                    validate model
-            in
-                if isValid validArticleModel then
-                    save validArticleModel nodeEnv organizationKey
-                else
-                    ( model, Cmd.none )
+            if isAllValid [ model.title, model.desc, model.keywords, model.categoryId ] then
+                save model nodeEnv organizationKey
+            else
+                ( model, Cmd.none )
 
         SaveArticleResponse (Ok id) ->
             ( { model
-                | title = ""
-                , titleError = Nothing
-                , desc = ""
-                , descError = Nothing
-                , keywords = ""
-                , keywordError = Nothing
+                | title = Field.update model.title ""
+                , desc = Field.update model.desc ""
+                , keywords = Field.update model.keywords ""
               }
             , Cmd.none
             )
@@ -115,7 +115,7 @@ update msg model nodeEnv organizationKey =
             ( { model | error = Just (toString err) }, Cmd.none )
 
         CategorySelected categoryId ->
-            ( { model | categoryId = categoryId }, Cmd.none )
+            ( { model | categoryId = Field.update model.categoryId categoryId }, Cmd.none )
 
         _ ->
             ( model, Cmd.none )
@@ -135,7 +135,7 @@ view model =
                 , input
                     [ placeholder "Title..."
                     , onInput TitleInput
-                    , value model.title
+                    , Html.Attributes.value <| Field.value model.title
                     , type_ "text"
                     ]
                     []
@@ -145,7 +145,7 @@ view model =
                 , textarea
                     [ placeholder "Short description about article..."
                     , onInput DescInput
-                    , value model.desc
+                    , Html.Attributes.value <| Field.value model.desc
                     ]
                     []
                 ]
@@ -154,7 +154,7 @@ view model =
                 , input
                     [ placeholder "Keywords..."
                     , onInput KeywordsInput
-                    , value model.keywords
+                    , Html.Attributes.value <| Field.value model.keywords
                     , type_ "text"
                     ]
                     []
@@ -181,13 +181,13 @@ categoryListDropdown model =
             [ onInput CategorySelected ]
             (List.concat
                 [ [ option
-                        [ value "0" ]
+                        [ Html.Attributes.value "0" ]
                         [ text "Select Category" ]
                   ]
                 , (List.map
                     (\category ->
                         option
-                            [ value category.id ]
+                            [ Html.Attributes.value category.id ]
                             [ text category.name ]
                     )
                     model.categories
@@ -199,9 +199,9 @@ categoryListDropdown model =
 
 articleInputs : Model -> CreateArticleInputs
 articleInputs { title, desc, categoryId } =
-    { title = title
-    , desc = desc
-    , category_id = categoryId
+    { title = Field.value title
+    , desc = Field.value desc
+    , category_id = Field.value categoryId
     }
 
 
@@ -214,77 +214,6 @@ save model nodeEnv organizationKey =
         ( model, cmd )
 
 
-validate : Model -> Model
-validate model =
-    model
-        |> validateTitle
-        |> validateDesc
-        |> validateKeyword
-        |> validateCategoryId
-
-
-validateTitle : Model -> Model
-validateTitle model =
-    if String.isEmpty model.title then
-        { model
-            | titleError =
-                Just "Title should be present"
-        }
-    else
-        { model
-            | titleError = Nothing
-        }
-
-
-validateDesc : Model -> Model
-validateDesc model =
-    if String.isEmpty model.desc then
-        { model
-            | descError =
-                Just "Desc is required"
-        }
-    else
-        { model
-            | descError = Nothing
-        }
-
-
-validateKeyword : Model -> Model
-validateKeyword model =
-    if String.isEmpty model.keywords then
-        { model
-            | keywordError =
-                Just "Keyword is required"
-        }
-    else
-        { model
-            | keywordError = Nothing
-        }
-
-
-validateCategoryId : Model -> Model
-validateCategoryId model =
-    if String.isEmpty model.categoryId then
-        { model
-            | categoryIdError = Just "category ID required"
-        }
-    else if model.categoryId == "0" then
-        { model
-            | categoryIdError = Just "Please select category"
-        }
-    else
-        { model
-            | categoryIdError = Nothing
-        }
-
-
-isValid : Model -> Bool
-isValid model =
-    model.titleError
-        == Nothing
-        && model.descError
-        == Nothing
-        && model.keywordError
-        == Nothing
-        && model.categoryIdError
-        == Nothing
+fetchCategories : NodeEnv -> ApiKey -> Cmd Msg
+fetchCategories nodeEnv key =
+    Task.attempt CategoriesLoaded (Reader.run (requestCategories) ( nodeEnv, key ))

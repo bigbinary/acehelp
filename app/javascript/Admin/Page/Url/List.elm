@@ -8,7 +8,6 @@ import Route
 import Request.UrlRequest exposing (..)
 import Request.RequestHelper exposing (..)
 import Data.UrlData exposing (..)
-import Data.CommonData exposing (Error)
 import Page.Common.View exposing (renderError)
 import Reader exposing (Reader)
 import Task exposing (Task)
@@ -21,7 +20,7 @@ import GraphQL.Client.Http as GQLClient
 type alias Model =
     { urls : List UrlData
     , urlId : UrlId
-    , error : Error
+    , error : Maybe String
     }
 
 

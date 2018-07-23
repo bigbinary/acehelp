@@ -1,9 +1,7 @@
 module Page.Common.View exposing (..)
 
-import Data.CommonData exposing (Error)
 
-
-renderError : Error -> String
+renderError : Maybe String -> String
 renderError error =
     if (error == Nothing) then
         ""
