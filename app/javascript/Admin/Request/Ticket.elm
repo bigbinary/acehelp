@@ -1,9 +1,9 @@
-module Request.TicketRequest exposing (..)
+module Request.Ticket exposing (..)
 
 import Request.RequestHelper exposing (..)
 import Reader exposing (Reader)
 import Task exposing (Task)
-import Data.TicketData exposing (..)
+import Data.Ticket exposing (..)
 import GraphQL.Client.Http as GQLClient
 import GraphQL.Request.Builder as GQLBuilder
 
