@@ -4,7 +4,6 @@ module Page.Ticket.List exposing (..)
 
 import Html exposing (..)
 import Html.Attributes exposing (..)
-import Data.CommonData exposing (..)
 import Page.Common.View exposing (renderError)
 import Request.Ticket exposing (..)
 import Request.Helpers exposing (NodeEnv, ApiKey)
@@ -26,7 +25,7 @@ type alias Ticket =
 
 type alias Model =
     { ticketList : List Ticket
-    , error : Error
+    , error : Maybe String
     }
 
 

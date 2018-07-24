@@ -7,10 +7,12 @@ import Data.ArticleData exposing (..)
 import Request.ArticleRequest exposing (..)
 import Request.CategoryRequest exposing (..)
 import Request.Helpers exposing (NodeEnv, ApiKey)
-import Data.CommonData exposing (Error)
 import Data.CategoryData exposing (..)
 import Reader exposing (Reader)
 import Task exposing (Task)
+import Field exposing (..)
+import Field.ValidationResult exposing (..)
+import Helpers exposing (..)
 import GraphQL.Client.Http as GQLClient
 
 
@@ -18,32 +20,24 @@ import GraphQL.Client.Http as GQLClient
 
 
 type alias Model =
-    { title : String
-    , titleError : Error
-    , desc : String
-    , descError : Error
-    , keywords : String
-    , keywordError : Error
-    , articleId : ArticleId
+    { title : Field String String
+    , desc : Field String String
+    , keywords : Field String String
+    , articleId : Maybe ArticleId
     , categories : List Category
-    , categoryId : String
-    , categoryIdError : Error
-    , error : Error
+    , categoryId : Field String String
+    , error : Maybe String
     }
 
 
 initModel : Model
 initModel =
-    { title = ""
-    , titleError = Nothing
-    , desc = ""
-    , descError = Nothing
-    , keywords = ""
-    , keywordError = Nothing
-    , articleId = "0"
+    { title = Field (validateEmpty "Title") ""
+    , desc = Field (validateEmpty "Article Content") ""
+    , keywords = Field (validateEmpty "Keywords") ""
+    , articleId = Nothing
     , categories = []
-    , categoryId = "0"
-    , categoryIdError = Nothing
+    , categoryId = Field (validateEmpty "Category Id") ""
     , error = Nothing
     }
 
@@ -75,32 +69,43 @@ update : Msg -> Model -> NodeEnv -> ApiKey -> ( Model, Cmd Msg )
 update msg model nodeEnv organizationKey =
     case msg of
         TitleInput title ->
-            ( { model | title = title }, Cmd.none )
+            ( { model | title = Field.update model.title title }, Cmd.none )
 
         DescInput desc ->
-            ( { model | desc = desc }, Cmd.none )
+            ( { model | desc = Field.update model.desc desc }, Cmd.none )
 
         KeywordsInput keywords ->
-            ( { model | keywords = keywords }, Cmd.none )
+            ( { model | keywords = Field.update model.keywords keywords }, Cmd.none )
 
         SaveArticle ->
             let
-                validArticleModel =
-                    validate model
+                fields =
+                    [ model.title, model.desc, model.keywords, model.categoryId ]
+
+                errors =
+                    validateAll fields
+                        |> filterFailures
+                        |> List.map
+                            (\result ->
+                                case result of
+                                    Failed err ->
+                                        err
+
+                                    Passed _ ->
+                                        "Unknown Error"
+                            )
+                        |> String.join ", "
             in
-                if isValid validArticleModel then
-                    save validArticleModel nodeEnv organizationKey
+                if isAllValid fields then
+                    save model nodeEnv organizationKey
                 else
-                    ( model, Cmd.none )
+                    ( { model | error = Just <| Debug.log "" errors }, Cmd.none )
 
         SaveArticleResponse (Ok id) ->
             ( { model
-                | title = ""
-                , titleError = Nothing
-                , desc = ""
-                , descError = Nothing
-                , keywords = ""
-                , keywordError = Nothing
+                | title = Field.update model.title ""
+                , desc = Field.update model.desc ""
+                , keywords = Field.update model.keywords ""
               }
             , Cmd.none
             )
@@ -115,7 +120,7 @@ update msg model nodeEnv organizationKey =
             ( { model | error = Just (toString err) }, Cmd.none )
 
         CategorySelected categoryId ->
-            ( { model | categoryId = categoryId }, Cmd.none )
+            ( { model | categoryId = Field.update model.categoryId categoryId }, Cmd.none )
 
         _ ->
             ( model, Cmd.none )
@@ -127,81 +132,95 @@ update msg model nodeEnv organizationKey =
 
 view : Model -> Html Msg
 view model =
-    div [ class "container" ]
-        [ Html.form
-            [ onSubmit SaveArticle ]
-            [ div []
-                [ label [] [ text "Title: " ]
-                , input
-                    [ placeholder "Title..."
-                    , onInput TitleInput
-                    , value model.title
-                    , type_ "text"
-                    ]
-                    []
+    div [ class "row article-block" ]
+        [ div []
+            [ Maybe.withDefault (text "") <|
+                Maybe.map
+                    (\err ->
+                        div [ class "alert alert-danger alert-dismissible fade show", attribute "role" "alert" ]
+                            [ text <| "Error: " ++ err
+                            ]
+                    )
+                    model.error
+            ]
+        , div [ class "col-md-8 article-title-content-block" ]
+            [ div
+                [ class "row article-title" ]
+                [ input [ type_ "text", class "form-control", placeholder "Title", onInput TitleInput ] []
                 ]
-            , div []
-                [ label [] [ text "Description: " ]
-                , textarea
-                    [ placeholder "Short description about article..."
-                    , onInput DescInput
-                    , value model.desc
-                    ]
-                    []
-                ]
-            , div []
-                [ label [] [ text "Keywords: " ]
-                , input
-                    [ placeholder "Keywords..."
-                    , onInput KeywordsInput
-                    , value model.keywords
-                    , type_ "text"
-                    ]
-                    []
-                ]
-            , div []
-                [ categoryListDropdown model
-                ]
-            , div []
-                [ button
-                    [ type_ "submit"
-                    , class "button primary"
-                    ]
-                    [ text "Submit" ]
+            , div
+                [ class "row article-content" ]
+                [ node "trix-editor" [ placeholder "Article content goes here..", onInput DescInput ] []
                 ]
             ]
+        , div [ class "col-sm article-meta-data-block" ]
+            [ categoryListDropdown model
+            , articleUrls model
+            , articleKeywords model
+            , button [ id "create-article", type_ "button", class "btn btn-success", onClick SaveArticle ] [ text "Create Article" ]
+            ]
+        ]
+
+
+articleKeywords : Model -> Html Msg
+articleKeywords model =
+    div []
+        [ h6 [] [ text "Keywords:" ]
+        , input
+            [ onInput KeywordsInput
+            , Html.Attributes.value <| Field.value model.keywords
+            , type_ "text"
+            , class "form-control"
+            , placeholder "Article keywords"
+            ]
+            []
+        ]
+
+
+articleUrls : Model -> Html Msg
+articleUrls model =
+    div []
+        [ h6 [] [ text "Linked URLs:" ]
+        , span [ class "badge badge-secondary" ] [ text "/getting-started/this-is-hardcoded" ]
         ]
 
 
 categoryListDropdown : Model -> Html Msg
 categoryListDropdown model =
-    div
-        []
-        [ select
-            [ onInput CategorySelected ]
-            (List.concat
-                [ [ option
-                        [ value "0" ]
-                        [ text "Select Category" ]
-                  ]
-                , (List.map
-                    (\category ->
-                        option
-                            [ value category.id ]
-                            [ text category.name ]
+    let
+        selectedCategory =
+            List.filter (\category -> category.id == (Field.value model.categoryId)) model.categories
+                |> List.map .name
+                |> List.head
+                |> Maybe.withDefault "Select Category"
+    in
+        div []
+            [ div [ class "dropdown" ]
+                [ a
+                    [ class "btn btn-secondary dropdown-toggle"
+                    , attribute "role" "button"
+                    , attribute "data-toggle" "dropdown"
+                    , attribute "aria-haspopup" "true"
+                    , attribute "aria-expanded" "false"
+                    ]
+                    [ text selectedCategory ]
+                , div
+                    [ class "dropdown-menu", attribute "aria-labelledby" "dropdownMenuButton" ]
+                    (List.map
+                        (\category ->
+                            a [ class "dropdown-item", onClick (CategorySelected category.id) ] [ text category.name ]
+                        )
+                        model.categories
                     )
-                    model.categories
-                  )
                 ]
-            )
-        ]
+            ]
 
 
 articleInputs : Model -> CreateArticleInputs
 articleInputs { title, desc, categoryId } =
-    { title = title
-    , desc = desc
-    , category_id = categoryId
+    { title = Field.value title
+    , desc = Field.value desc
+    , category_id = Field.value categoryId
     }
 
 
@@ -212,79 +231,3 @@ save model nodeEnv organizationKey =
             Task.attempt SaveArticleResponse (Reader.run (requestCreateArticle) ( nodeEnv, (articleInputs model) ))
     in
         ( model, cmd )
-
-
-validate : Model -> Model
-validate model =
-    model
-        |> validateTitle
-        |> validateDesc
-        |> validateKeyword
-        |> validateCategoryId
-
-
-validateTitle : Model -> Model
-validateTitle model =
-    if String.isEmpty model.title then
-        { model
-            | titleError =
-                Just "Title should be present"
-        }
-    else
-        { model
-            | titleError = Nothing
-        }
-
-
-validateDesc : Model -> Model
-validateDesc model =
-    if String.isEmpty model.desc then
-        { model
-            | descError =
-                Just "Desc is required"
-        }
-    else
-        { model
-            | descError = Nothing
-        }
-
-
-validateKeyword : Model -> Model
-validateKeyword model =
-    if String.isEmpty model.keywords then
-        { model
-            | keywordError =
-                Just "Keyword is required"
-        }
-    else
-        { model
-            | keywordError = Nothing
-        }
-
-
-validateCategoryId : Model -> Model
-validateCategoryId model =
-    if String.isEmpty model.categoryId then
-        { model
-            | categoryIdError = Just "category ID required"
-        }
-    else if model.categoryId == "0" then
-        { model
-            | categoryIdError = Just "Please select category"
-        }
-    else
-        { model
-            | categoryIdError = Nothing
-        }
-
-
-isValid : Model -> Bool
-isValid model =
-    model.titleError
-        == Nothing
-        && model.descError
-        == Nothing
-        && model.keywordError
-        == Nothing
-        && model.categoryIdError
-        == Nothing

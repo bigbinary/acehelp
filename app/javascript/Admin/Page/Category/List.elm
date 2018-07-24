@@ -8,7 +8,6 @@ import Route
 import Data.CategoryData exposing (..)
 import Request.CategoryRequest exposing (..)
 import Request.RequestHelper exposing (..)
-import Data.CommonData exposing (Error)
 import Task exposing (Task)
 import Reader exposing (Reader)
 import GraphQL.Client.Http as GQLClient
@@ -19,7 +18,7 @@ import GraphQL.Client.Http as GQLClient
 
 type alias Model =
     { categories : List Category
-    , error : Error
+    , error : Maybe String
     }
 
 

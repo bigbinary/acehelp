@@ -5,7 +5,6 @@ import Html.Attributes exposing (..)
 import Html.Events exposing (..)
 import Request.UrlRequest exposing (..)
 import Request.Helpers exposing (NodeEnv, ApiKey)
-import Data.CommonData exposing (Error)
 import Data.UrlData exposing (..)
 import Reader exposing (Reader)
 import Task exposing (Task)
@@ -16,12 +15,12 @@ import GraphQL.Client.Http as GQLClient
 
 
 type alias Model =
-    { error : Error
+    { error : Maybe String
     , id : String
     , url : String
-    , urlError : Error
+    , urlError : Maybe String
     , urlTitle : String
-    , urlTitleError : Error
+    , urlTitleError : Maybe String
     }
 
 

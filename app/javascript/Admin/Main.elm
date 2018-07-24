@@ -17,7 +17,6 @@ import Page.Errors as Errors
 import Data.Organization exposing (OrganizationId)
 import Data.CategoryData exposing (Category)
 import Data.UrlData exposing (UrlData)
-import Data.CommonData exposing (Error)
 import UrlParser as Url exposing (..)
 import Request.RequestHelper exposing (NodeEnv, ApiKey, logoutRequest)
 import Route
@@ -60,7 +59,7 @@ type alias Model =
     , route : Route.Route
     , nodeEnv : String
     , organizationKey : String
-    , error : Error
+    , error : Maybe String
     }
 
 
@@ -265,7 +264,7 @@ update msg model =
                     ArticleCreate.update caMsg currentPageModel model.nodeEnv model.organizationKey
             in
                 ( { model | currentPage = Loaded (ArticleCreate articleCreateModel) }
-                , Cmd.none
+                , Cmd.map ArticleCreateMsg createArticleCmd
                 )
 
         ArticleCategoriesLoaded (Ok categoriesList) ->

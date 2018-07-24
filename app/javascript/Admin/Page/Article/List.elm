@@ -7,7 +7,6 @@ import Navigation exposing (..)
 import Route
 import Request.ArticleRequest exposing (..)
 import Request.UrlRequest exposing (..)
-import Data.CommonData exposing (..)
 import Page.Common.View exposing (renderError)
 import Data.ArticleData exposing (..)
 import Data.UrlData exposing (..)
@@ -25,7 +24,7 @@ type alias Model =
     { articles : List ArticleSummary
     , urlList : List UrlData
     , url : String
-    , error : Error
+    , error : Maybe String
     }
 
 
