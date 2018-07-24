@@ -142,6 +142,7 @@ view model =
             [ categoryListDropdown model
             , articleUrls model
             , articleKeywords model
+            , button [ id "create-article", type_ "button", class "btn btn-success" ] [ text "Create Article" ]
             ]
         ]
 

@@ -28,9 +28,11 @@ $blueThemeColor: rgb(60, 170, 249);
     .article-block{
         margin: 0 10px;
     }
+    .article-content{
+        flex-direction: column;
+    }
     .article-title-content-block{
         flex-direction: column;
-        height: 500px;
         input {
             width:100%;
         }
@@ -39,14 +41,12 @@ $blueThemeColor: rgb(60, 170, 249);
         div{
             padding: 5px 0px;
         }
+        #create-article{
+            bottom: 0;
+            position: absolute;
+        }
     }
-    trix-editor, trix-toolbar{
-        width:100%;
-    }
-    trix-toolbar{
-        max-height:40px;
-    }
-    trix-editor, .article-content{
-        height:100%;
+    trix-editor{
+        height:500px;
     }
 }
