@@ -27,6 +27,6 @@ class Organization < ApplicationRecord
 
     def assign_slug
       # TODO put it in a loop in case the slug is taken
-      self.slug = self.name.parameterize
+      self.slug = self.name.parameterize.downcase
     end
 end
