@@ -59,6 +59,9 @@ class UrlControllerTest < ActionDispatch::IntegrationTest
   end
 
   def test_destroy_success
+    ArticleUrl.delete_all
+    Article.delete_all
+
     delete url_path(@url.id), params: nil, headers: @headers
 
     assert_response :success

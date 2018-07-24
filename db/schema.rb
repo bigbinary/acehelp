@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2018_07_23_114540) do
+ActiveRecord::Schema.define(version: 2018_07_24_114503) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "pgcrypto"
@@ -21,6 +21,8 @@ ActiveRecord::Schema.define(version: 2018_07_23_114540) do
     t.uuid "url_id", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.index ["article_id"], name: "index_article_urls_on_article_id"
+    t.index ["url_id"], name: "index_article_urls_on_url_id"
   end
 
   create_table "articles", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
@@ -32,6 +34,7 @@ ActiveRecord::Schema.define(version: 2018_07_23_114540) do
     t.uuid "organization_id"
     t.integer "upvotes_count", default: 0
     t.integer "downvotes_count", default: 0
+    t.index ["category_id"], name: "index_articles_on_category_id"
     t.index ["organization_id"], name: "index_articles_on_organization_id"
   end
 
@@ -83,8 +86,14 @@ ActiveRecord::Schema.define(version: 2018_07_23_114540) do
     t.datetime "updated_at", null: false
     t.uuid "organization_id"
     t.index ["email"], name: "index_users_on_email", unique: true
+    t.index ["organization_id"], name: "index_users_on_organization_id"
     t.index ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true
   end
 
+  add_foreign_key "article_urls", "articles"
+  add_foreign_key "article_urls", "urls"
+  add_foreign_key "articles", "categories"
+  add_foreign_key "articles", "organizations"
+  add_foreign_key "urls", "organizations"
   add_foreign_key "users", "organizations"
 end

@@ -30,8 +30,10 @@ module Api
       end
 
       def test_all_for_no_categories_and_articles
-        Category.delete_all
+        ArticleUrl.delete_all
         Article.delete_all
+        Category.delete_all
+
 
         get api_v1_all_url, params: { format: :json }
 

@@ -108,6 +108,9 @@ class ArticleControllerTest < ActionDispatch::IntegrationTest
     delete article_path(@article.id), params: { article: { title: "Rails" } }
     assert_response :unauthorized
 
+    # to get around the foreign key issue
+    ArticleUrl.delete_all
+
     delete article_path(@article.id), params: nil, headers: headers
 
     assert_response :success
