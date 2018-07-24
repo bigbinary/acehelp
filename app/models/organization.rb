@@ -3,6 +3,7 @@
 class Organization < ApplicationRecord
   has_many :urls
   has_many :articles
+  has_many :categories
 
   has_many :owners, class_name: "User"
 
