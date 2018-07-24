@@ -6,14 +6,14 @@ class HomeController < ApplicationController
   end
 
   def getting_started
-    render
+    render "/pages/aceinvoice/getting_started"
   end
 
   def integrations
-    render
+    render "/pages/aceinvoice/integrations"
   end
 
   def pricing
-    render
+    render "/pages/aceinvoice/pricing"
   end
 end
