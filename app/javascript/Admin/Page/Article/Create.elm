@@ -231,8 +231,3 @@ save model nodeEnv organizationKey =
             Task.attempt SaveArticleResponse (Reader.run (requestCreateArticle) ( nodeEnv, (articleInputs model) ))
     in
         ( model, cmd )
-
-
-fetchCategories : NodeEnv -> ApiKey -> Cmd Msg
-fetchCategories nodeEnv key =
-    Task.attempt CategoriesLoaded (Reader.run (requestCategories) ( nodeEnv, key ))
