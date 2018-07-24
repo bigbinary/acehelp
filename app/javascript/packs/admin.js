@@ -21,3 +21,13 @@ document.addEventListener("DOMContentLoaded", () => {
         organization_key: org_key
     });
 });
+
+//TODO: Handle file uploads
+document.addEventListener("trix-attachment-add", function(event) {
+    var attachment;
+    attachment = event.attachment;
+    if (attachment.file) {
+        //return uploadAttachment(attachment);
+        //console.log(attachment.file);
+    }
+});

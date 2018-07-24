@@ -14,9 +14,9 @@ import Page.Ticket.List as TicketList
 import Page.Category.Create as CategoryCreate
 import Page.Integration as Integration
 import Page.Errors as Errors
-import Data.Organization exposing (OrganizationId)
-import Data.CategoryData exposing (Category)
-import Data.UrlData exposing (UrlData)
+import Admin.Data.Organization exposing (OrganizationId)
+import Admin.Data.Category exposing (Category)
+import Admin.Data.Url exposing (UrlData)
 import UrlParser as Url exposing (..)
 import Request.RequestHelper exposing (NodeEnv, ApiKey, logoutRequest)
 import Route
@@ -263,7 +263,7 @@ update msg model =
                 ( articleCreateModel, createArticleCmd ) =
                     ArticleCreate.update caMsg currentPageModel model.nodeEnv model.organizationKey
             in
-                ( { model | currentPage = Loaded (ArticleCreate articleCreateModel) }
+                ( { model | currentPage = TransitioningTo (ArticleCreate articleCreateModel) }
                 , Cmd.map ArticleCreateMsg createArticleCmd
                 )
 

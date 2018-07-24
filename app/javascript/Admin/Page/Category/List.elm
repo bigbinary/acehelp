@@ -5,7 +5,7 @@ import Html.Attributes exposing (..)
 import Html.Events exposing (..)
 import Navigation exposing (..)
 import Route
-import Data.CategoryData exposing (..)
+import Admin.Data.Category exposing (..)
 import Request.CategoryRequest exposing (..)
 import Request.RequestHelper exposing (..)
 import Task exposing (Task)

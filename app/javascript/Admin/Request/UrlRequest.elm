@@ -1,7 +1,7 @@
 module Request.UrlRequest exposing (..)
 
 import Request.RequestHelper exposing (..)
-import Data.UrlData exposing (..)
+import Admin.Data.Url exposing (..)
 import Reader exposing (Reader)
 import Task exposing (Task)
 import GraphQL.Client.Http as GQLClient

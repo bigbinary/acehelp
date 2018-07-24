@@ -4,12 +4,12 @@ import Http
 import Json.Decode as JD exposing (field)
 import Json.Encode as JE
 import Request.RequestHelper exposing (..)
-import Data.Organization as AD exposing (..)
+import Admin.Data.Organization as AD exposing (..)
 
 
 organizationUrl : NodeEnv -> OrganizationId -> Url
 organizationUrl env organizationId =
-    (baseUrl env) ++ "/api/v1/organization/" ++ toString(organizationId) ++ "/data"
+    (baseUrl env) ++ "/api/v1/organization/" ++ toString (organizationId) ++ "/data"
 
 
 requestOrganization : NodeEnv -> ApiKey -> OrganizationId -> Http.Request OrganizationResponse

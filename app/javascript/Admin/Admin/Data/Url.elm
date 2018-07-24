@@ -1,4 +1,4 @@
-module Data.UrlData exposing (..)
+module Admin.Data.Url exposing (..)
 
 import GraphQL.Request.Builder as GQLBuilder
 import GraphQL.Request.Builder.Arg as Arg
@@ -32,10 +32,7 @@ requestUrlsQuery =
             (GQLBuilder.field "urls"
                 []
                 (GQLBuilder.list
-                    (GQLBuilder.object UrlData
-                        |> GQLBuilder.with (GQLBuilder.field "id" [] GQLBuilder.string)
-                        |> GQLBuilder.with (GQLBuilder.field "url" [] GQLBuilder.string)
-                    )
+                    urlExtractor
                 )
             )
 
@@ -57,8 +54,13 @@ createUrlMutation =
                     (GQLBuilder.extract <|
                         GQLBuilder.field "url"
                             []
-                            (GQLBuilder.object UrlData
-                                |> GQLBuilder.with (GQLBuilder.field "id" [] GQLBuilder.string)
-                                |> GQLBuilder.with (GQLBuilder.field "url" [] GQLBuilder.string)
-                            )
+                            urlExtractor
                     )
+
+
+urlExtractor : GQLBuilder.ValueSpec GQLBuilder.NonNull GQLBuilder.ObjectType UrlData vars
+urlExtractor =
+    (GQLBuilder.object UrlData
+        |> GQLBuilder.with (GQLBuilder.field "id" [] GQLBuilder.string)
+        |> GQLBuilder.with (GQLBuilder.field "url" [] GQLBuilder.string)
+    )

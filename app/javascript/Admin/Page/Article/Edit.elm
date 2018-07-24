@@ -22,27 +22,27 @@ import GraphQL.Client.Http as GQLClient
 type alias Model =
     { title : Field String String
     , desc : Field String String
-    , articleId : Maybe ArticleId
+    , articleId : ArticleId
     , categories : List Category
     , categoryId : Field String String
     , error : Maybe String
     }
 
 
-initModel : Model
-initModel =
+initModel : ArticleId -> Model
+initModel articleId =
     { title = Field (validateEmpty "Title") ""
     , desc = Field (validateEmpty "Article Content") ""
-    , articleId = Nothing
+    , articleId = articleId
     , categories = []
     , categoryId = Field (validateEmpty "Category Id") ""
     , error = Nothing
     }
 
 
-init : ( Model, Reader ( NodeEnv, ApiKey ) (Task GQLClient.Error (List Category)) )
-init =
-    ( initModel
+init : ArticleId -> ( Model, Reader ( NodeEnv, ApiKey ) (Task GQLClient.Error (List Category)) )
+init articleId =
+    ( initModel articleId
     , requestCategories
     )
 
@@ -91,7 +91,7 @@ update msg model nodeEnv organizationKey =
                 if isAllValid fields then
                     save model nodeEnv organizationKey
                 else
-                    ( { model | error = Just errors }, Cmd.none )
+                    ( { model | error = Just <| Debug.log "" errors }, Cmd.none )
 
         SaveArticleResponse (Ok id) ->
             ( { model
@@ -192,7 +192,7 @@ articleInputs : Model -> CreateArticleInputs
 articleInputs { title, desc, categoryId } =
     { title = Field.value title
     , desc = Field.value desc
-    , categoryId = Field.value categoryId
+    , category_id = Field.value categoryId
     }
 
 

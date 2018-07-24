@@ -5,7 +5,7 @@ import Html.Attributes exposing (..)
 import Html.Events exposing (..)
 import Request.UrlRequest exposing (..)
 import Request.Helpers exposing (NodeEnv, ApiKey)
-import Data.UrlData exposing (..)
+import Admin.Data.Url exposing (..)
 import Reader exposing (Reader)
 import Task exposing (Task)
 import GraphQL.Client.Http as GQLClient

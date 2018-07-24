@@ -1,0 +1,26 @@
+.article-block{
+    margin: 0 10px;
+
+    
+    .article-title-content-block{
+        flex-direction: column;
+        input {
+            width:100%;
+        }
+        .article-content{
+            flex-direction: column;
+        }
+    }
+    .article-meta-data-block{
+        div{
+            padding: 5px 0px;
+        }
+        #create-article{
+            bottom: 0;
+            position: absolute;
+        }
+    }
+    trix-editor{
+        min-height:500px;
+    }
+}

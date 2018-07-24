@@ -1,6 +1,6 @@
 module Request.CategoryRequest exposing (..)
 
-import Data.CategoryData exposing (..)
+import Admin.Data.Category exposing (..)
 import Request.RequestHelper exposing (..)
 import Reader exposing (Reader)
 import Task exposing (Task)

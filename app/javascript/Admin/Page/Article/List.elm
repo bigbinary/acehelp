@@ -8,8 +8,8 @@ import Route
 import Request.ArticleRequest exposing (..)
 import Request.UrlRequest exposing (..)
 import Page.Common.View exposing (renderError)
-import Data.ArticleData exposing (..)
-import Data.UrlData exposing (..)
+import Admin.Data.Article exposing (..)
+import Admin.Data.Url exposing (..)
 import Json.Decode as Json
 import Request.Helpers exposing (NodeEnv, ApiKey)
 import Task exposing (Task)

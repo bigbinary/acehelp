@@ -3,7 +3,7 @@ module Request.ArticleRequest exposing (..)
 import Request.RequestHelper exposing (..)
 import Reader exposing (Reader)
 import Task exposing (Task)
-import Data.ArticleData exposing (..)
+import Admin.Data.Article exposing (..)
 import GraphQL.Client.Http as GQLClient
 import GraphQL.Request.Builder as GQLBuilder
 
@@ -25,7 +25,7 @@ requestCreateArticle =
                 (GQLBuilder.request
                     { title = articleInputs.title
                     , desc = articleInputs.desc
-                    , category_id = articleInputs.category_id
+                    , categoryId = articleInputs.categoryId
                     }
                     createArticleMutation
                 )

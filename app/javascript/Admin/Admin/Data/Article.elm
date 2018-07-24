@@ -1,10 +1,12 @@
-module Data.ArticleData exposing (..)
+module Admin.Data.Article exposing (..)
 
 import Json.Decode exposing (..)
 import Json.Decode.Pipeline as Pipeline exposing (decode, required)
 import GraphQL.Request.Builder.Arg as Arg
 import GraphQL.Request.Builder.Variable as Var
 import GraphQL.Request.Builder as GQLBuilder
+import Admin.Data.Category exposing (CategoryId)
+import Admin.Data.Url exposing (UrlId, UrlData, urlExtractor)
 
 
 type alias ArticleId =
@@ -15,13 +17,15 @@ type alias Article =
     { id : ArticleId
     , title : String
     , desc : String
+    , categoryId : CategoryId
+    , urls : List UrlData
     }
 
 
 type alias CreateArticleInputs =
     { title : String
     , desc : String
-    , category_id : String
+    , categoryId : String
     }
 
 
@@ -63,6 +67,23 @@ requestArticlesQuery =
             )
 
 
+requestArticlByIdQuery : GQLBuilder.Document GQLBuilder.Query (List Article) { vars | id : String }
+requestArticlByIdQuery =
+    let
+        idVar =
+            Var.required "id" .id Var.string
+    in
+        GQLBuilder.queryDocument
+            (GQLBuilder.extract
+                (GQLBuilder.field "article"
+                    [ ( "id", Arg.variable idVar ) ]
+                    (GQLBuilder.list
+                        articleObject
+                    )
+                )
+            )
+
+
 createArticleMutation : GQLBuilder.Document GQLBuilder.Mutation Article CreateArticleInputs
 createArticleMutation =
     let
@@ -73,7 +94,7 @@ createArticleMutation =
             Var.required "desc" .desc Var.string
 
         categoryIdVar =
-            Var.required "category_id" .category_id Var.string
+            Var.required "category_id" .categoryId Var.string
     in
         GQLBuilder.mutationDocument <|
             GQLBuilder.extract
@@ -89,10 +110,22 @@ createArticleMutation =
                     (GQLBuilder.extract <|
                         GQLBuilder.field "article"
                             []
-                            (GQLBuilder.object Article
-                                |> GQLBuilder.with (GQLBuilder.field "id" [] GQLBuilder.string)
-                                |> GQLBuilder.with (GQLBuilder.field "title" [] GQLBuilder.string)
-                                |> GQLBuilder.with (GQLBuilder.field "desc" [] GQLBuilder.string)
-                            )
+                            articleObject
                     )
                 )
+
+
+articleObject : GQLBuilder.ValueSpec GQLBuilder.NonNull GQLBuilder.ObjectType Article vars
+articleObject =
+    GQLBuilder.object Article
+        |> GQLBuilder.with (GQLBuilder.field "id" [] GQLBuilder.string)
+        |> GQLBuilder.with (GQLBuilder.field "title" [] GQLBuilder.string)
+        |> GQLBuilder.with (GQLBuilder.field "desc" [] GQLBuilder.string)
+        |> GQLBuilder.with (GQLBuilder.field "categoryId" [] GQLBuilder.string)
+        |> GQLBuilder.with
+            (GQLBuilder.field "urls"
+                []
+                (GQLBuilder.list
+                    urlExtractor
+                )
+            )

@@ -1,4 +1,4 @@
-module Data.CategoryData exposing (..)
+module Admin.Data.Category exposing (..)
 
 import GraphQL.Request.Builder as GQLBuilder
 import GraphQL.Request.Builder.Variable as Var

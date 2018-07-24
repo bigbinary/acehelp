@@ -84,7 +84,7 @@ modifyUrl =
 
 fromLocation : Location -> Route
 fromLocation location =
-    case (Debug.log "route:" <| parsePath routeMatcher location) of
+    case parsePath routeMatcher location of
         Just route ->
             route
 
