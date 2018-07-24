@@ -161,16 +161,6 @@ articleKeywords model =
         ]
 
 
-
--- input
---             [ placeholder "Keywords..."
---             , onInput KeywordsInput
---             , Html.Attributes.value <| Field.value model.keywords
---             , type_ "text"
---             ]
---             []
-
-
 articleUrls : Model -> Html Msg
 articleUrls model =
     div []
