@@ -264,7 +264,7 @@ update msg model =
                     ArticleCreate.update caMsg currentPageModel model.nodeEnv model.organizationKey
             in
                 ( { model | currentPage = Loaded (ArticleCreate articleCreateModel) }
-                , Cmd.none
+                , Cmd.map ArticleCreateMsg createArticleCmd
                 )
 
         ArticleCategoriesLoaded (Ok categoriesList) ->

@@ -37,20 +37,7 @@ initModel =
     , keywords = Field (validateEmpty "Keywords") ""
     , articleId = Nothing
     , categories = []
-    , categoryId =
-        Field
-            (\cId ->
-                case cId of
-                    "" ->
-                        Failed "categpry Id cannot be empty"
-
-                    "0" ->
-                        Failed "Please select a categpryId"
-
-                    _ ->
-                        Passed cId
-            )
-            "0"
+    , categoryId = Field (validateEmpty "Category Id") ""
     , error = Nothing
     }
 
@@ -91,10 +78,28 @@ update msg model nodeEnv organizationKey =
             ( { model | keywords = Field.update model.keywords keywords }, Cmd.none )
 
         SaveArticle ->
-            if isAllValid [ model.title, model.desc, model.keywords, model.categoryId ] then
-                save model nodeEnv organizationKey
-            else
-                ( model, Cmd.none )
+            let
+                fields =
+                    [ model.title, model.desc, model.keywords, model.categoryId ]
+
+                errors =
+                    validateAll fields
+                        |> filterFailures
+                        |> List.map
+                            (\result ->
+                                case result of
+                                    Failed err ->
+                                        err
+
+                                    Passed _ ->
+                                        "Unknown Error"
+                            )
+                        |> String.join ", "
+            in
+                if isAllValid fields then
+                    save model nodeEnv organizationKey
+                else
+                    ( { model | error = Just <| Debug.log "" errors }, Cmd.none )
 
         SaveArticleResponse (Ok id) ->
             ( { model
@@ -128,21 +133,31 @@ update msg model nodeEnv organizationKey =
 view : Model -> Html Msg
 view model =
     div [ class "row article-block" ]
-        [ div [ class "col-md-8 article-title-content-block" ]
+        [ div []
+            [ Maybe.withDefault (text "") <|
+                Maybe.map
+                    (\err ->
+                        div [ class "alert alert-danger alert-dismissible fade show", attribute "role" "alert" ]
+                            [ text <| "Error: " ++ err
+                            ]
+                    )
+                    model.error
+            ]
+        , div [ class "col-md-8 article-title-content-block" ]
             [ div
                 [ class "row article-title" ]
-                [ input [ type_ "text", class "form-control", placeholder "Title" ] []
+                [ input [ type_ "text", class "form-control", placeholder "Title", onInput TitleInput ] []
                 ]
             , div
                 [ class "row article-content" ]
-                [ node "trix-editor" [ placeholder "Article content goes here.." ] []
+                [ node "trix-editor" [ placeholder "Article content goes here..", onInput DescInput ] []
                 ]
             ]
         , div [ class "col-sm article-meta-data-block" ]
             [ categoryListDropdown model
             , articleUrls model
             , articleKeywords model
-            , button [ id "create-article", type_ "button", class "btn btn-success" ] [ text "Create Article" ]
+            , button [ id "create-article", type_ "button", class "btn btn-success", onClick SaveArticle ] [ text "Create Article" ]
             ]
         ]
 
@@ -172,26 +187,33 @@ articleUrls model =
 
 categoryListDropdown : Model -> Html Msg
 categoryListDropdown model =
-    div []
-        [ div [ class "dropdown" ]
-            [ a
-                [ class "btn btn-secondary dropdown-toggle"
-                , attribute "role" "button"
-                , attribute "data-toggle" "dropdown"
-                , attribute "aria-haspopup" "true"
-                , attribute "aria-expanded" "false"
-                ]
-                [ text "Select Category" ]
-            , div
-                [ class "dropdown-menu", attribute "aria-labelledby" "dropdownMenuButton" ]
-                (List.map
-                    (\category ->
-                        a [ class "dropdown-item", onClick (CategorySelected category.id) ] [ text category.name ]
+    let
+        selectedCategory =
+            List.filter (\category -> category.id == (Field.value model.categoryId)) model.categories
+                |> List.map .name
+                |> List.head
+                |> Maybe.withDefault "Select Category"
+    in
+        div []
+            [ div [ class "dropdown" ]
+                [ a
+                    [ class "btn btn-secondary dropdown-toggle"
+                    , attribute "role" "button"
+                    , attribute "data-toggle" "dropdown"
+                    , attribute "aria-haspopup" "true"
+                    , attribute "aria-expanded" "false"
+                    ]
+                    [ text selectedCategory ]
+                , div
+                    [ class "dropdown-menu", attribute "aria-labelledby" "dropdownMenuButton" ]
+                    (List.map
+                        (\category ->
+                            a [ class "dropdown-item", onClick (CategorySelected category.id) ] [ text category.name ]
+                        )
+                        model.categories
                     )
-                    model.categories
-                )
+                ]
             ]
-        ]
 
 
 articleInputs : Model -> CreateArticleInputs
