@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2018_07_24_114503) do
+ActiveRecord::Schema.define(version: 2018_07_24_141940) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "pgcrypto"
@@ -42,6 +42,8 @@ ActiveRecord::Schema.define(version: 2018_07_24_114503) do
     t.string "name", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.uuid "organization_id"
+    t.index ["organization_id"], name: "index_categories_on_organization_id"
   end
 
   create_table "organizations", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
@@ -50,6 +52,8 @@ ActiveRecord::Schema.define(version: 2018_07_24_114503) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.string "email", null: false
+    t.string "slug", null: false
+    t.index ["slug"], name: "index_organizations_on_slug", unique: true
   end
 
   create_table "tickets", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
@@ -94,6 +98,7 @@ ActiveRecord::Schema.define(version: 2018_07_24_114503) do
   add_foreign_key "article_urls", "urls"
   add_foreign_key "articles", "categories"
   add_foreign_key "articles", "organizations"
+  add_foreign_key "categories", "organizations"
   add_foreign_key "urls", "organizations"
   add_foreign_key "users", "organizations"
 end

@@ -25,6 +25,8 @@ npm install -g elm
 
 elm-package install
 
+rake searchkick:reindex:all
+
 foreman start -f Procfile.dev
 ```
 
