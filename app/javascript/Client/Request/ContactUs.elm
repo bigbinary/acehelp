@@ -16,3 +16,11 @@ requestAddTicketMutation feedbackFrom =
             GQLClient.customSendMutation (requestOptions env apiKey) <|
                 GQLBuilder.request feedbackFrom addTicketMutation
         )
+
+requestAddFeedbackMutation : FeedbackForm -> Reader ( NodeEnv, ApiKey ) (Task GQLClient.Error (Maybe (List GQLError)))
+requestAddFeedbackMutation feedbackFrom =
+    Reader.Reader
+        (\( env, apiKey ) ->
+            GQLClient.sendMutation (graphqlUrl env) <|
+                GQLBuilder.request feedbackFrom addFeedbackMutation
+        )

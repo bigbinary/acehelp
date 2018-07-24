@@ -4,7 +4,7 @@ import Data.Common exposing (GQLError)
 import Data.Article exposing (..)
 import Request.Article exposing (..)
 import Data.ContactUs exposing (FeedbackForm)
-import Request.ContactUs exposing (requestAddTicketMutation)
+import Request.ContactUs exposing (requestAddTicketMutation, requestAddFeedbackMutation)
 import Request.Helpers exposing (ApiKey, Context, NodeEnv, graphqlUrl)
 import Html exposing (..)
 import Html.Attributes exposing (..)
@@ -68,6 +68,7 @@ type Msg
     | EmailInput String
     | CommentInput String
 
+--markFeedback: Msg -> Model -> Model
 
 update : Msg -> Model -> ( Model, SectionCmd Msg )
 update msg model =
@@ -82,12 +83,15 @@ update msg model =
 
                 _ ->
                     ( { model | feedback = feedback }, Nothing )
-
         SendFeedback ->
             ( { model | feedback = FeedbackSent }
             , Maybe.map
                 (\form ->
-                    Reader.map (Task.attempt SentFeedbackResponse) <| requestAddTicketMutation form
+                    case form.email of
+                      "" ->
+                          Reader.map (Task.attempt SentFeedbackResponse) <| requestAddFeedbackMutation form
+                      _ ->
+                          Reader.map (Task.attempt SentFeedbackResponse) <| requestAddTicketMutation form
                 )
                 model.feedbackForm
             )

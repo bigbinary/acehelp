@@ -1,4 +1,4 @@
-module Data.ContactUs exposing (FeedbackForm, ResponseMessage, RequestMessage, getEncodedContact, decodeMessage, addTicketMutation)
+module Data.ContactUs exposing (FeedbackForm, ResponseMessage, RequestMessage, getEncodedContact, decodeMessage, addTicketMutation, addFeedbackMutation)
 
 import Json.Encode as Encode
 import Json.Decode as Decode exposing (Decoder)
@@ -31,7 +31,6 @@ type alias FeedbackForm =
     , email : String
     , name : String
     }
-
 
 
 -- ENCODERS
@@ -82,8 +81,26 @@ addTicketMutation =
                     ]
                     errorsExtractor
 
+addFeedbackMutation : GQLBuilder.Document GQLBuilder.Mutation (Maybe (List GQLError)) FeedbackForm
+addFeedbackMutation =
+    let
+        guestNameVar =
+            Var.required "name" .name Var.string
 
-
+        guestMessageVar =
+            Var.required "message" .comment Var.string
+    in
+        GQLBuilder.mutationDocument <|
+            GQLBuilder.extract <|
+                GQLBuilder.field "addFeedback"
+                    [ ( "input"
+                      , Arg.object
+                          [ ("name", Arg.variable guestNameVar )
+                          , ("message", Arg.variable guestMessageVar )
+                          ]
+                      )
+                    ]
+                    errorsExtractor
 -- DECODERS
 
 
