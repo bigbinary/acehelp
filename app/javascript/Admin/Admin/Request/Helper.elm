@@ -1,4 +1,4 @@
-module Request.RequestHelper exposing (..)
+module Admin.Request.Helper exposing (..)
 
 import Http
 import Json.Decode exposing (Decoder)

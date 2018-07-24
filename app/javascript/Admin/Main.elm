@@ -18,7 +18,7 @@ import Admin.Data.Organization exposing (OrganizationId)
 import Admin.Data.Category exposing (Category)
 import Admin.Data.Url exposing (UrlData)
 import UrlParser as Url exposing (..)
-import Request.RequestHelper exposing (NodeEnv, ApiKey, logoutRequest)
+import Admin.Request.Helper exposing (NodeEnv, ApiKey, logoutRequest)
 import Route
 import Task exposing (Task)
 import GraphQL.Client.Http as GQLClient
@@ -429,7 +429,7 @@ update msg model =
             ( model, Http.send SignedOut (logoutRequest model.nodeEnv) )
 
         SignedOut _ ->
-            ( model, load (Request.RequestHelper.baseUrl model.nodeEnv) )
+            ( model, load (Admin.Request.Helper.baseUrl model.nodeEnv) )
 
 
 retriveOrganizationFromUrl : Location -> OrganizationId

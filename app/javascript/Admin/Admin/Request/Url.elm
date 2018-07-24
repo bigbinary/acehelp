@@ -1,6 +1,6 @@
-module Request.UrlRequest exposing (..)
+module Admin.Request.Url exposing (..)
 
-import Request.RequestHelper exposing (..)
+import Admin.Request.Helper exposing (..)
 import Admin.Data.Url exposing (..)
 import Reader exposing (Reader)
 import Task exposing (Task)

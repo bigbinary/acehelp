@@ -1,6 +1,6 @@
-module Request.Ticket exposing (..)
+module Admin.Request.Ticket exposing (..)
 
-import Request.RequestHelper exposing (..)
+import Admin.Request.Helper exposing (..)
 import Reader exposing (Reader)
 import Task exposing (Task)
 import Admin.Data.Ticket exposing (..)
