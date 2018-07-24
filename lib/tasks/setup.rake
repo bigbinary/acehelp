@@ -85,7 +85,7 @@ def create_data_for_ace_invoice_organization
                                   desc: desc,
                                   organization_id: org.id
 
-  category = Category.create! name: "Pricing"
+  category = org.categories.create! name: "Pricing"
   a5 = category.articles.create!  title: "Do I need to put credit card to try it out?",
                             desc: desc,
                             organization_id: org.id
