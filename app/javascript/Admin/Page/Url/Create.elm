@@ -9,6 +9,9 @@ import Data.UrlData exposing (..)
 import Reader exposing (Reader)
 import Task exposing (Task)
 import GraphQL.Client.Http as GQLClient
+import Field exposing (..)
+import Field.ValidationResult exposing (..)
+import Helpers exposing (..)
 
 
 -- MODEL
@@ -17,10 +20,8 @@ import GraphQL.Client.Http as GQLClient
 type alias Model =
     { error : Maybe String
     , id : String
-    , url : String
-    , urlError : Maybe String
-    , urlTitle : String
-    , urlTitleError : Maybe String
+    , url : Field String String
+    , urlTitle : Field String String
     }
 
 
@@ -28,10 +29,8 @@ initModel : Model
 initModel =
     { error = Nothing
     , id = "0"
-    , url = ""
-    , urlError = Nothing
-    , urlTitle = ""
-    , urlTitleError = Nothing
+    , url = Field (validateEmpty "Url") ""
+    , urlTitle = Field (validateEmpty "Title") ""
     }
 
 
@@ -57,27 +56,39 @@ update : Msg -> Model -> NodeEnv -> ApiKey -> ( Model, Cmd Msg )
 update msg model nodeEnv organizationKey =
     case msg of
         UrlInput url ->
-            ( { model | url = url }, Cmd.none )
+            ( { model | url = Field.update model.url url }, Cmd.none )
 
         TitleInput title ->
-            ( { model | urlTitle = title }, Cmd.none )
+            ( { model | urlTitle = Field.update model.urlTitle title }, Cmd.none )
 
         SaveUrl ->
             let
-                updatedModel =
-                    validate model
+                fields =
+                    [ model.url, model.urlTitle ]
+
+                errors =
+                    validateAll fields
+                        |> filterFailures
+                        |> List.map
+                            (\result ->
+                                case result of
+                                    Failed err ->
+                                        err
+
+                                    Passed _ ->
+                                        "Unknown Error"
+                            )
+                        |> String.join ", "
             in
-                if isValid updatedModel then
-                    save updatedModel nodeEnv
+                if isAllValid fields then
+                    save model nodeEnv
                 else
-                    ( updatedModel, Cmd.none )
+                    ( { model | error = Just errors }, Cmd.none )
 
         SaveUrlResponse (Ok id) ->
             ( { model
-                | url = ""
-                , urlError = Nothing
-                , urlTitle = ""
-                , urlTitleError = Nothing
+                | url = Field.update model.url ""
+                , urlTitle = Field.update model.urlTitle ""
                 , error = Nothing
               }
             , Cmd.none
@@ -96,11 +107,20 @@ view model =
     div [ class "container" ]
         [ Html.form [ onSubmit SaveUrl ]
             [ div []
+                [ Maybe.withDefault (text "") <|
+                    Maybe.map
+                        (\err ->
+                            div [ class "alert alert-danger alert-dismissible fade show", attribute "role" "alert" ]
+                                [ text <| "Error: " ++ err
+                                ]
+                        )
+                        model.error
+                ]
+            , div []
                 [ label [] [ text "URL: " ]
                 , input
                     [ type_ "text"
                     , placeholder "Url..."
-                    , value model.url
                     , onInput UrlInput
                     ]
                     []
@@ -110,7 +130,6 @@ view model =
                 , input
                     [ type_ "text"
                     , placeholder "Title..."
-                    , value model.urlTitle
                     , onInput TitleInput
                     ]
                     []
@@ -120,49 +139,10 @@ view model =
         ]
 
 
-validate : Model -> Model
-validate model =
-    model
-        |> validateUrl
-        |> validateUrlTitle
-
-
-validateUrl : Model -> Model
-validateUrl model =
-    if String.isEmpty model.url then
-        { model
-            | urlError = Just "Url is required"
-        }
-    else
-        { model
-            | urlError = Nothing
-        }
-
-
-validateUrlTitle : Model -> Model
-validateUrlTitle model =
-    if String.isEmpty model.urlTitle then
-        { model
-            | urlTitleError = Just "Title required"
-        }
-    else
-        { model
-            | urlTitleError = Nothing
-        }
-
-
-isValid : Model -> Bool
-isValid model =
-    model.urlError
-        == Nothing
-        && model.urlTitleError
-        == Nothing
-
-
 save : Model -> NodeEnv -> ( Model, Cmd Msg )
 save model nodeEnv =
     let
         cmd =
-            Task.attempt SaveUrlResponse (Reader.run (createUrl) ( nodeEnv, { url = model.url } ))
+            Task.attempt SaveUrlResponse (Reader.run (createUrl) ( nodeEnv, { url = Field.value model.url } ))
     in
         ( model, cmd )

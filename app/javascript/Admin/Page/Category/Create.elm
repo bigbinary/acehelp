@@ -6,24 +6,25 @@ import Html.Attributes exposing (..)
 import Html.Events exposing (..)
 import Data.CategoryData exposing (..)
 import Request.Helpers exposing (..)
+import Field exposing (..)
+import Field.ValidationResult exposing (..)
+import Helpers exposing (..)
 
 
 -- MODEL
 
 
 type alias Model =
-    { id : Int
-    , name : String
-    , nameError : Maybe String
+    { id : String
+    , name : Field String String
     , error : Maybe String
     }
 
 
 initModel : Model
 initModel =
-    { id = 0
-    , name = ""
-    , nameError = Nothing
+    { id = "0"
+    , name = Field (validateEmpty "Name") ""
     , error = Nothing
     }
 
@@ -49,22 +50,36 @@ update : Msg -> Model -> NodeEnv -> ApiKey -> ( Model, Cmd Msg )
 update msg model nodeEnv organizationKey =
     case msg of
         CategoryNameInput categoryName ->
-            ( { model | name = categoryName }, Cmd.none )
+            ( { model | name = Field.update model.name categoryName }, Cmd.none )
 
         SaveCategory ->
             let
-                updatedModel =
-                    validate model
+                fields =
+                    [ model.name ]
+
+                errors =
+                    validateAll fields
+                        |> filterFailures
+                        |> List.map
+                            (\result ->
+                                case result of
+                                    Failed err ->
+                                        err
+
+                                    Passed _ ->
+                                        "Unknown Error"
+                            )
+                        |> String.join ", "
             in
-                if isValid updatedModel then
-                    saveCategory updatedModel nodeEnv organizationKey
+                if isAllValid fields then
+                    saveCategory model nodeEnv organizationKey
                 else
-                    ( updatedModel, Cmd.none )
+                    ( { model | error = Just errors }, Cmd.none )
 
         SaveCategoryResponse (Ok id) ->
             ( { model
-                | id = 0
-                , name = ""
+                | id = "0"
+                , name = Field.update model.name ""
                 , error = Nothing
               }
             , Cmd.none
@@ -96,11 +111,19 @@ view model =
     Html.form
         [ onSubmit SaveCategory ]
         [ div []
+            [ Maybe.withDefault (text "") <|
+                Maybe.map
+                    (\err ->
+                        div [ class "alert alert-danger alert-dismissible fade show", attribute "role" "alert" ]
+                            [ text <| "Error: " ++ err ]
+                    )
+                    model.error
+            ]
+        , div []
             [ label [] [ text "Category Name: " ]
             , input
                 [ type_ "text"
                 , placeholder "Enter name for category..."
-                , value model.name
                 , onInput CategoryNameInput
                 ]
                 []
@@ -113,30 +136,6 @@ view model =
                 [ text "Submit" ]
             ]
         ]
-
-
-validate : Model -> Model
-validate model =
-    model
-        |> validateCategoryName
-
-
-validateCategoryName : Model -> Model
-validateCategoryName model =
-    if String.isEmpty model.name then
-        { model
-            | nameError = Just "Category name is required"
-        }
-    else
-        { model
-            | nameError = Nothing
-        }
-
-
-isValid : Model -> Bool
-isValid model =
-    model.nameError
-        == Nothing
 
 
 
