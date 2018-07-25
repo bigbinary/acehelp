@@ -47,6 +47,28 @@ requestUrlsQuery =
             )
 
 
+urlByIdQuery : GQLBuilder.Document GQLBuilder.Query UrlData { vars | id : String }
+urlByIdQuery =
+    let
+        idVar =
+            Var.required "id" .id Var.string
+    in
+        GQLBuilder.queryDocument
+            (GQLBuilder.extract
+                (GQLBuilder.field "url"
+                    [ ( "id", Arg.variable idVar ) ]
+                    urlObject
+                )
+            )
+
+
+urlObject : GQLBuilder.ValueSpec GQLBuilder.NonNull GQLBuilder.ObjectType UrlData vars
+urlObject =
+    GQLBuilder.object UrlData
+        |> GQLBuilder.with (GQLBuilder.field "id" [] GQLBuilder.string)
+        |> GQLBuilder.with (GQLBuilder.field "url" [] GQLBuilder.string)
+
+
 createUrlMutation : GQLBuilder.Document GQLBuilder.Mutation UrlData CreateUrlInput
 createUrlMutation =
     let
@@ -66,7 +88,6 @@ createUrlMutation =
                             []
                             urlExtractor
                     )
-
 
 deleteUrlMutation : GQLBuilder.Document GQLBuilder.Mutation UrlId UrlIdInput
 deleteUrlMutation =
@@ -88,10 +109,32 @@ deleteUrlMutation =
                             GQLBuilder.string
                     )
 
-
 urlExtractor : GQLBuilder.ValueSpec GQLBuilder.NonNull GQLBuilder.ObjectType UrlData vars
 urlExtractor =
     (GQLBuilder.object UrlData
         |> GQLBuilder.with (GQLBuilder.field "id" [] GQLBuilder.string)
         |> GQLBuilder.with (GQLBuilder.field "url" [] GQLBuilder.string)
     )
+
+updateUrlMutation : GQLBuilder.Document GQLBuilder.Mutation UrlData CreateUrlInput
+updateUrlMutation =
+    let
+        urlVar =
+            Var.required "url" .url Var.string
+    in
+        GQLBuilder.mutationDocument <|
+            GQLBuilder.extract <|
+                GQLBuilder.field "addUrl"
+                    [ ( "input"
+                      , Arg.object
+                            [ ( "url", Arg.variable urlVar ) ]
+                      )
+                    ]
+                    (GQLBuilder.extract <|
+                        GQLBuilder.field "url"
+                            []
+                            (GQLBuilder.object UrlData
+                                |> GQLBuilder.with (GQLBuilder.field "id" [] GQLBuilder.string)
+                                |> GQLBuilder.with (GQLBuilder.field "url" [] GQLBuilder.string)
+                            )
+                    )
