@@ -98,8 +98,9 @@ subscriptions model =
 view : Model -> Html Msg
 view model =
     div
-        []
-        [ div []
+        [ id "url_listing" ]
+        [ div
+            []
             [ Maybe.withDefault (text "") <|
                 Maybe.map
                     (\err ->
@@ -140,6 +141,14 @@ urlRow url =
                 , class "button primary deleteUrl"
                 ]
                 [ text "Delete Url" ]
+            ]
+        , div
+            []
+            [ Html.a
+                [ onClick (Navigate <| Route.UrlEdit url.id)
+                , class "button primary"
+                ]
+                [ text "Edit Url" ]
             ]
         ]
 
