@@ -14,7 +14,9 @@ class Mutations::TicketMutations
     resolve ->(object, inputs, context) {
       new_ticket = Ticket.new(name: inputs[:name],
                               email: inputs[:email],
-                              message: inputs[:message])
+                              message: inputs[:message],
+                              organization_id: context[:organization].id
+                              )
 
       if new_ticket.save
         ticket = new_ticket
