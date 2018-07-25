@@ -7,6 +7,7 @@ import Http
 import Navigation exposing (..)
 import Page.Article.List as ArticleList
 import Page.Article.Create as ArticleCreate
+import Page.Article.Edit as ArticleEdit
 import Page.Url.List as UrlList
 import Page.Url.Create as UrlCreate
 import Page.Category.List as CategoryList
@@ -38,6 +39,7 @@ type alias Flags =
 type Page
     = ArticleList ArticleList.Model
     | ArticleCreate ArticleCreate.Model
+    | ArticleEdit ArticleEdit.Model
     | CategoryList CategoryList.Model
     | CategoryCreate CategoryCreate.Model
     | UrlList UrlList.Model
@@ -90,6 +92,7 @@ type Msg
     | ArticlesUrlsLoaded (Result GQLClient.Error (List UrlData))
     | ArticleCreateMsg ArticleCreate.Msg
     | ArticleCategoriesLoaded (Result GQLClient.Error (List Category))
+    | ArticleEditMsg ArticleEdit.Msg
     | UrlCreateMsg UrlCreate.Msg
     | UrlListMsg UrlList.Msg
     | UrlsLoaded (Result GQLClient.Error (List UrlData))
@@ -195,6 +198,16 @@ navigateTo newRoute model =
             Route.Dashboard ->
                 ( { model | currentPage = Loaded Blank }, Cmd.none )
 
+            Route.ArticleEdit articleId ->
+                let
+                    ( articleEditModel, articleEditCmd ) =
+                        ArticleEdit.init articleId
+
+                    cmd =
+                        Cmd.map ArticleEditMsg <| Task.attempt (ArticleEdit.ArticleLoaded) (Reader.run (articleEditCmd) ( model.nodeEnv, model.organizationKey ))
+                in
+                    ( { model | currentPage = TransitioningTo (ArticleEdit articleEditModel), route = newRoute }, cmd )
+
             Route.NotFound ->
                 ( { model | currentPage = Loaded NotFound }, Cmd.none )
 
@@ -265,6 +278,23 @@ update msg model =
             in
                 ( { model | currentPage = TransitioningTo (ArticleCreate articleCreateModel) }
                 , Cmd.map ArticleCreateMsg createArticleCmd
+                )
+
+        ArticleEditMsg aeMsg ->
+            let
+                currentPageModel =
+                    case model.currentPage of
+                        Loaded (ArticleEdit articleEditModel) ->
+                            articleEditModel
+
+                        _ ->
+                            ArticleEdit.initModel "0"
+
+                ( articleEditModel, articleEditCmd ) =
+                    ArticleEdit.update aeMsg currentPageModel model.nodeEnv model.organizationKey
+            in
+                ( { model | currentPage = TransitioningTo (ArticleEdit articleEditModel) }
+                , Cmd.map ArticleEditMsg articleEditCmd
                 )
 
         ArticleCategoriesLoaded (Ok categoriesList) ->
@@ -477,6 +507,12 @@ view model =
             adminLayout model
                 (Html.map ArticleCreateMsg
                     (ArticleCreate.view articleCreateModel)
+                )
+
+        ArticleEdit articleEditModel ->
+            adminLayout model
+                (Html.map ArticleEditMsg
+                    (ArticleEdit.view articleEditModel)
                 )
 
         UrlCreate urlCreateModel ->

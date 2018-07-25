@@ -120,33 +120,38 @@ update msg model nodeEnv organizationKey =
 
 view : Model -> Html Msg
 view model =
-    div [ class "row article-block" ]
-        [ div []
-            [ Maybe.withDefault (text "") <|
-                Maybe.map
-                    (\err ->
-                        div [ class "alert alert-danger alert-dismissible fade show", attribute "role" "alert" ]
-                            [ text <| "Error: " ++ err
-                            ]
-                    )
-                    model.error
-            ]
-        , div [ class "col-md-8 article-title-content-block" ]
-            [ div
-                [ class "row article-title" ]
-                [ input [ type_ "text", class "form-control", placeholder "Title", onInput TitleInput ] []
+    div []
+        [ errorView model
+        , div [ class "row article-block" ]
+            [ div [ class "col-md-8 article-title-content-block" ]
+                [ div
+                    [ class "row article-title" ]
+                    [ input [ type_ "text", class "form-control", placeholder "Title", onInput TitleInput ] []
+                    ]
+                , div
+                    [ class "row article-content" ]
+                    [ node "trix-editor" [ placeholder "Article content goes here..", onInput DescInput ] []
+                    ]
                 ]
-            , div
-                [ class "row article-content" ]
-                [ node "trix-editor" [ placeholder "Article content goes here..", onInput DescInput ] []
+            , div [ class "col-sm article-meta-data-block" ]
+                [ categoryListDropdown model
+                , articleUrls model
+                , button [ id "create-article", type_ "button", class "btn btn-success", onClick SaveArticle ] [ text "Create Article" ]
                 ]
-            ]
-        , div [ class "col-sm article-meta-data-block" ]
-            [ categoryListDropdown model
-            , articleUrls model
-            , button [ id "create-article", type_ "button", class "btn btn-success", onClick SaveArticle ] [ text "Create Article" ]
             ]
         ]
+
+
+errorView : Model -> Html Msg
+errorView model =
+    Maybe.withDefault (text "") <|
+        Maybe.map
+            (\err ->
+                div [ class "alert alert-danger alert-dismissible fade show", attribute "role" "alert" ]
+                    [ text <| "Error: " ++ err
+                    ]
+            )
+            model.error
 
 
 articleUrls : Model -> Html Msg
@@ -200,6 +205,6 @@ save : Model -> NodeEnv -> ApiKey -> ( Model, Cmd Msg )
 save model nodeEnv organizationKey =
     let
         cmd =
-            Task.attempt SaveArticleResponse (Reader.run (requestCreateArticle) ( nodeEnv, (articleInputs model) ))
+            Task.attempt SaveArticleResponse (Reader.run (requestCreateArticle (articleInputs model)) nodeEnv)
     in
         ( model, cmd )

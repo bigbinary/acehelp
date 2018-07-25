@@ -5,7 +5,7 @@ import Json.Decode.Pipeline as Pipeline exposing (decode, required)
 import GraphQL.Request.Builder.Arg as Arg
 import GraphQL.Request.Builder.Variable as Var
 import GraphQL.Request.Builder as GQLBuilder
-import Admin.Data.Category exposing (CategoryId)
+import Admin.Data.Category exposing (CategoryId, categoryObject, Category)
 import Admin.Data.Url exposing (UrlId, UrlData, urlExtractor)
 
 
@@ -17,7 +17,7 @@ type alias Article =
     { id : ArticleId
     , title : String
     , desc : String
-    , categoryId : CategoryId
+    , category : Category
     , urls : List UrlData
     }
 
@@ -67,8 +67,8 @@ requestArticlesQuery =
             )
 
 
-requestArticlByIdQuery : GQLBuilder.Document GQLBuilder.Query (List Article) { vars | id : String }
-requestArticlByIdQuery =
+articleByIdQuery : GQLBuilder.Document GQLBuilder.Query Article { vars | id : String }
+articleByIdQuery =
     let
         idVar =
             Var.required "id" .id Var.string
@@ -77,9 +77,7 @@ requestArticlByIdQuery =
             (GQLBuilder.extract
                 (GQLBuilder.field "article"
                     [ ( "id", Arg.variable idVar ) ]
-                    (GQLBuilder.list
-                        articleObject
-                    )
+                    articleObject
                 )
             )
 
@@ -121,7 +119,7 @@ articleObject =
         |> GQLBuilder.with (GQLBuilder.field "id" [] GQLBuilder.string)
         |> GQLBuilder.with (GQLBuilder.field "title" [] GQLBuilder.string)
         |> GQLBuilder.with (GQLBuilder.field "desc" [] GQLBuilder.string)
-        |> GQLBuilder.with (GQLBuilder.field "categoryId" [] GQLBuilder.string)
+        |> GQLBuilder.with (GQLBuilder.field "category" [] categoryObject)
         |> GQLBuilder.with
             (GQLBuilder.field "urls"
                 []

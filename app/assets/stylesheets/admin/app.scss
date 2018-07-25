@@ -25,28 +25,5 @@ $blueThemeColor: rgb(60, 170, 249);
       }
     }
   }
-    .article-block{
-        margin: 0 10px;
-    }
-    .article-content{
-        flex-direction: column;
-    }
-    .article-title-content-block{
-        flex-direction: column;
-        input {
-            width:100%;
-        }
-    }
-    .article-meta-data-block{
-        div{
-            padding: 5px 0px;
-        }
-        #create-article{
-            bottom: 0;
-            position: absolute;
-        }
-    }
-    trix-editor{
-        min-height:500px;
-    }
+    
 }

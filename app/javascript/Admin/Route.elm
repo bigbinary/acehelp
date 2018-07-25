@@ -2,6 +2,7 @@ module Route exposing (Route(..), fromLocation, modifyUrl, routeToString)
 
 import Navigation exposing (Location)
 import UrlParser as Url exposing ((</>), Parser, oneOf, parsePath, s, string)
+import Admin.Data.Article exposing (ArticleId)
 
 
 -- ROUTING --
@@ -10,6 +11,7 @@ import UrlParser as Url exposing ((</>), Parser, oneOf, parsePath, s, string)
 type Route
     = ArticleList
     | ArticleCreate
+    | ArticleEdit ArticleId
     | CategoryList
     | CategoryCreate
     | UrlList
@@ -32,6 +34,7 @@ routeMatcher =
         , Url.map ArticleCreate (s "admin" </> s "articles" </> s "new")
         , Url.map UrlCreate (s "admin" </> s "urls" </> s "new")
         , Url.map CategoryCreate (s "admin" </> s "categories" </> s "new")
+        , Url.map ArticleEdit (s "admin" </> s "articles" </> string)
         ]
 
 
@@ -70,6 +73,9 @@ routeToString page =
 
                 CategoryCreate ->
                     [ "categories", "new" ]
+
+                ArticleEdit articleId ->
+                    [ "articles", articleId ]
 
                 NotFound ->
                     []

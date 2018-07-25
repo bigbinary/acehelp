@@ -36,10 +36,7 @@ categoriesQuery =
             (GQLBuilder.field "categories"
                 []
                 (GQLBuilder.list
-                    (GQLBuilder.object Category
-                        |> GQLBuilder.with (GQLBuilder.field "id" [] GQLBuilder.string)
-                        |> GQLBuilder.with (GQLBuilder.field "name" [] GQLBuilder.string)
-                    )
+                    categoryObject
                 )
             )
         )
@@ -56,7 +53,12 @@ createCategoryMutation =
                 GQLBuilder.field "category"
                     [ ( "name", Arg.variable nameVar )
                     ]
-                    (GQLBuilder.object Category
-                        |> GQLBuilder.with (GQLBuilder.field "id" [] GQLBuilder.string)
-                        |> GQLBuilder.with (GQLBuilder.field "name" [] GQLBuilder.string)
-                    )
+                    categoryObject
+
+
+categoryObject : GQLBuilder.ValueSpec GQLBuilder.NonNull GQLBuilder.ObjectType Category vars
+categoryObject =
+    (GQLBuilder.object Category
+        |> GQLBuilder.with (GQLBuilder.field "id" [] GQLBuilder.string)
+        |> GQLBuilder.with (GQLBuilder.field "name" [] GQLBuilder.string)
+    )

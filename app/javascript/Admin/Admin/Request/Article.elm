@@ -17,10 +17,10 @@ requestArticles url =
         )
 
 
-requestCreateArticle : Reader ( NodeEnv, CreateArticleInputs ) (Task GQLClient.Error Article)
-requestCreateArticle =
+requestCreateArticle : CreateArticleInputs -> Reader NodeEnv (Task GQLClient.Error Article)
+requestCreateArticle articleInputs =
     Reader.Reader
-        (\( env, articleInputs ) ->
+        (\env ->
             GQLClient.sendMutation (graphqlUrl env) <|
                 (GQLBuilder.request
                     { title = articleInputs.title
@@ -28,5 +28,17 @@ requestCreateArticle =
                     , categoryId = articleInputs.categoryId
                     }
                     createArticleMutation
+                )
+        )
+
+
+requestArticleById : ArticleId -> Reader ( NodeEnv, ApiKey ) (Task GQLClient.Error Article)
+requestArticleById articleId =
+    Reader.Reader
+        (\( env, apiKey ) ->
+            GQLClient.sendQuery (graphqlUrl env) <|
+                (GQLBuilder.request
+                    { id = articleId }
+                    articleByIdQuery
                 )
         )
