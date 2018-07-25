@@ -78,7 +78,8 @@ class Mutations::ArticleMutations
 
     resolve ->(_obj, inputs, context) {
       article = Article.find_by(id: inputs[:id], organization_id: context[:organization].id)
-      if !article
+
+      if article.blank?
         errors = Utils::ErrorHandler.new.generate_error_hash("Article not found", context)
       else
         if article.destroy
