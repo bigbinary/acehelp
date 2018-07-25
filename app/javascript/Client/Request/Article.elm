@@ -12,16 +12,11 @@ import GraphQL.Request.Builder as GQLBuilder
 
 requestArticleList : Context -> Reader ( NodeEnv, ApiKey ) (Task GQLClient.Error (List ArticleSummary))
 requestArticleList context =
-    -- Reader.Reader (\( env, apiKey ) -> Http.toTask (httpGet apiKey context (apiUrl env "article") [] decodeArticles))
     Reader.Reader
         (\( env, apiKey ) ->
             GQLClient.sendQuery (graphqlUrl env) <|
                 GQLBuilder.request {} articlesQuery
         )
-
-
-
--- Reader.Reader (\( env, apiKey, context ) -> Http.toTask (httpGet apiKey context ("https://www.mocky.io/v2/5b1a4ce93300001000fb1362") [] decodeArticles))
 
 
 requestArticle : ArticleId -> Reader ( NodeEnv, ApiKey ) (Task GQLClient.Error Article)
