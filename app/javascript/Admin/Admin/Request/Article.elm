@@ -1,9 +1,9 @@
-module Request.ArticleRequest exposing (..)
+module Admin.Request.Article exposing (..)
 
-import Request.RequestHelper exposing (..)
+import Admin.Request.Helper exposing (..)
 import Reader exposing (Reader)
 import Task exposing (Task)
-import Data.ArticleData exposing (..)
+import Admin.Data.Article exposing (..)
 import GraphQL.Client.Http as GQLClient
 import GraphQL.Request.Builder as GQLBuilder
 
@@ -17,16 +17,28 @@ requestArticles url =
         )
 
 
-requestCreateArticle : Reader ( NodeEnv, CreateArticleInputs ) (Task GQLClient.Error Article)
-requestCreateArticle =
+requestCreateArticle : CreateArticleInputs -> Reader NodeEnv (Task GQLClient.Error Article)
+requestCreateArticle articleInputs =
     Reader.Reader
-        (\( env, articleInputs ) ->
+        (\env ->
             GQLClient.sendMutation (graphqlUrl env) <|
                 (GQLBuilder.request
                     { title = articleInputs.title
                     , desc = articleInputs.desc
-                    , category_id = articleInputs.category_id
+                    , categoryId = articleInputs.categoryId
                     }
                     createArticleMutation
+                )
+        )
+
+
+requestArticleById : ArticleId -> Reader ( NodeEnv, ApiKey ) (Task GQLClient.Error Article)
+requestArticleById articleId =
+    Reader.Reader
+        (\( env, apiKey ) ->
+            GQLClient.sendQuery (graphqlUrl env) <|
+                (GQLBuilder.request
+                    { id = articleId }
+                    articleByIdQuery
                 )
         )

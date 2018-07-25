@@ -5,9 +5,9 @@ import Html.Attributes exposing (..)
 import Html.Events exposing (..)
 import Navigation exposing (..)
 import Route
-import Data.CategoryData exposing (..)
-import Request.CategoryRequest exposing (..)
-import Request.RequestHelper exposing (..)
+import Admin.Data.Category exposing (..)
+import Admin.Request.Category exposing (..)
+import Admin.Request.Helper exposing (..)
 import Task exposing (Task)
 import Reader exposing (Reader)
 import GraphQL.Client.Http as GQLClient

@@ -1,8 +1,8 @@
-module Data.Organization exposing (..)
+module Admin.Data.Organization exposing (..)
 
 import Json.Decode exposing (..)
 import Json.Decode.Pipeline as Pipeline exposing (decode, hardcoded, optional, required)
-import Data.ArticleData exposing (ArticleSummary, decodeArticleSummary)
+import Admin.Data.Article exposing (ArticleSummary, decodeArticleSummary)
 
 
 type alias OrganizationId =

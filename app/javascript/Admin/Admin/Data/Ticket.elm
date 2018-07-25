@@ -1,4 +1,4 @@
-module Data.Ticket exposing (..)
+module Admin.Data.Ticket exposing (..)
 
 import GraphQL.Request.Builder.Arg as Arg
 import GraphQL.Request.Builder.Variable as Var

@@ -2,7 +2,7 @@ module Page.Integration exposing (..)
 
 import Html exposing (..)
 import Html.Attributes exposing (..)
-import Request.RequestHelper exposing (ApiKey)
+import Admin.Request.Helper exposing (ApiKey)
 
 
 -- Model

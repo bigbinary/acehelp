@@ -5,11 +5,11 @@ import Html.Attributes exposing (..)
 import Html.Events exposing (..)
 import Navigation exposing (..)
 import Route
-import Request.ArticleRequest exposing (..)
-import Request.UrlRequest exposing (..)
+import Admin.Request.Article exposing (..)
+import Admin.Request.Url exposing (..)
 import Page.Common.View exposing (renderError)
-import Data.ArticleData exposing (..)
-import Data.UrlData exposing (..)
+import Admin.Data.Article exposing (..)
+import Admin.Data.Url exposing (..)
 import Json.Decode as Json
 import Request.Helpers exposing (NodeEnv, ApiKey)
 import Task exposing (Task)
@@ -49,17 +49,17 @@ init =
 type Msg
     = UrlSelected String
     | UrlLoaded (Result GQLClient.Error (List UrlData))
-    | ArticleLoaded (Result GQLClient.Error (List ArticleSummary))
+    | ArticleListLoaded (Result GQLClient.Error (List ArticleSummary))
     | Navigate Route.Route
 
 
 update : Msg -> Model -> ApiKey -> NodeEnv -> ( Model, Cmd Msg )
 update msg model organizationKey nodeEnv =
     case msg of
-        ArticleLoaded (Ok articlesList) ->
+        ArticleListLoaded (Ok articlesList) ->
             ( { model | articles = articlesList }, Cmd.none )
 
-        ArticleLoaded (Err err) ->
+        ArticleListLoaded (Err err) ->
             ( { model | error = Just (toString err) }, Cmd.none )
 
         UrlLoaded (Ok urlList) ->
@@ -75,7 +75,7 @@ update msg model organizationKey nodeEnv =
                 ( { model | url = url }, fetchArticlesList nodeEnv url )
 
         Navigate page ->
-            model ! [ Navigation.newUrl (Route.routeToString page) ]
+            ( model, Navigation.newUrl (Route.routeToString page) )
 
 
 
@@ -114,7 +114,7 @@ view model =
 rows : ArticleSummary -> Html Msg
 rows article =
     div
-        []
+        [ onClick <| Navigate <| Route.ArticleEdit article.id ]
         [ text article.title
         ]
 
@@ -148,4 +148,4 @@ urlsDropdown model =
 
 fetchArticlesList : NodeEnv -> String -> Cmd Msg
 fetchArticlesList nodeEnv url =
-    Task.attempt ArticleLoaded (Reader.run (requestArticles url) (nodeEnv))
+    Task.attempt ArticleListLoaded (Reader.run (requestArticles url) (nodeEnv))

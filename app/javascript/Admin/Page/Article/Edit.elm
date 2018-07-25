@@ -1,11 +1,10 @@
-module Page.Article.Create exposing (..)
+module Page.Article.Edit exposing (..)
 
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
 import Admin.Data.Article exposing (..)
 import Admin.Request.Article exposing (..)
-import Admin.Request.Category exposing (..)
 import Request.Helpers exposing (NodeEnv, ApiKey)
 import Admin.Data.Category exposing (..)
 import Reader exposing (Reader)
@@ -13,6 +12,7 @@ import Task exposing (Task)
 import Field exposing (..)
 import Field.ValidationResult exposing (..)
 import Helpers exposing (..)
+import Admin.Ports exposing (insertArticleContent)
 import GraphQL.Client.Http as GQLClient
 
 
@@ -22,28 +22,28 @@ import GraphQL.Client.Http as GQLClient
 type alias Model =
     { title : Field String String
     , desc : Field String String
-    , articleId : Maybe ArticleId
+    , articleId : ArticleId
     , categories : List Category
     , categoryId : Field String String
     , error : Maybe String
     }
 
 
-initModel : Model
-initModel =
+initModel : ArticleId -> Model
+initModel articleId =
     { title = Field (validateEmpty "Title") ""
     , desc = Field (validateEmpty "Article Content") ""
-    , articleId = Nothing
+    , articleId = articleId
     , categories = []
     , categoryId = Field (validateEmpty "Category Id") ""
     , error = Nothing
     }
 
 
-init : ( Model, Reader ( NodeEnv, ApiKey ) (Task GQLClient.Error (List Category)) )
-init =
-    ( initModel
-    , requestCategories
+init : ArticleId -> ( Model, Reader ( NodeEnv, ApiKey ) (Task GQLClient.Error Article) )
+init articleId =
+    ( initModel articleId
+    , requestArticleById articleId
     )
 
 
@@ -56,8 +56,13 @@ type Msg
     | DescInput String
     | SaveArticle
     | SaveArticleResponse (Result GQLClient.Error Article)
+    | ArticleLoaded (Result GQLClient.Error Article)
     | CategoriesLoaded (Result GQLClient.Error (List Category))
     | CategorySelected String
+
+
+
+-- TODO: Fetch categories to populate categories dropdown
 
 
 update : Msg -> Model -> NodeEnv -> ApiKey -> ( Model, Cmd Msg )
@@ -91,7 +96,7 @@ update msg model nodeEnv organizationKey =
                 if isAllValid fields then
                     save model nodeEnv organizationKey
                 else
-                    ( { model | error = Just errors }, Cmd.none )
+                    ( { model | error = Just <| Debug.log "" errors }, Cmd.none )
 
         SaveArticleResponse (Ok id) ->
             ( { model
@@ -103,6 +108,18 @@ update msg model nodeEnv organizationKey =
 
         SaveArticleResponse (Err error) ->
             ( { model | error = Just (toString error) }, Cmd.none )
+
+        ArticleLoaded (Ok article) ->
+            ( { model
+                | title = Field.update model.title article.title
+                , desc = Field.update model.desc article.desc
+                , categoryId = Field.update model.categoryId article.category.id
+              }
+            , insertArticleContent article.desc
+            )
+
+        ArticleLoaded (Err err) ->
+            ( { model | error = Just "There was an error loading up the article" }, Cmd.none )
 
         CategoriesLoaded (Ok categories) ->
             ( { model | categories = categories }, Cmd.none )
@@ -126,7 +143,14 @@ view model =
             [ div [ class "col-md-8 article-title-content-block" ]
                 [ div
                     [ class "row article-title" ]
-                    [ input [ type_ "text", class "form-control", placeholder "Title", onInput TitleInput ] []
+                    [ input
+                        [ Html.Attributes.value <| Field.value model.title
+                        , type_ "text"
+                        , class "form-control"
+                        , placeholder "Title"
+                        , onInput TitleInput
+                        ]
+                        []
                     ]
                 , div
                     [ class "row article-content" ]
@@ -136,7 +160,6 @@ view model =
             , div [ class "col-sm article-meta-data-block" ]
                 [ categoryListDropdown model
                 , articleUrls model
-                , button [ id "create-article", type_ "button", class "btn btn-success", onClick SaveArticle ] [ text "Create Article" ]
                 ]
             ]
         ]

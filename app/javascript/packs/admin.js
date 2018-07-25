@@ -16,8 +16,23 @@ document.addEventListener("DOMContentLoaded", () => {
     var node = document.getElementById("admin-hook");
     var target = document.querySelector("meta[name=organization_key]");
     var org_key = target.getAttribute("value");
-    Elm.Main.embed(node, {
+    var app = Elm.Main.embed(node, {
         node_env: process.env.NODE_ENV,
         organization_key: org_key
     });
+
+    app.ports.insertArticleContent.subscribe(function(html) {
+        var trixEl = document.querySelector("trix-editor");
+        trixEl.editor.insertHTML(html);
+    });
+});
+
+//TODO: Handle file uploads
+document.addEventListener("trix-attachment-add", function(event) {
+    var attachment;
+    attachment = event.attachment;
+    if (attachment.file) {
+        //return uploadAttachment(attachment);
+        //console.log(attachment.file);
+    }
 });
