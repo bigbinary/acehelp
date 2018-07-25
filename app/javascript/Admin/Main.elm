@@ -343,7 +343,7 @@ update msg model =
                     UrlList.update ulMsg currentPageModel
             in
                 ( { model | currentPage = Loaded (UrlList urlListModel) }
-                , Cmd.none
+                , Cmd.map UrlListMsg urlListCmds
                 )
 
         UrlsLoaded (Ok urlsList) ->
@@ -394,7 +394,7 @@ update msg model =
                     CategoryList.update clMsg currentPageModel
             in
                 ( { model | currentPage = Loaded (CategoryList categoryListModel) }
-                , Cmd.none
+                , Cmd.map CategoryListMsg categoryListCmd
                 )
 
         CategoriesLoaded (Ok categoriesList) ->
