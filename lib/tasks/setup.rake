@@ -133,7 +133,7 @@ def create_data_for_eii_organization
                                   desc: desc,
                                   organization_id: org.id
 
-  category = Category.create! name: "Pricing"
+  category = Category.create! name: "Pricing", organization_id: org.id
   a5 = category.articles.create!  title: "Can you waive service fee for events happening in colleges?",
                             desc: desc,
                             organization_id: org.id
