@@ -15,7 +15,7 @@ class Mutations::FeedbackMutations
 
       sanitized_params = inputs.to_h.slice(*inputs.keys)
       new_feedback = Feedback.new(sanitized_params)
-      if new_feedback.save!
+      if new_feedback.save
         feedback = new_feedback
       else
         errors = Utils::ErrorHandler.new.generate_detailed_error_hash(new_feedback, context)

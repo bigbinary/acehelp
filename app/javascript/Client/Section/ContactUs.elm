@@ -29,6 +29,7 @@ type alias Model =
     { name : Field
     , email : Field
     , message : Field
+    , article_id: Field
     , userNotification : UserNotification
     }
 
@@ -38,6 +39,7 @@ init name email =
     { name = Field Nothing name
     , email = Field Nothing email
     , message = Field Nothing ""
+    , article_id = Field Nothing ""
     , userNotification = NoNotification
     }
 
@@ -89,6 +91,7 @@ modelToRequestMessage model =
     { name = fieldValue model.name
     , email = fieldValue model.email
     , comment = fieldValue model.message
+    , article_id = fieldValue model.article_id
     }
 
 

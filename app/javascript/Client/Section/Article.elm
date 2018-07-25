@@ -2,9 +2,10 @@ module Section.Article exposing (init, Model, view, defaultModel, Msg, update)
 
 import Data.Common exposing (GQLError)
 import Data.Article exposing (..)
-import Request.Article exposing (..)
 import Data.ContactUs exposing (FeedbackForm)
-import Request.ContactUs exposing (requestAddTicketMutation, requestAddFeedbackMutation)
+import Request.Article exposing (..)
+import Request.ContactUs exposing (requestAddTicketMutation)
+import Request.Article exposing (requestAddFeedbackMutation)
 import Request.Helpers exposing (ApiKey, Context, NodeEnv, graphqlUrl)
 import Html exposing (..)
 import Html.Attributes exposing (..)
@@ -47,11 +48,12 @@ defaultModel article =
     }
 
 
-emptyForm : FeedbackForm
-emptyForm =
+emptyForm : ArticleId -> FeedbackForm
+emptyForm articleId =
     { comment = ""
     , email = ""
     , name = ""
+    , article_id = articleId
     }
 
 
@@ -79,7 +81,7 @@ update msg model =
                     ( { model | feedback = feedback }, Just <| Reader.map (Task.attempt Vote) <| requestUpvoteMutation model.article.id )
 
                 Negative ->
-                    ( { model | feedback = feedback, feedbackForm = Just emptyForm }, Just <| Reader.map (Task.attempt Vote) <| requestDownvoteMutation model.article.id )
+                    ( { model | feedback = feedback, feedbackForm = Just (emptyForm model.article.id) }, Just <| Reader.map (Task.attempt Vote) <| requestDownvoteMutation model.article.id )
 
                 _ ->
                     ( { model | feedback = feedback }, Nothing )
