@@ -41,6 +41,7 @@ class Mutations::UrlMutations
 
     resolve ->(object, inputs, context) {
       url = Url.find_by(id: inputs[:id], organization_id: context[:organization].id)
+
       if url.nil?
         errors = Utils::ErrorHandler.new.generate_error_hash("Url not found", context)
       else

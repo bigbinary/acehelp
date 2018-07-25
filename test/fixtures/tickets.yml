@@ -4,3 +4,4 @@ payment_issue_ticket:
   email: alan@example.com
   name: Alan
   message: Not able to do payment
+  organization: bigbinary

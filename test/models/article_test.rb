@@ -17,7 +17,7 @@ class ArticleTest < ActiveSupport::TestCase
   end
 
   def test_search
-    c1 = Category.create! name: "Code"
+    c1 = Category.create! name: "Code", organization_id: Organization.first.id
     org = Organization.create! name: "Google", email: "google@google.com"
     c1.articles.create!(
       title: "How do I put nodejs code in my website?",
