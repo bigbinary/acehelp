@@ -429,7 +429,7 @@ update msg model =
                 ( urlEditModel, urlEditCmd ) =
                     UrlEdit.update ueMsg currentPageModel model.nodeEnv model.organizationKey
             in
-                ( { model | currentPage = TransitioningTo (UrlEdit urlEditModel) }
+                ( { model | currentPage = Loaded (UrlEdit urlEditModel) }
                 , Cmd.map UrlEditMsg urlEditCmd
                 )
 

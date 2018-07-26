@@ -93,6 +93,7 @@ update msg model nodeEnv organizationKey =
         UrlLoaded (Ok url) ->
             ( { model
                 | url = Field.update model.url url.url
+                , urlId = url.id
               }
             , Cmd.none
             )
@@ -134,9 +135,10 @@ view model =
         ]
 
 
-urlInputs : Model -> CreateUrlInput
-urlInputs { url } =
+urlInputs : Model -> UrlData
+urlInputs { url, urlId } =
     { url = Field.value url
+    , id = urlId
     }
 
 
@@ -144,6 +146,6 @@ save : Model -> NodeEnv -> ApiKey -> ( Model, Cmd Msg )
 save model nodeEnv organizationKey =
     let
         cmd =
-            Task.attempt UpdateUrlResponse (Reader.run (createUrl) ( nodeEnv, { url = Field.value model.url } ))
+            Task.attempt UpdateUrlResponse (Reader.run (updateUrl) ( nodeEnv, urlInputs model ))
     in
         ( model, cmd )
