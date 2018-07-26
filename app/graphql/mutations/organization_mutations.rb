@@ -14,7 +14,7 @@ class Mutations::OrganizationMutations
     resolve -> (object, inputs, context) {
       user = User.find_by_id(inputs[:user_id])
       if user
-        sanitized_params = inputs.to_h.slice(*inputs.keys)
+        sanitized_params = inputs.to_h.slice("name", "email")
         new_org = user.add_organization(sanitized_params)
 
         if new_org

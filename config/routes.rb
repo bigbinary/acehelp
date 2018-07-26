@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 Rails.application.routes.draw do
-  devise_for :users
+  devise_for :users, controllers: {registrations: "registrations"}
 
   root to: "home#index"
 
@@ -23,6 +23,12 @@ Rails.application.routes.draw do
     resources :integrations, only: [:index]
     resources :dashboard, only: [:index]
   end
+
+  scope module: 'admin' do
+    resources :organizations, only: :new
+  end
+
+  # get 'organizations/new' => 'admin/organizations#new'
 
   if Rails.env.development?
     mount GraphqlPlayground::Rails::Engine, at: "/graphql/playground", graphql_path: "/graphql"

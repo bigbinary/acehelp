@@ -16,6 +16,7 @@ import Page.Ticket.List as TicketList
 import Page.Feedback.List as FeedbackList
 import Page.Category.Create as CategoryCreate
 import Page.Settings as Settings
+import Page.Organization.Create as OrganizationCreate
 import Page.Errors as Errors
 import Admin.Data.Organization exposing (OrganizationId)
 import Admin.Data.Category exposing (Category)
@@ -50,6 +51,7 @@ type Page
     | UrlCreate UrlCreate.Model
     | UrlEdit UrlEdit.Model
     | Settings Settings.Model
+    | OrganizationCreate OrganizationCreate.Model
     | TicketList TicketList.Model
     | FeedbackList FeedbackList.Model
     | Dashboard
@@ -115,6 +117,7 @@ type Msg
     | OnLocationChange Navigation.Location
     | SignOut
     | SignedOut (Result Http.Error String)
+    | OrganizationCreateMsg OrganizationCreate.Msg
 
 
 
@@ -129,7 +132,6 @@ getPage pageState =
 
         TransitioningTo page ->
             page
-
 
 setRoute : Location -> Model -> ( Model, Cmd Msg )
 setRoute location model =
@@ -322,6 +324,9 @@ navigateTo newRoute model =
                       }
                     , cmd
                     )
+            Route.OrganizationCreate ->
+                (OrganizationCreate.init)
+                   |> transitionTo OrganizationCreate OrganizationCreateMsg
 
             Route.NotFound ->
                 ( { model | currentPage = Loaded NotFound }, Cmd.none )
@@ -624,6 +629,23 @@ update msg model =
                 , Cmd.map SettingsMsg settingsCmd
                 )
 
+        OrganizationCreateMsg oCMsg ->
+            let
+                currentPageModel =
+                    case model.currentPage of
+                        Loaded (OrganizationCreate orgCreateModel) ->
+                            orgCreateModel
+
+                        _ ->
+                            OrganizationCreate.initModel "fe8ab352-be16-4e83-9d6f-d57393cc2c0f"
+
+                ( createOrgModel, createOrgCmds ) =
+                    OrganizationCreate.update oCMsg currentPageModel model.nodeEnv
+            in
+                ( { model | currentPage = Loaded (OrganizationCreate createOrgModel) }
+                , Cmd.map OrganizationCreateMsg createOrgCmds
+                )
+
         OnLocationChange location ->
             setRoute location model
 
@@ -737,6 +759,12 @@ view model =
 
         Dashboard ->
             div [] [ text "Dashboard" ]
+
+        OrganizationCreate orgCreateModel ->
+            adminLayout model
+                (Html.map OrganizationCreateMsg
+                    (OrganizationCreate.view orgCreateModel )
+                )
 
         NotFound ->
             Errors.notFound

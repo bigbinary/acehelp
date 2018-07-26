@@ -1,11 +1,14 @@
-module Request.OrganizationRequest exposing (..)
+module Admin.Request.Organization exposing (..)
 
 import Http
 import Json.Decode as JD exposing (field)
 import Json.Encode as JE
 import Admin.Request.Helper exposing (..)
 import Admin.Data.Organization as AD exposing (..)
-
+import Reader exposing (Reader)
+import Task exposing (Task)
+import GraphQL.Client.Http as GQLClient
+import GraphQL.Request.Builder as GQLBuilder
 
 organizationUrl : NodeEnv -> OrganizationId -> Url
 organizationUrl env organizationId =
@@ -40,3 +43,18 @@ requestOrganization env apiKey organizationId =
             , timeout = Nothing
             , withCredentials = False
             }
+
+requestCreateOrganization : OrganizationData -> Reader NodeEnv (Task GQLClient.Error OrganizationData)
+requestCreateOrganization orgInputs =
+    Reader.Reader
+        (\env ->
+            GQLClient.sendMutation (graphqlUrl env) <|
+                (GQLBuilder.request
+                    { name = orgInputs.name
+                    , email = orgInputs.email
+                    , user_id = orgInputs.user_id
+                    }
+                    AD.createOrganizationMutation
+                )
+        )
+
