@@ -16,11 +16,11 @@ class Mutations::OrganizationUserMutations
       organization = organization.find_by_id(inputs[:organization_id])
 
       if user.blank?
-        errors = Utils::ErrorHandler.new.generate_error_hash("User not found", context)
+        errors = Utils::ErrorHandler.new.error("User not found", context)
       elsif organization.blank?
-        errors = Utils::ErrorHandler.new.generate_error_hash("Organization not found", context)
+        errors = Utils::ErrorHandler.new.error("Organization not found", context)
       elsif OrganizationUser.exists?(organization_id: organization.id, user_id: user.id)
-        errors = Utils::ErrorHandler.new.generate_error_hash("Record already exists for given user and organization", context)
+        errors = Utils::ErrorHandler.new.error("Record already exists for given user and organization", context)
       else
         new_organization_user = OrganizationUser.create organization_id: organization.id,
                                                     user_id: user.id,
@@ -29,12 +29,12 @@ class Mutations::OrganizationUserMutations
         if new_organization_user.save
           organization_user = new_organization_user
         else
-          errors = Utils::ErrorHandler.new.generate_detailed_error_hash(new_organization_user, context)
+          errors = Utils::ErrorHandler.new.detailed_error(new_organization_user, context)
         end
       end
 
       {
-        organization_user: organization_user
+        organization_user: organization_user,
         errors: errors
       }
     }
@@ -54,27 +54,26 @@ class Mutations::OrganizationUserMutations
       organization = organization.find_by_id(inputs[:organization_id])
 
       if user.blank?
-        errors = Utils::ErrorHandler.new.generate_error_hash("User not found", context)
+        errors = Utils::ErrorHandler.new.error("User not found", context)
       elsif organization.blank?
-        errors = Utils::ErrorHandler.new.generate_error_hash("Organization not found", context)
+        errors = Utils::ErrorHandler.new.error("Organization not found", context)
       elsif OrganizationUser.where(organization_id: organization.id, user_id: user.id).first.blank?
-        errors = Utils::ErrorHandler.new.generate_error_hash("Record does not exist for given user and organization", context)
+        errors = Utils::ErrorHandler.new.error("Record does not exist for given user and organization", context)
       else
 
         organization_user = OrganizationUser.where(organization_id: organization.id, user_id: user.id).first
 
         if organization_user.destroy
-          #noop
+          # noop
         else
-          errors = Utils::ErrorHandler.new.generate_detailed_error_hash(organization_user, context)
+          errors = Utils::ErrorHandler.new.detailed_error(organization_user, context)
         end
       end
 
       {
-        organization_user: organization_user
+        organization_user: organization_user,
         errors: errors
       }
     }
   end
-
 end
