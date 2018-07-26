@@ -27,7 +27,6 @@ createUrl =
             )
         )
 
-
 deleteUrl : Reader ( NodeEnv, ApiKey, UrlIdInput ) (Task GQLClient.Error UrlId)
 deleteUrl =
     Reader.Reader
@@ -40,8 +39,8 @@ deleteUrl =
 updateUrl : Reader ( NodeEnv, ApiKey, CreateUrlInput, UrlId ) (Task GQLClient.Error UrlData)
 updateUrl =
     Reader.Reader
-        (\( nodeEnv, apiKey, createUrlInput, urlId ) ->
-            (GQLClient.customSendMutation (requestOptions nodeEnv apiKey) <|
+        (\( nodeEnv, createUrlInput, urlId ) ->
+            (GQLClient.sendMutation (graphqlUrl nodeEnv) <|
                 GQLBuilder.request createUrlInput updateUrlMutation
             )
         )

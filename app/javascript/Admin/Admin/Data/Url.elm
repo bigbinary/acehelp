@@ -57,16 +57,17 @@ urlByIdQuery =
             (GQLBuilder.extract
                 (GQLBuilder.field "url"
                     [ ( "id", Arg.variable idVar ) ]
-                    urlObject
+                    urlExtractor
                 )
             )
 
 
-urlObject : GQLBuilder.ValueSpec GQLBuilder.NonNull GQLBuilder.ObjectType UrlData vars
-urlObject =
-    GQLBuilder.object UrlData
+urlExtractor : GQLBuilder.ValueSpec GQLBuilder.NonNull GQLBuilder.ObjectType UrlData vars
+urlExtractor =
+    (GQLBuilder.object UrlData
         |> GQLBuilder.with (GQLBuilder.field "id" [] GQLBuilder.string)
         |> GQLBuilder.with (GQLBuilder.field "url" [] GQLBuilder.string)
+    )
 
 
 createUrlMutation : GQLBuilder.Document GQLBuilder.Mutation UrlData CreateUrlInput
