@@ -3,9 +3,9 @@ module Page.Url.Edit exposing (..)
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
-import Request.UrlRequest exposing (..)
+import Admin.Request.Url exposing (..)
 import Request.Helpers exposing (NodeEnv, ApiKey)
-import Data.UrlData exposing (..)
+import Admin.Data.Url exposing (..)
 import Reader exposing (Reader)
 import Task exposing (Task)
 import Field exposing (..)
@@ -20,7 +20,7 @@ import GraphQL.Client.Http as GQLClient
 type alias Model =
     { error : Maybe String
     , url : Field String String
-    , id : UrlId
+    , urlId : UrlId
     }
 
 
@@ -28,7 +28,7 @@ initModel : UrlId -> Model
 initModel urlId =
     { error = Nothing
     , url = Field (validateEmpty "Url") ""
-    , id = urlId
+    , urlId = urlId
     }
 
 
@@ -45,8 +45,8 @@ init urlId =
 
 type Msg
     = UrlInput String
-    | SaveUrl
-    | SaveUrlResponse (Result GQLClient.Error UrlData)
+    | UpdateUrl
+    | UpdateUrlResponse (Result GQLClient.Error UrlData)
     | UrlLoaded (Result GQLClient.Error UrlData)
 
 
@@ -56,7 +56,7 @@ update msg model nodeEnv organizationKey =
         UrlInput url ->
             ( { model | url = Field.update model.url url }, Cmd.none )
 
-        SaveUrl ->
+        UpdateUrl ->
             let
                 fields =
                     [ model.url ]
@@ -75,19 +75,19 @@ update msg model nodeEnv organizationKey =
                             )
                         |> String.join ", "
             in
-                if 1 == 1 then
+                if isAllValid fields then
                     save model nodeEnv organizationKey
                 else
-                    ( { model | error = Just <| Debug.log "" errors }, Cmd.none )
+                    ( { model | error = Just errors }, Cmd.none )
 
-        SaveUrlResponse (Ok id) ->
+        UpdateUrlResponse (Ok id) ->
             ( { model
                 | url = Field.update model.url ""
               }
             , Cmd.none
             )
 
-        SaveUrlResponse (Err error) ->
+        UpdateUrlResponse (Err error) ->
             ( { model | error = Just (toString error) }, Cmd.none )
 
         UrlLoaded (Ok url) ->
@@ -108,17 +108,28 @@ update msg model nodeEnv organizationKey =
 view : Model -> Html Msg
 view model =
     div [ class "container" ]
-        [ Html.form [ onSubmit SaveUrl ]
+        [ Html.form [ onSubmit UpdateUrl ]
             [ div []
+                [ Maybe.withDefault (text "") <|
+                    Maybe.map
+                        (\err ->
+                            div [ class "alert alert-danger alert-dismissible fade show", attribute "role" "alert" ]
+                                [ text <| "Error: " ++ err
+                                ]
+                        )
+                        model.error
+                ]
+            , div []
                 [ label [] [ text "URL: " ]
                 , input
-                    [ type_ "text"
+                    [ Html.Attributes.value <| Field.value model.url
+                    , type_ "text"
                     , placeholder "Url..."
                     , onInput UrlInput
                     ]
                     []
                 ]
-            , button [ type_ "submit", class "button primary" ] [ text "Save URL" ]
+            , button [ type_ "submit", class "button primary" ] [ text "Update URL" ]
             ]
         ]
 
@@ -133,6 +144,6 @@ save : Model -> NodeEnv -> ApiKey -> ( Model, Cmd Msg )
 save model nodeEnv organizationKey =
     let
         cmd =
-            Task.attempt SaveUrlResponse (Reader.run (createUrl) ( nodeEnv, (urlInputs model) ))
+            Task.attempt UpdateUrlResponse (Reader.run (createUrl) ( nodeEnv, { url = Field.value model.url } ))
     in
         ( model, cmd )

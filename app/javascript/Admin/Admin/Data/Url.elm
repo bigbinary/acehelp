@@ -62,14 +62,6 @@ urlByIdQuery =
             )
 
 
-urlExtractor : GQLBuilder.ValueSpec GQLBuilder.NonNull GQLBuilder.ObjectType UrlData vars
-urlExtractor =
-    (GQLBuilder.object UrlData
-        |> GQLBuilder.with (GQLBuilder.field "id" [] GQLBuilder.string)
-        |> GQLBuilder.with (GQLBuilder.field "url" [] GQLBuilder.string)
-    )
-
-
 createUrlMutation : GQLBuilder.Document GQLBuilder.Mutation UrlData CreateUrlInput
 createUrlMutation =
     let
@@ -117,25 +109,26 @@ urlExtractor =
         |> GQLBuilder.with (GQLBuilder.field "url" [] GQLBuilder.string)
     )
 
-updateUrlMutation : GQLBuilder.Document GQLBuilder.Mutation UrlData CreateUrlInput
+
+updateUrlMutation : GQLBuilder.Document GQLBuilder.Mutation UrlData UrlData
 updateUrlMutation =
     let
+        idVar =
+            Var.required "id" .id Var.string
+
         urlVar =
             Var.required "url" .url Var.string
     in
         GQLBuilder.mutationDocument <|
             GQLBuilder.extract <|
-                GQLBuilder.field "addUrl"
+                GQLBuilder.field "updateUrl"
                     [ ( "input"
                       , Arg.object
-                            [ ( "url", Arg.variable urlVar ) ]
+                            [ ( "url", Arg.variable urlVar ), ( "id", Arg.variable idVar ) ]
                       )
                     ]
                     (GQLBuilder.extract <|
                         GQLBuilder.field "url"
                             []
-                            (GQLBuilder.object UrlData
-                                |> GQLBuilder.with (GQLBuilder.field "id" [] GQLBuilder.string)
-                                |> GQLBuilder.with (GQLBuilder.field "url" [] GQLBuilder.string)
-                            )
+                            urlExtractor
                     )
