@@ -5,4 +5,6 @@ class Category < ApplicationRecord
   belongs_to :organization
 
   validates :name, presence: true
+
+  scope :for_organization, ->(org) { where(organization: org) }
 end

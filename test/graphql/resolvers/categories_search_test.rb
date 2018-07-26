@@ -8,7 +8,7 @@ class Resolvers::CategoriesSearchTest < ActiveSupport::TestCase
   end
 
   def find
-    Resolvers::CategoriesSearch.new.call(nil, nil, organization: @organization)
+    Resolvers::CategoriesSearch.new.call(nil, {}, { organization: @organization })
   end
 
   test "get_all_categories_success" do

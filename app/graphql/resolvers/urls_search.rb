@@ -6,10 +6,9 @@ class Resolvers::UrlsSearch < GraphQL::Function
   argument :url, types.String
 
   def call(obj, args, context)
-    if args[:url]
-      Url.where(url: args[:url]).for_organization(context[:organization])
-    else
-      Url.for_organization(context[:organization])
-    end
+    query = Url.for_organization(context[:organization])
+
+    url = args[:url]
+    url.present? ? query.where(url: url) : query
   end
 end
