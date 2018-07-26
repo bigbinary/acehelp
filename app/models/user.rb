@@ -10,6 +10,9 @@ class User < ApplicationRecord
 
   belongs_to :organization, autosave: true, dependent: :destroy, required: false
 
+  has_many :organization_users, dependent: :destroy
+  has_many :organizations, through: :organization_users
+
   def name
     "#{first_name} #{last_name}".squish
   end

@@ -60,6 +60,7 @@ end
 def create_data_for_ace_invoice_organization
   desc = "Article details is coming soon"
   org = Organization.create! name: "AceInvoice", email: "aceinvoice@example.com"
+  OrganizationUser.create! organization_id: org.id, user_id: User.first.id
 
   getting_started_url = org.urls.create! url: "http://aceinvoice.com/getting-started"
   integrations_url = org.urls.create! url: "http://aceinvoice.com/integrations"
@@ -109,6 +110,7 @@ end
 def create_data_for_eii_organization
   desc = "Article details is coming soon"
   org = Organization.create! name: "EventsInIndia", email: "eventsinindia@example.com"
+  OrganizationUser.create! organization_id: org.id, user_id: User.first.id
 
   events_url = org.urls.create! url: "http://eventsinindia.com/events"
   buying_tickets_url = org.urls.create! url: "http://eventsinindia.com/buying_tickets"

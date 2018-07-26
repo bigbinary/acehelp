@@ -5,6 +5,9 @@ class Organization < ApplicationRecord
   has_many :articles
   has_many :categories
 
+  has_many :organization_users, dependent: :destroy
+  has_many :users, through: :organization_users
+
   has_many :owners, class_name: "User"
 
   validates :name, presence: true
