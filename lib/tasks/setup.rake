@@ -152,4 +152,10 @@ def create_data_for_eii_organization
 
   ArticleUrl.create! article_id: a5.id, url_id: pricing_url.id
   ArticleUrl.create! article_id: a6.id, url_id: pricing_url.id
+
+
+  Ticket.create!  name: "Sam Smith",
+                  email: "sam@example.com",
+                  message: "How to pay using credit card?",
+                  organization_id: org.id
 end

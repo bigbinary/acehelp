@@ -3,14 +3,11 @@
 class Resolvers::TicketsSearch < GraphQL::Function
   type !types[Types::TicketType]
 
-  argument :id, types.ID
+  argument :id, types.String
 
   def call(obj, args, context)
-    if args[:id].present?
-      Ticket.where(id: args[:id]).for_organization(context[:organization])
-    else
-      # Ticket.for_organization(context[:organization])
-      Ticket.all
-    end
+    query = Ticket.for_organization(context[:organization])
+
+    args[:id].present? ? query.where(id: args[:id]) : query
   end
 end
