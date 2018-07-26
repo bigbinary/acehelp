@@ -8,19 +8,22 @@ Types::QueryType = GraphQL::ObjectType.define do
   field :urls, function: Resolvers::UrlsSearch.new
   field :tickets, function: Resolvers::TicketsSearch.new
 
+  hash = { type: Types::ArticleType, model: Article }
   field :article, Types::ArticleType,
-                  field: Resolvers::Fields::FetchField.build(type: Types::ArticleType,
-                                                             model: Article)
+                  field: Resolvers::Fields::FetchField.build(hash)
 
-  field :url, Types::UrlType,
-              field: Resolvers::Fields::FetchField.build(type: Types::UrlType,
-                                                         model: Url)
+  hash = { type: Types::UrlType, model: Url }
+  field :url, Types::UrlType, field: Resolvers::Fields::FetchField.build(hash)
+
+  hash = { type: Types::OrganizationType, model: Organization }
   field :organization, Types::OrganizationType,
-                       field: Resolvers::Fields::FetchField.build(type: Types::OrganizationType,
-                                                                  model: Organization)
+                       field: Resolvers::Fields::FetchField.build(hash)
 
+  hash = { type: Types::TicketType, model: Ticket }
   field :ticket, Types::TicketType,
-                 field: Resolvers::Fields::FetchField.build(type: Types::TicketType,
-                                                            model: Ticket)
-  field :category, Types::CategoryType, field: Resolvers::Fields::FetchField.build(type: Types::CategoryType, model: Category)
+                 field: Resolvers::Fields::FetchField.build(hash)
+
+  hash = { type: Types::CategoryType, model: Category }
+  field :category, Types::CategoryType, field: Resolvers::Fields::FetchField.build(hash)
+
 end
