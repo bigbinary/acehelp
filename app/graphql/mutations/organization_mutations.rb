@@ -20,10 +20,10 @@ class Mutations::OrganizationMutations
         if new_org
           organization = new_org
         else
-          errors = Utils::ErrorHandler.new.generate_detailed_error_hash(new_org, context)
+          errors = Utils::ErrorHandler.new.detailed_error(new_org, context)
         end
       else
-        errors = Utils::ErrorHandler.new.generate_error_hash("User not found", context)
+        errors = Utils::ErrorHandler.new.error("User not found", context)
       end
       {
         organization: organization,

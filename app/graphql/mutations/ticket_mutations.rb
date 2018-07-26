@@ -21,7 +21,7 @@ class Mutations::TicketMutations
       if new_ticket.save
         ticket = new_ticket
       else
-        errors = Utils::ErrorHandler.new.generate_detailed_error_hash(new_ticket, context)
+        errors = Utils::ErrorHandler.new.detailed_error(new_ticket, context)
       end
 
       {

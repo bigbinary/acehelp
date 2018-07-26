@@ -20,7 +20,7 @@ class Mutations::UserMutations
       if new_user.save
         user = new_user
       else
-        errors = Utils::ErrorHandler.new.generate_detailed_error_hash(new_user, context)
+        errors = Utils::ErrorHandler.new.detailed_error(new_user, context)
       end
 
       {

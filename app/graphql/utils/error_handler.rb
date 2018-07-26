@@ -15,7 +15,7 @@ class Utils::ErrorHandler
     }
   end
 
-  def generate_error_hash(message, context, attributes: [])
+  def error(message, context, attributes: [])
     [
       {
         message: message,
@@ -24,7 +24,7 @@ class Utils::ErrorHandler
     ]
   end
 
-  def generate_detailed_error_hash(object, context, general_message: nil)
+  def detailed_error(object, context, general_message: nil)
     if object.respond_to?(:errors) && object.errors.present?
       object.errors.map do |attribute, message|
         attribute = attribute.to_s

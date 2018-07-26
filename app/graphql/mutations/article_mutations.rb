@@ -14,7 +14,7 @@ class Mutations::ArticleMutations
     resolve ->(object, inputs, context) {
       category = Category.find_by_id(inputs[:category_id])
       if category.nil?
-        errors = Utils::ErrorHandler.new.generate_error_hash("Category not found", context)
+        errors = Utils::ErrorHandler.new.error("Category not found", context)
       else
         new_article = category.articles.new(title: inputs[:title], desc: inputs[:desc])
         new_article.organization = context[:organization]
@@ -22,7 +22,7 @@ class Mutations::ArticleMutations
         if new_article.save
           article = new_article
         else
-          errors = Utils::ErrorHandler.new.generate_detailed_error_hash(new_article, context)
+          errors = Utils::ErrorHandler.new.detailed_error(new_article, context)
         end
       end
 
@@ -52,12 +52,12 @@ class Mutations::ArticleMutations
       article = Article.find_by(id: inputs[:id], organization_id: context[:organization].id)
 
       if article.nil?
-        errors = Utils::ErrorHandler.new.generate_error_hash("Article not found", context)
+        errors = Utils::ErrorHandler.new.error("Article not found", context)
       else
         if article.update_attributes(inputs[:article].to_h)
           updated_article = article
         else
-          errors = Utils::ErrorHandler.new.generate_detailed_error_hash(article, context)
+          errors = Utils::ErrorHandler.new.detailed_error(article, context)
         end
 
         {
@@ -80,12 +80,12 @@ class Mutations::ArticleMutations
       article = Article.find_by(id: inputs[:id], organization_id: context[:organization].id)
 
       if article.blank?
-        errors = Utils::ErrorHandler.new.generate_error_hash("Article not found", context)
+        errors = Utils::ErrorHandler.new.error("Article not found", context)
       else
         if article.destroy
           deleted_id = inputs[:id]
         else
-          errors = Utils::ErrorHandler.new.generate_detailed_error_hash(article, context)
+          errors = Utils::ErrorHandler.new.detailed_error(article, context)
         end
       end
 
@@ -110,10 +110,10 @@ class Mutations::ArticleMutations
         if article.increment_upvote
           upvoted_article = article
         else
-          errors = Utils::ErrorHandler.new.generate_detailed_error_hash(article, context)
+          errors = Utils::ErrorHandler.new.detailed_error(article, context)
         end
       else
-        errors = Utils::ErrorHandler.new.generate_error_hash("Article not found", context)
+        errors = Utils::ErrorHandler.new.error("Article not found", context)
       end
       {
         article: upvoted_article,
@@ -137,10 +137,10 @@ class Mutations::ArticleMutations
         if article.increment_downvote
           downvoted_article = article
         else
-          errors = Utils::ErrorHandler.new.generate_detailed_error_hash(article, context)
+          errors = Utils::ErrorHandler.new.detailed_error(article, context)
         end
       else
-        errors = Utils::ErrorHandler.new.generate_error_hash("Article not found", context)
+        errors = Utils::ErrorHandler.new.error("Article not found", context)
       end
 
       {
