@@ -89,7 +89,6 @@ init flags location =
 type Msg
     = NavigateTo Route.Route
     | ArticleListMsg ArticleList.Msg
-    | ArticlesUrlsLoaded (Result GQLClient.Error (List UrlData))
     | ArticleCreateMsg ArticleCreate.Msg
     | ArticleCategoriesLoaded (Result GQLClient.Error (List Category))
     | ArticleEditMsg ArticleEdit.Msg
@@ -142,10 +141,10 @@ navigateTo newRoute model =
             Route.ArticleList ->
                 let
                     ( articleListModel, articleListRequest ) =
-                        ArticleList.init
+                        ArticleList.init model.organizationKey
 
                     cmd =
-                        Task.attempt ArticlesUrlsLoaded (Reader.run (articleListRequest) ( model.nodeEnv, model.organizationKey ))
+                        Cmd.map ArticleListMsg <| Task.attempt ArticleList.ArticleListLoaded (Reader.run (articleListRequest) ( model.nodeEnv, model.organizationKey ))
                 in
                     ( { model | currentPage = TransitioningTo (ArticleList articleListModel), route = newRoute }, cmd )
 
@@ -236,32 +235,6 @@ update msg model =
                 ( { model | currentPage = Loaded (ArticleList articleListModel) }
                 , Cmd.map ArticleListMsg articleListCmd
                 )
-
-        ArticlesUrlsLoaded (Ok urlsList) ->
-            let
-                currentPageModel =
-                    case model.currentPage of
-                        Loaded (ArticleList articleListModel) ->
-                            articleListModel
-
-                        _ ->
-                            ArticleList.initModel
-            in
-                ( { model | currentPage = Loaded (ArticleList { currentPageModel | urlList = urlsList }) }
-                , Cmd.none
-                )
-
-        ArticlesUrlsLoaded (Err error) ->
-            let
-                currentPageModel =
-                    case model.currentPage of
-                        Loaded (ArticleList articleListModel) ->
-                            articleListModel
-
-                        _ ->
-                            ArticleList.initModel
-            in
-                ( { model | currentPage = Loaded (ArticleList { currentPageModel | error = Just (toString error) }) }, Cmd.none )
 
         ArticleCreateMsg caMsg ->
             let

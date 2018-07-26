@@ -8,12 +8,12 @@ import GraphQL.Client.Http as GQLClient
 import GraphQL.Request.Builder as GQLBuilder
 
 
-requestArticles : String -> Reader ( NodeEnv, ApiKey ) (Task GQLClient.Error (List ArticleSummary))
-requestArticles url =
+requestArticlesByUrl : String -> Reader ( NodeEnv, ApiKey ) (Task GQLClient.Error (List ArticleSummary))
+requestArticlesByUrl url =
     Reader.Reader
         (\( nodeEnv, apiKey ) ->
             GQLClient.customSendQuery (requestOptions nodeEnv apiKey) <|
-                GQLBuilder.request { url = url } requestArticlesQuery
+                GQLBuilder.request { url = url } articlesByUrlQuery
         )
 
 
@@ -41,4 +41,13 @@ requestArticleById articleId =
                     { id = articleId }
                     articleByIdQuery
                 )
+        )
+
+
+requestArticlesByOrganization : String -> Reader NodeEnv (Task GQLClient.Error (List ArticleSummary))
+requestArticlesByOrganization organizationKey =
+    Reader.Reader
+        (\nodeEnv ->
+            GQLClient.sendQuery (graphqlUrl nodeEnv) <|
+                GQLBuilder.request { organizationKey = organizationKey } articlesByOrganizationQuery
         )
