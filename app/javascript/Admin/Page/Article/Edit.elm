@@ -220,7 +220,7 @@ articleInputs : Model -> CreateArticleInputs
 articleInputs { title, desc, categoryId } =
     { title = Field.value title
     , desc = Field.value desc
-    , categoryId = Field.value categoryId
+    , categoryId = Just (Field.value categoryId)
     }
 
 

@@ -25,7 +25,7 @@ type alias Article =
 type alias CreateArticleInputs =
     { title : String
     , desc : String
-    , categoryId : String
+    , categoryId : Maybe String
     }
 
 
@@ -92,7 +92,7 @@ createArticleMutation =
             Var.required "desc" .desc Var.string
 
         categoryIdVar =
-            Var.required "category_id" .categoryId Var.string
+            Var.optional "category_id" .categoryId Var.string ""
     in
         GQLBuilder.mutationDocument <|
             GQLBuilder.extract

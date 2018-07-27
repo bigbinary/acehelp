@@ -276,7 +276,7 @@ update msg model =
                 ( articleCreateModel, createArticleCmd ) =
                     ArticleCreate.update caMsg currentPageModel model.nodeEnv model.organizationKey
             in
-                ( { model | currentPage = TransitioningTo (ArticleCreate articleCreateModel) }
+                ( { model | currentPage = Loaded (ArticleCreate articleCreateModel) }
                 , Cmd.map ArticleCreateMsg createArticleCmd
                 )
 

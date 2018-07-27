@@ -72,7 +72,7 @@ update msg model nodeEnv organizationKey =
         SaveArticle ->
             let
                 fields =
-                    [ model.title, model.desc, model.categoryId ]
+                    [ model.title, model.desc ]
 
                 errors =
                     validateAll fields
@@ -197,7 +197,7 @@ articleInputs : Model -> CreateArticleInputs
 articleInputs { title, desc, categoryId } =
     { title = Field.value title
     , desc = Field.value desc
-    , categoryId = Field.value categoryId
+    , categoryId = Just (Field.value categoryId)
     }
 
 

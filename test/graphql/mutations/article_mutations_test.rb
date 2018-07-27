@@ -27,25 +27,6 @@ class Mutations::ArticleMutationsTest < ActiveSupport::TestCase
     assert_equal result.data.add_article.article.title, "Create Article"
   end
 
-  test "create article failure" do
-    query = <<-'GRAPHQL'
-              mutation($input: CreateArticleInput!) {
-                addArticle(input: $input) {
-                  article {
-                    id
-                    title
-                  }
-                  errors {
-                    message
-                  }
-                }
-              }
-            GRAPHQL
-
-    result = AceHelp::Client.execute(query, input: { title: "Create Article", desc: "New article creation", category_id: "" })
-    assert_nil result.data.add_article.article
-  end
-
   test "create article invalid title failure" do
     query = <<-'GRAPHQL'
               mutation($input: CreateArticleInput!) {
