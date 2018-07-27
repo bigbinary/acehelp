@@ -28,7 +28,7 @@ createUrl =
         )
 
 
-deleteUrl : Reader ( NodeEnv, ApiKey, UrlIdInput ) (Task GQLClient.Error UrlIdInput)
+deleteUrl : Reader ( NodeEnv, ApiKey, UrlIdInput ) (Task GQLClient.Error UrlId)
 deleteUrl =
     Reader.Reader
         (\( nodeEnv, apiKey, urlId ) ->

@@ -48,14 +48,15 @@ type Msg
     | UrlLoaded (Result GQLClient.Error (List UrlData))
     | Navigate Route.Route
     | DeleteUrl String
+    | DeleteUrlResponse (Result GQLClient.Error UrlId)
 
 
 
 --| DeleteUrlResponse (Result GQLClient.Error String)
 
 
-update : Msg -> Model -> ( Model, Cmd Msg )
-update msg model =
+update : Msg -> Model -> NodeEnv -> ApiKey -> ( Model, Cmd Msg )
+update msg model nodeEnv organizationKey =
     case msg of
         LoadUrl urlId ->
             ( { model | urlId = urlId }, Cmd.none )
@@ -70,7 +71,13 @@ update msg model =
             model ! [ Navigation.newUrl (Route.routeToString page) ]
 
         DeleteUrl urlId ->
-            delete model
+            deleteRecord model nodeEnv organizationKey ({ id = urlId })
+
+        DeleteUrlResponse (Ok id) ->
+            ( model, Cmd.none )
+
+        DeleteUrlResponse (Err error) ->
+            ( { model | error = Just (toString error) }, Cmd.none )
 
 
 
@@ -90,9 +97,15 @@ view : Model -> Html Msg
 view model =
     div
         []
-        [ div
-            []
-            [ text (renderError model.error)
+        [ div []
+            [ Maybe.withDefault (text "") <|
+                Maybe.map
+                    (\err ->
+                        div [ class "alert alert-danger alert-dismissible fade show", attribute "role" "alert" ]
+                            [ text <| "Error: " ++ err
+                            ]
+                    )
+                    model.error
             ]
         , div
             [ class "buttonDiv" ]
@@ -114,7 +127,7 @@ view model =
 
 urlRow : UrlData -> Html Msg
 urlRow url =
-    div []
+    div [ id url.id ]
         [ div
             []
             [ text url.url ]
@@ -129,6 +142,10 @@ urlRow url =
         ]
 
 
-delete : Model -> ( Model, Cmd Msg )
-delete model =
-    ( model, Cmd.none )
+deleteRecord : Model -> NodeEnv -> ApiKey -> UrlIdInput -> ( Model, Cmd Msg )
+deleteRecord model nodeEnv apiKey urlId =
+    let
+        cmd =
+            Task.attempt DeleteUrlResponse (Reader.run (deleteUrl) ( nodeEnv, apiKey, urlId ))
+    in
+        ( model, cmd )

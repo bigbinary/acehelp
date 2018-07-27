@@ -340,7 +340,7 @@ update msg model =
                             UrlList.initModel
 
                 ( urlListModel, urlListCmds ) =
-                    UrlList.update ulMsg currentPageModel
+                    UrlList.update ulMsg currentPageModel model.nodeEnv model.organizationKey
             in
                 ( { model | currentPage = Loaded (UrlList urlListModel) }
                 , Cmd.map UrlListMsg urlListCmds
