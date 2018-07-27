@@ -8,8 +8,6 @@ import Route
 import Admin.Request.Article exposing (..)
 import Page.Common.View exposing (renderError)
 import Admin.Data.Article exposing (..)
-import Admin.Data.Url exposing (..)
-import Json.Decode as Json
 import Request.Helpers exposing (NodeEnv, ApiKey)
 import Task exposing (Task)
 import Reader exposing (Reader)
@@ -32,9 +30,9 @@ initModel =
     }
 
 
-init : ( Model, Reader ( NodeEnv, ApiKey ) (Task GQLClient.Error (List ArticleSummary)) )
+init : ( Model, Reader NodeEnv (Task GQLClient.Error (List ArticleSummary)) )
 init =
-    ( initModel, requestArticlesByOrganization organizationKey )
+    ( initModel, requestAllArticles )
 
 
 

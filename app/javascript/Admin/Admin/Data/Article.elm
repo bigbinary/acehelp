@@ -64,21 +64,17 @@ articlesByUrlQuery =
             )
 
 
-articlesByOrganizationQuery : GQLBuilder.Document GQLBuilder.Query (List ArticleSummary) { vars | organizationKey : String }
-articlesByOrganizationQuery =
-    let
-        idVar =
-            Var.required "organizationKey" .organizationKey Var.string
-    in
-        GQLBuilder.queryDocument
-            (GQLBuilder.extract
-                (GQLBuilder.field "articles"
-                    [ ( "id", Arg.variable idVar ) ]
-                    (GQLBuilder.list
-                        articleSummaryObject
-                    )
+allArticlesQuery : GQLBuilder.Document GQLBuilder.Query (List ArticleSummary) {}
+allArticlesQuery =
+    GQLBuilder.queryDocument
+        (GQLBuilder.extract
+            (GQLBuilder.field "articles"
+                []
+                (GQLBuilder.list
+                    articleSummaryObject
                 )
             )
+        )
 
 
 articleByIdQuery : GQLBuilder.Document GQLBuilder.Query Article { vars | id : String }
