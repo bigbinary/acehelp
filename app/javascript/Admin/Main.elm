@@ -141,7 +141,7 @@ navigateTo newRoute model =
             Route.ArticleList ->
                 let
                     ( articleListModel, articleListRequest ) =
-                        ArticleList.init model.organizationKey
+                        ArticleList.init
 
                     cmd =
                         Cmd.map ArticleListMsg <| Task.attempt ArticleList.ArticleListLoaded (Reader.run (articleListRequest) ( model.nodeEnv, model.organizationKey ))

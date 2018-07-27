@@ -30,7 +30,7 @@ initModel =
     }
 
 
-init : ( Model, Reader NodeEnv (Task GQLClient.Error (List ArticleSummary)) )
+init : ( Model, Reader ( NodeEnv, ApiKey ) (Task GQLClient.Error (List ArticleSummary)) )
 init =
     ( initModel, requestAllArticles )
 
@@ -69,18 +69,6 @@ view model =
         [ div
             []
             [ text (renderError model.error) ]
-        , div [] <|
-            List.map
-                (\article -> div [] [ text article.title ])
-                model.articles
-        , div
-            [ class "buttonDiv" ]
-            [ Html.a
-                [ onClick (Navigate <| Route.ArticleCreate)
-                , class "button primary"
-                ]
-                [ text "New Article" ]
-            ]
         , div
             []
             (List.map
@@ -89,6 +77,14 @@ view model =
                 )
                 model.articles
             )
+        , div
+            [ class "buttonDiv" ]
+            [ Html.a
+                [ onClick (Navigate <| Route.ArticleCreate)
+                , class "button primary"
+                ]
+                [ text "New Article" ]
+            ]
         ]
 
 

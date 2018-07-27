@@ -44,10 +44,10 @@ requestArticleById articleId =
         )
 
 
-requestAllArticles : Reader NodeEnv (Task GQLClient.Error (List ArticleSummary))
+requestAllArticles : Reader ( NodeEnv, ApiKey ) (Task GQLClient.Error (List ArticleSummary))
 requestAllArticles =
     Reader.Reader
-        (\nodeEnv ->
-            GQLClient.sendQuery (graphqlUrl nodeEnv) <|
+        (\( nodeEnv, apiKey ) ->
+            GQLClient.customSendQuery (requestOptions nodeEnv apiKey) <|
                 GQLBuilder.request {} allArticlesQuery
         )
