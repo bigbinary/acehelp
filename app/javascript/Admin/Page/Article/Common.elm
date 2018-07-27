@@ -29,7 +29,7 @@ articleUrls urls =
         ]
 
 
-categoryListDropdown : List Category -> CategoryId -> msg -> Html msg
+categoryListDropdown : List Category -> CategoryId -> (CategoryId -> msg) -> Html msg
 categoryListDropdown categories selectedId onItemClick =
     let
         selectedCategory =
@@ -52,7 +52,7 @@ categoryListDropdown categories selectedId onItemClick =
                     [ class "dropdown-menu", attribute "aria-labelledby" "dropdownMenuButton" ]
                     (List.map
                         (\category ->
-                            a [ class "dropdown-item", onClick onItemClick ] [ text category.name ]
+                            a [ class "dropdown-item", onClick (onItemClick category.id) ] [ text category.name ]
                         )
                         categories
                     )
