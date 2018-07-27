@@ -36,13 +36,14 @@ class Mutations::ArticleMutations
   Update = GraphQL::Relay::Mutation.define do
     name "UpdateArticle"
 
+    input_field :id, !types.String
+
     ArticleInputObjectType = GraphQL::InputObjectType.define do
       name "ArticleInput"
       input_field :category_id, !types.String
       input_field :title, !types.String
       input_field :desc, !types.String
     end
-    input_field :id, !types.String
     input_field :article, !ArticleInputObjectType
 
     return_field :article, Types::ArticleType
