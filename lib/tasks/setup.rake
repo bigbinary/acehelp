@@ -38,6 +38,7 @@ desc "Deletes all records and populates sample data"
 task setup_sample_data: [:environment] do
   OrganizationUser.delete_all
   ArticleUrl.delete_all
+  Article.delete_all
   Ticket.delete_all
   Url.delete_all
 
