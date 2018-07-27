@@ -8,20 +8,20 @@ import GraphQL.Client.Http as GQLClient
 import GraphQL.Request.Builder as GQLBuilder
 
 
-requestArticles : String -> Reader NodeEnv (Task GQLClient.Error (List ArticleSummary))
+requestArticles : String -> Reader ( NodeEnv, ApiKey ) (Task GQLClient.Error (List ArticleSummary))
 requestArticles url =
     Reader.Reader
-        (\nodeEnv ->
-            GQLClient.sendQuery (graphqlUrl nodeEnv) <|
+        (\( nodeEnv, apiKey ) ->
+            GQLClient.customSendQuery (requestOptions nodeEnv apiKey) <|
                 GQLBuilder.request { url = url } requestArticlesQuery
         )
 
 
-requestCreateArticle : CreateArticleInputs -> Reader NodeEnv (Task GQLClient.Error Article)
-requestCreateArticle articleInputs =
+requestCreateArticle : Reader ( NodeEnv, ApiKey, CreateArticleInputs ) (Task GQLClient.Error Article)
+requestCreateArticle =
     Reader.Reader
-        (\env ->
-            GQLClient.sendMutation (graphqlUrl env) <|
+        (\( nodeEnv, apiKey, articleInputs ) ->
+            GQLClient.customSendMutation (requestOptions nodeEnv apiKey) <|
                 (GQLBuilder.request
                     { title = articleInputs.title
                     , desc = articleInputs.desc
@@ -36,7 +36,7 @@ requestArticleById : ArticleId -> Reader ( NodeEnv, ApiKey ) (Task GQLClient.Err
 requestArticleById articleId =
     Reader.Reader
         (\( env, apiKey ) ->
-            GQLClient.sendQuery (graphqlUrl env) <|
+            GQLClient.customSendQuery (requestOptions env apiKey) <|
                 (GQLBuilder.request
                     { id = articleId }
                     articleByIdQuery

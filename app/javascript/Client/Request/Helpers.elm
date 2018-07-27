@@ -5,6 +5,7 @@ module Request.Helpers
         , constructUrl
         , httpGet
         , httpPost
+        , requestOptions
         , ApiKey
         , ApiErrorMessage
         , Url
@@ -15,6 +16,7 @@ module Request.Helpers
 
 import Http exposing (request, encodeUri, header, Header)
 import Json.Decode exposing (Decoder)
+import GraphQL.Client.Http exposing (RequestOptions)
 
 
 type alias Url =
@@ -64,6 +66,24 @@ graphqlUrl env =
 
         _ ->
             "/graphql/"
+
+
+requestOptions : NodeEnv -> ApiKey -> RequestOptions
+requestOptions nodeEnv apiKey =
+    let
+        headers =
+            [ Http.header "api-key" apiKey
+            ]
+
+        url =
+            graphqlUrl nodeEnv
+    in
+        { method = "POST"
+        , headers = headers
+        , url = url
+        , timeout = Nothing
+        , withCredentials = False
+        }
 
 
 constructUrl : String -> List ( String, String ) -> String

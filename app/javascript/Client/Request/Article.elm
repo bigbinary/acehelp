@@ -3,9 +3,8 @@ module Request.Article exposing (..)
 import Http
 import Task exposing (Task)
 import Reader exposing (Reader)
-import Request.Helpers exposing (apiUrl, graphqlUrl, httpGet, ApiKey, Context, NodeEnv)
+import Request.Helpers exposing (apiUrl, graphqlUrl, httpGet, requestOptions, ApiKey, Context, NodeEnv)
 import Data.Article exposing (..)
-import Data.Common exposing (..)
 import GraphQL.Client.Http as GQLClient
 import GraphQL.Request.Builder as GQLBuilder
 
@@ -14,7 +13,7 @@ requestArticleList : Context -> Reader ( NodeEnv, ApiKey ) (Task GQLClient.Error
 requestArticleList context =
     Reader.Reader
         (\( env, apiKey ) ->
-            GQLClient.sendQuery (graphqlUrl env) <|
+            GQLClient.customSendQuery (requestOptions env apiKey) <|
                 GQLBuilder.request {} articlesQuery
         )
 
@@ -23,7 +22,7 @@ requestArticle : ArticleId -> Reader ( NodeEnv, ApiKey ) (Task GQLClient.Error A
 requestArticle articleId =
     Reader.Reader
         (\( env, apiKey ) ->
-            GQLClient.sendQuery (graphqlUrl env) <|
+            GQLClient.customSendQuery (requestOptions env apiKey) <|
                 GQLBuilder.request { articleId = articleId } articleQuery
         )
 
@@ -40,7 +39,7 @@ requestUpvoteMutation : ArticleId -> Reader ( NodeEnv, ApiKey ) (Task GQLClient.
 requestUpvoteMutation articleId =
     Reader.Reader
         (\( env, apiKey ) ->
-            GQLClient.sendMutation (graphqlUrl env) <|
+            GQLClient.customSendMutation (requestOptions env apiKey) <|
                 GQLBuilder.request { articleId = articleId } upvoteMutation
         )
 
@@ -49,6 +48,6 @@ requestDownvoteMutation : ArticleId -> Reader ( NodeEnv, ApiKey ) (Task GQLClien
 requestDownvoteMutation articleId =
     Reader.Reader
         (\( env, apiKey ) ->
-            GQLClient.sendMutation (graphqlUrl env) <|
+            GQLClient.customSendMutation (requestOptions env apiKey) <|
                 GQLBuilder.request { articleId = articleId } downvoteMutation
         )

@@ -8,21 +8,21 @@ import GraphQL.Client.Http as GQLClient
 import GraphQL.Request.Builder as GQLBuilder
 
 
-requestUrls : Reader NodeEnv (Task GQLClient.Error (List UrlData))
+requestUrls : Reader ( NodeEnv, ApiKey ) (Task GQLClient.Error (List UrlData))
 requestUrls =
     Reader.Reader
-        (\nodeEnv ->
-            (GQLClient.sendQuery (graphqlUrl nodeEnv) <|
+        (\( nodeEnv, apiKey ) ->
+            (GQLClient.customSendQuery (requestOptions nodeEnv apiKey) <|
                 GQLBuilder.request {} requestUrlsQuery
             )
         )
 
 
-createUrl : Reader ( NodeEnv, CreateUrlInput ) (Task GQLClient.Error UrlData)
+createUrl : Reader ( NodeEnv, ApiKey, CreateUrlInput ) (Task GQLClient.Error UrlData)
 createUrl =
     Reader.Reader
-        (\( nodeEnv, createUrlInput ) ->
-            (GQLClient.sendMutation (graphqlUrl nodeEnv) <|
+        (\( nodeEnv, apiKey, createUrlInput ) ->
+            (GQLClient.customSendMutation (requestOptions nodeEnv apiKey) <|
                 GQLBuilder.request createUrlInput createUrlMutation
             )
         )

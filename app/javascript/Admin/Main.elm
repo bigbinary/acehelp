@@ -145,7 +145,7 @@ navigateTo newRoute model =
                         ArticleList.init
 
                     cmd =
-                        Task.attempt ArticlesUrlsLoaded (Reader.run (articleListRequest) (model.nodeEnv))
+                        Task.attempt ArticlesUrlsLoaded (Reader.run (articleListRequest) ( model.nodeEnv, model.organizationKey ))
                 in
                     ( { model | currentPage = TransitioningTo (ArticleList articleListModel), route = newRoute }, cmd )
 
@@ -179,7 +179,7 @@ navigateTo newRoute model =
                         UrlList.init
 
                     cmd =
-                        Task.attempt UrlsLoaded (Reader.run (urlListRequest) (model.nodeEnv))
+                        Task.attempt UrlsLoaded (Reader.run (urlListRequest) ( model.nodeEnv, model.organizationKey ))
                 in
                     ( { model | currentPage = TransitioningTo (UrlList urlListModel), route = newRoute }, cmd )
 

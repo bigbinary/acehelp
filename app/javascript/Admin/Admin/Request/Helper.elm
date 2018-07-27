@@ -2,6 +2,7 @@ module Admin.Request.Helper exposing (..)
 
 import Http
 import Json.Decode exposing (Decoder)
+import GraphQL.Client.Http exposing (RequestOptions)
 
 
 type alias ApiKey =
@@ -52,6 +53,24 @@ defaultRequestHeaders =
     [ Http.header "Accept" "application/json, text/javascript, */*; q=0.01"
     , Http.header "X-Requested-With" "XMLHttpRequest"
     ]
+
+
+requestOptions : NodeEnv -> ApiKey -> RequestOptions
+requestOptions env apiKey =
+    let
+        headers =
+            [ Http.header "api-key" apiKey
+            ]
+
+        url =
+            graphqlUrl env
+    in
+        { method = "POST"
+        , url = url
+        , headers = headers
+        , timeout = Nothing
+        , withCredentials = False
+        }
 
 
 constructUrl : String -> List ( String, String ) -> String

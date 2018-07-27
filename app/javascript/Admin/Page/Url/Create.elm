@@ -81,7 +81,7 @@ update msg model nodeEnv organizationKey =
                         |> String.join ", "
             in
                 if isAllValid fields then
-                    save model nodeEnv
+                    save model nodeEnv organizationKey
                 else
                     ( { model | error = Just errors }, Cmd.none )
 
@@ -139,10 +139,10 @@ view model =
         ]
 
 
-save : Model -> NodeEnv -> ( Model, Cmd Msg )
-save model nodeEnv =
+save : Model -> NodeEnv -> ApiKey -> ( Model, Cmd Msg )
+save model nodeEnv apiKey =
     let
         cmd =
-            Task.attempt SaveUrlResponse (Reader.run (createUrl) ( nodeEnv, { url = Field.value model.url } ))
+            Task.attempt SaveUrlResponse (Reader.run (createUrl) ( nodeEnv, apiKey, { url = Field.value model.url } ))
     in
         ( model, cmd )

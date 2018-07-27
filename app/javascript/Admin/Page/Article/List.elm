@@ -37,7 +37,7 @@ initModel =
     }
 
 
-init : ( Model, Reader NodeEnv (Task GQLClient.Error (List UrlData)) )
+init : ( Model, Reader ( NodeEnv, ApiKey ) (Task GQLClient.Error (List UrlData)) )
 init =
     ( initModel, requestUrls )
 
@@ -72,10 +72,10 @@ update msg model organizationKey nodeEnv =
             if url == "select_url" then
                 ( { model | articles = [] }, Cmd.none )
             else
-                ( { model | url = url }, fetchArticlesList nodeEnv url )
+                ( { model | url = url }, fetchArticlesList nodeEnv organizationKey url )
 
         Navigate page ->
-            ( model, Navigation.newUrl (Route.routeToString page) )
+            model ! [ Navigation.newUrl (Route.routeToString page) ]
 
 
 
@@ -146,6 +146,6 @@ urlsDropdown model =
         ]
 
 
-fetchArticlesList : NodeEnv -> String -> Cmd Msg
-fetchArticlesList nodeEnv url =
-    Task.attempt ArticleListLoaded (Reader.run (requestArticles url) (nodeEnv))
+fetchArticlesList : NodeEnv -> ApiKey -> String -> Cmd Msg
+fetchArticlesList nodeEnv apiKey url =
+    Task.attempt ArticleListLoaded (Reader.run (requestArticles url) ( nodeEnv, apiKey ))

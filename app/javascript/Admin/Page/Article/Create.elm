@@ -205,6 +205,6 @@ save : Model -> NodeEnv -> ApiKey -> ( Model, Cmd Msg )
 save model nodeEnv organizationKey =
     let
         cmd =
-            Task.attempt SaveArticleResponse (Reader.run (requestCreateArticle (articleInputs model)) nodeEnv)
+            Task.attempt SaveArticleResponse (Reader.run (requestCreateArticle) ( nodeEnv, organizationKey, (articleInputs model) ))
     in
         ( model, cmd )

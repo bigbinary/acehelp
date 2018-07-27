@@ -11,7 +11,7 @@ import GraphQL.Request.Builder as GQLBuilder
 requestCategories : Reader ( NodeEnv, ApiKey ) (Task GQLClient.Error (List Category))
 requestCategories =
     Reader.Reader
-        (\( env, apiKey ) ->
-            GQLClient.sendQuery (graphqlUrl env) <|
+        (\( nodeEnv, apiKey ) ->
+            GQLClient.customSendQuery (requestOptions nodeEnv apiKey) <|
                 GQLBuilder.request {} categoriesQuery
         )

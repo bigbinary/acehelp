@@ -32,7 +32,7 @@ initModel =
     }
 
 
-init : ( Model, Reader NodeEnv (Task GQLClient.Error (List UrlData)) )
+init : ( Model, Reader ( NodeEnv, ApiKey ) (Task GQLClient.Error (List UrlData)) )
 init =
     ( initModel
     , requestUrls
