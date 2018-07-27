@@ -23,7 +23,7 @@ brew services start elasticsearch
 
 npm install -g elm
 
-elm-package install
+elm-package install -y
 
 rake searchkick:reindex:all
 
