@@ -121,7 +121,7 @@ class Mutations::ArticleMutationsTest < ActiveSupport::TestCase
   test "delete article mutations" do
     query = <<-'GRAPHQL'
               mutation($input: DestroyArticleInput!) {
-                destroyArticle(input: $input) {
+                deleteArticle(input: $input) {
                   deletedId
                 }
               }
@@ -129,6 +129,6 @@ class Mutations::ArticleMutationsTest < ActiveSupport::TestCase
 
     result = AceHelp::Client.execute(query, input: { id: @article.id })
 
-    assert_equal result.data.destroy_article.deleted_id, @article.id
+    assert_equal result.data.delete_article.deleted_id, @article.id
   end
 end

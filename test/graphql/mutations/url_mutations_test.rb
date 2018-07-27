@@ -78,7 +78,7 @@ class Mutations::UrlMutationsTest < ActiveSupport::TestCase
   test "delete url mutations" do
     query = <<-'GRAPHQL'
               mutation($input: DestroyUrlInput!) {
-                destroyUrl(input: $input) {
+                deleteUrl(input: $input) {
                   deletedId
                 }
               }
@@ -86,6 +86,6 @@ class Mutations::UrlMutationsTest < ActiveSupport::TestCase
 
     result = AceHelp::Client.execute(query, input: { id: @url.id })
 
-    assert_equal result.data.destroy_url.deleted_id, @url.id
+    assert_equal result.data.delete_url.deleted_id, @url.id
   end
 end
