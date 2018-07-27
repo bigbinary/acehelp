@@ -12,6 +12,7 @@ import GraphQL.Client.Http as GQLClient
 import Field exposing (..)
 import Field.ValidationResult exposing (..)
 import Helpers exposing (..)
+import Route
 
 
 -- MODEL
@@ -86,13 +87,7 @@ update msg model nodeEnv organizationKey =
                     ( { model | error = Just errors }, Cmd.none )
 
         SaveUrlResponse (Ok id) ->
-            ( { model
-                | url = Field.update model.url ""
-                , urlTitle = Field.update model.urlTitle ""
-                , error = Nothing
-              }
-            , Cmd.none
-            )
+            ( model, Route.modifyUrl <| Route.UrlList )
 
         SaveUrlResponse (Err error) ->
             ( { model | error = Just (toString error) }, Cmd.none )
