@@ -47,8 +47,8 @@ decodeArticleSummary =
         |> required "title" string
 
 
-requestArticlesQuery : GQLBuilder.Document GQLBuilder.Query (List ArticleSummary) { vars | url : String }
-requestArticlesQuery =
+articlesByUrlQuery : GQLBuilder.Document GQLBuilder.Query (List ArticleSummary) { vars | url : String }
+articlesByUrlQuery =
     let
         urlVar =
             Var.required "url" .url Var.string
@@ -58,13 +58,23 @@ requestArticlesQuery =
                 (GQLBuilder.field "articles"
                     [ ( "url", Arg.variable urlVar ) ]
                     (GQLBuilder.list
-                        (GQLBuilder.object ArticleSummary
-                            |> GQLBuilder.with (GQLBuilder.field "id" [] GQLBuilder.string)
-                            |> GQLBuilder.with (GQLBuilder.field "title" [] GQLBuilder.string)
-                        )
+                        articleSummaryObject
                     )
                 )
             )
+
+
+allArticlesQuery : GQLBuilder.Document GQLBuilder.Query (List ArticleSummary) {}
+allArticlesQuery =
+    GQLBuilder.queryDocument
+        (GQLBuilder.extract
+            (GQLBuilder.field "articles"
+                []
+                (GQLBuilder.list
+                    articleSummaryObject
+                )
+            )
+        )
 
 
 articleByIdQuery : GQLBuilder.Document GQLBuilder.Query Article { vars | id : String }
@@ -127,3 +137,11 @@ articleObject =
                     urlExtractor
                 )
             )
+
+
+articleSummaryObject : GQLBuilder.ValueSpec GQLBuilder.NonNull GQLBuilder.ObjectType ArticleSummary vars
+articleSummaryObject =
+    (GQLBuilder.object ArticleSummary
+        |> GQLBuilder.with (GQLBuilder.field "id" [] GQLBuilder.string)
+        |> GQLBuilder.with (GQLBuilder.field "title" [] GQLBuilder.string)
+    )

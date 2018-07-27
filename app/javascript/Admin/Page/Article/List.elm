@@ -6,11 +6,8 @@ import Html.Events exposing (..)
 import Navigation exposing (..)
 import Route
 import Admin.Request.Article exposing (..)
-import Admin.Request.Url exposing (..)
 import Page.Common.View exposing (renderError)
 import Admin.Data.Article exposing (..)
-import Admin.Data.Url exposing (..)
-import Json.Decode as Json
 import Request.Helpers exposing (NodeEnv, ApiKey)
 import Task exposing (Task)
 import Reader exposing (Reader)
@@ -22,8 +19,6 @@ import GraphQL.Client.Http as GQLClient
 
 type alias Model =
     { articles : List ArticleSummary
-    , urlList : List UrlData
-    , url : String
     , error : Maybe String
     }
 
@@ -31,15 +26,13 @@ type alias Model =
 initModel : Model
 initModel =
     { articles = []
-    , urlList = []
-    , url = ""
     , error = Nothing
     }
 
 
-init : ( Model, Reader ( NodeEnv, ApiKey ) (Task GQLClient.Error (List UrlData)) )
+init : ( Model, Reader ( NodeEnv, ApiKey ) (Task GQLClient.Error (List ArticleSummary)) )
 init =
-    ( initModel, requestUrls )
+    ( initModel, requestAllArticles )
 
 
 
@@ -47,9 +40,7 @@ init =
 
 
 type Msg
-    = UrlSelected String
-    | UrlLoaded (Result GQLClient.Error (List UrlData))
-    | ArticleListLoaded (Result GQLClient.Error (List ArticleSummary))
+    = ArticleListLoaded (Result GQLClient.Error (List ArticleSummary))
     | Navigate Route.Route
 
 
@@ -61,18 +52,6 @@ update msg model organizationKey nodeEnv =
 
         ArticleListLoaded (Err err) ->
             ( { model | error = Just (toString err) }, Cmd.none )
-
-        UrlLoaded (Ok urlList) ->
-            ( { model | urlList = urlList }, Cmd.none )
-
-        UrlLoaded (Err err) ->
-            ( { model | error = Just (toString err) }, Cmd.none )
-
-        UrlSelected url ->
-            if url == "select_url" then
-                ( { model | articles = [] }, Cmd.none )
-            else
-                ( { model | url = url }, fetchArticlesList nodeEnv organizationKey url )
 
         Navigate page ->
             model ! [ Navigation.newUrl (Route.routeToString page) ]
@@ -90,16 +69,6 @@ view model =
         [ div
             []
             [ text (renderError model.error) ]
-        , div []
-            [ urlsDropdown model ]
-        , div
-            [ class "buttonDiv" ]
-            [ Html.a
-                [ onClick (Navigate <| Route.ArticleCreate)
-                , class "button primary"
-                ]
-                [ text "New Article" ]
-            ]
         , div
             []
             (List.map
@@ -108,6 +77,14 @@ view model =
                 )
                 model.articles
             )
+        , div
+            [ class "buttonDiv" ]
+            [ Html.a
+                [ onClick (Navigate <| Route.ArticleCreate)
+                , class "button primary"
+                ]
+                [ text "New Article" ]
+            ]
         ]
 
 
@@ -117,35 +94,3 @@ rows article =
         [ onClick <| Navigate <| Route.ArticleEdit article.id ]
         [ text article.title
         ]
-
-
-urlsDropdown : Model -> Html Msg
-urlsDropdown model =
-    div
-        [ class "dropdown" ]
-        [ select
-            [ on "change" (Json.map UrlSelected targetValue) ]
-            (List.concat
-                [ [ option
-                        [ value "select_url" ]
-                        [ text "Select URL" ]
-                  , option
-                        [ value "" ]
-                        [ text "All" ]
-                  ]
-                , (List.map
-                    (\url ->
-                        option
-                            [ value url.url ]
-                            [ text url.url ]
-                    )
-                    model.urlList
-                  )
-                ]
-            )
-        ]
-
-
-fetchArticlesList : NodeEnv -> ApiKey -> String -> Cmd Msg
-fetchArticlesList nodeEnv apiKey url =
-    Task.attempt ArticleListLoaded (Reader.run (requestArticles url) ( nodeEnv, apiKey ))
