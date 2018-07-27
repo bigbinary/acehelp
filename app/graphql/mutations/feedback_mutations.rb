@@ -18,7 +18,7 @@ class Mutations::FeedbackMutations
       if new_feedback.save
         feedback = new_feedback
       else
-        errors = Utils::ErrorHandler.new.generate_detailed_error_hash(new_feedback, context)
+        errors = Utils::ErrorHandler.new.detailed_error(new_feedback, context)
       end
 
       {

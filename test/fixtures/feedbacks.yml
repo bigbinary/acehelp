@@ -3,9 +3,9 @@
 valid_feedback:
   name: Ganesh Gaitonde
   message: Valid feedback
-  article_id:
+  article: life
 
-invalid_feedback:
+second_feedback:
   name: Harely Davidson
-  message:
-  article_id:
+  message: Message to pass DB validation
+  article: ror

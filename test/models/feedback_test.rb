@@ -2,7 +2,7 @@ require 'test_helper'
 
 class FeedbackTest < ActiveSupport::TestCase
   def setup
-    @feedback = feedbacks(:valid_feedback)
+    @article = articles(:life)
   end
 
   test "valid feedback" do
@@ -11,7 +11,10 @@ class FeedbackTest < ActiveSupport::TestCase
   end
 
   test "invalid feedback" do
-    invalid_feedback = feedbacks(:invalid_feedback)
-    assert_not invalid_feedback.valid?
+    invalid_feedback = feedbacks(:second_feedback)
+    invalid_feedback.message = nil
+    assert_raise(ActiveRecord::RecordInvalid) do
+      invalid_feedback.save!
+    end
   end
 end
