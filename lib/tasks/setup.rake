@@ -39,7 +39,8 @@ task setup_sample_data: [:environment] do
   OrganizationUser.delete_all
   ArticleUrl.delete_all
   Ticket.delete_all
-  
+  Url.delete_all
+
   delete_all_records_from_all_tables
   system "rake db:seed"
 
