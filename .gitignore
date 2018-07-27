@@ -50,3 +50,5 @@ coverage
 
 /app/javascript/tests/elm-stuff
 /app/javascript/elm-stuff
+
+logfile
