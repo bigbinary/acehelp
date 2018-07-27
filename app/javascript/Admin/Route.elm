@@ -8,8 +8,12 @@ import Admin.Data.Article exposing (ArticleId)
 -- ROUTING --
 
 
+type alias OrganizationApiKey =
+    String
+
+
 type Route
-    = ArticleList
+    = ArticleList OrganizationApiKey
     | ArticleCreate
     | ArticleEdit ArticleId
     | CategoryList
@@ -26,15 +30,15 @@ routeMatcher : Parser (Route -> a) a
 routeMatcher =
     oneOf
         [ Url.map Dashboard (s "admin" </> s "")
-        , Url.map ArticleList (s "admin" </> s "articles")
-        , Url.map UrlList (s "admin" </> s "urls")
-        , Url.map CategoryList (s "admin" </> s "categories")
-        , Url.map TicketList (s "admin" </> s "tickets")
-        , Url.map Integration (s "admin" </> s "integrations")
-        , Url.map ArticleCreate (s "admin" </> s "articles" </> s "new")
-        , Url.map UrlCreate (s "admin" </> s "urls" </> s "new")
-        , Url.map CategoryCreate (s "admin" </> s "categories" </> s "new")
-        , Url.map ArticleEdit (s "admin" </> s "articles" </> string)
+        , Url.map ArticleList (s "organizations" </> string </> s "articles")
+        , Url.map UrlList (s "urls")
+        , Url.map CategoryList (s "categories")
+        , Url.map TicketList (s "tickets")
+        , Url.map Integration (s "integrations")
+        , Url.map ArticleCreate (s "articles" </> s "new")
+        , Url.map UrlCreate (s "urls" </> s "new")
+        , Url.map CategoryCreate (s "categories" </> s "new")
+        , Url.map ArticleEdit (s "articles" </> string)
         ]
 
 
@@ -50,8 +54,8 @@ routeToString page =
                 Dashboard ->
                     []
 
-                ArticleList ->
-                    [ "articles" ]
+                ArticleList organizationApiKey ->
+                    [ "organizations", organizationApiKey, "articles" ]
 
                 UrlList ->
                     [ "urls" ]
@@ -80,7 +84,7 @@ routeToString page =
                 NotFound ->
                     []
     in
-        "/admin/" ++ String.join "/" pieces
+        "/" ++ String.join "/" pieces
 
 
 modifyUrl : Route -> Cmd msg

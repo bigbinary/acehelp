@@ -3,20 +3,23 @@
 Rails.application.routes.draw do
   devise_for :users
 
-  post "/graphql", to: "graphql#execute"
+  root to: "home#index"
 
-  get "/", to: "home#index"
+  post "/graphql", to: "graphql#execute"
 
   get "/pages/aceinvoice/getting_started", to: "home#getting_started"
   get "/pages/aceinvoice/integrations", to: "home#integrations"
   get "/pages/aceinvoice/pricing", to: "home#pricing"
+
+  resources :organizations, only: [:show], param: :api_key do
+    resources :articles, only: [:index]
+  end
 
   namespace :admin do
     resources :integrations, only: [:index]
     resources :dashboard, only: [:index]
     resources :articles
     resources :urls
-    resources :organization, only: [:show]
     resources :categories
     resources :tickets, only: [:index]
   end

@@ -33,6 +33,8 @@ import Task exposing (Task)
 type alias Flags =
     { node_env : String
     , organization_key : String
+    , user_id : String
+    , user_email : String
     }
 
 
@@ -61,6 +63,8 @@ type alias Model =
     , route : Route.Route
     , nodeEnv : String
     , organizationKey : String
+    , userId : String
+    , userEmail : String
     , error : Maybe String
     }
 
@@ -76,6 +80,8 @@ init flags location =
             , route = Route.fromLocation location
             , nodeEnv = flags.node_env
             , organizationKey = flags.organization_key
+            , userId = flags.user_id
+            , userEmail = flags.user_email
             , error = Nothing
             }
     in
@@ -139,7 +145,7 @@ navigateTo newRoute model =
                     (Cmd.map msg)
     in
         case newRoute of
-            Route.ArticleList ->
+            Route.ArticleList organizationKey ->
                 let
                     ( articleListModel, articleListRequest ) =
                         ArticleList.init
@@ -578,9 +584,9 @@ adminHeader model =
                 [ Html.a
                     [ classList
                         [ ( "nav-link", True )
-                        , ( "active", (model.route == Route.ArticleList) || (model.route == Route.ArticleCreate) )
+                        , ( "active", (model.route == (Route.ArticleList model.organizationKey)) || (model.route == Route.ArticleCreate) )
                         ]
-                    , onClick <| NavigateTo Route.ArticleList
+                    , onClick <| NavigateTo (Route.ArticleList model.organizationKey)
                     ]
                     [ text "Articles" ]
                 ]

@@ -8,7 +8,7 @@ module LoadOrganization
   end
 
   def load_organization
-    api_key = request.headers["api-key"]
+    api_key = request.headers["api-key"] || params["api_key"]
 
     if Rails.env.development?
       @organization = Organization.first
