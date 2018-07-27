@@ -47,6 +47,11 @@ type Msg
     = LoadUrl UrlId
     | UrlLoaded (Result GQLClient.Error (List UrlData))
     | Navigate Route.Route
+    | DeleteUrl
+
+
+
+--| DeleteUrlResponse (Result GQLClient.Error String)
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -63,6 +68,9 @@ update msg model =
 
         Navigate page ->
             model ! [ Navigation.newUrl (Route.routeToString page) ]
+
+        DeleteUrl ->
+            delete model
 
 
 
@@ -107,4 +115,20 @@ view model =
 urlRow : UrlData -> Html Msg
 urlRow url =
     div []
-        [ text url.url ]
+        [ div
+            []
+            [ text url.url ]
+        , div
+            []
+            [ Html.a
+                [ onClick DeleteUrl
+                , class "button primary"
+                ]
+                [ text "Delete Url" ]
+            ]
+        ]
+
+
+delete : Model -> ( Model, Cmd Msg )
+delete model =
+    ( model, Cmd.none )

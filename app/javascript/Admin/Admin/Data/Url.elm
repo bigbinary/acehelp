@@ -15,6 +15,11 @@ type alias UrlData =
     }
 
 
+type alias UrlIdInput =
+    { id : String
+    }
+
+
 type alias CreateUrlInput =
     { url : String
     }
@@ -55,6 +60,29 @@ createUrlMutation =
                         GQLBuilder.field "url"
                             []
                             urlExtractor
+                    )
+
+
+deleteUrlMutation : GQLBuilder.Document GQLBuilder.Mutation UrlIdInput UrlIdInput
+deleteUrlMutation =
+    let
+        idVar =
+            Var.required "id" .id Var.string
+    in
+        GQLBuilder.mutationDocument <|
+            GQLBuilder.extract <|
+                GQLBuilder.field "deleteUrl"
+                    [ ( "input"
+                      , Arg.object
+                            [ ( "id", Arg.variable idVar ) ]
+                      )
+                    ]
+                    (GQLBuilder.extract <|
+                        GQLBuilder.field "id"
+                            []
+                            (GQLBuilder.object UrlIdInput
+                                |> GQLBuilder.with (GQLBuilder.field "id" [] GQLBuilder.string)
+                            )
                     )
 
 
