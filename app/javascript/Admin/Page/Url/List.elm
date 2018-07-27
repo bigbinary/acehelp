@@ -74,7 +74,11 @@ update msg model nodeEnv organizationKey =
             deleteRecord model nodeEnv organizationKey ({ id = urlId })
 
         DeleteUrlResponse (Ok id) ->
-            ( model, Cmd.none )
+            let
+                urls =
+                    List.drop (0) model.urls
+            in
+                ( { model | urls = urls }, Cmd.none )
 
         DeleteUrlResponse (Err error) ->
             ( { model | error = Just (toString error) }, Cmd.none )
