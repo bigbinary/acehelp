@@ -8,11 +8,9 @@ module LoadOrganization
   end
 
   def load_organization
-    api_key = request.headers["api-key"] || params["api_key"]
+    api_key = request.headers["api-key"] || params["organization_api_key"]
 
-    if Rails.env.development?
-      @organization = Organization.first
-    elsif api_key.blank?
+    if api_key.blank?
       render_unauthorized(unathorized_error_message)
     else
       @organization = Organization.find_by(api_key: api_key)
