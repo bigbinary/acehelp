@@ -87,7 +87,7 @@ update msg model nodeEnv organizationKey =
                     ( { model | error = Just errors }, Cmd.none )
 
         SaveUrlResponse (Ok id) ->
-            ( model, Route.modifyUrl <| Route.UrlList )
+            ( model, Route.modifyUrl <| Route.UrlList organizationKey )
 
         SaveUrlResponse (Err error) ->
             ( { model | error = Just (toString error) }, Cmd.none )

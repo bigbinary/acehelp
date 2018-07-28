@@ -224,7 +224,7 @@ navigateTo newRoute model =
                 (CategoryCreate.init)
                     |> transitionTo CategoryCreate CategoryCreateMsg
 
-            Route.UrlList ->
+            Route.UrlList organizationKey ->
                 let
                     ( urlListModel, urlListRequest ) =
                         UrlList.init
@@ -690,11 +690,11 @@ adminHeader model =
                     [ classList
                         [ ( "nav-link", True )
                         , ( "active"
-                          , (model.route == Route.UrlList)
+                          , (model.route == (Route.UrlList model.organizationKey))
                                 || (model.route == Route.UrlCreate)
                           )
                         ]
-                    , onClick <| NavigateTo Route.UrlList
+                    , onClick <| NavigateTo (Route.UrlList model.organizationKey)
                     ]
                     [ text "URL" ]
                 ]
