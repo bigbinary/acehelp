@@ -253,7 +253,7 @@ navigateTo newRoute model =
                 (TicketList.init model.nodeEnv model.organizationKey)
                     |> transitionTo TicketList TicketListMsg
 
-            Route.Settings ->
+            Route.Settings organizationKey ->
                 (Settings.init model.organizationKey)
                     |> transitionTo Settings SettingsMsg
 
@@ -725,9 +725,9 @@ adminHeader model =
                 [ Html.a
                     [ classList
                         [ ( "nav-link", True )
-                        , ( "active", model.route == Route.Settings )
+                        , ( "active", (model.route == (Route.Settings model.organizationKey)) )
                         ]
-                    , onClick <| NavigateTo Route.Settings
+                    , onClick <| NavigateTo (Route.Settings model.organizationKey)
                     ]
                     [ text "Settings" ]
                 ]
