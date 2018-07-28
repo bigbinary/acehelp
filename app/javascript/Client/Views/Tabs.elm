@@ -71,7 +71,12 @@ view model =
                 |> List.map
                     (\tab ->
                         div
-                            [ classList [ ( "tabs", True ), ( "selected", (Zipper.current model) == tab ) ]
+                            [ classList
+                                [ ( "tabs", True )
+                                , ( "selected"
+                                  , (Zipper.current model) == tab
+                                  )
+                                ]
                             , onClick (TabSelected tab)
                             ]
                             [ text (tabToString tab)
@@ -83,7 +88,15 @@ view model =
             , style [ ( "background-color", "rgb(60, 170, 249)" ), ( "color", "#fff" ) ]
             ]
         <|
-            (span [ id "under-tab", class (underTabClassForTab currentTab), style [ ( "background-color", "#ffffff" ) ] ] [])
+            (span
+                [ id "under-tab"
+                , class (underTabClassForTab currentTab)
+                , style
+                    [ ( "background-color", "#ffffff" )
+                    ]
+                ]
+                []
+            )
                 :: tabsDom
 
 

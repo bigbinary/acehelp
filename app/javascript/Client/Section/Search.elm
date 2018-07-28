@@ -33,7 +33,12 @@ type Msg
 view : Model -> String -> Html Msg
 view model color =
     div [ class "ah-search-bar", style [ ( "background-color", color ) ] ]
-        [ input [ type_ "text", onInput OnSearchQueryInput, placeholder "Search for an Article" ] []
+        [ input
+            [ type_ "text"
+            , onInput OnSearchQueryInput
+            , placeholder "Search for an Article"
+            ]
+            []
         , span [ onClick OnSearch ] [ SolidIcon.search ]
         ]
 
@@ -47,7 +52,9 @@ update msg model =
     case msg of
         OnSearch ->
             ( model
-            , Just <| Reader.map (Task.attempt SearchResultsReceived) (requestSearch model)
+            , Just <|
+                Reader.map (Task.attempt SearchResultsReceived)
+                    (requestSearch model)
             )
 
         OnSearchQueryInput searchQuery ->

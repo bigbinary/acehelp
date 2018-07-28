@@ -57,7 +57,9 @@ view gqlError =
                     in
                         ( toString response.status.code, response.status.message, "" )
     in
-        errorMessageView (text boldExclamationText) (text friendlyMessage) (text systemMessage)
+        errorMessageView (text boldExclamationText)
+            (text friendlyMessage)
+            (text systemMessage)
 
 
 errorMessageView : Html msg -> Html msg -> Html msg -> Html msg

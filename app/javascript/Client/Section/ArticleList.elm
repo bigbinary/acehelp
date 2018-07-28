@@ -62,7 +62,13 @@ view model =
             errorMessageView
                 (text "")
                 (text "We could not find relevant articles for you at this moment")
-                (span [] [ text "You can check out our ", a [ onClick OpenLibrary ] [ text "Library" ], text " or Search for an article" ])
+                (span []
+                    [ text "You can check out our "
+                    , a [ onClick OpenLibrary ]
+                        [ text "Library" ]
+                    , text " or Search for an article"
+                    ]
+                )
 
         _ ->
             div [ id "content-wrapper" ]

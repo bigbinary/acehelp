@@ -20,7 +20,11 @@ errorsExtractor =
             (GQLBuilder.nullable
                 (GQLBuilder.list
                     (GQLBuilder.object GQLError
-                        |> GQLBuilder.with (GQLBuilder.field "message" [] GQLBuilder.string)
+                        |> GQLBuilder.with
+                            (GQLBuilder.field "message"
+                                []
+                                GQLBuilder.string
+                            )
                     )
                 )
             )

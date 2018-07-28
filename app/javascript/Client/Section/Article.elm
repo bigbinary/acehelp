@@ -70,7 +70,10 @@ type Msg
     | EmailInput String
     | CommentInput String
 
+
+
 --markFeedback: Msg -> Model -> Model
+
 
 update : Msg -> Model -> ( Model, SectionCmd Msg )
 update msg model =
@@ -78,22 +81,39 @@ update msg model =
         FeedbackSelected feedback ->
             case feedback of
                 Positive ->
-                    ( { model | feedback = feedback }, Just <| Reader.map (Task.attempt Vote) <| requestUpvoteMutation model.article.id )
+                    ( { model | feedback = feedback }
+                    , Just <|
+                        Reader.map (Task.attempt Vote) <|
+                            requestUpvoteMutation model.article.id
+                    )
 
                 Negative ->
-                    ( { model | feedback = feedback, feedbackForm = Just (emptyForm model.article.id) }, Just <| Reader.map (Task.attempt Vote) <| requestDownvoteMutation model.article.id )
+                    ( { model
+                        | feedback = feedback
+                        , feedbackForm =
+                            Just
+                                (emptyForm model.article.id)
+                      }
+                    , Just <|
+                        Reader.map (Task.attempt Vote) <|
+                            requestDownvoteMutation model.article.id
+                    )
 
                 _ ->
                     ( { model | feedback = feedback }, Nothing )
+
         SendFeedback ->
             ( { model | feedback = FeedbackSent }
             , Maybe.map
                 (\form ->
                     case form.email of
-                      "" ->
-                          Reader.map (Task.attempt SentFeedbackResponse) <| requestAddFeedbackMutation form
-                      _ ->
-                          Reader.map (Task.attempt SentFeedbackResponse) <| requestAddTicketMutation form
+                        "" ->
+                            Reader.map (Task.attempt SentFeedbackResponse) <|
+                                requestAddFeedbackMutation form
+
+                        _ ->
+                            Reader.map (Task.attempt SentFeedbackResponse) <|
+                                requestAddTicketMutation form
                 )
                 model.feedbackForm
             )
@@ -120,21 +140,24 @@ update msg model =
         NameInput name ->
             let
                 newForm =
-                    Maybe.map (\currentForm -> { currentForm | name = name }) model.feedbackForm
+                    Maybe.map (\currentForm -> { currentForm | name = name })
+                        model.feedbackForm
             in
                 ( { model | feedbackForm = newForm }, Nothing )
 
         EmailInput email ->
             let
                 newForm =
-                    Maybe.map (\currentForm -> { currentForm | email = email }) model.feedbackForm
+                    Maybe.map (\currentForm -> { currentForm | email = email })
+                        model.feedbackForm
             in
                 ( { model | feedbackForm = newForm }, Nothing )
 
         CommentInput comment ->
             let
                 newForm =
-                    Maybe.map (\currentForm -> { currentForm | comment = comment }) model.feedbackForm
+                    Maybe.map (\currentForm -> { currentForm | comment = comment })
+                        model.feedbackForm
             in
                 ( { model | feedbackForm = newForm }, Nothing )
 
@@ -181,8 +204,22 @@ didThisHelpView : Html Msg
 didThisHelpView =
     div [ class "did-this-help" ]
         [ span [ class "text-label" ] [ text "Did this help?" ]
-        , div [ class "thumbs thumbs-up", onClick (FeedbackSelected Positive) ] [ SolidIcon.thumbs_up ]
-        , div [ class "thumbs thumbs-down", onClick (FeedbackSelected Negative) ] [ SolidIcon.thumbs_down ]
+        , div
+            [ class "thumbs thumbs-up"
+            , onClick
+                (FeedbackSelected
+                    Positive
+                )
+            ]
+            [ SolidIcon.thumbs_up ]
+        , div
+            [ class "thumbs thumbs-down"
+            , onClick
+                (FeedbackSelected
+                    Negative
+                )
+            ]
+            [ SolidIcon.thumbs_down ]
         ]
 
 
@@ -199,9 +236,26 @@ negativeView =
             [ text "Please tell us what you are looking for."
             , text " If you enter your email then this would create a support ticket and we would get back to you soon"
             ]
-        , textarea [ class "comment-box", placeholder "Your comments", onInput CommentInput ] []
-        , input [ class "text-input", type_ "text", placeholder "Your Email", onInput EmailInput ] []
-        , input [ class "text-input", type_ "text", placeholder "Your Name (optional)", onInput NameInput ] []
+        , textarea
+            [ class "comment-box"
+            , placeholder "Your comments"
+            , onInput CommentInput
+            ]
+            []
+        , input
+            [ class "text-input"
+            , type_ "text"
+            , placeholder "Your Email"
+            , onInput EmailInput
+            ]
+            []
+        , input
+            [ class "text-input"
+            , type_ "text"
+            , placeholder "Your Name (optional)"
+            , onInput NameInput
+            ]
+            []
         , div []
             [ div
                 [ class "regular-button"

@@ -139,7 +139,14 @@ navigateTo newRoute model =
     let
         transitionTo page msg =
             Tuple.mapFirst
-                (\pageModel -> ({ model | currentPage = TransitioningTo (page pageModel), route = newRoute }))
+                (\pageModel ->
+                    ({ model
+                        | currentPage =
+                            TransitioningTo (page pageModel)
+                        , route = newRoute
+                     }
+                    )
+                )
                 >> Tuple.mapSecond
                     (Cmd.map msg)
     in
@@ -150,9 +157,23 @@ navigateTo newRoute model =
                         ArticleList.init
 
                     cmd =
-                        Cmd.map ArticleListMsg <| Task.attempt ArticleList.ArticleListLoaded (Reader.run (articleListRequest) ( model.nodeEnv, model.organizationKey ))
+                        Cmd.map ArticleListMsg <|
+                            Task.attempt
+                                ArticleList.ArticleListLoaded
+                                (Reader.run (articleListRequest)
+                                    ( model.nodeEnv
+                                    , model.organizationKey
+                                    )
+                                )
                 in
-                    ( { model | currentPage = TransitioningTo (ArticleList articleListModel), route = newRoute }, cmd )
+                    ( { model
+                        | currentPage =
+                            TransitioningTo
+                                (ArticleList articleListModel)
+                        , route = newRoute
+                      }
+                    , cmd
+                    )
 
             Route.ArticleCreate ->
                 let
@@ -160,9 +181,21 @@ navigateTo newRoute model =
                         ArticleCreate.init
 
                     cmd =
-                        Task.attempt ArticleCategoriesLoaded (Reader.run (categoriesRequest) ( model.nodeEnv, model.organizationKey ))
+                        Task.attempt ArticleCategoriesLoaded
+                            (Reader.run (categoriesRequest)
+                                ( model.nodeEnv
+                                , model.organizationKey
+                                )
+                            )
                 in
-                    ( { model | currentPage = TransitioningTo (ArticleCreate articleCreateModel), route = newRoute }, cmd )
+                    ( { model
+                        | currentPage =
+                            TransitioningTo
+                                (ArticleCreate articleCreateModel)
+                        , route = newRoute
+                      }
+                    , cmd
+                    )
 
             Route.CategoryList ->
                 let
@@ -170,9 +203,22 @@ navigateTo newRoute model =
                         CategoryList.init
 
                     cmd =
-                        Task.attempt CategoriesLoaded (Reader.run (categoriesRequest) ( model.nodeEnv, model.organizationKey ))
+                        Task.attempt CategoriesLoaded
+                            (Reader.run
+                                (categoriesRequest)
+                                ( model.nodeEnv, model.organizationKey )
+                            )
                 in
-                    ( { model | currentPage = TransitioningTo (CategoryList categoryListModel), route = newRoute }, cmd )
+                    ( { model
+                        | currentPage =
+                            TransitioningTo
+                                (CategoryList
+                                    categoryListModel
+                                )
+                        , route = newRoute
+                      }
+                    , cmd
+                    )
 
             Route.CategoryCreate ->
                 (CategoryCreate.init)
@@ -184,9 +230,20 @@ navigateTo newRoute model =
                         UrlList.init
 
                     cmd =
-                        Task.attempt UrlsLoaded (Reader.run (urlListRequest) ( model.nodeEnv, model.organizationKey ))
+                        Task.attempt UrlsLoaded
+                            (Reader.run
+                                (urlListRequest)
+                                ( model.nodeEnv, model.organizationKey )
+                            )
                 in
-                    ( { model | currentPage = TransitioningTo (UrlList urlListModel), route = newRoute }, cmd )
+                    ( { model
+                        | currentPage =
+                            TransitioningTo
+                                (UrlList urlListModel)
+                        , route = newRoute
+                      }
+                    , cmd
+                    )
 
             Route.UrlCreate ->
                 (UrlCreate.init)
@@ -209,9 +266,21 @@ navigateTo newRoute model =
                         ArticleEdit.init articleId
 
                     cmd =
-                        Cmd.map ArticleEditMsg <| Task.attempt (ArticleEdit.ArticleLoaded) (Reader.run (articleEditCmd) ( model.nodeEnv, model.organizationKey ))
+                        Cmd.map ArticleEditMsg <|
+                            Task.attempt
+                                (ArticleEdit.ArticleLoaded)
+                                (Reader.run (articleEditCmd)
+                                    ( model.nodeEnv, model.organizationKey )
+                                )
                 in
-                    ( { model | currentPage = TransitioningTo (ArticleEdit articleEditModel), route = newRoute }, cmd )
+                    ( { model
+                        | currentPage =
+                            TransitioningTo
+                                (ArticleEdit articleEditModel)
+                        , route = newRoute
+                      }
+                    , cmd
+                    )
 
             Route.NotFound ->
                 ( { model | currentPage = Loaded NotFound }, Cmd.none )
@@ -223,7 +292,13 @@ update msg model =
         NavigateTo route ->
             navigateTo route model
                 |> Tuple.mapSecond
-                    (\cmd -> Cmd.batch <| cmd :: [ modifyUrl <| Route.routeToString route ])
+                    (\cmd ->
+                        Cmd.batch <|
+                            cmd
+                                :: [ modifyUrl <|
+                                        Route.routeToString route
+                                   ]
+                    )
 
         ArticleListMsg alMsg ->
             let
@@ -236,7 +311,10 @@ update msg model =
                             ArticleList.initModel
 
                 ( articleListModel, articleListCmd ) =
-                    ArticleList.update alMsg currentPageModel model.organizationKey model.nodeEnv
+                    ArticleList.update alMsg
+                        currentPageModel
+                        model.organizationKey
+                        model.nodeEnv
             in
                 ( { model | currentPage = Loaded (ArticleList articleListModel) }
                 , Cmd.map ArticleListMsg articleListCmd
@@ -253,7 +331,10 @@ update msg model =
                             ArticleCreate.initModel
 
                 ( articleCreateModel, createArticleCmd ) =
-                    ArticleCreate.update caMsg currentPageModel model.nodeEnv model.organizationKey
+                    ArticleCreate.update caMsg
+                        currentPageModel
+                        model.nodeEnv
+                        model.organizationKey
             in
                 ( { model | currentPage = Loaded (ArticleCreate articleCreateModel) }
                 , Cmd.map ArticleCreateMsg createArticleCmd
@@ -270,7 +351,10 @@ update msg model =
                             ArticleEdit.initModel "0"
 
                 ( articleEditModel, articleEditCmd ) =
-                    ArticleEdit.update aeMsg currentPageModel model.nodeEnv model.organizationKey
+                    ArticleEdit.update aeMsg
+                        currentPageModel
+                        model.nodeEnv
+                        model.organizationKey
             in
                 ( { model | currentPage = TransitioningTo (ArticleEdit articleEditModel) }
                 , Cmd.map ArticleEditMsg articleEditCmd
@@ -286,7 +370,15 @@ update msg model =
                         _ ->
                             ArticleCreate.initModel
             in
-                ( { model | currentPage = Loaded (ArticleCreate { currentPageModel | categories = categoriesList }) }, Cmd.none )
+                ( { model
+                    | currentPage =
+                        Loaded
+                            (ArticleCreate
+                                { currentPageModel | categories = categoriesList }
+                            )
+                  }
+                , Cmd.none
+                )
 
         ArticleCategoriesLoaded (Err error) ->
             ( { model | error = Just (toString error) }, Cmd.none )
@@ -302,7 +394,10 @@ update msg model =
                             UrlCreate.initModel
 
                 ( createUrlModel, createUrlCmds ) =
-                    UrlCreate.update cuMsg currentPageModel model.nodeEnv model.organizationKey
+                    UrlCreate.update cuMsg
+                        currentPageModel
+                        model.nodeEnv
+                        model.organizationKey
             in
                 ( { model | currentPage = Loaded (UrlCreate createUrlModel) }
                 , Cmd.map UrlCreateMsg createUrlCmds
@@ -335,7 +430,15 @@ update msg model =
                         _ ->
                             UrlList.initModel
             in
-                ( { model | currentPage = Loaded (UrlList { currentPageModel | urls = urlsList }) }
+                ( { model
+                    | currentPage =
+                        Loaded
+                            (UrlList
+                                { currentPageModel
+                                    | urls = urlsList
+                                }
+                            )
+                  }
                 , Cmd.none
                 )
 
@@ -353,7 +456,10 @@ update msg model =
                             TicketList.initModel
 
                 ( ticketListModel, ticketListCmds ) =
-                    TicketList.update tlMsg currentPageModel model.nodeEnv model.organizationKey
+                    TicketList.update tlMsg
+                        currentPageModel
+                        model.nodeEnv
+                        model.organizationKey
             in
                 ( { model | currentPage = Loaded (TicketList ticketListModel) }
                 , Cmd.map TicketListMsg ticketListCmds
@@ -386,7 +492,13 @@ update msg model =
                         _ ->
                             CategoryList.initModel
             in
-                ( { model | currentPage = Loaded (CategoryList { currentPageModel | categories = categoriesList }) }
+                ( { model
+                    | currentPage =
+                        Loaded
+                            (CategoryList
+                                { currentPageModel | categories = categoriesList }
+                            )
+                  }
                 , Cmd.none
                 )
 
@@ -404,7 +516,10 @@ update msg model =
                             CategoryCreate.initModel
 
                 ( categoryCreateModel, categoryCreateCmd ) =
-                    CategoryCreate.update ccMsg currentPageModel model.nodeEnv model.organizationKey
+                    CategoryCreate.update ccMsg
+                        currentPageModel
+                        model.nodeEnv
+                        model.organizationKey
             in
                 ( { model
                     | currentPage = Loaded (CategoryCreate categoryCreateModel)
@@ -557,7 +672,14 @@ adminHeader model =
                 [ Html.a
                     [ classList
                         [ ( "nav-link", True )
-                        , ( "active", (model.route == (Route.ArticleList model.organizationKey)) || (model.route == Route.ArticleCreate) )
+                        , ( "active"
+                          , (model.route
+                                == (Route.ArticleList
+                                        model.organizationKey
+                                   )
+                            )
+                                || (model.route == Route.ArticleCreate)
+                          )
                         ]
                     , onClick <| NavigateTo (Route.ArticleList model.organizationKey)
                     ]
@@ -567,7 +689,10 @@ adminHeader model =
                 [ Html.a
                     [ classList
                         [ ( "nav-link", True )
-                        , ( "active", (model.route == Route.UrlList) || (model.route == Route.UrlCreate) )
+                        , ( "active"
+                          , (model.route == Route.UrlList)
+                                || (model.route == Route.UrlCreate)
+                          )
                         ]
                     , onClick <| NavigateTo Route.UrlList
                     ]
@@ -577,7 +702,10 @@ adminHeader model =
                 [ Html.a
                     [ classList
                         [ ( "nav-link", True )
-                        , ( "active", (model.route == Route.CategoryList) || (model.route == Route.CategoryCreate) )
+                        , ( "active"
+                          , (model.route == Route.CategoryList)
+                                || (model.route == Route.CategoryCreate)
+                          )
                         ]
                     , onClick <| NavigateTo Route.CategoryList
                     ]
@@ -605,7 +733,11 @@ adminHeader model =
                 ]
             ]
         , ul [ class "navbar-nav ml-auto" ]
-            [ li [ class "nav-item " ] [ Html.a [ class "nav-link", onClick SignOut ] [ text "Logout" ] ] ]
+            [ li [ class "nav-item " ]
+                [ Html.a [ class "nav-link", onClick SignOut ]
+                    [ text "Logout" ]
+                ]
+            ]
         ]
 
 

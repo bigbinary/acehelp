@@ -94,7 +94,15 @@ constructUrl baseUrl queryParams =
 
         -- NOTE: since we do not decode server side at the moment - removed encodeUri for value part of query parameter to get things working
         _ ->
-            baseUrl ++ "?" ++ String.join "&" (List.map (\( key, value ) -> encodeUri key ++ "=" ++ value) queryParams)
+            baseUrl
+                ++ "?"
+                ++ String.join "&"
+                    (List.map
+                        (\( key, value ) ->
+                            encodeUri key ++ "=" ++ value
+                        )
+                        queryParams
+                    )
 
 
 httpGet : ApiKey -> Context -> Url -> QueryParameters -> Decoder a -> Http.Request a

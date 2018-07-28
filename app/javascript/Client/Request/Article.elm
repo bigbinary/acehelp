@@ -29,7 +29,9 @@ requestArticle articleId =
         )
 
 
-requestSearchArticles : String -> Reader ( NodeEnv, ApiKey ) (Task Http.Error ArticleListResponse)
+requestSearchArticles :
+    String
+    -> Reader ( NodeEnv, ApiKey ) (Task Http.Error ArticleListResponse)
 requestSearchArticles searchTerm =
     Reader.Reader
         (\( env, apiKey ) ->
@@ -37,7 +39,9 @@ requestSearchArticles searchTerm =
         )
 
 
-requestUpvoteMutation : ArticleId -> Reader ( NodeEnv, ApiKey ) (Task GQLClient.Error ArticleSummary)
+requestUpvoteMutation :
+    ArticleId
+    -> Reader ( NodeEnv, ApiKey ) (Task GQLClient.Error ArticleSummary)
 requestUpvoteMutation articleId =
     Reader.Reader
         (\( env, apiKey ) ->
@@ -46,7 +50,9 @@ requestUpvoteMutation articleId =
         )
 
 
-requestDownvoteMutation : ArticleId -> Reader ( NodeEnv, ApiKey ) (Task GQLClient.Error ArticleSummary)
+requestDownvoteMutation :
+    ArticleId
+    -> Reader ( NodeEnv, ApiKey ) (Task GQLClient.Error ArticleSummary)
 requestDownvoteMutation articleId =
     Reader.Reader
         (\( env, apiKey ) ->
@@ -54,10 +60,13 @@ requestDownvoteMutation articleId =
                 GQLBuilder.request { articleId = articleId } downvoteMutation
         )
 
-requestAddFeedbackMutation : FeedbackForm -> Reader ( NodeEnv, ApiKey ) (Task GQLClient.Error (Maybe (List GQLError)))
+
+requestAddFeedbackMutation :
+    FeedbackForm
+    -> Reader ( NodeEnv, ApiKey ) (Task GQLClient.Error (Maybe (List GQLError)))
 requestAddFeedbackMutation feedbackFrom =
-    Debug.log(toString feedbackFrom)
-    Reader.Reader
+    Debug.log (toString feedbackFrom)
+        Reader.Reader
         (\( env, apiKey ) ->
             GQLClient.sendMutation (graphqlUrl env) <|
                 GQLBuilder.request feedbackFrom addFeedbackMutation

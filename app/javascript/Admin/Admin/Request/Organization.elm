@@ -12,7 +12,11 @@ organizationUrl env organizationId =
     (baseUrl env) ++ "/api/v1/organization/" ++ toString (organizationId) ++ "/data"
 
 
-requestOrganization : NodeEnv -> ApiKey -> OrganizationId -> Http.Request OrganizationResponse
+requestOrganization :
+    NodeEnv
+    -> ApiKey
+    -> OrganizationId
+    -> Http.Request OrganizationResponse
 requestOrganization env apiKey organizationId =
     let
         url =

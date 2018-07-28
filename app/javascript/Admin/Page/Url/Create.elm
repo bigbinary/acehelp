@@ -105,7 +105,10 @@ view model =
                 [ Maybe.withDefault (text "") <|
                     Maybe.map
                         (\err ->
-                            div [ class "alert alert-danger alert-dismissible fade show", attribute "role" "alert" ]
+                            div
+                                [ class "alert alert-danger alert-dismissible fade show"
+                                , attribute "role" "alert"
+                                ]
                                 [ text <| "Error: " ++ err
                                 ]
                         )
@@ -138,6 +141,12 @@ save : Model -> NodeEnv -> ApiKey -> ( Model, Cmd Msg )
 save model nodeEnv apiKey =
     let
         cmd =
-            Task.attempt SaveUrlResponse (Reader.run (createUrl) ( nodeEnv, apiKey, { url = Field.value model.url } ))
+            Task.attempt SaveUrlResponse
+                (Reader.run (createUrl)
+                    ( nodeEnv
+                    , apiKey
+                    , { url = Field.value model.url }
+                    )
+                )
     in
         ( model, cmd )

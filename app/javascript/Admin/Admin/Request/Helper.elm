@@ -80,7 +80,15 @@ constructUrl url params =
             url
 
         _ ->
-            url ++ "?" ++ String.join "&" (List.map (\( key, value ) -> Http.encodeUri key ++ "=" ++ value) params)
+            url
+                ++ "?"
+                ++ String.join "&"
+                    (List.map
+                        (\( key, value ) ->
+                            Http.encodeUri key ++ "=" ++ value
+                        )
+                        params
+                    )
 
 
 graphqlUrl : String -> String

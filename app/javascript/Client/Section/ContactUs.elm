@@ -29,7 +29,7 @@ type alias Model =
     { name : Field
     , email : Field
     , message : Field
-    , article_id: Field
+    , article_id : Field
     , userNotification : UserNotification
     }
 
@@ -78,7 +78,9 @@ isFieldErrored field =
 
 isModelSubmittable : Model -> Bool
 isModelSubmittable model =
-    not (isFieldErrored model.name) && not (isFieldErrored model.email) && not (isFieldErrored model.message)
+    not (isFieldErrored model.name)
+        && not (isFieldErrored model.email)
+        && not (isFieldErrored model.message)
 
 
 contramapField : (Maybe String -> Maybe String) -> Field -> Field
@@ -145,7 +147,12 @@ validateModel model =
         validatedMessage =
             validateBlankField message "Message cannot be blank"
     in
-        ({ model | name = validatedName, email = validatedEmail, message = validatedMessage })
+        ({ model
+            | name = validatedName
+            , email = validatedEmail
+            , message = validatedMessage
+         }
+        )
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -163,7 +170,12 @@ update msg model =
                         Nothing ->
                             MessageNotification "Thank you for your message. We will contact you soon!"
             in
-                ( { model | message = Field Nothing "", userNotification = notification }, Cmd.none )
+                ( { model
+                    | message = Field Nothing ""
+                    , userNotification = notification
+                  }
+                , Cmd.none
+                )
 
         RequestMessageCompleted (Err error) ->
             let
@@ -226,7 +238,15 @@ formView model message =
     let
         userNotificationDom =
             Maybe.map
-                (\message -> div [ classList [ ( "user-notification", True ), ( "error", True ) ] ] [ text message ])
+                (\message ->
+                    div
+                        [ classList
+                            [ ( "user-notification", True )
+                            , ( "error", True )
+                            ]
+                        ]
+                        [ text message ]
+                )
                 message
                 |> Maybe.withDefault (text "")
 
@@ -265,8 +285,23 @@ formView model message =
                 ]
 
             -- , input [ type_ "text", class "contact-subject", placeholder "Subject" ] []
-            , span [ class "contact-message" ] [ textarea [ placeholder "How can we help?", onInput MessageInput ] [], fieldErrorDom model.message ]
-            , div [ class "regular-button", style [ ( "background-color", "rgb(60, 170, 249)" ) ], onClick SendMessage ] [ text "Send Message" ]
+            , span [ class "contact-message" ]
+                [ textarea
+                    [ placeholder
+                        "How can we help?"
+                    , onInput MessageInput
+                    ]
+                    []
+                , fieldErrorDom model.message
+                ]
+            , div
+                [ class "regular-button"
+                , style
+                    [ ( "background-color", "rgb(60, 170, 249)" )
+                    ]
+                , onClick SendMessage
+                ]
+                [ text "Send Message" ]
             ]
 
 

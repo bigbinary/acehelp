@@ -9,7 +9,9 @@ import GraphQL.Client.Http as GQLClient
 import GraphQL.Request.Builder as GQLBuilder
 
 
-requestAddTicketMutation : FeedbackForm -> Reader ( NodeEnv, ApiKey ) (Task GQLClient.Error (Maybe (List GQLError)))
+requestAddTicketMutation :
+    FeedbackForm
+    -> Reader ( NodeEnv, ApiKey ) (Task GQLClient.Error (Maybe (List GQLError)))
 requestAddTicketMutation feedbackFrom =
     Reader.Reader
         (\( env, apiKey ) ->

@@ -114,7 +114,10 @@ view model =
             [ Maybe.withDefault (text "") <|
                 Maybe.map
                     (\err ->
-                        div [ class "alert alert-danger alert-dismissible fade show", attribute "role" "alert" ]
+                        div
+                            [ class "alert alert-danger alert-dismissible fade show"
+                            , attribute "role" "alert"
+                            ]
                             [ text <| "Error: " ++ err ]
                     )
                     model.error

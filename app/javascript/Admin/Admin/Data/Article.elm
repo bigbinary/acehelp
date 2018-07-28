@@ -47,7 +47,12 @@ decodeArticleSummary =
         |> required "title" string
 
 
-articlesByUrlQuery : GQLBuilder.Document GQLBuilder.Query (List ArticleSummary) { vars | url : String }
+articlesByUrlQuery :
+    GQLBuilder.Document GQLBuilder.Query
+        (List ArticleSummary)
+        { vars
+            | url : String
+        }
 articlesByUrlQuery =
     let
         urlVar =

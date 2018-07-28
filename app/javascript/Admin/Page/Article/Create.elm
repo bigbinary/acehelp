@@ -126,17 +126,33 @@ view model =
             [ div [ class "col-md-8 article-title-content-block" ]
                 [ div
                     [ class "row article-title" ]
-                    [ input [ type_ "text", class "form-control", placeholder "Title", onInput TitleInput ] []
+                    [ input
+                        [ type_ "text"
+                        , class "form-control"
+                        , placeholder "Title"
+                        , onInput TitleInput
+                        ]
+                        []
                     ]
                 , div
                     [ class "row article-content" ]
-                    [ node "trix-editor" [ placeholder "Article content goes here..", onInput DescInput ] []
+                    [ node "trix-editor"
+                        [ placeholder "Article content goes here.."
+                        , onInput DescInput
+                        ]
+                        []
                     ]
                 ]
             , div [ class "col-sm article-meta-data-block" ]
                 [ categoryListDropdown model
                 , articleUrls model
-                , button [ id "create-article", type_ "button", class "btn btn-success", onClick SaveArticle ] [ text "Create Article" ]
+                , button
+                    [ id "create-article"
+                    , type_ "button"
+                    , class "btn btn-success"
+                    , onClick SaveArticle
+                    ]
+                    [ text "Create Article" ]
                 ]
             ]
         ]
@@ -147,7 +163,10 @@ errorView model =
     Maybe.withDefault (text "") <|
         Maybe.map
             (\err ->
-                div [ class "alert alert-danger alert-dismissible fade show", attribute "role" "alert" ]
+                div
+                    [ class "alert alert-danger alert-dismissible fade show"
+                    , attribute "role" "alert"
+                    ]
                     [ text <| "Error: " ++ err
                     ]
             )
@@ -158,7 +177,9 @@ articleUrls : Model -> Html Msg
 articleUrls model =
     div []
         [ h6 [] [ text "Linked URLs:" ]
-        , span [ class "badge badge-secondary" ] [ text "/getting-started/this-is-hardcoded" ]
+        , span [ class "badge badge-secondary" ]
+            [ text "/getting-started/this-is-hardcoded"
+            ]
         ]
 
 
@@ -166,7 +187,8 @@ categoryListDropdown : Model -> Html Msg
 categoryListDropdown model =
     let
         selectedCategory =
-            List.filter (\category -> category.id == (Field.value model.categoryId)) model.categories
+            List.filter (\category -> category.id == (Field.value model.categoryId))
+                model.categories
                 |> List.map .name
                 |> List.head
                 |> Maybe.withDefault "Select Category"
@@ -185,7 +207,12 @@ categoryListDropdown model =
                     [ class "dropdown-menu", attribute "aria-labelledby" "dropdownMenuButton" ]
                     (List.map
                         (\category ->
-                            a [ class "dropdown-item", onClick (CategorySelected category.id) ] [ text category.name ]
+                            a
+                                [ class "dropdown-item"
+                                , onClick
+                                    (CategorySelected category.id)
+                                ]
+                                [ text category.name ]
                         )
                         model.categories
                     )
@@ -205,6 +232,9 @@ save : Model -> NodeEnv -> ApiKey -> ( Model, Cmd Msg )
 save model nodeEnv organizationKey =
     let
         cmd =
-            Task.attempt SaveArticleResponse (Reader.run (requestCreateArticle) ( nodeEnv, organizationKey, (articleInputs model) ))
+            Task.attempt SaveArticleResponse
+                (Reader.run (requestCreateArticle)
+                    ( nodeEnv, organizationKey, (articleInputs model) )
+                )
     in
         ( model, cmd )

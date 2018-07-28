@@ -105,7 +105,14 @@ init flags location =
 
 minimizedView : Html Msg
 minimizedView =
-    div [ id "mini-view", style [ ( "background-color", "rgb(60, 170, 249)" ), ( "color", "#fff" ) ], onClick (SetAppState Maximized) ]
+    div
+        [ id "mini-view"
+        , style
+            [ ( "background-color", "rgb(60, 170, 249)" )
+            , ( "color", "#fff" )
+            ]
+        , onClick (SetAppState Maximized)
+        ]
         [ div [ class "question-icon" ]
             [ SolidIcon.question ]
         ]
@@ -288,7 +295,9 @@ update msg model =
     case msg of
         Animate animationMsg ->
             ( { model
-                | containerAnimation = Animation.update animationMsg model.containerAnimation
+                | containerAnimation =
+                    Animation.update animationMsg
+                        model.containerAnimation
               }
             , Cmd.none
             )
@@ -298,7 +307,14 @@ update msg model =
                 ( animation, newSectionState, cmd ) =
                     setAppState appState model
             in
-                ( { model | currentAppState = appState, containerAnimation = animation, sectionState = newSectionState }, cmd )
+                ( { model
+                    | currentAppState = appState
+                    , containerAnimation =
+                        animation
+                    , sectionState = newSectionState
+                  }
+                , cmd
+                )
 
         TabMsg tabMsg ->
             let
@@ -310,7 +326,12 @@ update msg model =
                 ( newTabModel, tabCmd ) =
                     Tabs.update tabMsg model.tabModel
             in
-                ( { newModel | tabModel = newTabModel }, Cmd.batch [ newCmd, Cmd.map TabMsg tabCmd ] )
+                ( { newModel | tabModel = newTabModel }
+                , Cmd.batch
+                    [ newCmd
+                    , Cmd.map TabMsg tabCmd
+                    ]
+                )
 
         CategoryListLoaded (Ok categories) ->
             ( { model | sectionState = Loaded (CategoryListSection categories) }, Cmd.none )
@@ -344,7 +365,12 @@ update msg model =
                         case currentArticles of
                             Just articles ->
                                 ( { model
-                                    | sectionState = Loaded <| ArticleListSection { id = Just categoryId, articles = articles }
+                                    | sectionState =
+                                        Loaded <|
+                                            ArticleListSection
+                                                { id = Just categoryId
+                                                , articles = articles
+                                                }
                                     , history = ModelHistory model
                                   }
                                 , Cmd.none
@@ -357,15 +383,33 @@ update msg model =
         ArticleListMsg articleListMsg ->
             case articleListMsg of
                 ArticleListSection.LoadArticle articleId ->
-                    ( { model | sectionState = transitionFromSection model.sectionState, history = ModelHistory model }
-                    , Task.attempt ArticleLoaded (Reader.run (ArticleSection.init articleId) ( model.nodeEnv, model.apiKey ))
+                    ( { model
+                        | sectionState =
+                            transitionFromSection
+                                model.sectionState
+                        , history = ModelHistory model
+                      }
+                    , Task.attempt ArticleLoaded
+                        (Reader.run (ArticleSection.init articleId)
+                            ( model.nodeEnv, model.apiKey )
+                        )
                     )
 
                 ArticleListSection.OpenLibrary ->
                     update (TabMsg (Tabs.TabSelected Tabs.Library)) model
 
         ArticleListLoaded (Ok articleList) ->
-            ( { model | sectionState = Loaded (ArticleListSection { id = Nothing, articles = articleList }) }, Cmd.none )
+            ( { model
+                | sectionState =
+                    Loaded
+                        (ArticleListSection
+                            { id = Nothing
+                            , articles = articleList
+                            }
+                        )
+              }
+            , Cmd.none
+            )
 
         ArticleLoaded (Ok article) ->
             ( { model
@@ -390,7 +434,17 @@ update msg model =
                     GQLClient.HttpError (Http.BadStatus response) ->
                         case response.status.code of
                             404 ->
-                                ( { model | sectionState = Loaded (ArticleListSection { id = Nothing, articles = [] }) }, Cmd.none )
+                                ( { model
+                                    | sectionState =
+                                        Loaded
+                                            (ArticleListSection
+                                                { id = Nothing
+                                                , articles = []
+                                                }
+                                            )
+                                  }
+                                , Cmd.none
+                                )
 
                             _ ->
                                 ( errModel, errCmd )
@@ -418,15 +472,25 @@ update msg model =
                 ( newArticleModel, cmd ) =
                     ArticleSection.update articleMsg currentArticleModel
             in
-                ( { model | sectionState = Loaded (ArticleSection newArticleModel) }, Maybe.withDefault Cmd.none <| Maybe.map (Cmd.map ArticleMsg) <| Maybe.map (flip Reader.run ( model.nodeEnv, model.apiKey )) cmd )
+                ( { model | sectionState = Loaded (ArticleSection newArticleModel) }
+                , Maybe.withDefault Cmd.none <|
+                    Maybe.map (Cmd.map ArticleMsg) <|
+                        Maybe.map (flip Reader.run ( model.nodeEnv, model.apiKey )) cmd
+                )
 
         OpenArticleWithId articleId ->
             let
                 ( animation, newSectionState, cmd ) =
                     setAppState Maximized model
             in
-                ( { model | currentAppState = Maximized, containerAnimation = animation, sectionState = newSectionState }
-                , Task.attempt ArticleLoaded <| Reader.run (ArticleSection.init articleId) ( model.nodeEnv, model.apiKey )
+                ( { model
+                    | currentAppState = Maximized
+                    , containerAnimation = animation
+                    , sectionState = newSectionState
+                  }
+                , Task.attempt ArticleLoaded <|
+                    Reader.run (ArticleSection.init articleId)
+                        ( model.nodeEnv, model.apiKey )
                 )
 
         SearchBarMsg searchBarMsg ->
@@ -437,14 +501,35 @@ update msg model =
                 case searchBarMsg of
                     SearchBar.OnSearch ->
                         ( { model | sectionState = transitionFromSection model.sectionState }
-                        , Maybe.withDefault Cmd.none <| Maybe.map (Cmd.map SearchBarMsg) <| Maybe.map (flip Reader.run ( model.nodeEnv, model.apiKey )) searchCmd
+                        , Maybe.withDefault Cmd.none <|
+                            Maybe.map (Cmd.map SearchBarMsg) <|
+                                Maybe.map (flip Reader.run ( model.nodeEnv, model.apiKey ))
+                                    searchCmd
                         )
 
                     SearchBar.SearchResultsReceived (Ok articleListResponse) ->
-                        ( { model | sectionState = Loaded (ArticleListSection { id = Nothing, articles = articleListResponse.articles }) }, Cmd.none )
+                        ( { model
+                            | sectionState =
+                                Loaded
+                                    (ArticleListSection
+                                        { id = Nothing
+                                        , articles = articleListResponse.articles
+                                        }
+                                    )
+                          }
+                        , Cmd.none
+                        )
 
                     SearchBar.SearchResultsReceived (Err error) ->
-                        ( { model | sectionState = Loaded (ErrorSection (GQLClient.HttpError error)) }, Cmd.none )
+                        ( { model
+                            | sectionState =
+                                Loaded
+                                    (ErrorSection
+                                        (GQLClient.HttpError error)
+                                    )
+                          }
+                        , Cmd.none
+                        )
 
                     _ ->
                         ( { model | searchQuery = searchModel }, Cmd.none )
@@ -475,17 +560,49 @@ update msg model =
                                         TransitioningFrom (ContactUsSection newContactUsModel)
                                   }
                                 , Cmd.map ContactUsMsg <|
-                                    Task.attempt ContactUsSection.RequestMessageCompleted (Reader.run (requestAddTicketMutation (ContactUsSection.modelToRequestMessage newContactUsModel)) ( model.nodeEnv, model.apiKey ))
+                                    Task.attempt ContactUsSection.RequestMessageCompleted
+                                        (Reader.run
+                                            (requestAddTicketMutation
+                                                (ContactUsSection.modelToRequestMessage
+                                                    newContactUsModel
+                                                )
+                                            )
+                                            ( model.nodeEnv, model.apiKey )
+                                        )
                                 )
 
                             False ->
-                                ( { model | sectionState = Loaded (ContactUsSection newContactUsModel) }, Cmd.none )
+                                ( { model
+                                    | sectionState =
+                                        Loaded
+                                            (ContactUsSection
+                                                newContactUsModel
+                                            )
+                                  }
+                                , Cmd.none
+                                )
 
                     ContactUsSection.RequestMessageCompleted postResponse ->
-                        ( { model | sectionState = Loaded (ContactUsSection newContactUsModel) }, Cmd.none )
+                        ( { model
+                            | sectionState =
+                                Loaded
+                                    (ContactUsSection
+                                        newContactUsModel
+                                    )
+                          }
+                        , Cmd.none
+                        )
 
                     _ ->
-                        ( { model | sectionState = Loaded (ContactUsSection newContactUsModel) }, Cmd.none )
+                        ( { model
+                            | sectionState =
+                                Loaded
+                                    (ContactUsSection
+                                        newContactUsModel
+                                    )
+                          }
+                        , Cmd.none
+                        )
 
         ReceivedUserInfo userInfo ->
             ( { model | userInfo = userInfo }, Cmd.none )
@@ -495,12 +612,18 @@ onTabChange : Tabs.Tabs -> Model -> ( Model, Cmd Msg )
 onTabChange tab model =
     case tab of
         Tabs.SuggestedArticles ->
-            ( { model | sectionState = transitionFromSection model.sectionState, history = ModelHistory model }
+            ( { model
+                | sectionState = transitionFromSection model.sectionState
+                , history = ModelHistory model
+              }
             , cmdForSuggestedArticles model
             )
 
         Tabs.Library ->
-            ( { model | sectionState = transitionFromSection model.sectionState, history = ModelHistory model }
+            ( { model
+                | sectionState = transitionFromSection model.sectionState
+                , history = ModelHistory model
+              }
             , cmdForLibrary model
             )
 
@@ -517,12 +640,20 @@ onTabChange tab model =
 
 cmdForSuggestedArticles : Model -> Cmd Msg
 cmdForSuggestedArticles model =
-    Task.attempt ArticleListLoaded (Reader.run (ArticleListSection.init model.context) ( model.nodeEnv, model.apiKey ))
+    Task.attempt ArticleListLoaded
+        (Reader.run (ArticleListSection.init model.context)
+            ( model.nodeEnv, model.apiKey )
+        )
 
 
 cmdForLibrary : Model -> Cmd Msg
 cmdForLibrary model =
-    Task.attempt CategoryListLoaded (Reader.run CategoryListSection.init ( model.nodeEnv, model.apiKey ))
+    Task.attempt CategoryListLoaded
+        (Reader.run CategoryListSection.init
+            ( model.nodeEnv
+            , model.apiKey
+            )
+        )
 
 
 
