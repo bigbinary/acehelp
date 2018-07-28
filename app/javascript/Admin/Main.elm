@@ -249,7 +249,7 @@ navigateTo newRoute model =
                 (UrlCreate.init)
                     |> transitionTo UrlCreate UrlCreateMsg
 
-            Route.TicketList ->
+            Route.TicketList organizationKey ->
                 (TicketList.init model.nodeEnv model.organizationKey)
                     |> transitionTo TicketList TicketListMsg
 
@@ -715,9 +715,9 @@ adminHeader model =
                 [ Html.a
                     [ classList
                         [ ( "nav-link", True )
-                        , ( "active", (model.route == Route.TicketList) )
+                        , ( "active", (model.route == (Route.TicketList model.organizationKey)) )
                         ]
-                    , onClick <| NavigateTo Route.TicketList
+                    , onClick <| NavigateTo (Route.TicketList model.organizationKey)
                     ]
                     [ text "Ticket" ]
                 ]
