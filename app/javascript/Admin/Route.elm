@@ -16,7 +16,7 @@ type Route
     = ArticleList OrganizationApiKey
     | ArticleCreate
     | ArticleEdit ArticleId
-    | CategoryList
+    | CategoryList OrganizationApiKey
     | CategoryCreate
     | UrlList OrganizationApiKey
     | UrlCreate
@@ -32,7 +32,7 @@ routeMatcher =
         [ Url.map Dashboard (s "admin" </> s "")
         , Url.map ArticleList (s "organizations" </> string </> s "articles")
         , Url.map UrlList (s "organizations" </> string </> s "urls")
-        , Url.map CategoryList (s "categories")
+        , Url.map CategoryList (s "organizations" </> string </> s "categories")
         , Url.map TicketList (s "tickets")
         , Url.map Integration (s "integrations")
         , Url.map ArticleCreate (s "articles" </> s "new")
@@ -60,8 +60,8 @@ routeToString page =
                 UrlList organizationApiKey ->
                     [ "organizations", organizationApiKey, "urls" ]
 
-                CategoryList ->
-                    [ "categories" ]
+                CategoryList organizationApiKey ->
+                    [ "organizations", organizationApiKey, "categories" ]
 
                 TicketList ->
                     [ "tickets" ]

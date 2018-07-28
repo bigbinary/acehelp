@@ -197,7 +197,7 @@ navigateTo newRoute model =
                     , cmd
                     )
 
-            Route.CategoryList ->
+            Route.CategoryList organizationKey ->
                 let
                     ( categoryListModel, categoriesRequest ) =
                         CategoryList.init
@@ -703,11 +703,11 @@ adminHeader model =
                     [ classList
                         [ ( "nav-link", True )
                         , ( "active"
-                          , (model.route == Route.CategoryList)
+                          , (model.route == (Route.CategoryList model.organizationKey))
                                 || (model.route == Route.CategoryCreate)
                           )
                         ]
-                    , onClick <| NavigateTo Route.CategoryList
+                    , onClick <| NavigateTo (Route.CategoryList model.organizationKey)
                     ]
                     [ text "Category" ]
                 ]
