@@ -26,8 +26,6 @@ end
 def delete_all_records_from_all_tables
   ActiveRecord::Base.connection.schema_cache.clear!
 
-  Dir.glob(Rails.root + "app/models/*.rb").each { |file| require file }
-
   ApplicationRecord.descendants.each do |klass|
     klass.reset_column_information
     klass.delete_all
