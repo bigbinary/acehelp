@@ -5,13 +5,13 @@ Types::MutationType = GraphQL::ObjectType.define do
 
   field :addTicket, field: Mutations::TicketMutations::Create.field
 
-  field :addArticle,  field: Mutations::ArticleMutations::Create.field
+  field :addArticle, field: Mutations::ArticleMutations::Create.field
   field :updateArticle, field: Mutations::ArticleMutations::Update.field
   field :deleteArticle, field: Mutations::ArticleMutations::Destroy.field
   field :upvoteArticle, field: Mutations::ArticleMutations::Upvote.field
   field :downvoteArticle, field: Mutations::ArticleMutations::Downvote.field
 
-  field :addCategory,  field: Mutations::CategoryMutations::Create.field
+  field :addCategory, field: Mutations::CategoryMutations::Create.field
   field :updateCategory, field: Mutations::CategoryMutations::Update.field
   field :deleteCategory, field: Mutations::CategoryMutations::Destroy.field
 
@@ -27,4 +27,7 @@ Types::MutationType = GraphQL::ObjectType.define do
   field :removeUserFromOrganization, field: Mutations::OrganizationUserMutations::Destroy.field
 
   field :addFeedback, field: Mutations::FeedbackMutations::Create.field
+
+  field :addCategoryToArticle, field: Mutations::CategoryArticleMutations::Create.field
+  field :removeCategoryFromArticle, field: Mutations::CategoryArticleMutations::Destroy.field
 end
