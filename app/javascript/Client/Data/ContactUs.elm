@@ -30,9 +30,8 @@ type alias FeedbackForm =
     { comment : String
     , email : String
     , name : String
+    , article_id: String
     }
-
-
 
 -- ENCODERS
 
@@ -81,9 +80,6 @@ addTicketMutation =
                       )
                     ]
                     errorsExtractor
-
-
-
 -- DECODERS
 
 

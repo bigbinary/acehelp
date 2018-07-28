@@ -6,6 +6,7 @@ import Json.Decode.Pipeline exposing (decode, required, optional, hardcoded)
 import GraphQL.Request.Builder as GQLBuilder
 import GraphQL.Request.Builder.Arg as Arg
 import GraphQL.Request.Builder.Variable as Var
+import Data.ContactUs exposing (FeedbackForm)
 
 
 type alias ArticleId =
@@ -31,8 +32,6 @@ type alias ArticleSummary =
     { id : ArticleId
     , title : String
     }
-
-
 
 -- QUERIES
 
@@ -99,6 +98,31 @@ voteMutation voteType =
                 )
     in
         GQLBuilder.mutationDocument queryRoot
+
+addFeedbackMutation : GQLBuilder.Document GQLBuilder.Mutation (Maybe (List GQLError)) FeedbackForm
+addFeedbackMutation =
+    let
+        guestNameVar =
+            Var.required "name" .name Var.string
+
+        guestMessageVar =
+            Var.required "message" .comment Var.string
+
+        articleIdVar =
+            Var.required "article_id" .article_id Var.string
+    in
+        GQLBuilder.mutationDocument <|
+            GQLBuilder.extract <|
+                GQLBuilder.field "addFeedback"
+                    [ ( "input"
+                      , Arg.object
+                          [ ("name", Arg.variable guestNameVar )
+                          , ("message", Arg.variable guestMessageVar )
+                          , ("article_id", Arg.variable articleIdVar )
+                          ]
+                      )
+                    ]
+                    errorsExtractor
 
 
 upvoteMutation : GQLBuilder.Document GQLBuilder.Mutation ArticleSummary { vars | articleId : ArticleId }

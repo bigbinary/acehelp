@@ -1,0 +1,11 @@
+# Read about fixtures at http://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+valid_feedback:
+  name: Ganesh Gaitonde
+  message: Valid feedback
+  article: life
+
+second_feedback:
+  name: Harely Davidson
+  message: Message to pass DB validation
+  article: ror

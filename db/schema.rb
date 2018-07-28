@@ -46,6 +46,15 @@ ActiveRecord::Schema.define(version: 2018_07_25_174820) do
     t.index ["organization_id"], name: "index_categories_on_organization_id"
   end
 
+  create_table "feedbacks", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.string "name"
+    t.text "message", null: false
+    t.uuid "article_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["article_id"], name: "index_feedbacks_on_article_id"
+  end
+
   create_table "organization_users", id: :serial, force: :cascade do |t|
     t.uuid "organization_id"
     t.uuid "user_id"
@@ -112,6 +121,7 @@ ActiveRecord::Schema.define(version: 2018_07_25_174820) do
   add_foreign_key "articles", "categories"
   add_foreign_key "articles", "organizations"
   add_foreign_key "categories", "organizations"
+  add_foreign_key "feedbacks", "articles"
   add_foreign_key "organization_users", "organizations"
   add_foreign_key "organization_users", "users"
   add_foreign_key "tickets", "organizations"

@@ -5,6 +5,8 @@ import Task exposing (Task)
 import Reader exposing (Reader)
 import Request.Helpers exposing (apiUrl, graphqlUrl, httpGet, requestOptions, ApiKey, Context, NodeEnv)
 import Data.Article exposing (..)
+import Data.ContactUs exposing (FeedbackForm)
+import Data.Common exposing (..)
 import GraphQL.Client.Http as GQLClient
 import GraphQL.Request.Builder as GQLBuilder
 
@@ -50,4 +52,13 @@ requestDownvoteMutation articleId =
         (\( env, apiKey ) ->
             GQLClient.customSendMutation (requestOptions env apiKey) <|
                 GQLBuilder.request { articleId = articleId } downvoteMutation
+        )
+
+requestAddFeedbackMutation : FeedbackForm -> Reader ( NodeEnv, ApiKey ) (Task GQLClient.Error (Maybe (List GQLError)))
+requestAddFeedbackMutation feedbackFrom =
+    Debug.log(toString feedbackFrom)
+    Reader.Reader
+        (\( env, apiKey ) ->
+            GQLClient.sendMutation (graphqlUrl env) <|
+                GQLBuilder.request feedbackFrom addFeedbackMutation
         )
