@@ -13,7 +13,7 @@ import Page.Url.Create as UrlCreate
 import Page.Category.List as CategoryList
 import Page.Ticket.List as TicketList
 import Page.Category.Create as CategoryCreate
-import Page.Integration as Integration
+import Page.Settings as Settings
 import Page.Errors as Errors
 import Admin.Data.Organization exposing (OrganizationId)
 import Admin.Data.Category exposing (Category)
@@ -46,7 +46,7 @@ type Page
     | CategoryCreate CategoryCreate.Model
     | UrlList UrlList.Model
     | UrlCreate UrlCreate.Model
-    | Integration Integration.Model
+    | Settings Settings.Model
     | TicketList TicketList.Model
     | Dashboard
     | NotFound
@@ -105,7 +105,7 @@ type Msg
     | CategoryCreateMsg CategoryCreate.Msg
     | CategoriesLoaded (Result GQLClient.Error (List Category))
     | TicketListMsg TicketList.Msg
-    | IntegrationMsg Integration.Msg
+    | SettingsMsg Settings.Msg
     | OnLocationChange Navigation.Location
     | SignOut
     | SignedOut (Result Http.Error String)
@@ -253,9 +253,9 @@ navigateTo newRoute model =
                 (TicketList.init model.nodeEnv model.organizationKey)
                     |> transitionTo TicketList TicketListMsg
 
-            Route.Integration ->
-                (Integration.init model.organizationKey)
-                    |> transitionTo Integration IntegrationMsg
+            Route.Settings ->
+                (Settings.init model.organizationKey)
+                    |> transitionTo Settings SettingsMsg
 
             Route.Dashboard ->
                 ( { model | currentPage = Loaded Blank }, Cmd.none )
@@ -527,23 +527,23 @@ update msg model =
                 , Cmd.map CategoryCreateMsg categoryCreateCmd
                 )
 
-        IntegrationMsg integrationMsg ->
+        SettingsMsg settingsMsg ->
             let
                 currentPageModel =
                     case model.currentPage of
-                        Loaded (Integration integrationPageModel) ->
-                            integrationPageModel
+                        Loaded (Settings settingsPageModel) ->
+                            settingsPageModel
 
                         _ ->
-                            Integration.initModel model.organizationKey
+                            Settings.initModel model.organizationKey
 
-                ( integrationModel, integrationCmd ) =
-                    Integration.update integrationMsg currentPageModel
+                ( settingsModel, settingsCmd ) =
+                    Settings.update settingsMsg currentPageModel
             in
                 ( { model
-                    | currentPage = Loaded (Integration integrationModel)
+                    | currentPage = Loaded (Settings settingsModel)
                   }
-                , Cmd.map IntegrationMsg integrationCmd
+                , Cmd.map SettingsMsg settingsCmd
                 )
 
         OnLocationChange location ->
@@ -633,10 +633,10 @@ view model =
                     (CategoryCreate.view categoryCreateModel)
                 )
 
-        Integration integrationModel ->
+        Settings settingsModel ->
             adminLayout model
-                (Html.map IntegrationMsg
-                    (Integration.view integrationModel)
+                (Html.map SettingsMsg
+                    (Settings.view settingsModel)
                 )
 
         TicketList ticketListModel ->
@@ -725,11 +725,11 @@ adminHeader model =
                 [ Html.a
                     [ classList
                         [ ( "nav-link", True )
-                        , ( "active", model.route == Route.Integration )
+                        , ( "active", model.route == Route.Settings )
                         ]
-                    , onClick <| NavigateTo Route.Integration
+                    , onClick <| NavigateTo Route.Settings
                     ]
-                    [ text "Integrations" ]
+                    [ text "Settings" ]
                 ]
             ]
         , ul [ class "navbar-nav ml-auto" ]

@@ -1,4 +1,4 @@
-module Page.Integration exposing (..)
+module Page.Settings exposing (..)
 
 import Html exposing (..)
 import Html.Attributes exposing (..)
