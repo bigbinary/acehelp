@@ -253,7 +253,7 @@ navigateTo newRoute model =
                 (TicketList.init model.nodeEnv model.organizationKey)
                     |> transitionTo TicketList TicketListMsg
 
-            Route.Integration ->
+            Route.Integration organizationKey ->
                 (Integration.init model.organizationKey)
                     |> transitionTo Integration IntegrationMsg
 
@@ -725,9 +725,9 @@ adminHeader model =
                 [ Html.a
                     [ classList
                         [ ( "nav-link", True )
-                        , ( "active", model.route == Route.Integration )
+                        , ( "active", model.route == (Route.Integration model.organizationKey) )
                         ]
-                    , onClick <| NavigateTo Route.Integration
+                    , onClick <| NavigateTo (Route.Integration model.organizationKey)
                     ]
                     [ text "Integrations" ]
                 ]
