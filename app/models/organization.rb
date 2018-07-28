@@ -12,7 +12,6 @@ class Organization < ApplicationRecord
 
   validates :name, presence: true
   validates :email, presence: true
-  validates_uniqueness_of :name, case_sensitive: false
 
   before_validation :ensure_api_key_assigned
   before_create :assign_slug
@@ -29,7 +28,12 @@ class Organization < ApplicationRecord
     end
 
     def assign_slug
-      # TODO put it in a loop in case the slug is taken
-      self.slug = self.name.parameterize.downcase
+      existing_orgs_count = Organization.where("lower(name) = ?", name.downcase).count
+      self.slug =
+        if existing_orgs_count == 0
+          name.parameterize.downcase
+        else
+          [name.parameterize.downcase, existing_orgs_count + 1].join("-")
+        end
     end
 end

@@ -16,4 +16,15 @@ class OrganizationTest < ActiveSupport::TestCase
     organization.save
     assert organization.errors.added?(:name, :blank)
   end
+
+  def test_slug_valiation
+    organization = Organization.create! name: "Hello World", email: "a@example.com"
+    assert_equal "hello-world", organization.slug
+
+    organization = Organization.create! name: "Hello World", email: "a@example.com"
+    assert_equal "hello-world-2", organization.slug
+
+    organization = Organization.create! name: "Hello World", email: "a@example.com"
+    assert_equal "hello-world-3", organization.slug
+  end
 end
