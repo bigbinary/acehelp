@@ -51,10 +51,6 @@ type Msg
     | DeleteUrlResponse (Result GQLClient.Error UrlId)
 
 
-
---| DeleteUrlResponse (Result GQLClient.Error String)
-
-
 update : Msg -> Model -> NodeEnv -> ApiKey -> ( Model, Cmd Msg )
 update msg model nodeEnv organizationKey =
     case msg of
@@ -76,7 +72,7 @@ update msg model nodeEnv organizationKey =
         DeleteUrlResponse (Ok id) ->
             let
                 urls =
-                    List.drop (0) model.urls
+                    List.filter (\m -> m.id /= id) model.urls
             in
                 ( { model | urls = urls }, Cmd.none )
 
