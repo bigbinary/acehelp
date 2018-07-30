@@ -7,6 +7,8 @@ class ApplicationController < ActionController::Base
   rescue_from ActiveRecord::RecordNotFound, with: :render_not_found
   skip_before_action :verify_authenticity_token
 
+  acts_as_token_authentication_handler_for User, fallback: :none
+
   private
 
     def ensure_user_is_logged_in

@@ -10,6 +10,7 @@ gem "rails", "~> 5.2.0"
 
 # Use this gem for maintaining sessions
 gem "devise", "~> 4.4.0"
+gem 'simple_token_authentication', '~> 1.0'
 
 # Use pg as the database for Active Record
 gem "pg"

@@ -6,6 +6,8 @@ class User < ApplicationRecord
   devise :database_authenticatable, :registerable,
          :recoverable, :rememberable, :trackable, :validatable
 
+  acts_as_token_authenticatable
+
   validates :first_name, presence: true
 
   belongs_to :organization, autosave: true, dependent: :destroy, required: false

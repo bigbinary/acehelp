@@ -11,3 +11,9 @@ brad:
   first_name: Brad
   last_name: Pitt
   role: 'user'
+
+hunt:
+  email: ethan.hunt@example.com
+  first_name: Ethan
+  last_name: Hunt
+  role: 'user'
