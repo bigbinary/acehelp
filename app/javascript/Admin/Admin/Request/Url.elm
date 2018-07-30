@@ -26,3 +26,13 @@ createUrl =
                 GQLBuilder.request createUrlInput createUrlMutation
             )
         )
+
+
+deleteUrl : Reader ( NodeEnv, ApiKey, UrlIdInput ) (Task GQLClient.Error UrlId)
+deleteUrl =
+    Reader.Reader
+        (\( nodeEnv, apiKey, urlId ) ->
+            (GQLClient.customSendMutation (requestOptions nodeEnv apiKey) <|
+                GQLBuilder.request urlId deleteUrlMutation
+            )
+        )
