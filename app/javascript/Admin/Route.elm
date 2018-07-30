@@ -14,12 +14,12 @@ type alias OrganizationApiKey =
 
 type Route
     = ArticleList OrganizationApiKey
-    | ArticleCreate
-    | ArticleEdit ArticleId
+    | ArticleCreate OrganizationApiKey
+    | ArticleEdit OrganizationApiKey ArticleId
     | CategoryList OrganizationApiKey
-    | CategoryCreate
+    | CategoryCreate OrganizationApiKey
     | UrlList OrganizationApiKey
-    | UrlCreate
+    | UrlCreate OrganizationApiKey
     | TicketList OrganizationApiKey
     | Settings OrganizationApiKey
     | Dashboard
@@ -35,10 +35,10 @@ routeMatcher =
         , Url.map CategoryList (s "organizations" </> string </> s "categories")
         , Url.map TicketList (s "organizations" </> string </> s "tickets")
         , Url.map Settings (s "organizations" </> string </> s "settings")
-        , Url.map ArticleCreate (s "articles" </> s "new")
-        , Url.map UrlCreate (s "urls" </> s "new")
-        , Url.map CategoryCreate (s "categories" </> s "new")
-        , Url.map ArticleEdit (s "articles" </> string)
+        , Url.map ArticleCreate (s "organizations" </> string </> s "articles" </> s "new")
+        , Url.map UrlCreate (s "organizations" </> string </> s "urls" </> s "new")
+        , Url.map CategoryCreate (s "organizations" </> string </> s "categories" </> s "new")
+        , Url.map ArticleEdit (s "organizations" </> string </> s "articles" </> string)
         ]
 
 
@@ -69,17 +69,17 @@ routeToString page =
                 Settings organizationApiKey ->
                     [ "organizations", organizationApiKey, "settings" ]
 
-                ArticleCreate ->
-                    [ "articles", "new" ]
+                ArticleCreate organizationApiKey ->
+                    [ "organizations", organizationApiKey, "articles", "new" ]
 
-                UrlCreate ->
-                    [ "urls", "new" ]
+                UrlCreate organizationApiKey ->
+                    [ "organizations", organizationApiKey, "urls", "new" ]
 
-                CategoryCreate ->
-                    [ "categories", "new" ]
+                CategoryCreate organizationApiKey ->
+                    [ "organizations", organizationApiKey, "categories", "new" ]
 
-                ArticleEdit articleId ->
-                    [ "articles", articleId ]
+                ArticleEdit organizationApiKey articleId ->
+                    [ "organizations", organizationApiKey, "articles", articleId ]
 
                 NotFound ->
                     []

@@ -12,15 +12,14 @@ Rails.application.routes.draw do
   get "/pages/aceinvoice/pricing", to: "home#pricing"
 
   resources :organizations, only: [:show], param: :api_key do
-    resources :articles, only: [:index]
+    resources :articles
+    resources :urls
+    resources :categories
   end
 
   namespace :admin do
     resources :integrations, only: [:index]
     resources :dashboard, only: [:index]
-    resources :articles
-    resources :urls
-    resources :categories
     resources :tickets, only: [:index]
   end
 

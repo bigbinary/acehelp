@@ -19,20 +19,22 @@ import GraphQL.Client.Http as GQLClient
 
 type alias Model =
     { articles : List ArticleSummary
+    , organizationKey : String
     , error : Maybe String
     }
 
 
-initModel : Model
-initModel =
+initModel : ApiKey -> Model
+initModel organizationKey =
     { articles = []
+    , organizationKey = organizationKey
     , error = Nothing
     }
 
 
-init : ( Model, Reader ( NodeEnv, ApiKey ) (Task GQLClient.Error (List ArticleSummary)) )
-init =
-    ( initModel, requestAllArticles )
+init : ApiKey -> ( Model, Reader ( NodeEnv, ApiKey ) (Task GQLClient.Error (List ArticleSummary)) )
+init organizationKey =
+    ( initModel organizationKey, requestAllArticles )
 
 
 
@@ -73,14 +75,14 @@ view model =
             []
             (List.map
                 (\article ->
-                    rows article
+                    rows model article
                 )
                 model.articles
             )
         , div
             [ class "buttonDiv" ]
             [ Html.a
-                [ onClick (Navigate <| Route.ArticleCreate)
+                [ onClick (Navigate <| Route.ArticleCreate model.organizationKey)
                 , class "button primary"
                 ]
                 [ text "New Article" ]
@@ -88,9 +90,9 @@ view model =
         ]
 
 
-rows : ArticleSummary -> Html Msg
-rows article =
+rows : Model -> ArticleSummary -> Html Msg
+rows model article =
     div
-        [ onClick <| Navigate <| Route.ArticleEdit article.id ]
+        [ onClick <| Navigate <| Route.ArticleEdit model.organizationKey article.id ]
         [ text article.title
         ]

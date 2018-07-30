@@ -154,7 +154,7 @@ navigateTo newRoute model =
             Route.ArticleList organizationKey ->
                 let
                     ( articleListModel, articleListRequest ) =
-                        ArticleList.init
+                        ArticleList.init organizationKey
 
                     cmd =
                         Cmd.map ArticleListMsg <|
@@ -175,7 +175,7 @@ navigateTo newRoute model =
                     , cmd
                     )
 
-            Route.ArticleCreate ->
+            Route.ArticleCreate organizationKey ->
                 let
                     ( articleCreateModel, categoriesRequest ) =
                         ArticleCreate.init
@@ -200,7 +200,7 @@ navigateTo newRoute model =
             Route.CategoryList organizationKey ->
                 let
                     ( categoryListModel, categoriesRequest ) =
-                        CategoryList.init
+                        CategoryList.init organizationKey
 
                     cmd =
                         Task.attempt CategoriesLoaded
@@ -220,14 +220,14 @@ navigateTo newRoute model =
                     , cmd
                     )
 
-            Route.CategoryCreate ->
+            Route.CategoryCreate organizationKey ->
                 (CategoryCreate.init)
                     |> transitionTo CategoryCreate CategoryCreateMsg
 
             Route.UrlList organizationKey ->
                 let
                     ( urlListModel, urlListRequest ) =
-                        UrlList.init
+                        UrlList.init organizationKey
 
                     cmd =
                         Task.attempt UrlsLoaded
@@ -245,7 +245,7 @@ navigateTo newRoute model =
                     , cmd
                     )
 
-            Route.UrlCreate ->
+            Route.UrlCreate organizationKey ->
                 (UrlCreate.init)
                     |> transitionTo UrlCreate UrlCreateMsg
 
@@ -260,7 +260,7 @@ navigateTo newRoute model =
             Route.Dashboard ->
                 ( { model | currentPage = Loaded Blank }, Cmd.none )
 
-            Route.ArticleEdit articleId ->
+            Route.ArticleEdit organizationKey articleId ->
                 let
                     ( articleEditModel, articleEditCmd ) =
                         ArticleEdit.init articleId
@@ -308,7 +308,7 @@ update msg model =
                             articleListModel
 
                         _ ->
-                            ArticleList.initModel
+                            ArticleList.initModel model.organizationKey
 
                 ( articleListModel, articleListCmd ) =
                     ArticleList.update alMsg
@@ -411,7 +411,7 @@ update msg model =
                             urlListModel
 
                         _ ->
-                            UrlList.initModel
+                            UrlList.initModel model.organizationKey
 
                 ( urlListModel, urlListCmds ) =
                     UrlList.update ulMsg currentPageModel
@@ -428,7 +428,7 @@ update msg model =
                             urlListModel
 
                         _ ->
-                            UrlList.initModel
+                            UrlList.initModel model.organizationKey
             in
                 ( { model
                     | currentPage =
@@ -473,7 +473,7 @@ update msg model =
                             categoryListModel
 
                         _ ->
-                            CategoryList.initModel
+                            CategoryList.initModel model.organizationKey
 
                 ( categoryListModel, categoryListCmd ) =
                     CategoryList.update clMsg currentPageModel
@@ -490,7 +490,7 @@ update msg model =
                             categoryListModel
 
                         _ ->
-                            CategoryList.initModel
+                            CategoryList.initModel model.organizationKey
             in
                 ( { model
                     | currentPage =
@@ -678,7 +678,7 @@ adminHeader model =
                                         model.organizationKey
                                    )
                             )
-                                || (model.route == Route.ArticleCreate)
+                                || (model.route == Route.ArticleCreate model.organizationKey)
                           )
                         ]
                     , onClick <| NavigateTo (Route.ArticleList model.organizationKey)
@@ -691,7 +691,7 @@ adminHeader model =
                         [ ( "nav-link", True )
                         , ( "active"
                           , (model.route == (Route.UrlList model.organizationKey))
-                                || (model.route == Route.UrlCreate)
+                                || (model.route == Route.UrlCreate model.organizationKey)
                           )
                         ]
                     , onClick <| NavigateTo (Route.UrlList model.organizationKey)
@@ -704,7 +704,7 @@ adminHeader model =
                         [ ( "nav-link", True )
                         , ( "active"
                           , (model.route == (Route.CategoryList model.organizationKey))
-                                || (model.route == Route.CategoryCreate)
+                                || (model.route == Route.CategoryCreate model.organizationKey)
                           )
                         ]
                     , onClick <| NavigateTo (Route.CategoryList model.organizationKey)
