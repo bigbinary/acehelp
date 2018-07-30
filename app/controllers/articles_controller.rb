@@ -8,4 +8,8 @@ class ArticlesController < ApplicationController
   def index
     render
   end
+
+  def new
+    render
+  end
 end

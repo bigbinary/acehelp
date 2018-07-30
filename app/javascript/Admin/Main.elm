@@ -154,7 +154,7 @@ navigateTo newRoute model =
             Route.ArticleList organizationKey ->
                 let
                     ( articleListModel, articleListRequest ) =
-                        ArticleList.init
+                        ArticleList.init organizationKey
 
                     cmd =
                         Cmd.map ArticleListMsg <|
@@ -175,7 +175,7 @@ navigateTo newRoute model =
                     , cmd
                     )
 
-            Route.ArticleCreate ->
+            Route.ArticleCreate organizationKey ->
                 let
                     ( articleCreateModel, categoriesRequest ) =
                         ArticleCreate.init
@@ -246,7 +246,7 @@ navigateTo newRoute model =
                     )
 
             Route.UrlCreate organizationKey ->
-                (UrlCreate.init model.organizationKey)
+                (UrlCreate.init)
                     |> transitionTo UrlCreate UrlCreateMsg
 
             Route.TicketList organizationKey ->
@@ -308,7 +308,7 @@ update msg model =
                             articleListModel
 
                         _ ->
-                            ArticleList.initModel
+                            ArticleList.initModel model.organizationKey
 
                 ( articleListModel, articleListCmd ) =
                     ArticleList.update alMsg
@@ -391,7 +391,7 @@ update msg model =
                             urlCreateModel
 
                         _ ->
-                            UrlCreate.initModel model.organizationKey
+                            UrlCreate.initModel
 
                 ( createUrlModel, createUrlCmds ) =
                     UrlCreate.update cuMsg
@@ -678,7 +678,7 @@ adminHeader model =
                                         model.organizationKey
                                    )
                             )
-                                || (model.route == Route.ArticleCreate)
+                                || (model.route == Route.ArticleCreate model.organizationKey)
                           )
                         ]
                     , onClick <| NavigateTo (Route.ArticleList model.organizationKey)

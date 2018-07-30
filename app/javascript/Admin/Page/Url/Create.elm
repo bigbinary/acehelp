@@ -23,23 +23,21 @@ type alias Model =
     , id : String
     , url : Field String String
     , urlTitle : Field String String
-    , organizationKey : ApiKey
     }
 
 
-initModel : ApiKey -> Model
-initModel organizationKey =
+initModel : Model
+initModel =
     { error = Nothing
     , id = "0"
     , url = Field (validateEmpty "Url") ""
     , urlTitle = Field (validateEmpty "Title") ""
-    , organizationKey = organizationKey
     }
 
 
-init : ApiKey -> ( Model, Cmd Msg )
-init organizationKey =
-    ( initModel organizationKey
+init : ( Model, Cmd Msg )
+init =
+    ( initModel
     , Cmd.none
     )
 
