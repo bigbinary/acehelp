@@ -30,7 +30,7 @@ type alias OrganizationResponse =
     , articles : List ArticleSummary
     }
 
-createOrganizationMutation : GQLBuilder.Document GQLBuilder.Mutation OrganizationData OrganizationData
+createOrganizationMutation : GQLBuilder.Document GQLBuilder.Mutation Organization OrganizationData
 createOrganizationMutation =
     let
         nameVar =
@@ -60,12 +60,11 @@ createOrganizationMutation =
                     )
                 )
 
-organizationObject : GQLBuilder.ValueSpec GQLBuilder.NonNull GQLBuilder.ObjectType OrganizationData vars
+organizationObject : GQLBuilder.ValueSpec GQLBuilder.NonNull GQLBuilder.ObjectType Organization vars
 organizationObject =
-    GQLBuilder.object OrganizationData
+    GQLBuilder.object Organization
+        |> GQLBuilder.with (GQLBuilder.field "id" [] GQLBuilder.string)
         |> GQLBuilder.with (GQLBuilder.field "name" [] GQLBuilder.string)
-        |> GQLBuilder.with (GQLBuilder.field "email" [] GQLBuilder.string)
-        |> GQLBuilder.with (GQLBuilder.field "user_id" [] GQLBuilder.string)
 
 
 organization : Decoder OrganizationResponse

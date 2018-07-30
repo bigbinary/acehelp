@@ -44,7 +44,7 @@ requestOrganization env apiKey organizationId =
             , withCredentials = False
             }
 
-requestCreateOrganization : OrganizationData -> Reader NodeEnv (Task GQLClient.Error OrganizationData)
+requestCreateOrganization : OrganizationData -> Reader NodeEnv (Task GQLClient.Error Organization)
 requestCreateOrganization orgInputs =
     Reader.Reader
         (\env ->

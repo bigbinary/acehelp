@@ -49,7 +49,7 @@ type Msg
     = OrgNameInput String
     | OrgEmailInput String
     | SaveOrganization
-    | SaveOrgResponse (Result GQLClient.Error OrganizationData)
+    | SaveOrgResponse (Result GQLClient.Error Organization)
     | LoadEmpty
 
 update : Msg -> Model -> NodeEnv -> ( Model, Cmd Msg )
@@ -86,9 +86,8 @@ update msg model nodeEnv =
         SaveOrgResponse (Ok id) ->
             ({ model
             | name = Field.update model.name ""
-            , email = Field.update model.email ""
             , error = Nothing
-            }, Navigation.modifyUrl (Route.routeToString Route.Dashboard))
+            }, Navigation.modifyUrl (Route.routeToString (Route.ArticleList id.id)))
         SaveOrgResponse (Err error) ->
             ( { model | error = Just (toString error) }, Cmd.none )
 
