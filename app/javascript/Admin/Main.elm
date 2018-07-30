@@ -325,7 +325,7 @@ navigateTo newRoute model =
                     , cmd
                     )
             Route.OrganizationCreate ->
-                (OrganizationCreate.init)
+                (OrganizationCreate.init model.userId)
                    |> transitionTo OrganizationCreate OrganizationCreateMsg
 
             Route.NotFound ->
@@ -637,7 +637,7 @@ update msg model =
                             orgCreateModel
 
                         _ ->
-                            OrganizationCreate.initModel "fe8ab352-be16-4e83-9d6f-d57393cc2c0f"
+                            OrganizationCreate.initModel model.userId
 
                 ( createOrgModel, createOrgCmds ) =
                     OrganizationCreate.update oCMsg currentPageModel model.nodeEnv

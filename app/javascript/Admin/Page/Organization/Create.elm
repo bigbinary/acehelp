@@ -32,9 +32,9 @@ initModel userId =
     , user_id = userId
     }
 
-init: ( Model, Cmd Msg )
-init =
-    ( initModel "fe8ab352-be16-4e83-9d6f-d57393cc2c0f"
+init: String -> ( Model, Cmd Msg )
+init userId =
+    ( initModel userId
     , send LoadEmpty
     )
 
@@ -88,7 +88,7 @@ update msg model nodeEnv =
             | name = Field.update model.name ""
             , email = Field.update model.email ""
             , error = Nothing
-            }, Navigation.modifyUrl (Route.routeToString Route.Dashboard) )
+            }, Navigation.modifyUrl (Route.routeToString Route.Dashboard))
         SaveOrgResponse (Err error) ->
             ( { model | error = Just (toString error) }, Cmd.none )
 

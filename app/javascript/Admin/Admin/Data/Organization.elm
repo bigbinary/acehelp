@@ -44,7 +44,7 @@ createOrganizationMutation =
     in
         GQLBuilder.mutationDocument <|
             GQLBuilder.extract
-                (GQLBuilder.field "createOrganization"
+                (GQLBuilder.field "addOrganization"
                     [ ( "input"
                       , Arg.object
                             [ ( "name", Arg.variable nameVar )
