@@ -16,11 +16,6 @@ class Organization < ApplicationRecord
   before_validation :ensure_api_key_assigned
   before_create :assign_slug
 
-
-  def user_id
-    owners.first&.id
-  end
-
   private
 
     def ensure_api_key_assigned
