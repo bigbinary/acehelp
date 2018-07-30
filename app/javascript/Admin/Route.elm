@@ -19,7 +19,7 @@ type Route
     | CategoryList OrganizationApiKey
     | CategoryCreate
     | UrlList OrganizationApiKey
-    | UrlCreate
+    | UrlCreate OrganizationApiKey
     | TicketList OrganizationApiKey
     | Settings OrganizationApiKey
     | Dashboard
@@ -36,7 +36,7 @@ routeMatcher =
         , Url.map TicketList (s "organizations" </> string </> s "tickets")
         , Url.map Settings (s "organizations" </> string </> s "settings")
         , Url.map ArticleCreate (s "articles" </> s "new")
-        , Url.map UrlCreate (s "urls" </> s "new")
+        , Url.map UrlCreate (s "organizations" </> string </> s "urls" </> s "new")
         , Url.map CategoryCreate (s "categories" </> s "new")
         , Url.map ArticleEdit (s "articles" </> string)
         ]
@@ -72,8 +72,8 @@ routeToString page =
                 ArticleCreate ->
                     [ "articles", "new" ]
 
-                UrlCreate ->
-                    [ "urls", "new" ]
+                UrlCreate organizationApiKey ->
+                    [ "organizations", organizationApiKey, "urls", "new" ]
 
                 CategoryCreate ->
                     [ "categories", "new" ]

@@ -13,7 +13,7 @@ Rails.application.routes.draw do
 
   resources :organizations, only: [:show], param: :api_key do
     resources :articles, only: [:index]
-    resources :urls, only: [:index]
+    resources :urls
   end
 
   namespace :admin do

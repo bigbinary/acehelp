@@ -20,21 +20,23 @@ import GraphQL.Client.Http as GQLClient
 type alias Model =
     { urls : List UrlData
     , urlId : UrlId
+    , organizationKey : String
     , error : Maybe String
     }
 
 
-initModel : Model
-initModel =
+initModel : ApiKey -> Model
+initModel organizationKey =
     { urls = []
     , urlId = ""
+    , organizationKey = organizationKey
     , error = Nothing
     }
 
 
-init : ( Model, Reader ( NodeEnv, ApiKey ) (Task GQLClient.Error (List UrlData)) )
-init =
-    ( initModel
+init : ApiKey -> ( Model, Reader ( NodeEnv, ApiKey ) (Task GQLClient.Error (List UrlData)) )
+init organizationKey =
+    ( initModel organizationKey
     , requestUrls
     )
 
@@ -89,7 +91,7 @@ view model =
         , div
             [ class "buttonDiv" ]
             [ Html.a
-                [ onClick (Navigate <| Route.UrlCreate)
+                [ onClick (Navigate <| Route.UrlCreate model.organizationKey)
                 , class "button primary"
                 ]
                 [ text "New Url" ]

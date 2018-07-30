@@ -227,7 +227,7 @@ navigateTo newRoute model =
             Route.UrlList organizationKey ->
                 let
                     ( urlListModel, urlListRequest ) =
-                        UrlList.init
+                        UrlList.init organizationKey
 
                     cmd =
                         Task.attempt UrlsLoaded
@@ -245,8 +245,8 @@ navigateTo newRoute model =
                     , cmd
                     )
 
-            Route.UrlCreate ->
-                (UrlCreate.init)
+            Route.UrlCreate organizationKey ->
+                (UrlCreate.init model.organizationKey)
                     |> transitionTo UrlCreate UrlCreateMsg
 
             Route.TicketList organizationKey ->
@@ -391,7 +391,7 @@ update msg model =
                             urlCreateModel
 
                         _ ->
-                            UrlCreate.initModel
+                            UrlCreate.initModel model.organizationKey
 
                 ( createUrlModel, createUrlCmds ) =
                     UrlCreate.update cuMsg
@@ -411,7 +411,7 @@ update msg model =
                             urlListModel
 
                         _ ->
-                            UrlList.initModel
+                            UrlList.initModel model.organizationKey
 
                 ( urlListModel, urlListCmds ) =
                     UrlList.update ulMsg currentPageModel
@@ -428,7 +428,7 @@ update msg model =
                             urlListModel
 
                         _ ->
-                            UrlList.initModel
+                            UrlList.initModel model.organizationKey
             in
                 ( { model
                     | currentPage =
@@ -691,7 +691,7 @@ adminHeader model =
                         [ ( "nav-link", True )
                         , ( "active"
                           , (model.route == (Route.UrlList model.organizationKey))
-                                || (model.route == Route.UrlCreate)
+                                || (model.route == Route.UrlCreate model.organizationKey)
                           )
                         ]
                     , onClick <| NavigateTo (Route.UrlList model.organizationKey)
