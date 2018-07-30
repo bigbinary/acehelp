@@ -20,8 +20,6 @@ Rails.application.routes.draw do
   namespace :admin do
     resources :integrations, only: [:index]
     resources :dashboard, only: [:index]
-    resources :articles
-    resources :categories
     resources :tickets, only: [:index]
   end
 

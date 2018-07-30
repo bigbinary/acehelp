@@ -19,19 +19,21 @@ import GraphQL.Client.Http as GQLClient
 type alias Model =
     { categories : List Category
     , error : Maybe String
+    , organizationKey : String
     }
 
 
-initModel : Model
-initModel =
+initModel : ApiKey -> Model
+initModel organizationKey =
     { categories = []
     , error = Nothing
+    , organizationKey = organizationKey
     }
 
 
-init : ( Model, Reader ( NodeEnv, ApiKey ) (Task GQLClient.Error (List Category)) )
-init =
-    ( initModel
+init : ApiKey -> ( Model, Reader ( NodeEnv, ApiKey ) (Task GQLClient.Error (List Category)) )
+init organizationKey =
+    ( initModel organizationKey
     , requestCategories
     )
 
@@ -73,7 +75,7 @@ view model =
         [ div
             [ class "buttonDiv" ]
             [ Html.a
-                [ onClick (Navigate <| Route.CategoryCreate)
+                [ onClick (Navigate <| Route.CategoryCreate model.organizationKey)
                 , class "button primary"
                 ]
                 [ text "New Category" ]

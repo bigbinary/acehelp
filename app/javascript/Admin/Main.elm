@@ -200,7 +200,7 @@ navigateTo newRoute model =
             Route.CategoryList organizationKey ->
                 let
                     ( categoryListModel, categoriesRequest ) =
-                        CategoryList.init
+                        CategoryList.init organizationKey
 
                     cmd =
                         Task.attempt CategoriesLoaded
@@ -220,7 +220,7 @@ navigateTo newRoute model =
                     , cmd
                     )
 
-            Route.CategoryCreate ->
+            Route.CategoryCreate organizationKey ->
                 (CategoryCreate.init)
                     |> transitionTo CategoryCreate CategoryCreateMsg
 
@@ -473,7 +473,7 @@ update msg model =
                             categoryListModel
 
                         _ ->
-                            CategoryList.initModel
+                            CategoryList.initModel model.organizationKey
 
                 ( categoryListModel, categoryListCmd ) =
                     CategoryList.update clMsg currentPageModel
@@ -490,7 +490,7 @@ update msg model =
                             categoryListModel
 
                         _ ->
-                            CategoryList.initModel
+                            CategoryList.initModel model.organizationKey
             in
                 ( { model
                     | currentPage =
@@ -704,7 +704,7 @@ adminHeader model =
                         [ ( "nav-link", True )
                         , ( "active"
                           , (model.route == (Route.CategoryList model.organizationKey))
-                                || (model.route == Route.CategoryCreate)
+                                || (model.route == Route.CategoryCreate model.organizationKey)
                           )
                         ]
                     , onClick <| NavigateTo (Route.CategoryList model.organizationKey)
