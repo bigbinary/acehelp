@@ -20,7 +20,6 @@ Rails.application.routes.draw do
     resources :integrations, only: [:index]
     resources :dashboard, only: [:index]
     resources :articles
-    resources :urls
     resources :categories
     resources :tickets, only: [:index]
   end
