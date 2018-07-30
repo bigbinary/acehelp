@@ -15,7 +15,7 @@ type alias OrganizationApiKey =
 type Route
     = ArticleList OrganizationApiKey
     | ArticleCreate OrganizationApiKey
-    | ArticleEdit ArticleId
+    | ArticleEdit OrganizationApiKey ArticleId
     | CategoryList OrganizationApiKey
     | CategoryCreate
     | UrlList OrganizationApiKey
@@ -38,7 +38,7 @@ routeMatcher =
         , Url.map ArticleCreate (s "organizations" </> string </> s "articles" </> s "new")
         , Url.map UrlCreate (s "organizations" </> string </> s "urls" </> s "new")
         , Url.map CategoryCreate (s "categories" </> s "new")
-        , Url.map ArticleEdit (s "articles" </> string)
+        , Url.map ArticleEdit (s "organizations" </> string </> s "articles" </> string)
         ]
 
 
@@ -78,8 +78,8 @@ routeToString page =
                 CategoryCreate ->
                     [ "categories", "new" ]
 
-                ArticleEdit articleId ->
-                    [ "articles", articleId ]
+                ArticleEdit organizationApiKey articleId ->
+                    [ "organizations", organizationApiKey, "articles", articleId ]
 
                 NotFound ->
                     []

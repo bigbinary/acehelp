@@ -12,4 +12,8 @@ class ArticlesController < ApplicationController
   def new
     render
   end
+
+  def show
+    render
+  end
 end

@@ -75,7 +75,7 @@ view model =
             []
             (List.map
                 (\article ->
-                    rows article
+                    rows model article
                 )
                 model.articles
             )
@@ -90,9 +90,9 @@ view model =
         ]
 
 
-rows : ArticleSummary -> Html Msg
-rows article =
+rows : Model -> ArticleSummary -> Html Msg
+rows model article =
     div
-        [ onClick <| Navigate <| Route.ArticleEdit article.id ]
+        [ onClick <| Navigate <| Route.ArticleEdit model.organizationKey article.id ]
         [ text article.title
         ]

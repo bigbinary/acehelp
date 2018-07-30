@@ -260,7 +260,7 @@ navigateTo newRoute model =
             Route.Dashboard ->
                 ( { model | currentPage = Loaded Blank }, Cmd.none )
 
-            Route.ArticleEdit articleId ->
+            Route.ArticleEdit organizationKey articleId ->
                 let
                     ( articleEditModel, articleEditCmd ) =
                         ArticleEdit.init articleId
