@@ -29,7 +29,7 @@ class Mutations::LoginMutationsTest < ActiveSupport::TestCase
     assert_equal @ethan.authentication_token, result.data.login_user.authentication_token
   end
 
-  test "With wront password" do
+  test "With wrong password" do
     result =  AceHelp::Client.execute(@query, login_keys: { email: @ethan.email, password: "IamWeak" })
     assert_not_empty result.data.login_user.errors.flat_map(&:path) & ["loginUser"]
   end
