@@ -154,6 +154,6 @@ save : Model -> NodeEnv -> ApiKey -> ( Model, Cmd Msg )
 save model nodeEnv organizationKey =
     let
         cmd =
-            Task.attempt UpdateUrlResponse (Reader.run (updateUrl) ( nodeEnv, urlInputs model ))
+            Task.attempt UpdateUrlResponse (Reader.run (updateUrl) ( nodeEnv, organizationKey, urlInputs model ))
     in
         ( model, cmd )
