@@ -11,6 +11,7 @@ class Mutations::UserMutations
     input_field :password_confirmation, !types.String
 
     return_field :user, Types::UserType
+    return_field :status, types.String
     return_field :errors, types[Types::ErrorType]
 
     resolve ->(object, inputs, context) {
@@ -19,12 +20,14 @@ class Mutations::UserMutations
 
       if new_user.save
         user = new_user
+        status = "200"
       else
         errors = Utils::ErrorHandler.new.detailed_error(new_user, context)
       end
 
       {
         user: user,
+        status: status,
         errors: errors
       }
     }
