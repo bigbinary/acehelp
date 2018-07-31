@@ -37,4 +37,9 @@ class User < ApplicationRecord
     user.save
   end
 
+  def deallocate_from_organization
+    user = self
+    user.organization_id = nil
+    user.save
+  end
 end
