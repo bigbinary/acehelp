@@ -19,7 +19,7 @@ import GraphQL.Client.Http as GQLClient
 
 type alias Model =
     { error : Maybe String
-    , success : String
+    , success : Maybe String
     , url : Field String String
     , urlId : UrlId
     }
@@ -28,7 +28,7 @@ type alias Model =
 initModel : UrlId -> Model
 initModel urlId =
     { error = Nothing
-    , success = ""
+    , success = Nothing
     , url = Field (validateEmpty "Url") ""
     , urlId = urlId
     }
@@ -85,7 +85,7 @@ update msg model nodeEnv organizationKey =
         UpdateUrlResponse (Ok id) ->
             ( { model
                 | url = Field.update model.url id.url
-                , success = "Url Updated Successfully."
+                , success = Just "Url Updated Successfully."
               }
             , Cmd.none
             )
@@ -123,11 +123,16 @@ view model =
                         )
                         model.error
                 ]
-            , div
-                [ class "alert alert-success alert-dismissible fade show"
-                , attribute "role" "alert"
+            , div []
+                [ Maybe.withDefault (text "") <|
+                    Maybe.map
+                        (\message ->
+                            div [ class "alert alert-success alert-dismissible fade show", attribute "role" "alert" ]
+                                [ text <| message
+                                ]
+                        )
+                        model.success
                 ]
-                [ text <| model.success ]
             , div []
                 [ label [] [ text "URL: " ]
                 , input
