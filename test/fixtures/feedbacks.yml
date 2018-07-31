@@ -9,3 +9,9 @@ second_feedback:
   name: Harely Davidson
   message: Message to pass DB validation
   article: ror
+
+ror_feedback:
+  name: Sam
+  message: "Feedback pointers"
+  article: ror
+
