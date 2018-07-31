@@ -23,6 +23,7 @@ type Route
     | UrlCreate OrganizationApiKey
     | UrlEdit OrganizationApiKey UrlId
     | TicketList OrganizationApiKey
+    | FeedbackList OrganizationApiKey
     | Settings OrganizationApiKey
     | Dashboard
     | NotFound
@@ -36,6 +37,7 @@ routeMatcher =
         , Url.map UrlList (s "organizations" </> string </> s "urls")
         , Url.map CategoryList (s "organizations" </> string </> s "categories")
         , Url.map TicketList (s "organizations" </> string </> s "tickets")
+        , Url.map FeedbackList (s "organizations" </> string </> s "feedbacks")
         , Url.map Settings (s "organizations" </> string </> s "settings")
         , Url.map ArticleCreate (s "organizations" </> string </> s "articles" </> s "new")
         , Url.map UrlCreate (s "organizations" </> string </> s "urls" </> s "new")
@@ -68,6 +70,9 @@ routeToString page =
 
                 TicketList organizationApiKey ->
                     [ "organizations", organizationApiKey, "tickets" ]
+
+                FeedbackList organizationApiKey ->
+                    [ "organizations", organizationApiKey, "feedbacks" ]
 
                 Settings organizationApiKey ->
                     [ "organizations", organizationApiKey, "settings" ]

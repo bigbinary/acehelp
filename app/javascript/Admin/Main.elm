@@ -13,6 +13,7 @@ import Page.Url.Create as UrlCreate
 import Page.Url.Edit as UrlEdit
 import Page.Category.List as CategoryList
 import Page.Ticket.List as TicketList
+import Page.Feedback.List as FeedbackList
 import Page.Category.Create as CategoryCreate
 import Page.Settings as Settings
 import Page.Errors as Errors
@@ -50,6 +51,7 @@ type Page
     | UrlEdit UrlEdit.Model
     | Settings Settings.Model
     | TicketList TicketList.Model
+    | FeedbackList FeedbackList.Model
     | Dashboard
     | NotFound
     | Blank
@@ -108,6 +110,7 @@ type Msg
     | CategoryCreateMsg CategoryCreate.Msg
     | CategoriesLoaded (Result GQLClient.Error (List Category))
     | TicketListMsg TicketList.Msg
+    | FeedbackListMsg FeedbackList.Msg
     | SettingsMsg Settings.Msg
     | OnLocationChange Navigation.Location
     | SignOut
@@ -265,6 +268,30 @@ navigateTo newRoute model =
                         Cmd.map UrlEditMsg <| Task.attempt (UrlEdit.UrlLoaded) (Reader.run (urlEditCmd) ( model.nodeEnv, model.organizationKey ))
                 in
                     ( { model | currentPage = TransitioningTo (UrlEdit urlEditModel), route = newRoute }, cmd )
+
+            Route.FeedbackList organizationKey ->
+                let
+                    ( feedbackListModel, feedbackListRequest ) =
+                        FeedbackList.init organizationKey
+
+                    cmd =
+                        Cmd.map FeedbackListMsg <|
+                            Task.attempt
+                                FeedbackList.FeedbackListLoaded
+                                (Reader.run (feedbackListRequest)
+                                    ( model.nodeEnv
+                                    , model.organizationKey
+                                    )
+                                )
+                in
+                    ( { model
+                        | currentPage =
+                            TransitioningTo
+                                (FeedbackList feedbackListModel)
+                        , route = newRoute
+                      }
+                    , cmd
+                    )
 
             Route.Settings organizationKey ->
                 (Settings.init model.organizationKey)
@@ -557,6 +584,26 @@ update msg model =
                 , Cmd.map CategoryCreateMsg categoryCreateCmd
                 )
 
+        FeedbackListMsg flmsg ->
+            let
+                currentPageModel =
+                    case model.currentPage of
+                        Loaded (FeedbackList feedbackListModel) ->
+                            feedbackListModel
+
+                        _ ->
+                            FeedbackList.initModel model.organizationKey
+
+                ( feedbackListModel, feedbackListCmd ) =
+                    FeedbackList.update flmsg
+                        currentPageModel
+                        model.organizationKey
+                        model.nodeEnv
+            in
+                ( { model | currentPage = Loaded (FeedbackList feedbackListModel) }
+                , Cmd.map FeedbackListMsg feedbackListCmd
+                )
+
         SettingsMsg settingsMsg ->
             let
                 currentPageModel =
@@ -679,6 +726,11 @@ view model =
             adminLayout model
                 (Html.map UrlEditMsg
                     (UrlEdit.view urlEditModel)
+
+        FeedbackList feedbackListModel ->
+            adminLayout model
+                (Html.map FeedbackListMsg
+                    (FeedbackList.view feedbackListModel)
                 )
 
         Dashboard ->
@@ -756,6 +808,16 @@ adminHeader model =
                     , onClick <| NavigateTo (Route.TicketList model.organizationKey)
                     ]
                     [ text "Ticket" ]
+                ]
+            , li [ class "nav-item" ]
+                [ Html.a
+                    [ classList
+                        [ ( "nav-link", True )
+                        , ( "active", (model.route == (Route.FeedbackList model.organizationKey)) )
+                        ]
+                    , onClick <| NavigateTo (Route.FeedbackList model.organizationKey)
+                    ]
+                    [ text "Feedback" ]
                 ]
             , li [ class "nav-item" ]
                 [ Html.a
