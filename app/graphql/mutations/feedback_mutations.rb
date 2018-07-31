@@ -27,4 +27,34 @@ class Mutations::FeedbackMutations
       }
     }
   end
+
+  UpdateStatus = GraphQL::Relay::Mutation.define do
+    name "UpdateFeedbackStatus"
+    input_field :id, !types.ID
+    input_field :status, !types.String
+
+    return_field :feedback, Types::FeedbackType
+    return_field :errors, types[Types::ErrorType]
+
+    resolve ->(object, inputs, context) {
+      feedback = Feedback.find_by(
+        id: inputs[:id]
+      )
+      if feedback.nil?
+        errors = Utils::ErrorHandler.new.error("Record Not Found", context)
+      else
+        if feedback.update_attributes!(status: inputs[:status])
+          updated_feedback = feedback
+        else
+          errors = Utils::ErrorHandler.new.detailed_error(feedback, context)
+        end
+      end
+
+      {
+        feedback: updated_feedback,
+        errors: errors
+      }
+
+    }
+  end
 end
