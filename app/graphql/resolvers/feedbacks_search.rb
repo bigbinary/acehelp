@@ -6,7 +6,7 @@ class Resolvers::FeedbacksSearch < GraphQL::Function
   argument :article_id, types.ID
 
   def call(obj, args, context)
-    query = Feedback.for_organization(context[:organization])
+    query = Feedback.open.for_organization(context[:organization])
 
     article_id = args[:article_id]
     article_id.present? ? query.where(article_id: article_id) : query

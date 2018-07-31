@@ -1,6 +1,8 @@
 # frozen_string_literal: true
 
 class Feedback < ApplicationRecord
+  enum status: { open: "open", closed: "closed" }
+
   validates :message, presence: true
   belongs_to :article
 
