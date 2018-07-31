@@ -27,7 +27,7 @@ Types::MutationType = GraphQL::ObjectType.define do
   field :removeUserFromOrganization, field: Mutations::OrganizationUserMutations::Destroy.field
 
   field :addFeedback, field: Mutations::FeedbackMutations::Create.field
-  field :closeFeedback, field: Mutations::FeedbackMutations::Close.field
+  field :updateFeedbackStatus, field: Mutations::FeedbackMutations::UpdateStatus.field
 
 
   field :addCategoryToArticle, field: Mutations::CategoryArticleMutations::Create.field

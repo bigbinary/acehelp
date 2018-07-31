@@ -39,15 +39,19 @@ class Mutations::OrganizationMutationsTest < ActiveSupport::TestCase
   test "close feedback" do
     feedback = feedbacks(:ror_feedback)
     query = <<-GRAPHQL
-              mutation($id: ID!)
+              mutation($id: ID!, $status: String!)
                 {
-                  closeFeedback(input: {id: $id})
+                  updateFeedbackStatus
+                  (input: {
+                      id: $id, status: $status
+                  })
                   { feedback { id, status }
                     errors { path, message }
                   }
+
                 }
             GRAPHQL
-    result = AceHelp::Client.execute(query, id: feedback.id)
-    assert_equal result.data.close_feedback.feedback.status, "closed"
+    result = AceHelp::Client.execute(query, id: feedback.id, status: "closed")
+    assert_equal result.data.update_feedback_status.feedback.status, "closed"
   end
 end

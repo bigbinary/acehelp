@@ -28,9 +28,10 @@ class Mutations::FeedbackMutations
     }
   end
 
-  Close = GraphQL::Relay::Mutation.define do
+  UpdateStatus = GraphQL::Relay::Mutation.define do
     name "UpdateFeedbackStatus"
     input_field :id, !types.ID
+    input_field :status, !types.String
 
     return_field :feedback, Types::FeedbackType
     return_field :errors, types[Types::ErrorType]
@@ -42,7 +43,7 @@ class Mutations::FeedbackMutations
       if feedback.nil?
         errors = Utils::ErrorHandler.new.error("Record Not Found", context)
       else
-        if feedback.closed!
+        if feedback.update_attributes!(status: inputs[:status])
           updated_feedback = feedback
         else
           errors = Utils::ErrorHandler.new.detailed_error(feedback, context)
