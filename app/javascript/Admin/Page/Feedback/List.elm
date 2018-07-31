@@ -89,4 +89,11 @@ row feedback =
         [ div
             []
             [ text feedback.name ]
+        , div
+            []
+            [ text feedback.message ]
+        , div
+            []
+            [ text feedback.status ]
+        , hr [] []
         ]

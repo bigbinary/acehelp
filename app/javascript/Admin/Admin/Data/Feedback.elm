@@ -10,6 +10,8 @@ type alias FeedbackId =
 type alias Feedback =
     { id : FeedbackId
     , name : String
+    , message : String
+    , status : String
     }
 
 
@@ -30,4 +32,6 @@ feedbackExtractor =
     (GQLBuilder.object Feedback
         |> GQLBuilder.with (GQLBuilder.field "id" [] GQLBuilder.string)
         |> GQLBuilder.with (GQLBuilder.field "name" [] GQLBuilder.string)
+        |> GQLBuilder.with (GQLBuilder.field "message" [] GQLBuilder.string)
+        |> GQLBuilder.with (GQLBuilder.field "status" [] GQLBuilder.string)
     )
