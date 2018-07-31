@@ -29,12 +29,8 @@ class Mutations::UrlMutations
   Update = GraphQL::Relay::Mutation.define do
     name "UpdateUrl"
 
-    UrlInputObjectType = GraphQL::InputObjectType.define do
-      name "UrlInput"
-      input_field :url, !types.String
-    end
     input_field :id, !types.String
-    input_field :url, !UrlInputObjectType
+    input_field :url, !types.String
 
     return_field :url, Types::UrlType
     return_field :errors, types[Types::ErrorType]
@@ -45,7 +41,7 @@ class Mutations::UrlMutations
       if url.nil?
         errors = Utils::ErrorHandler.new.error("Url not found", context)
       else
-        if url.update_attributes(inputs[:url].to_h)
+        if url.update_attributes(url: inputs[:url])
           updated_url = url
         else
           errors = Utils::ErrorHandler.new.detailed_error(url, context)

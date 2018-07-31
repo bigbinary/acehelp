@@ -10,6 +10,7 @@ import Page.Article.Create as ArticleCreate
 import Page.Article.Edit as ArticleEdit
 import Page.Url.List as UrlList
 import Page.Url.Create as UrlCreate
+import Page.Url.Edit as UrlEdit
 import Page.Category.List as CategoryList
 import Page.Ticket.List as TicketList
 import Page.Category.Create as CategoryCreate
@@ -46,6 +47,7 @@ type Page
     | CategoryCreate CategoryCreate.Model
     | UrlList UrlList.Model
     | UrlCreate UrlCreate.Model
+    | UrlEdit UrlEdit.Model
     | Settings Settings.Model
     | TicketList TicketList.Model
     | Dashboard
@@ -99,6 +101,7 @@ type Msg
     | ArticleCategoriesLoaded (Result GQLClient.Error (List Category))
     | ArticleEditMsg ArticleEdit.Msg
     | UrlCreateMsg UrlCreate.Msg
+    | UrlEditMsg UrlEdit.Msg
     | UrlListMsg UrlList.Msg
     | UrlsLoaded (Result GQLClient.Error (List UrlData))
     | CategoryListMsg CategoryList.Msg
@@ -253,6 +256,16 @@ navigateTo newRoute model =
                 (TicketList.init model.nodeEnv model.organizationKey)
                     |> transitionTo TicketList TicketListMsg
 
+            Route.UrlEdit organizationKey urlId ->
+                let
+                    ( urlEditModel, urlEditCmd ) =
+                        UrlEdit.init urlId
+
+                    cmd =
+                        Cmd.map UrlEditMsg <| Task.attempt (UrlEdit.UrlLoaded) (Reader.run (urlEditCmd) ( model.nodeEnv, model.organizationKey ))
+                in
+                    ( { model | currentPage = TransitioningTo (UrlEdit urlEditModel), route = newRoute }, cmd )
+
             Route.Settings organizationKey ->
                 (Settings.init model.organizationKey)
                     |> transitionTo Settings SettingsMsg
@@ -401,6 +414,23 @@ update msg model =
             in
                 ( { model | currentPage = Loaded (UrlCreate createUrlModel) }
                 , Cmd.map UrlCreateMsg createUrlCmds
+                )
+
+        UrlEditMsg ueMsg ->
+            let
+                currentPageModel =
+                    case model.currentPage of
+                        Loaded (UrlEdit urlEditModel) ->
+                            urlEditModel
+
+                        _ ->
+                            UrlEdit.initModel "0"
+
+                ( urlEditModel, urlEditCmd ) =
+                    UrlEdit.update ueMsg currentPageModel model.nodeEnv model.organizationKey
+            in
+                ( { model | currentPage = Loaded (UrlEdit urlEditModel) }
+                , Cmd.map UrlEditMsg urlEditCmd
                 )
 
         UrlListMsg ulMsg ->
@@ -643,6 +673,12 @@ view model =
             adminLayout model
                 (Html.map TicketListMsg
                     (TicketList.view ticketListModel)
+                )
+
+        UrlEdit urlEditModel ->
+            adminLayout model
+                (Html.map UrlEditMsg
+                    (UrlEdit.view urlEditModel)
                 )
 
         Dashboard ->
