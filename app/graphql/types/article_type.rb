@@ -8,9 +8,9 @@ Types::ArticleType = GraphQL::ObjectType.define do
   field :upvotes_count, !types.Int
   field :downvotes_count, !types.Int
 
-  field :category, -> { Types::CategoryType } do
-    preload :category
-    resolve ->(obj, args, context) { obj.category }
+  field :categories, -> { !types[Types::CategoryType] } do
+    preload :categories
+    resolve ->(obj, args, context) { obj.categories }
   end
 
   field :urls, -> { !types[Types::UrlType] }  do

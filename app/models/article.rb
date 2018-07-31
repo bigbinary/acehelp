@@ -3,12 +3,14 @@
 class Article < ApplicationRecord
   searchkick
 
-  belongs_to :category, optional: true
   belongs_to :organization
   has_many :article_urls
   has_many :urls, through: :article_urls
 
-  validates :title, uniqueness: { scope: [:organization_id, :category_id] }, presence: true
+  has_many :article_categories, dependent: :destroy
+  has_many :categories, through: :article_categories
+
+  validates :title, uniqueness: { scope: [:organization_id] }, presence: true
 
   scope :for_organization, ->(org) { where(organization: org) }
 

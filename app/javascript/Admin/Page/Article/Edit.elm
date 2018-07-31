@@ -113,7 +113,7 @@ update msg model nodeEnv organizationKey =
             ( { model
                 | title = Field.update model.title article.title
                 , desc = Field.update model.desc article.desc
-                , categoryId = Field.update model.categoryId article.category.id
+                , categories = article.categories
               }
             , insertArticleContent article.desc
             )

@@ -16,6 +16,13 @@ ActiveRecord::Schema.define(version: 2018_07_30_112505) do
   enable_extension "pgcrypto"
   enable_extension "plpgsql"
 
+  create_table "article_categories", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.uuid "category_id", default: -> { "gen_random_uuid()" }, null: false
+    t.uuid "article_id", default: -> { "gen_random_uuid()" }, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
   create_table "article_urls", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.uuid "article_id", null: false
     t.uuid "url_id", null: false
@@ -28,13 +35,11 @@ ActiveRecord::Schema.define(version: 2018_07_30_112505) do
   create_table "articles", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.string "title", null: false
     t.text "desc", null: false
-    t.uuid "category_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.uuid "organization_id"
     t.integer "upvotes_count", default: 0
     t.integer "downvotes_count", default: 0
-    t.index ["category_id"], name: "index_articles_on_category_id"
     t.index ["organization_id"], name: "index_articles_on_organization_id"
   end
 
@@ -118,9 +123,10 @@ ActiveRecord::Schema.define(version: 2018_07_30_112505) do
     t.index ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true
   end
 
+  add_foreign_key "article_categories", "articles"
+  add_foreign_key "article_categories", "categories"
   add_foreign_key "article_urls", "articles"
   add_foreign_key "article_urls", "urls"
-  add_foreign_key "articles", "categories"
   add_foreign_key "articles", "organizations"
   add_foreign_key "categories", "organizations"
   add_foreign_key "feedbacks", "articles"

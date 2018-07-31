@@ -10,7 +10,6 @@ class Resolvers::OrganizationSearchTest < ActiveSupport::TestCase
     @category = categories :novel
     @url = urls :bigbinary
 
-    @article.category = @category
     @article.organization = @organization
     @url.organization = @organization
     @article.save

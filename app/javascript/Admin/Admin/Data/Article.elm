@@ -17,7 +17,7 @@ type alias Article =
     { id : ArticleId
     , title : String
     , desc : String
-    , category : Category
+    , categories : List Category
     , urls : List UrlData
     }
 
@@ -134,7 +134,13 @@ articleObject =
         |> GQLBuilder.with (GQLBuilder.field "id" [] GQLBuilder.string)
         |> GQLBuilder.with (GQLBuilder.field "title" [] GQLBuilder.string)
         |> GQLBuilder.with (GQLBuilder.field "desc" [] GQLBuilder.string)
-        |> GQLBuilder.with (GQLBuilder.field "category" [] categoryObject)
+        |> GQLBuilder.with
+            (GQLBuilder.field "categories"
+                []
+                (GQLBuilder.list
+                    categoryObject
+                )
+            )
         |> GQLBuilder.with
             (GQLBuilder.field "urls"
                 []

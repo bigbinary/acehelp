@@ -12,16 +12,17 @@ class Mutations::ArticleMutations
     return_field :errors, types[Types::ErrorType]
 
     resolve ->(object, inputs, context) {
-      new_article = Article.new(title: inputs[:title], desc: inputs[:desc])
-
-      if inputs[:category_id].present?
-        category = Category.find_by!(id: inputs[:category_id])
-        new_article.category = category
-      end
-
-      new_article.organization = context[:organization]
+      new_article = Article.new(
+        title: inputs[:title],
+        desc: inputs[:desc],
+        organization_id: context[:organization].id
+      )
 
       if new_article.save
+        if inputs[:category_id].present?
+          category = Category.find_by!(id: inputs[:category_id])
+          new_article.categories << category
+        end
         article = new_article
       else
         errors = Utils::ErrorHandler.new.detailed_error(new_article, context)
@@ -38,14 +39,9 @@ class Mutations::ArticleMutations
     name "UpdateArticle"
 
     input_field :id, !types.String
-
-    ArticleInputObjectType = GraphQL::InputObjectType.define do
-      name "ArticleInput"
-      input_field :category_id, !types.String
-      input_field :title, !types.String
-      input_field :desc, !types.String
-    end
-    input_field :article, !ArticleInputObjectType
+    input_field :category_id, types.String
+    input_field :title, !types.String
+    input_field :desc, !types.String
 
     return_field :article, Types::ArticleType
     return_field :errors, types[Types::ErrorType]
@@ -56,7 +52,11 @@ class Mutations::ArticleMutations
       if article.nil?
         errors = Utils::ErrorHandler.new.error("Article not found", context)
       else
-        if article.update_attributes(inputs[:article].to_h)
+        if article.update_attributes(title: inputs[:title], desc: inputs[:desc])
+          if inputs[:category_id].present?
+            category = Category.find_by!(id: inputs[:category_id])
+            article.categories << category
+          end
           updated_article = article
         else
           errors = Utils::ErrorHandler.new.detailed_error(article, context)

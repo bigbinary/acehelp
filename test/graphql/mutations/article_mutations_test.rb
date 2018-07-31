@@ -66,6 +66,7 @@ class Mutations::ArticleMutationsTest < ActiveSupport::TestCase
 
 
   test "update article mutations" do
+    category = categories :autobiography
     query = <<-'GRAPHQL'
               mutation($input: UpdateArticleInput!) {
                 updateArticle(input: $input) {
@@ -77,7 +78,7 @@ class Mutations::ArticleMutationsTest < ActiveSupport::TestCase
               }
             GRAPHQL
 
-    result = AceHelp::Client.execute(query, input: { id: @article.id, article: { title: "update_test_article", desc: "none", category_id: @category.id } })
+    result = AceHelp::Client.execute(query, input: { id: @article.id, title: "update_test_article", desc: "none", category_id: category.id })
 
     assert_equal result.data.update_article.article.title, "update_test_article"
   end
@@ -94,7 +95,7 @@ class Mutations::ArticleMutationsTest < ActiveSupport::TestCase
               }
             GRAPHQL
 
-    result = AceHelp::Client.execute(query, input: { id: @article.id, article: { title: "", desc: "none", category_id: @category.id } })
+    result = AceHelp::Client.execute(query, input: { id: @article.id, title: "", desc: "none", category_id: @category.id })
     assert_nil result.data.update_article.article
   end
 
@@ -114,7 +115,8 @@ class Mutations::ArticleMutationsTest < ActiveSupport::TestCase
               }
     GRAPHQL
 
-    result = AceHelp::Client.execute(query, input: { id: @article.id, article: { title: "", desc: "none", category_id: @category.id } })
+    result = AceHelp::Client.execute(query, input: { id: @article.id, title: "", desc: "none", category_id: @category.id })
+
     assert_not_empty result.data.update_article.errors.flat_map(&:path) & ["updateArticle", "title"]
   end
 

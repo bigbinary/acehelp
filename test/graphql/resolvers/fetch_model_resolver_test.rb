@@ -8,7 +8,6 @@ class Resolvers::OrganizationSearchTest < ActiveSupport::TestCase
     @article = articles :ror
     @organization = organizations :bigbinary
     @category = categories :novel
-    @article.category = @category
     @article.organization = @organization
     @article.save!
   end

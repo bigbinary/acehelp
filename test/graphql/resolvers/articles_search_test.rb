@@ -10,10 +10,9 @@ class Resolvers::ArticlesSearchTest < ActiveSupport::TestCase
     @category = categories :novel
     @url = urls :google
 
-    @article.category = @category
     @article.organization = @organization
     @url.organization = @organization
-    @article.save
+    @article.save!
     @url.save
   end
 

@@ -24,7 +24,7 @@ class Mutations::CategoryArticleMutations
       elsif category.articles.where(id: inputs[:article_id]).first.present?
         errors = Utils::ErrorHandler.new.error("Record already exists", context)
       else
-        if article.update(category: category)
+        if article.categories << category
           updated_article = article
         else
           errors = Utils::ErrorHandler.new.detailed_error(article, context)
@@ -59,7 +59,7 @@ class Mutations::CategoryArticleMutations
       elsif article.blank?
         errors = Utils::ErrorHandler.new.error("Article not found", context)
       elsif category.articles.where(id: inputs[:article_id]).exists?
-        if article.update(category: nil)
+        if article.categories.delete(category)
           updated_article = article
         else
           errors = Utils::ErrorHandler.new.detailed_error(article, context)

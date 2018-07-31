@@ -10,7 +10,6 @@ class GraphqlControllerTest < ActionDispatch::IntegrationTest
     @category = categories :novel
     @url = urls :google
 
-    @article.category = @category
     @article.organization = @organization
     @url.organization = @organization
     @article.save
