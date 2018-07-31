@@ -16,3 +16,15 @@ requestFeedbacks =
                 GQLBuilder.request { status = status } requestFeedbacksQuery
             )
         )
+
+
+requestFeedbackById : FeedbackId -> Reader ( NodeEnv, ApiKey ) (Task GQLClient.Error Feedback)
+requestFeedbackById feedbackId =
+    Reader.Reader
+        (\( env, apiKey ) ->
+            GQLClient.customSendQuery (requestOptions env apiKey) <|
+                (GQLBuilder.request
+                    { id = feedbackId }
+                    feedbackByIdQuery
+                )
+        )
