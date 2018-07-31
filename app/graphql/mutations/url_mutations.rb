@@ -29,10 +29,6 @@ class Mutations::UrlMutations
   Update = GraphQL::Relay::Mutation.define do
     name "UpdateUrl"
 
-    UrlInputObjectType = GraphQL::InputObjectType.define do
-      name "UrlInput"
-      input_field :url, !types.String
-    end
     input_field :id, !types.String
     input_field :url, !types.String
 

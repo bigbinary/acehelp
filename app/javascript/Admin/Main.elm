@@ -256,7 +256,7 @@ navigateTo newRoute model =
                 (TicketList.init model.nodeEnv model.organizationKey)
                     |> transitionTo TicketList TicketListMsg
 
-            Route.UrlEdit urlId ->
+            Route.UrlEdit organizationKey urlId ->
                 let
                     ( urlEditModel, urlEditCmd ) =
                         UrlEdit.init urlId

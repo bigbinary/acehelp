@@ -121,15 +121,15 @@ view model =
         , div []
             (List.map
                 (\url ->
-                    urlRow url
+                    urlRow model url
                 )
                 model.urls
             )
         ]
 
 
-urlRow : UrlData -> Html Msg
-urlRow url =
+urlRow : Model -> UrlData -> Html Msg
+urlRow model url =
     div [ id url.id ]
         [ div
             []
@@ -145,7 +145,7 @@ urlRow url =
         , div
             []
             [ Html.a
-                [ onClick (Navigate <| Route.UrlEdit url.id)
+                [ onClick (Navigate <| Route.UrlEdit model.organizationKey url.id)
                 , class "button primary"
                 ]
                 [ text "Edit Url" ]

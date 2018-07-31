@@ -5,6 +5,7 @@ import UrlParser as Url exposing ((</>), Parser, oneOf, parsePath, s, string)
 import Admin.Data.Article exposing (ArticleId)
 import Admin.Data.Url exposing (UrlId)
 
+
 -- ROUTING --
 
 
@@ -20,7 +21,7 @@ type Route
     | CategoryCreate OrganizationApiKey
     | UrlList OrganizationApiKey
     | UrlCreate OrganizationApiKey
-    | UrlEdit UrlId
+    | UrlEdit OrganizationApiKey UrlId
     | TicketList OrganizationApiKey
     | Settings OrganizationApiKey
     | Dashboard
@@ -40,7 +41,7 @@ routeMatcher =
         , Url.map UrlCreate (s "organizations" </> string </> s "urls" </> s "new")
         , Url.map CategoryCreate (s "organizations" </> string </> s "categories" </> s "new")
         , Url.map ArticleEdit (s "organizations" </> string </> s "articles" </> string)
-        , Url.map UrlEdit (s "admin" </> s "urls" </> string </> s "edit")
+        , Url.map UrlEdit (s "organizations" </> string </> s "urls" </> string </> s "edit")
         ]
 
 
@@ -80,8 +81,8 @@ routeToString page =
                 CategoryCreate organizationApiKey ->
                     [ "organizations", organizationApiKey, "categories", "new" ]
 
-                UrlEdit urlId ->
-                    [ "urls", urlId, "edit" ]
+                UrlEdit organizationApiKey urlId ->
+                    [ "organizations", organizationApiKey, "urls", urlId, "edit" ]
 
                 ArticleEdit organizationApiKey articleId ->
                     [ "organizations", organizationApiKey, "articles", articleId ]
