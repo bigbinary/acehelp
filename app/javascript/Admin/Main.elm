@@ -726,6 +726,7 @@ view model =
             adminLayout model
                 (Html.map UrlEditMsg
                     (UrlEdit.view urlEditModel)
+                )
 
         FeedbackList feedbackListModel ->
             adminLayout model
