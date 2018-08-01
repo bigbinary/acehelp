@@ -22,7 +22,7 @@ type alias Organization =
 type alias OrganizationData =
     { name: String
     , email: String
-    , user_id: String
+    , userId: String
     }
 
 type alias OrganizationResponse =
@@ -40,7 +40,7 @@ createOrganizationMutation =
             Var.required "email" .email Var.string
 
         userIdVar =
-            Var.required "user_id" .user_id Var.string
+            Var.required "user_id" .userId Var.string
     in
         GQLBuilder.mutationDocument <|
             GQLBuilder.extract

@@ -131,7 +131,7 @@ orgInputs : Model -> OrganizationData
 orgInputs { name, email, user_id } =
     { name = Field.value name
     , email = Field.value email
-    , user_id = user_id
+    , userId = user_id
     }
 
 save : Model -> NodeEnv -> (Model, Cmd Msg )

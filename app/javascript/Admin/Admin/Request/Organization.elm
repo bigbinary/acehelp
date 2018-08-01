@@ -52,7 +52,7 @@ requestCreateOrganization orgInputs =
                 (GQLBuilder.request
                     { name = orgInputs.name
                     , email = orgInputs.email
-                    , user_id = orgInputs.user_id
+                    , userId = orgInputs.userId
                     }
                     createOrganizationMutation
                 )
