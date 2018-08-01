@@ -13,6 +13,8 @@ class User < ApplicationRecord
   has_many :organization_users, dependent: :destroy
   has_many :organizations, through: :organization_users
 
+  scope :agents, -> { where(role: :agent) }
+
   def name
     ("#{first_name} #{last_name}".squish).presence || "Anonymous"
   end

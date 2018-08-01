@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2018_07_31_081642) do
+ActiveRecord::Schema.define(version: 2018_08_01_182741) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "pgcrypto"
@@ -89,6 +89,8 @@ ActiveRecord::Schema.define(version: 2018_07_31_081642) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.uuid "organization_id"
+    t.string "status"
+    t.uuid "agent_id"
     t.index ["organization_id"], name: "index_tickets_on_organization_id"
   end
 
@@ -134,6 +136,7 @@ ActiveRecord::Schema.define(version: 2018_07_31_081642) do
   add_foreign_key "organization_users", "organizations"
   add_foreign_key "organization_users", "users"
   add_foreign_key "tickets", "organizations"
+  add_foreign_key "tickets", "users", column: "agent_id"
   add_foreign_key "urls", "organizations"
   add_foreign_key "users", "organizations"
 end
