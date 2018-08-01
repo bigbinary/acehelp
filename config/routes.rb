@@ -11,6 +11,10 @@ Rails.application.routes.draw do
   get "/pages/aceinvoice/integrations", to: "home#integrations"
   get "/pages/aceinvoice/pricing", to: "home#pricing"
 
+  scope module: 'admin' do
+    resources :organizations, only: :new
+  end
+
   resources :organizations, only: [:show], param: :api_key do
     resources :articles
     resources :urls
@@ -22,10 +26,6 @@ Rails.application.routes.draw do
   namespace :admin do
     resources :integrations, only: [:index]
     resources :dashboard, only: [:index]
-  end
-
-  scope module: 'admin' do
-    resources :organizations, only: :new
   end
 
   if Rails.env.development?
