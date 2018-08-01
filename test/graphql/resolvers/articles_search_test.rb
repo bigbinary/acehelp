@@ -43,6 +43,6 @@ class Resolvers::ArticlesSearchTest < ActiveSupport::TestCase
     result = AceHelp::Client.execute(query)
 
     assert_equal result.data.articles.size, 2
-    assert_equal result.data.articles.second.title, @article.title
+    assert_equal result.data.articles.last.title, @article.title
   end
 end
