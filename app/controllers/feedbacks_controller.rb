@@ -8,4 +8,8 @@ class FeedbacksController < ApplicationController
   def index
     render
   end
+
+  def show
+    render
+  end
 end

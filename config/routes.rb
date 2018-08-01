@@ -15,8 +15,8 @@ Rails.application.routes.draw do
     resources :articles
     resources :urls
     resources :categories
-    resources :feedbacks, only: [:index]
     resources :tickets, only: [:index]
+    resources :feedbacks, only: [:index, :show]
   end
 
   namespace :admin do
