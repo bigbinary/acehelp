@@ -15,6 +15,7 @@ Rails.application.routes.draw do
     resources :articles
     resources :urls
     resources :categories
+    resources :feedbacks, only: [:index]
   end
 
   namespace :admin do
