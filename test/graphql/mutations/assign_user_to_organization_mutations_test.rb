@@ -39,7 +39,7 @@ class Mutations::AssignUserToOrganizationMutationsTest < ActiveSupport::TestCase
   end
 
   test "api should return new user" do
-    new_email = "new_email@example.com"
+    new_email = "new_email+#{rand(1000)}@example.com"
     result =  AceHelp::Client.execute(@query, user_keys: { email: new_email })
     assert_equal new_email,  result.data.assign_user_to_organization.user.email
   end
