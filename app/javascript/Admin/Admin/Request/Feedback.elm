@@ -28,3 +28,13 @@ requestFeedbackById feedbackId =
                     feedbackByIdQuery
                 )
         )
+
+
+requestUpdateFeedbackStatus : FeedbackId -> Reader ( NodeEnv, ApiKey ) (Task GQLClient.Error Feedback)
+requestUpdateFeedbackStatus feedbackId =
+    Reader.Reader
+        (\( nodeEnv, apiKey ) ->
+            (GQLClient.customSendMutation (requestOptions nodeEnv apiKey) <|
+                GQLBuilder.request { id = feedbackId } updateFeedabackStatusMutation
+            )
+        )

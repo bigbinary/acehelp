@@ -297,6 +297,28 @@ navigateTo newRoute model =
                     , cmd
                     )
 
+            Route.FeedbackShow organizationKey feedbackId ->
+                let
+                    ( feedbackShowModel, feedbackShowRequest ) =
+                        FeedbackShow.init feedbackId
+
+                    cmd =
+                        Cmd.map FeedbackShowMsg <|
+                            Task.attempt
+                                (FeedbackShow.FeedbackLoaded)
+                                (Reader.run (feedbackShowRequest)
+                                    ( model.nodeEnv, model.organizationKey )
+                                )
+                in
+                    ( { model
+                        | currentPage =
+                            TransitioningTo
+                                (FeedbackShow feedbackShowModel)
+                        , route = newRoute
+                      }
+                    , cmd
+                    )
+
             Route.Settings organizationKey ->
                 (Settings.init model.organizationKey)
                     |> transitionTo Settings SettingsMsg
@@ -321,28 +343,6 @@ navigateTo newRoute model =
                         | currentPage =
                             TransitioningTo
                                 (ArticleEdit articleEditModel)
-                        , route = newRoute
-                      }
-                    , cmd
-                    )
-
-            Route.FeedbackShow organizationKey feedbackId ->
-                let
-                    ( feedbackShowModel, feedbackShowCmd ) =
-                        FeedbackShow.init feedbackId
-
-                    cmd =
-                        Cmd.map FeedbackShowMsg <|
-                            Task.attempt
-                                (FeedbackShow.FeedbackLoaded)
-                                (Reader.run (feedbackShowCmd)
-                                    ( model.nodeEnv, model.organizationKey )
-                                )
-                in
-                    ( { model
-                        | currentPage =
-                            TransitioningTo
-                                (FeedbackShow feedbackShowModel)
                         , route = newRoute
                       }
                     , cmd
