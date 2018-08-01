@@ -328,14 +328,14 @@ navigateTo newRoute model =
 
             Route.FeedbackShow organizationKey feedbackId ->
                 let
-                    ( feedbackShowModel, feedbackEditCmd ) =
+                    ( feedbackShowModel, feedbackShowCmd ) =
                         FeedbackShow.init feedbackId
 
                     cmd =
                         Cmd.map FeedbackShowMsg <|
                             Task.attempt
                                 (FeedbackShow.FeedbackLoaded)
-                                (Reader.run (feedbackEditCmd)
+                                (Reader.run (feedbackShowCmd)
                                     ( model.nodeEnv, model.organizationKey )
                                 )
                 in

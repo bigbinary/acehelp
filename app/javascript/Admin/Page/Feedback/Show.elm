@@ -17,6 +17,7 @@ import GraphQL.Client.Http as GQLClient
 type alias Model =
     { name : String
     , message : String
+    , id : FeedbackId
     , error : Maybe String
     }
 
@@ -25,6 +26,7 @@ initModel : FeedbackId -> Model
 initModel feedbackId =
     { name = ""
     , message = ""
+    , id = feedbackId
     , error = Nothing
     }
 
@@ -71,5 +73,6 @@ update msg model nodeEnv organizationKey =
 
 view : Model -> Html Msg
 view model =
-    div []
+    div
         []
+        [ text model.message ]
