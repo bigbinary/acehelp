@@ -1,9 +1,15 @@
 module Admin.Data.Feedback exposing (..)
 
+import GraphQL.Request.Builder.Arg as Arg
+import GraphQL.Request.Builder.Variable as Var
 import GraphQL.Request.Builder as GQLBuilder
 
 
 type alias FeedbackId =
+    String
+
+
+type alias FeedbackStatus =
     String
 
 
@@ -15,16 +21,20 @@ type alias Feedback =
     }
 
 
-requestFeedbacksQuery : GQLBuilder.Document GQLBuilder.Query (List Feedback) vars
+requestFeedbacksQuery : GQLBuilder.Document GQLBuilder.Query (List Feedback) { vars | status : FeedbackStatus }
 requestFeedbacksQuery =
-    GQLBuilder.queryDocument <|
-        GQLBuilder.extract
-            (GQLBuilder.field "feedbacks"
-                []
-                (GQLBuilder.list
-                    feedbackExtractor
+    let
+        statusVar =
+            Var.required "status" .status Var.string
+    in
+        GQLBuilder.queryDocument <|
+            GQLBuilder.extract
+                (GQLBuilder.field "feedbacks"
+                    [ ( "status", Arg.variable statusVar ) ]
+                    (GQLBuilder.list
+                        feedbackExtractor
+                    )
                 )
-            )
 
 
 feedbackExtractor : GQLBuilder.ValueSpec GQLBuilder.NonNull GQLBuilder.ObjectType Feedback vars

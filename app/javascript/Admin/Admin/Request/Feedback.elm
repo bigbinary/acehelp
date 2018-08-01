@@ -8,11 +8,11 @@ import GraphQL.Client.Http as GQLClient
 import GraphQL.Request.Builder as GQLBuilder
 
 
-requestFeedbacks : Reader ( NodeEnv, ApiKey ) (Task GQLClient.Error (List Feedback))
+requestFeedbacks : Reader ( NodeEnv, ApiKey, FeedbackStatus ) (Task GQLClient.Error (List Feedback))
 requestFeedbacks =
     Reader.Reader
-        (\( nodeEnv, apiKey ) ->
+        (\( nodeEnv, apiKey, status ) ->
             (GQLClient.customSendQuery (requestOptions nodeEnv apiKey) <|
-                GQLBuilder.request {} requestFeedbacksQuery
+                GQLBuilder.request { status = status } requestFeedbacksQuery
             )
         )
