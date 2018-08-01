@@ -8,16 +8,20 @@ class User < ApplicationRecord
 
   acts_as_token_authenticatable
 
-  validates :first_name, presence: true
-
   belongs_to :organization, autosave: true, dependent: :destroy, required: false
 
   has_many :organization_users, dependent: :destroy
   has_many :organizations, through: :organization_users
 
   def name
-    "#{first_name} #{last_name}".squish
+    ("#{first_name} #{last_name}".squish).presence || "Anonymous"
   end
+
+  def name=(name)
+    user = self
+    user.first_name, user.last_name = name.split(/\s+/, 2) if name
+  end
+
 
   def add_organization(args)
     user = self
@@ -25,4 +29,12 @@ class User < ApplicationRecord
     user.save
     user.organization
   end
+
+  def assign_organization(org_data)
+    user = self
+    org_data = org_data.id if org_data.is_a?(Organization)
+    user.organization_id = org_data
+    user.save
+  end
+
 end

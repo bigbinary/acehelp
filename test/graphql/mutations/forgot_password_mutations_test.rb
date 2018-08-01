@@ -3,7 +3,7 @@
 require "test_helper"
 require "graphql/client_host"
 
-class Mutations::LoginMutationsTest < ActiveSupport::TestCase
+class Mutations::ForgotPasswordMutationsTest < ActiveSupport::TestCase
 
   setup do
     @ethan = users(:hunt)

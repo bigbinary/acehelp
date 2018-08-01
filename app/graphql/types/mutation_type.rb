@@ -39,4 +39,6 @@ Types::MutationType = GraphQL::ObjectType.define do
   field :loginUser, field: Mutations::LoginMutations::Login.field
   field :forgotPassword, field: Mutations::ForgotPasswordMutations::Perform.field
 
+  field :assign_user_to_organization, field: Mutations::AssignUserToOrganizationMutations::Assign.field
+
 end
