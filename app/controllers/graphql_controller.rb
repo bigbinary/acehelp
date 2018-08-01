@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 class GraphqlController < ApplicationController
+  include LoadOrganization
 
   def execute
     result = AcehelpSchema.execute(query, variables: variables, context: context, operation_name: operation_name)
@@ -26,10 +27,9 @@ class GraphqlController < ApplicationController
     end
 
     def context
-      context_hash = custom_hash_that_raises_exception_when_no_org_is_found
-      @organization = find_org
-      context_hash[:organization] = @organization if @organization
-      context_hash
+      {
+          organization: @organization
+      }
     end
 
     def ensure_hash(ambiguous_param)
@@ -60,20 +60,5 @@ class GraphqlController < ApplicationController
       logger.error e.backtrace.join("\n")
 
       raise e if Rails.env.test?
-    end
-
-    def find_org
-      api_key = request.headers["api-key"] || params["organization_api_key"]
-      Organization.find_by(api_key: api_key)
-    end
-
-    def custom_hash_that_raises_exception_when_no_org_is_found
-      context_hash = {}
-      context_hash.default_proc = Proc.new do |hsh, key|
-        if key == :organization
-          raise GraphQL::ExecutionError.new("Unauthorized request: Missing or invalid API Key")
-        end
-      end
-      context_hash
     end
 end
