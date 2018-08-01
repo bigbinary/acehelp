@@ -26,7 +26,7 @@ class GraphqlController < ApplicationController
     end
 
     def context
-      context_hash = hash_raise_if_no_org
+      context_hash = custom_hash_that_raises_exception_when_no_org_is_found
       @organization = find_org
       context_hash[:organization] = @organization if @organization
       context_hash
@@ -67,11 +67,11 @@ class GraphqlController < ApplicationController
       Organization.find_by(api_key: api_key)
     end
 
-    def hash_raise_if_no_org
+    def custom_hash_that_raises_exception_when_no_org_is_found
       context_hash = {}
       context_hash.default_proc = Proc.new do |hsh, key|
         if key == :organization
-          raise GraphQL::ExecutionError.new("Missing organization key")
+          raise GraphQL::ExecutionError.new("Unauthorized request: Missing or invalid API Key")
         end
       end
       context_hash
