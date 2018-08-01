@@ -19,6 +19,7 @@ type alias Model =
     { name : String
     , message : String
     , id : FeedbackId
+    , status : String
     , error : Maybe String
     , success : Maybe String
     }
@@ -29,6 +30,7 @@ initModel feedbackId =
     { name = ""
     , message = ""
     , id = feedbackId
+    , status = ""
     , error = Nothing
     , success = Nothing
     }
@@ -47,7 +49,7 @@ init feedbackId =
 
 type Msg
     = FeedbackLoaded (Result GQLClient.Error Feedback)
-    | UpdateFeedabackStatus FeedbackId
+    | UpdateFeedabackStatus FeedbackId String
     | UpdateFeedbackResponse (Result GQLClient.Error Feedback)
 
 
@@ -63,6 +65,7 @@ update msg model nodeEnv organizationKey =
                 | name = feedback.name
                 , message = feedback.message
                 , id = feedback.id
+                , status = feedback.status
               }
             , Cmd.none
             )
@@ -72,14 +75,15 @@ update msg model nodeEnv organizationKey =
             , Cmd.none
             )
 
-        UpdateFeedabackStatus feedbackId ->
-            updateFeedabackStatus model nodeEnv organizationKey feedbackId
+        UpdateFeedabackStatus feedbackId status ->
+            updateFeedabackStatus model nodeEnv organizationKey feedbackId status
 
         UpdateFeedbackResponse (Ok feedback) ->
             ( { model
                 | name = feedback.name
                 , message = feedback.message
                 , id = feedback.id
+                , status = feedback.status
                 , success = Just "Feedback Updated Successfully."
               }
             , Cmd.none
@@ -124,19 +128,32 @@ view model =
             [ text model.message ]
         , div
             []
-            [ Html.a
-                [ onClick (UpdateFeedabackStatus model.id)
-                , class "button primary"
-                ]
-                [ text "Close Feedback" ]
-            ]
+            [ feedbackStatusButton model model.status ]
         ]
 
 
-updateFeedabackStatus : Model -> NodeEnv -> ApiKey -> FeedbackId -> ( Model, Cmd Msg )
-updateFeedabackStatus model nodeEnv apiKey feedbackId =
+updateFeedabackStatus : Model -> NodeEnv -> ApiKey -> FeedbackId -> String -> ( Model, Cmd Msg )
+updateFeedabackStatus model nodeEnv apiKey feedbackId feedbackStatus =
     let
         cmd =
-            Task.attempt UpdateFeedbackResponse (Reader.run (requestUpdateFeedbackStatus feedbackId) ( nodeEnv, apiKey ))
+            Task.attempt UpdateFeedbackResponse (Reader.run (requestUpdateFeedbackStatus feedbackId feedbackStatus) ( nodeEnv, apiKey ))
     in
         ( model, cmd )
+
+
+feedbackStatusButton : Model -> String -> Html Msg
+feedbackStatusButton model status =
+    case status of
+        "closed" ->
+            Html.a
+                [ onClick (UpdateFeedabackStatus model.id "open")
+                , class "button primary"
+                ]
+                [ text <| "Open Feedback" ]
+
+        _ ->
+            Html.a
+                [ onClick (UpdateFeedabackStatus model.id "closed")
+                , class "button primary"
+                ]
+                [ text <| "Close Feedback" ]

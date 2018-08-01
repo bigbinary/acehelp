@@ -30,11 +30,11 @@ requestFeedbackById feedbackId =
         )
 
 
-requestUpdateFeedbackStatus : FeedbackId -> Reader ( NodeEnv, ApiKey ) (Task GQLClient.Error Feedback)
-requestUpdateFeedbackStatus feedbackId =
+requestUpdateFeedbackStatus : FeedbackId -> String -> Reader ( NodeEnv, ApiKey ) (Task GQLClient.Error Feedback)
+requestUpdateFeedbackStatus feedbackId feedbackStatus =
     Reader.Reader
         (\( nodeEnv, apiKey ) ->
             (GQLClient.customSendMutation (requestOptions nodeEnv apiKey) <|
-                GQLBuilder.request { id = feedbackId } updateFeedabackStatusMutation
+                GQLBuilder.request { id = feedbackId, status = feedbackStatus } updateFeedabackStatusMutation
             )
         )

@@ -11,8 +11,10 @@ type alias FeedbackId =
 type alias FeedbackStatus =
     String
 
-type alias FeedbackIdInput =
-    { id : String }
+type alias FeedbackStatusInput =
+    { id : String
+    , status : String
+    }
 
 type alias Feedback =
     { id : FeedbackId
@@ -53,18 +55,23 @@ feedbackByIdQuery =
             )
 
 
-updateFeedabackStatusMutation : GQLBuilder.Document GQLBuilder.Mutation Feedback FeedbackIdInput
+updateFeedabackStatusMutation : GQLBuilder.Document GQLBuilder.Mutation Feedback FeedbackStatusInput
 updateFeedabackStatusMutation =
     let
         idVar =
             Var.required "id" .id Var.string
+
+        statusVar =
+            Var.required "status" .status Var.string
     in
         GQLBuilder.mutationDocument <|
             GQLBuilder.extract <|
-                GQLBuilder.field "closeFeedback"
+                GQLBuilder.field "updateFeedbackStatus"
                     [ ( "input"
                       , Arg.object
-                            [ ( "id", Arg.variable idVar ) ]
+                            [ ( "id", Arg.variable idVar )
+                            , ( "status", Arg.variable statusVar )
+                            ]
                       )
                     ]
                     (GQLBuilder.extract <|
