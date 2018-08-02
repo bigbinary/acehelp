@@ -73,6 +73,13 @@ view model =
                     )
                     model.error
             ]
+        , div
+            []
+            [ Html.a
+                [ class "button primary"
+                ]
+                [ text " + Add Team Member " ]
+            ]
         , div []
             (List.map
                 (\teamMember ->
