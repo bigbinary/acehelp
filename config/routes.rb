@@ -16,12 +16,12 @@ Rails.application.routes.draw do
     resources :urls
     resources :categories
     resources :feedbacks, only: [:index]
+    resources :tickets, only: [:index]
   end
 
   namespace :admin do
     resources :integrations, only: [:index]
     resources :dashboard, only: [:index]
-    resources :tickets, only: [:index]
   end
 
   if Rails.env.development?

@@ -12,6 +12,6 @@ requestTickets : Reader ( NodeEnv, ApiKey ) (Task GQLClient.Error (List Ticket))
 requestTickets =
     Reader.Reader
         (\( env, apiKey ) ->
-            GQLClient.sendQuery (graphqlUrl env) <|
+            GQLClient.customSendQuery (requestOptions env apiKey) <|
                 GQLBuilder.request {} requestTicketQuery
         )
