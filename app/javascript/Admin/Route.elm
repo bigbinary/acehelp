@@ -45,7 +45,7 @@ routeMatcher =
         , Url.map TicketList (s "organizations" </> string </> s "tickets")
         , Url.map FeedbackList (s "organizations" </> string </> s "feedbacks")
         , Url.map FeedbackShow (s "organizations" </> string </> s "feedbacks" </> string)
-        , Url.map TeamList (s "organizations" </> string </> s "teams")
+        , Url.map TeamList (s "organizations" </> string </> s "team")
         , Url.map Settings (s "organizations" </> string </> s "settings")
 
         , Url.map ArticleCreate (s "organizations" </> string </> s "articles" </> s "new")
@@ -87,7 +87,7 @@ routeToString page =
                     [ "organizations", organizationApiKey, "feedbacks", feedbackId ]
 
                 TeamList organizationApiKey ->
-                    [ "organizations", organizationApiKey, "teams" ]
+                    [ "organizations", organizationApiKey, "team" ]
 
                 Settings organizationApiKey ->
                     [ "organizations", organizationApiKey, "settings" ]
@@ -116,7 +116,7 @@ routeToString page =
                 NotFound ->
                     []
     in
-    "/" ++ String.join "/" pieces
+        "/" ++ String.join "/" pieces
 
 
 modifyUrl : Route -> Cmd msg

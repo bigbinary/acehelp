@@ -88,6 +88,6 @@ row teamMember =
     div [ id teamMember.id ]
         [ div
             []
-            [ text teamMember.name ]
+            [ text <| (teamMember.name ++ " | " ++ teamMember.email) ]
         , hr [] []
         ]

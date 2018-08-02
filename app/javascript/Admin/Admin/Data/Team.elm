@@ -13,6 +13,7 @@ type alias UserId =
 type alias TeamMember =
     { id : UserId
     , name : String
+    , email : String
     }
 
 
@@ -33,4 +34,5 @@ teamMemberExtractor =
     (GQLBuilder.object TeamMember
         |> GQLBuilder.with (GQLBuilder.field "id" [] GQLBuilder.string)
         |> GQLBuilder.with (GQLBuilder.field "name" [] GQLBuilder.string)
+        |> GQLBuilder.with (GQLBuilder.field "email" [] GQLBuilder.string)
     )

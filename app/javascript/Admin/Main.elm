@@ -326,36 +326,12 @@ navigateTo newRoute model =
                                 FeedbackShow.FeedbackLoaded
                                 (Reader.run feedbackShowRequest
                                     ( model.nodeEnv, model.organizationKey )
-                in
-                    ( { model
-                        | currentPage =
-                            TransitioningTo
-                                (FeedbackShow feedbackShowModel)
-                        , route = newRoute
-                      }
-                    , cmd
-                    )
-
-
-            Route.TeamList organizationKey ->
-                let
-                    ( teamListModel, teamListRequest ) =
-                        TeamList.init organizationKey
-
-                    cmd =
-                        Cmd.map TeamListMsg <|
-                            Task.attempt
-                                TeamList.TeamListLoaded
-                                (Reader.run (teamListRequest)
-                                    ( model.nodeEnv
-                                    , model.organizationKey
-                                    )
                                 )
                 in
                     ( { model
                         | currentPage =
                             TransitioningTo
-                                (TeamList teamListModel)
+                                (FeedbackShow feedbackShowModel)
                         , route = newRoute
                       }
                     , cmd
@@ -415,6 +391,30 @@ navigateTo newRoute model =
             Route.OrganizationCreate ->
                 (OrganizationCreate.init model.userId)
                     |> transitionTo OrganizationCreate OrganizationCreateMsg
+
+            Route.TeamList organizationKey ->
+                let
+                    ( teamListModel, teamListRequest ) =
+                        TeamList.init organizationKey
+
+                    cmd =
+                        Cmd.map TeamListMsg <|
+                            Task.attempt
+                                TeamList.TeamListLoaded
+                                (Reader.run (teamListRequest)
+                                    ( model.nodeEnv
+                                    , model.organizationKey
+                                    )
+                                )
+                in
+                    ( { model
+                        | currentPage =
+                            TransitioningTo
+                                (TeamList teamListModel)
+                        , route = newRoute
+                      }
+                    , cmd
+                    )
 
             Route.NotFound ->
                 ( { model | currentPage = Loaded NotFound }, Cmd.none )
@@ -915,6 +915,7 @@ view model =
             adminLayout model
                 (Html.map FeedbackShowMsg
                     (FeedbackShow.view feedbackShowModel)
+                )
 
         TeamList teamListModel ->
             adminLayout model

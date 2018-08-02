@@ -21,7 +21,7 @@ Rails.application.routes.draw do
     resources :categories
     resources :tickets, only: [:index]
     resources :feedbacks, only: [:index, :show]
-    resources :teams, only: [:index]
+    resources :team, only: [:index]
   end
 
   namespace :admin do
