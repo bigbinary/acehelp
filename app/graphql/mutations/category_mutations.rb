@@ -12,7 +12,6 @@ class Mutations::CategoryMutations
     resolve ->(object, inputs, context) {
       new_category = Category.new name: inputs[:name]
       new_category.organization = context[:organization]
-
       if new_category.save
         category = new_category
       else

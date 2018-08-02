@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2018_08_01_182741) do
+ActiveRecord::Schema.define(version: 2018_08_01_191529) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "pgcrypto"
@@ -51,6 +51,14 @@ ActiveRecord::Schema.define(version: 2018_08_01_182741) do
     t.index ["organization_id"], name: "index_categories_on_organization_id"
   end
 
+  create_table "comments", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.text "info", null: false
+    t.uuid "agent_id", null: false
+    t.uuid "ticket_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
   create_table "feedbacks", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.string "name"
     t.text "message", null: false
@@ -89,8 +97,8 @@ ActiveRecord::Schema.define(version: 2018_08_01_182741) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.uuid "organization_id"
-    t.string "status"
     t.uuid "agent_id"
+    t.string "status", default: "open", null: false
     t.index ["organization_id"], name: "index_tickets_on_organization_id"
   end
 
@@ -132,6 +140,8 @@ ActiveRecord::Schema.define(version: 2018_08_01_182741) do
   add_foreign_key "article_urls", "urls"
   add_foreign_key "articles", "organizations"
   add_foreign_key "categories", "organizations"
+  add_foreign_key "comments", "tickets"
+  add_foreign_key "comments", "users", column: "agent_id"
   add_foreign_key "feedbacks", "articles"
   add_foreign_key "organization_users", "organizations"
   add_foreign_key "organization_users", "users"

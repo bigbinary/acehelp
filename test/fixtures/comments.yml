@@ -1,0 +1,11 @@
+# Read about fixtures at http://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  info: First Comment
+  agent: illya_kuryakin
+  ticket: payment_issue_ticket
+
+two:
+  info: Second Comment
+  agent: napoleon_solo
+  ticket: payment_issue_ticket
