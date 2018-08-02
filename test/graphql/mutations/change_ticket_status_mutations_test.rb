@@ -10,7 +10,7 @@ class Mutations::ChangeTicketMutationsTest < ActiveSupport::TestCase
     @query = <<-GRAPHQL
         mutation($ticket_args: ChangeTicketStatusInput!) {
           changeTicketStatus(input: $ticket_args) {
-            result
+            updated_ticket
             errors {
               path
               message
@@ -22,22 +22,22 @@ class Mutations::ChangeTicketMutationsTest < ActiveSupport::TestCase
 
   test "update ticket status with OPEN" do
     result = AceHelp::Client.execute(@query, ticket_args: {ticket_id: @ticket.id, status: "OPEN"})
-    assert_equal true, result.data.change_ticket_status.result
+    assert_equal true, result.data.change_ticket_status.updated_ticket
   end
 
   test "update ticket status with PENDING_ON_CUSTOMER" do
     result = AceHelp::Client.execute(@query, ticket_args: {ticket_id: @ticket.id, status: "PENDING_ON_CUSTOMER"})
-    assert_equal true, result.data.change_ticket_status.result
+    assert_equal true, result.data.change_ticket_status.updated_ticket
   end
 
   test "update ticket status with RESOLVED" do
     result = AceHelp::Client.execute(@query, ticket_args: {ticket_id: @ticket.id, status: "RESOLVED"})
-    assert_equal true, result.data.change_ticket_status.result
+    assert_equal true, result.data.change_ticket_status.updated_ticket
   end
 
   test "update ticket status with CLOSED" do
     result = AceHelp::Client.execute(@query, ticket_args: {ticket_id: @ticket.id, status: "CLOSED"})
-    assert_equal true, result.data.change_ticket_status.result
+    assert_equal true, result.data.change_ticket_status.updated_ticket
   end
 
   test "update ticket with invalid status" do
