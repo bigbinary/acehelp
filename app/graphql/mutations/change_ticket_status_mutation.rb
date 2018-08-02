@@ -7,7 +7,7 @@ class Mutations::ChangeTicketStatusMutation
     input_field :status, !Types::TicketStatusEnumType
     input_field :ticket_id, !types.String
 
-    return_field :result, !types.Boolean
+    return_field :updated_ticket, !types.Boolean
     return_field :errors, types[Types::ErrorType]
 
     resolve ->(object, inputs, context) {
@@ -15,13 +15,13 @@ class Mutations::ChangeTicketStatusMutation
       ticket = Ticket.find_by(id: inputs[:ticket_id])
 
       if ticket
-        result = ticket.update_attributes(status: inputs[:status])
+        updated_ticket = ticket.update_attributes(status: inputs[:status])
       else
         errors = Utils::ErrorHandler.new.error("Ticket Not found", context)
       end
 
       {
-        result: result,
+        updated_ticket: updated_ticket,
         errors: errors
       }
     }
