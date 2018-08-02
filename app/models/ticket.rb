@@ -3,7 +3,7 @@
 class Ticket < ApplicationRecord
   validates :email, :message, presence: true
   belongs_to :organization
-  
+
   belongs_to :agent, required: false
   has_many :comments, dependent: :destroy
 
