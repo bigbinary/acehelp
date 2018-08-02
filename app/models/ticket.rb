@@ -4,7 +4,7 @@ class Ticket < ApplicationRecord
   validates :email, :message, presence: true
   belongs_to :organization
 
-  belongs_to :agent
+  belongs_to :agent, required: false
 
   scope :for_organization, ->(org) { where(organization: org) }
 
