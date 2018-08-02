@@ -1,5 +1,8 @@
 module Helpers exposing (..)
 
+import Time exposing (Time)
+import Task
+import Process
 import Field.ValidationResult exposing (..)
 
 
@@ -11,3 +14,10 @@ validateEmpty fieldName fieldValue =
 
         _ ->
             Passed fieldValue
+
+
+delayedCmd : Time -> msg -> Cmd msg
+delayedCmd time msg =
+    Process.sleep time
+        |> Task.andThen (always <| Task.succeed msg)
+        |> Task.perform identity
