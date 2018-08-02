@@ -19,7 +19,6 @@ class Mutations::TicketMutationsTest < ActiveSupport::TestCase
     result = AceHelp::Client.execute(query, input: {  name: "Ticket_name",
                                                       email: "contact@email.com",
                                                       message: "Dummy" })
-
     assert_equal result.data.add_ticket.ticket.name, "Ticket_name"
   end
 
@@ -78,7 +77,6 @@ class Mutations::TicketMutationsTest < ActiveSupport::TestCase
                 }
               }
     GRAPHQL
-
     result = AceHelp::Client.execute(query, input: { name: "", email: "", message: "Dummy" })
     assert_not_empty result.data.add_ticket.errors.flat_map(&:path) & ["addTicket", "email"]
   end

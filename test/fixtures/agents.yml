@@ -1,0 +1,13 @@
+napoleon_solo:
+  email: napoleon_solo@example.com
+  first_name: Napoleon
+  last_name: Solo
+  role: 'agent'
+  organization: bigbinary
+
+illya_kuryakin:
+  email: illya.kuryakin@example.com
+  first_name: Illya
+  last_name: Kuryakkin
+  role: 'agent'
+  organization: bigbinary

@@ -42,4 +42,6 @@ Types::MutationType = GraphQL::ObjectType.define do
   field :assign_user_to_organization, field: Mutations::AssignUserToOrganizationMutations::Assign.field
   field :dismissUser, field: Mutations::DismissUserMutations::Perform.field
 
+  field :assignTicketToAgent, field: Mutations::AssignTicketToAgentMutations::Perform.field
+
 end
