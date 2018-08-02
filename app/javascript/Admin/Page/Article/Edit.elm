@@ -75,28 +75,7 @@ update msg model nodeEnv organizationKey =
             ( { model | desc = Field.update model.desc desc }, Cmd.none )
 
         SaveArticle ->
-            let
-                fields =
-                    [ model.title, model.desc, model.categoryId ]
-
-                errors =
-                    validateAll fields
-                        |> filterFailures
-                        |> List.map
-                            (\result ->
-                                case result of
-                                    Failed err ->
-                                        err
-
-                                    Passed _ ->
-                                        "Unknown Error"
-                            )
-                        |> String.join ", "
-            in
-                if isAllValid fields then
-                    save model nodeEnv organizationKey
-                else
-                    ( { model | error = Just <| Debug.log "" errors }, Cmd.none )
+            save model nodeEnv organizationKey
 
         SaveArticleResponse (Ok id) ->
             ( { model
@@ -246,6 +225,23 @@ articleInputs { title, desc, categoryId } =
 save : Model -> NodeEnv -> ApiKey -> ( Model, Cmd Msg )
 save model nodeEnv organizationKey =
     let
+        fields =
+            [ model.title, model.desc, model.categoryId ]
+
+        errors =
+            validateAll fields
+                |> filterFailures
+                |> List.map
+                    (\result ->
+                        case result of
+                            Failed err ->
+                                err
+
+                            Passed _ ->
+                                "Unknown Error"
+                    )
+                |> String.join ", "
+
         cmd =
             Task.attempt SaveArticleResponse
                 (Reader.run
@@ -253,4 +249,7 @@ save model nodeEnv organizationKey =
                     ( nodeEnv, organizationKey )
                 )
     in
-        ( model, cmd )
+        if isAllValid fields then
+            ( model, cmd )
+        else
+            ( { model | error = Just errors }, Cmd.none )
