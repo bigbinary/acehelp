@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2018_08_06_104343) do
+ActiveRecord::Schema.define(version: 2018_08_07_085117) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "pgcrypto"
@@ -53,10 +53,11 @@ ActiveRecord::Schema.define(version: 2018_08_06_104343) do
 
   create_table "comments", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.text "info", null: false
-    t.uuid "agent_id", null: false
+    t.uuid "commentable_id", null: false
     t.uuid "ticket_id", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "commentable_type", null: false
   end
 
   create_table "delayed_jobs", force: :cascade do |t|
@@ -161,7 +162,7 @@ ActiveRecord::Schema.define(version: 2018_08_06_104343) do
   add_foreign_key "articles", "organizations"
   add_foreign_key "categories", "organizations"
   add_foreign_key "comments", "tickets"
-  add_foreign_key "comments", "users", column: "agent_id"
+  add_foreign_key "comments", "users", column: "commentable_id"
   add_foreign_key "feedbacks", "articles"
   add_foreign_key "organization_users", "organizations"
   add_foreign_key "organization_users", "users"

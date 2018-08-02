@@ -38,6 +38,10 @@ class Ticket < ApplicationRecord
     update(status: STATUSES[:closed])
   end
 
+  def add_note(note_txt)
+    update(note: note_txt)
+  end
+
   private
     def parse_user_agent
       if user_agent.present?
@@ -60,5 +64,4 @@ class Ticket < ApplicationRecord
         end
       end
     end
-
 end
