@@ -8,6 +8,7 @@ Types::QueryType = GraphQL::ObjectType.define do
   field :urls,        function: Resolvers::UrlsSearch.new
   field :tickets,     function: Resolvers::TicketsSearch.new
   field :feedbacks,   function: Resolvers::FeedbacksSearch.new
+  field :users,   function: Resolvers::UsersSearch.new
 
   hash = { type: Types::ArticleType, model: Article }
   field :article, Types::ArticleType,
