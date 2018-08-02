@@ -14,10 +14,10 @@ class Resolvers::FeedbacksSearchTest < ActiveSupport::TestCase
   end
 
   test "get_all_feedbacks_success" do
-    assert_equal ["Harely Davidson", "Sam"], find({}).pluck(:name)
+    assert_equal ["Harely Davidson", "Sam"], find(status: "open").pluck(:name)
   end
 
   test "feedbacks with article id" do
-    assert_equal ["Harely Davidson", "Sam"], find(article_id: @article.id).pluck(:name)
+    assert_equal ["Harely Davidson", "Sam"], find(status: "open", article_id: @article.id).pluck(:name)
   end
 end

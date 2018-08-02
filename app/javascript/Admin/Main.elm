@@ -281,6 +281,7 @@ navigateTo newRoute model =
                                 (Reader.run (feedbackListRequest)
                                     ( model.nodeEnv
                                     , model.organizationKey
+                                    , "open"
                                     )
                                 )
                 in

@@ -3,6 +3,7 @@ module Page.Feedback.List exposing (..)
 --import Http
 
 import Html exposing (..)
+import Html.Events exposing (..)
 import Html.Attributes exposing (..)
 import Request.Helpers exposing (NodeEnv, ApiKey)
 import Admin.Request.Feedback exposing (..)
@@ -30,7 +31,7 @@ initModel organizationKey =
     }
 
 
-init : ApiKey -> ( Model, Reader ( NodeEnv, ApiKey ) (Task GQLClient.Error (List Feedback)) )
+init : ApiKey -> ( Model, Reader ( NodeEnv, ApiKey, FeedbackStatus ) (Task GQLClient.Error (List Feedback)) )
 init organizationKey =
     ( initModel organizationKey
     , requestFeedbacks
@@ -43,6 +44,7 @@ init organizationKey =
 
 type Msg
     = FeedbackListLoaded (Result GQLClient.Error (List Feedback))
+    | FeedbackListReloaded FeedbackStatus
 
 
 update : Msg -> Model -> ApiKey -> NodeEnv -> ( Model, Cmd Msg )
@@ -53,6 +55,9 @@ update msg model apiKey nodeEnv =
 
         FeedbackListLoaded (Err err) ->
             ( { model | error = Just (toString err) }, Cmd.none )
+
+        FeedbackListReloaded status ->
+            requestFeedbacksList model apiKey nodeEnv status
 
 
 
@@ -72,6 +77,22 @@ view model =
                             ]
                     )
                     model.error
+            ]
+        , div
+            [ class "buttonDiv" ]
+            [ Html.a
+                [ onClick (FeedbackListReloaded "closed")
+                , class "button primary"
+                ]
+                [ text "Closed Feedback" ]
+            ]
+        , div
+            [ class "buttonDiv" ]
+            [ Html.a
+                [ onClick (FeedbackListReloaded "open")
+                , class "button primary"
+                ]
+                [ text "Open Feedback" ]
             ]
         , div []
             (List.map
@@ -97,3 +118,12 @@ row feedback =
             [ text feedback.status ]
         , hr [] []
         ]
+
+
+requestFeedbacksList : Model -> ApiKey -> NodeEnv -> FeedbackStatus -> ( Model, Cmd Msg )
+requestFeedbacksList model apiKey nodeEnv status =
+    let
+        cmd =
+            Task.attempt FeedbackListLoaded (Reader.run (requestFeedbacks) ( nodeEnv, apiKey, status ))
+    in
+        ( model, cmd )
