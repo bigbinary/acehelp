@@ -1,6 +1,5 @@
 # frozen_string_literal: true
 
-
 class Mutations::LoginMutations
   Login = GraphQL::Relay::Mutation.define do
     name "LoginUser"
