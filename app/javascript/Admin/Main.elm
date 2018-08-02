@@ -17,6 +17,8 @@ import Page.Category.Create as CategoryCreate
 import Page.Category.Edit as CategoryEdit
 import Page.Category.List as CategoryList
 import Page.Errors as Errors
+import Page.Ticket.List as TicketList
+import Page.Team.List as TeamList
 import Page.Feedback.List as FeedbackList
 import Page.Feedback.Show as FeedbackShow
 import Page.Settings as Settings
@@ -66,6 +68,7 @@ type Page
     | TicketList TicketList.Model
     | FeedbackList FeedbackList.Model
     | FeedbackShow FeedbackShow.Model
+    | TeamList TeamList.Model
     | Dashboard
     | NotFound
     | Blank
@@ -127,6 +130,7 @@ type Msg
     | TicketListMsg TicketList.Msg
     | FeedbackListMsg FeedbackList.Msg
     | FeedbackShowMsg FeedbackShow.Msg
+    | TeamListMsg TeamList.Msg
     | SettingsMsg Settings.Msg
     | OnLocationChange Navigation.Location
     | SignOut
@@ -322,12 +326,36 @@ navigateTo newRoute model =
                                 FeedbackShow.FeedbackLoaded
                                 (Reader.run feedbackShowRequest
                                     ( model.nodeEnv, model.organizationKey )
-                                )
                 in
                     ( { model
                         | currentPage =
                             TransitioningTo
                                 (FeedbackShow feedbackShowModel)
+                        , route = newRoute
+                      }
+                    , cmd
+                    )
+
+
+            Route.TeamList organizationKey ->
+                let
+                    ( teamListModel, teamListRequest ) =
+                        TeamList.init organizationKey
+
+                    cmd =
+                        Cmd.map TeamListMsg <|
+                            Task.attempt
+                                TeamList.TeamListLoaded
+                                (Reader.run (teamListRequest)
+                                    ( model.nodeEnv
+                                    , model.organizationKey
+                                    )
+                                )
+                in
+                    ( { model
+                        | currentPage =
+                            TransitioningTo
+                                (TeamList teamListModel)
                         , route = newRoute
                       }
                     , cmd
@@ -710,6 +738,26 @@ update msg model =
                 , Cmd.map CategoryEditMsg categoryEditCmd
                 )
 
+        TeamListMsg tlmsg ->
+            let
+                currentPageModel =
+                    case model.currentPage of
+                        Loaded (TeamList teamListModel) ->
+                            teamListModel
+
+                        _ ->
+                            TeamList.initModel model.organizationKey
+
+                ( teamListModel, teamListCmd ) =
+                    TeamList.update tlmsg
+                        currentPageModel
+                        model.organizationKey
+                        model.nodeEnv
+            in
+                ( { model | currentPage = Loaded (TeamList teamListModel) }
+                , Cmd.map TeamListMsg teamListCmd
+                )
+
         SettingsMsg settingsMsg ->
             let
                 currentPageModel =
@@ -867,6 +915,11 @@ view model =
             adminLayout model
                 (Html.map FeedbackShowMsg
                     (FeedbackShow.view feedbackShowModel)
+
+        TeamList teamListModel ->
+            adminLayout model
+                (Html.map TeamListMsg
+                    (TeamList.view teamListModel)
                 )
 
         Dashboard ->
@@ -964,7 +1017,17 @@ adminHeader model =
                 [ Html.a
                     [ classList
                         [ ( "nav-link", True )
-                        , ( "active", model.route == Route.Settings model.organizationKey )
+                        , ( "active", (model.route == (Route.TeamList model.organizationKey)) )
+                        ]
+                    , onClick <| NavigateTo (Route.TeamList model.organizationKey)
+                    ]
+                    [ text "Team" ]
+                ]
+            , li [ class "nav-item" ]
+                [ Html.a
+                    [ classList
+                        [ ( "nav-link", True )
+                        , ( "active", (model.route == (Route.Settings model.organizationKey)) )
                         ]
                     , onClick <| NavigateTo (Route.Settings model.organizationKey)
                     ]
