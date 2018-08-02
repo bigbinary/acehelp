@@ -249,8 +249,8 @@ save model nodeEnv organizationKey =
         cmd =
             Task.attempt SaveArticleResponse
                 (Reader.run
-                    (requestCreateArticle)
-                    ( nodeEnv, organizationKey, (articleInputs model) )
+                    (requestCreateArticle (articleInputs model))
+                    ( nodeEnv, organizationKey )
                 )
     in
         ( model, cmd )

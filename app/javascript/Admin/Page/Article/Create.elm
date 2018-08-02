@@ -165,7 +165,7 @@ save model nodeEnv organizationKey =
                             { title = model.title, desc = model.desc, categoryId = model.categoryId }
                         )
                     )
-                    nodeEnv
+                    ( nodeEnv, organizationKey )
                 )
     in
         ( model, cmd )

@@ -17,10 +17,10 @@ requestArticlesByUrl url =
         )
 
 
-requestCreateArticle : Reader ( NodeEnv, ApiKey, CreateArticleInputs ) (Task GQLClient.Error Article)
-requestCreateArticle =
+requestCreateArticle : CreateArticleInputs -> Reader ( NodeEnv, ApiKey ) (Task GQLClient.Error Article)
+requestCreateArticle articleInputs =
     Reader.Reader
-        (\( nodeEnv, apiKey, articleInputs ) ->
+        (\( nodeEnv, apiKey ) ->
             GQLClient.customSendMutation (requestOptions nodeEnv apiKey) <|
                 (GQLBuilder.request
                     { title = articleInputs.title
