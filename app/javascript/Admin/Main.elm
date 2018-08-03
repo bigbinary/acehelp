@@ -21,6 +21,8 @@ import Page.Ticket.List as TicketList
 import Page.Team.List as TeamList
 import Page.Feedback.List as FeedbackList
 import Page.Feedback.Show as FeedbackShow
+import Page.Category.Create as CategoryCreate
+import Page.Team.Create as TeamMemberCreate
 import Page.Settings as Settings
 import Page.Organization.Create as OrganizationCreate
 import Page.Errors as Errors
@@ -69,6 +71,7 @@ type Page
     | FeedbackList FeedbackList.Model
     | FeedbackShow FeedbackShow.Model
     | TeamList TeamList.Model
+    | TeamMemberCreate TeamMemberCreate.Model
     | Dashboard
     | NotFound
     | Blank
@@ -131,6 +134,7 @@ type Msg
     | FeedbackListMsg FeedbackList.Msg
     | FeedbackShowMsg FeedbackShow.Msg
     | TeamListMsg TeamList.Msg
+    | TeamCreateMsg TeamMemberCreate.Msg
     | SettingsMsg Settings.Msg
     | OnLocationChange Navigation.Location
     | SignOut
@@ -360,6 +364,10 @@ navigateTo newRoute model =
                       }
                     , cmd
                     )
+
+            Route.TeamMemberCreate organizationKey ->
+                (TeamMemberCreate.init)
+                    |> transitionTo TeamMemberCreate TeamCreateMsg
 
             Route.Settings organizationKey ->
                 Settings.init model.organizationKey
@@ -762,6 +770,26 @@ update msg model =
                 , Cmd.map TeamListMsg teamListCmd
                 )
 
+        TeamCreateMsg tcmsg ->
+            let
+                currentPageModel =
+                    case model.currentPage of
+                        Loaded (TeamMemberCreate teamCreateModel) ->
+                            teamCreateModel
+
+                        _ ->
+                            TeamMemberCreate.initModel
+
+                ( createTeamModel, createTeamCmds ) =
+                    TeamMemberCreate.update tcmsg
+                        currentPageModel
+                        model.nodeEnv
+                        model.organizationKey
+            in
+                ( { model | currentPage = Loaded (TeamMemberCreate createTeamModel) }
+                , Cmd.map TeamCreateMsg createTeamCmds
+                )
+
         SettingsMsg settingsMsg ->
             let
                 currentPageModel =
@@ -925,6 +953,12 @@ view model =
             adminLayout model
                 (Html.map TeamListMsg
                     (TeamList.view teamListModel)
+                )
+
+        TeamMemberCreate teamMemberCreateModel ->
+            adminLayout model
+                (Html.map TeamCreateMsg
+                    (TeamMemberCreate.view teamMemberCreateModel)
                 )
 
         Dashboard ->
