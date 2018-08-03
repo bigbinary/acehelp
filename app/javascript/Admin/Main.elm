@@ -133,6 +133,7 @@ getPage pageState =
         TransitioningTo page ->
             page
 
+
 setRoute : Location -> Model -> ( Model, Cmd Msg )
 setRoute location model =
     let
@@ -170,7 +171,7 @@ navigateTo newRoute model =
                                 ArticleList.ArticleListLoaded
                                 (Reader.run (articleListRequest)
                                     ( model.nodeEnv
-                                    , model.organizationKey
+                                    , organizationKey
                                     )
                                 )
                 in
@@ -179,6 +180,7 @@ navigateTo newRoute model =
                             TransitioningTo
                                 (ArticleList articleListModel)
                         , route = newRoute
+                        , organizationKey = organizationKey
                       }
                     , cmd
                     )
@@ -324,9 +326,10 @@ navigateTo newRoute model =
                       }
                     , cmd
                     )
+
             Route.OrganizationCreate ->
                 (OrganizationCreate.init model.userId)
-                   |> transitionTo OrganizationCreate OrganizationCreateMsg
+                    |> transitionTo OrganizationCreate OrganizationCreateMsg
 
             Route.NotFound ->
                 ( { model | currentPage = Loaded NotFound }, Cmd.none )
@@ -763,7 +766,7 @@ view model =
         OrganizationCreate orgCreateModel ->
             adminLayout model
                 (Html.map OrganizationCreateMsg
-                    (OrganizationCreate.view orgCreateModel )
+                    (OrganizationCreate.view orgCreateModel)
                 )
 
         NotFound ->

@@ -4,7 +4,6 @@ require "test_helper"
 require "graphql/client_host"
 
 class Mutations::AssignUserToOrganizationMutationsTest < ActiveSupport::TestCase
-
   setup do
     @ethan = users(:hunt)
 
@@ -16,7 +15,9 @@ class Mutations::AssignUserToOrganizationMutationsTest < ActiveSupport::TestCase
                 email
                 first_name
                 last_name
-                organization_id
+                organizations {
+                  id
+                }
               }
               errors {
                 message
@@ -29,13 +30,13 @@ class Mutations::AssignUserToOrganizationMutationsTest < ActiveSupport::TestCase
 
 
   test "assign organization" do
-    result =  AceHelp::Client.execute(@query, user_keys: { email: @ethan.email})
-    assert_equal organizations(:bigbinary).id,  result.data.assign_user_to_organization.user.organization_id
+    result = AceHelp::Client.execute(@query, user_keys: { email: @ethan.email })
+    assert result.data.assign_user_to_organization.user.organizations.any?
   end
 
   test "api should return correct user" do
-    result =  AceHelp::Client.execute(@query, user_keys: { email: @ethan.email})
-    assert_equal @ethan.email,  result.data.assign_user_to_organization.user.email
+    result = AceHelp::Client.execute(@query, user_keys: { email: @ethan.email })
+    assert_equal @ethan.email, result.data.assign_user_to_organization.user.email
   end
 
   test "api should return new user" do
@@ -46,7 +47,7 @@ class Mutations::AssignUserToOrganizationMutationsTest < ActiveSupport::TestCase
 
   test "assign organization with name" do
     new_email_2 =
-    result =  AceHelp::Client.execute(@query, user_keys: { email: "new_email_2@example.com", name: "Sagar Alias Jackey" })
+    result = AceHelp::Client.execute(@query, user_keys: { email: "new_email_2@example.com", name: "Sagar Alias Jackey" })
     assert_equal "Sagar",  result.data.assign_user_to_organization.user.first_name
     assert_equal "Alias Jackey",  result.data.assign_user_to_organization.user.last_name
   end

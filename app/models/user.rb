@@ -27,16 +27,16 @@ class User < ApplicationRecord
 
   def add_organization(args)
     user = self
-    user.organization = Organization.new(email: args["email"], name: args["name"])
-    user.save
-    user.organization
+    organization = Organization.create(email: args["email"], name: args["name"])
+    user.organizations << organization
+    organization
   end
 
   def assign_organization(org_data)
     user = self
-    org_data = org_data.id if org_data.is_a?(Organization)
-    user.organization_id = org_data
-    user.save
+    org_data = org_data if org_data.is_a?(Organization)
+    user.organizations << org_data
+    org_data
   end
 
   def deallocate_from_organization

@@ -11,24 +11,30 @@ import GraphQL.Request.Builder.Variable as Var
 type alias OrganizationId =
     String
 
+
 type alias UserId =
     String
+
 
 type alias Organization =
     { id : OrganizationId
     , name : String
+    , api_key : String
     }
 
+
 type alias OrganizationData =
-    { name: String
-    , email: String
-    , userId: String
+    { name : String
+    , email : String
+    , userId : String
     }
+
 
 type alias OrganizationResponse =
     { organization : Organization
     , articles : List ArticleSummary
     }
+
 
 createOrganizationMutation : GQLBuilder.Document GQLBuilder.Mutation Organization OrganizationData
 createOrganizationMutation =
@@ -60,11 +66,13 @@ createOrganizationMutation =
                     )
                 )
 
+
 organizationObject : GQLBuilder.ValueSpec GQLBuilder.NonNull GQLBuilder.ObjectType Organization vars
 organizationObject =
     GQLBuilder.object Organization
         |> GQLBuilder.with (GQLBuilder.field "id" [] GQLBuilder.string)
         |> GQLBuilder.with (GQLBuilder.field "name" [] GQLBuilder.string)
+        |> GQLBuilder.with (GQLBuilder.field "api_key" [] GQLBuilder.string)
 
 
 organization : Decoder OrganizationResponse
@@ -79,3 +87,4 @@ organizationDecoder =
     decode Organization
         |> required "id" string
         |> required "name" string
+        |> required "api_key" string

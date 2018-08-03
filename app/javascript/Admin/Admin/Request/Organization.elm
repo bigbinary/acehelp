@@ -10,16 +10,13 @@ import Task exposing (Task)
 import GraphQL.Client.Http as GQLClient
 import GraphQL.Request.Builder as GQLBuilder
 
+
 organizationUrl : NodeEnv -> OrganizationId -> Url
 organizationUrl env organizationId =
     (baseUrl env) ++ "/api/v1/organization/" ++ toString (organizationId) ++ "/data"
 
 
-requestOrganization :
-    NodeEnv
-    -> ApiKey
-    -> OrganizationId
-    -> Http.Request OrganizationResponse
+requestOrganization : NodeEnv -> ApiKey -> OrganizationId -> Http.Request OrganizationResponse
 requestOrganization env apiKey organizationId =
     let
         url =
@@ -43,6 +40,7 @@ requestOrganization env apiKey organizationId =
             , timeout = Nothing
             , withCredentials = False
             }
+
 
 requestCreateOrganization : OrganizationData -> Reader NodeEnv (Task GQLClient.Error Organization)
 requestCreateOrganization orgInputs =

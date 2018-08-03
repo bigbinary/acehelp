@@ -4,7 +4,7 @@ import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
 import Admin.Data.Organization exposing (..)
-import Request.Helpers exposing (NodeEnv)
+import Request.Helpers exposing (..)
 import Admin.Request.Organization exposing (..)
 import Reader exposing (Reader)
 import Field exposing (..)
@@ -15,14 +15,17 @@ import Task exposing (Task)
 import Navigation
 import Route
 
+
 -- MODEL
 
+
 type alias Model =
-    { error: Maybe String
+    { error : Maybe String
     , name : Field String String
-    , email: Field String String
-    , user_id: String
+    , email : Field String String
+    , user_id : String
     }
+
 
 initModel : String -> Model
 initModel userId =
@@ -32,18 +35,23 @@ initModel userId =
     , user_id = userId
     }
 
-init: String -> ( Model, Cmd Msg )
+
+init : String -> ( Model, Cmd Msg )
 init userId =
     ( initModel userId
     , send LoadEmpty
     )
 
+
+
 -- UPDATE
+
 
 send : msg -> Cmd msg
 send msg =
-  Task.succeed msg
-  |> Task.perform identity
+    Task.succeed msg
+        |> Task.perform identity
+
 
 type Msg
     = OrgNameInput String
@@ -52,13 +60,16 @@ type Msg
     | SaveOrgResponse (Result GQLClient.Error Organization)
     | LoadEmpty
 
+
 update : Msg -> Model -> NodeEnv -> ( Model, Cmd Msg )
 update msg model nodeEnv =
     case msg of
         LoadEmpty ->
             ( model, Cmd.none )
+
         OrgNameInput name ->
             ( { model | name = Field.update model.name name }, Cmd.none )
+
         OrgEmailInput email ->
             ( { model | email = Field.update model.email email }, Cmd.none )
 
@@ -66,6 +77,7 @@ update msg model nodeEnv =
             let
                 fields =
                     [ model.name, model.email ]
+
                 errors =
                     validateAll fields
                         |> filterFailures
@@ -74,6 +86,7 @@ update msg model nodeEnv =
                                 case result of
                                     Failed err ->
                                         err
+
                                     Passed okay ->
                                         "Unknown Error"
                             )
@@ -82,29 +95,29 @@ update msg model nodeEnv =
                 if isAllValid fields then
                     save model nodeEnv
                 else
-                    ( {model | error = Just "Please check your inputs" }, Cmd.none )
-        SaveOrgResponse (Ok id) ->
-            ({ model
-            | name = Field.update model.name ""
-            , error = Nothing
-            }, Navigation.modifyUrl (Route.routeToString (Route.ArticleList id.id)))
+                    ( { model | error = Just "Please check your inputs" }, Cmd.none )
+
+        SaveOrgResponse (Ok org) ->
+            ( model, Route.modifyUrl <| Route.ArticleList org.api_key )
+
         SaveOrgResponse (Err error) ->
             ( { model | error = Just (toString error) }, Cmd.none )
 
+
 view : Model -> Html Msg
 view model =
-    div [ class "container"]
-    [ Html.form [onSubmit SaveOrganization ]
-        [ div []
-            [ Maybe.withDefault (text "") <|
-                Maybe.map
-                    (\err ->
-                        div [ class "alert alert-danger alert-dismissible fade show", attribute "role" "alert" ]
-                            [ text <| "Error: " ++ err
-                            ]
-                    )
-                    model.error
-            ]
+    div [ class "container" ]
+        [ Html.form [ onSubmit SaveOrganization ]
+            [ div []
+                [ Maybe.withDefault (text "") <|
+                    Maybe.map
+                        (\err ->
+                            div [ class "alert alert-danger alert-dismissible fade show", attribute "role" "alert" ]
+                                [ text <| "Error: " ++ err
+                                ]
+                        )
+                        model.error
+                ]
             , div []
                 [ label [] [ text "Name: " ]
                 , input
@@ -124,8 +137,9 @@ view model =
                     []
                 ]
             , button [ type_ "submit", class "button primary" ] [ text "Save URL" ]
+            ]
         ]
-    ]
+
 
 orgInputs : Model -> OrganizationData
 orgInputs { name, email, user_id } =
@@ -134,11 +148,12 @@ orgInputs { name, email, user_id } =
     , userId = user_id
     }
 
-save : Model -> NodeEnv -> (Model, Cmd Msg )
+
+save : Model -> NodeEnv -> ( Model, Cmd Msg )
 save model nodeEnv =
     let
         cmd =
-            Task.attempt SaveOrgResponse ( Reader.run ( requestCreateOrganization (orgInputs model)) nodeEnv )
+            Task.attempt SaveOrgResponse (Reader.run (requestCreateOrganization (orgInputs model)) nodeEnv)
     in
         ( model, cmd )
 
@@ -152,10 +167,12 @@ validateEmail s =
         False ->
             Failed "Please enter a valid email"
 
+
 validEmail : Regex
 validEmail =
     Regex.regex "^[a-zA-Z0-9.!#$%&'*+\\/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$"
         |> Regex.caseInsensitive
+
 
 validateEmpty : String -> String -> ValidationResult String String
 validateEmpty n s =
