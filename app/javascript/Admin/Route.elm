@@ -1,10 +1,11 @@
 module Route exposing (Route(..), fromLocation, modifyUrl, routeToString)
 
+import Admin.Data.Article exposing (ArticleId)
+import Admin.Data.Category exposing (CategoryId)
+import Admin.Data.Feedback exposing (FeedbackId)
+import Admin.Data.Url exposing (UrlId)
 import Navigation exposing (Location)
 import UrlParser as Url exposing ((</>), Parser, oneOf, parsePath, s, string)
-import Admin.Data.Article exposing (ArticleId)
-import Admin.Data.Url exposing (UrlId)
-import Admin.Data.Feedback exposing (FeedbackId)
 
 
 -- ROUTING --
@@ -20,6 +21,7 @@ type Route
     | ArticleEdit OrganizationApiKey ArticleId
     | CategoryList OrganizationApiKey
     | CategoryCreate OrganizationApiKey
+    | CategoryEdit CategoryId
     | UrlList OrganizationApiKey
     | UrlCreate OrganizationApiKey
     | UrlEdit OrganizationApiKey UrlId
@@ -47,6 +49,7 @@ routeMatcher =
         , Url.map CategoryCreate (s "organizations" </> string </> s "categories" </> s "new")
         , Url.map ArticleEdit (s "organizations" </> string </> s "articles" </> string)
         , Url.map UrlEdit (s "organizations" </> string </> s "urls" </> string </> s "edit")
+        , Url.map CategoryEdit (s "categories" </> string)
         ]
 
 
@@ -98,10 +101,13 @@ routeToString page =
                 ArticleEdit organizationApiKey articleId ->
                     [ "organizations", organizationApiKey, "articles", articleId ]
 
+                CategoryEdit categoryId ->
+                    [ "categories", categoryId ]
+
                 NotFound ->
                     []
     in
-        "/" ++ String.join "/" pieces
+    "/" ++ String.join "/" pieces
 
 
 modifyUrl : Route -> Cmd msg
