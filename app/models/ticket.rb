@@ -16,10 +16,11 @@ class Ticket < ApplicationRecord
     return false if !Agent.exists?(id: agent_id)
     update_attributes(agent_id: agent_id)
   end
-
+  
   def add_note(note_txt)
     update(note: note_txt)
   end
+
   private
     def parse_user_agent
       if user_agent.present?
@@ -30,5 +31,4 @@ class Ticket < ApplicationRecord
       end
     end
     handle_asynchronously :parse_user_agent
-  
 end
