@@ -3,7 +3,7 @@
 require "test_helper"
 require "graphql/client_host"
 
-class Mutations::OrganizationMutationsTest < ActiveSupport::TestCase
+class Mutations::FeedbackMutationsTest < ActiveSupport::TestCase
   setup do
     @mutation_query = <<-GRAPHQL
       mutation($feedback: CreateFeedbackInput!) {
@@ -36,10 +36,10 @@ class Mutations::OrganizationMutationsTest < ActiveSupport::TestCase
     end
   end
 
-  test "close feedback" do
+  test "alter feedback status" do
     feedback = feedbacks(:ror_feedback)
     query = <<-GRAPHQL
-              mutation($id: ID!, $status: String!)
+              mutation($id: String!, $status: String!)
                 {
                   updateFeedbackStatus
                   (input: {

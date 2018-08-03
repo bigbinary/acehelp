@@ -14,6 +14,7 @@ import Page.Url.Edit as UrlEdit
 import Page.Category.List as CategoryList
 import Page.Ticket.List as TicketList
 import Page.Feedback.List as FeedbackList
+import Page.Feedback.Show as FeedbackShow
 import Page.Category.Create as CategoryCreate
 import Page.Settings as Settings
 import Page.Errors as Errors
@@ -52,6 +53,7 @@ type Page
     | Settings Settings.Model
     | TicketList TicketList.Model
     | FeedbackList FeedbackList.Model
+    | FeedbackShow FeedbackShow.Model
     | Dashboard
     | NotFound
     | Blank
@@ -111,6 +113,7 @@ type Msg
     | CategoriesLoaded (Result GQLClient.Error (List Category))
     | TicketListMsg TicketList.Msg
     | FeedbackListMsg FeedbackList.Msg
+    | FeedbackShowMsg FeedbackShow.Msg
     | SettingsMsg Settings.Msg
     | OnLocationChange Navigation.Location
     | SignOut
@@ -289,6 +292,28 @@ navigateTo newRoute model =
                         | currentPage =
                             TransitioningTo
                                 (FeedbackList feedbackListModel)
+                        , route = newRoute
+                      }
+                    , cmd
+                    )
+
+            Route.FeedbackShow organizationKey feedbackId ->
+                let
+                    ( feedbackShowModel, feedbackShowRequest ) =
+                        FeedbackShow.init feedbackId
+
+                    cmd =
+                        Cmd.map FeedbackShowMsg <|
+                            Task.attempt
+                                (FeedbackShow.FeedbackLoaded)
+                                (Reader.run (feedbackShowRequest)
+                                    ( model.nodeEnv, model.organizationKey )
+                                )
+                in
+                    ( { model
+                        | currentPage =
+                            TransitioningTo
+                                (FeedbackShow feedbackShowModel)
                         , route = newRoute
                       }
                     , cmd
@@ -605,6 +630,26 @@ update msg model =
                 , Cmd.map FeedbackListMsg feedbackListCmd
                 )
 
+        FeedbackShowMsg fsMsg ->
+            let
+                currentPageModel =
+                    case model.currentPage of
+                        Loaded (FeedbackShow feedbackShowModel) ->
+                            feedbackShowModel
+
+                        _ ->
+                            FeedbackShow.initModel "0"
+
+                ( feedbackShowModel, feedbackShowCmd ) =
+                    FeedbackShow.update fsMsg
+                        currentPageModel
+                        model.nodeEnv
+                        model.organizationKey
+            in
+                ( { model | currentPage = TransitioningTo (FeedbackShow feedbackShowModel) }
+                , Cmd.map FeedbackShowMsg feedbackShowCmd
+                )
+
         SettingsMsg settingsMsg ->
             let
                 currentPageModel =
@@ -733,6 +778,12 @@ view model =
             adminLayout model
                 (Html.map FeedbackListMsg
                     (FeedbackList.view feedbackListModel)
+                )
+
+        FeedbackShow feedbackShowModel ->
+            adminLayout model
+                (Html.map FeedbackShowMsg
+                    (FeedbackShow.view feedbackShowModel)
                 )
 
         Dashboard ->

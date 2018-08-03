@@ -30,7 +30,7 @@ class Mutations::FeedbackMutations
 
   UpdateStatus = GraphQL::Relay::Mutation.define do
     name "UpdateFeedbackStatus"
-    input_field :id, !types.ID
+    input_field :id, !types.String
     input_field :status, !types.String
 
     return_field :feedback, Types::FeedbackType

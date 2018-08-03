@@ -4,6 +4,7 @@ import Navigation exposing (Location)
 import UrlParser as Url exposing ((</>), Parser, oneOf, parsePath, s, string)
 import Admin.Data.Article exposing (ArticleId)
 import Admin.Data.Url exposing (UrlId)
+import Admin.Data.Feedback exposing (FeedbackId)
 
 
 -- ROUTING --
@@ -24,6 +25,7 @@ type Route
     | UrlEdit OrganizationApiKey UrlId
     | TicketList OrganizationApiKey
     | FeedbackList OrganizationApiKey
+    | FeedbackShow OrganizationApiKey FeedbackId
     | Settings OrganizationApiKey
     | Dashboard
     | NotFound
@@ -38,6 +40,7 @@ routeMatcher =
         , Url.map CategoryList (s "organizations" </> string </> s "categories")
         , Url.map TicketList (s "organizations" </> string </> s "tickets")
         , Url.map FeedbackList (s "organizations" </> string </> s "feedbacks")
+        , Url.map FeedbackShow (s "organizations" </> string </> s "feedbacks" </> string)
         , Url.map Settings (s "organizations" </> string </> s "settings")
         , Url.map ArticleCreate (s "organizations" </> string </> s "articles" </> s "new")
         , Url.map UrlCreate (s "organizations" </> string </> s "urls" </> s "new")
@@ -73,6 +76,9 @@ routeToString page =
 
                 FeedbackList organizationApiKey ->
                     [ "organizations", organizationApiKey, "feedbacks" ]
+
+                FeedbackShow organizationApiKey feedbackId ->
+                    [ "organizations", organizationApiKey, "feedbacks", feedbackId ]
 
                 Settings organizationApiKey ->
                     [ "organizations", organizationApiKey, "settings" ]
