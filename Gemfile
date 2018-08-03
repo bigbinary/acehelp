@@ -69,6 +69,12 @@ gem "searchkick"
 # Cross-Origin Resource Sharing (CORS) for Rack compatible web applications
 gem "rack-cors", require: "rack/cors"
 
+# for background job processing
+gem "delayed_job_active_record"
+
+# for user_agent/device detection
+gem 'browser'
+
 group :development, :test do
   # Call "byebug" anywhere in the code to stop execution and get a debugger console
   gem "byebug", platforms: [:mri, :mingw, :x64_mingw]
