@@ -31,4 +31,5 @@ class Ticket < ApplicationRecord
       end
     end
     handle_asynchronously :parse_user_agent
+
 end
