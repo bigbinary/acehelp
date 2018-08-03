@@ -29,16 +29,24 @@ document.addEventListener("DOMContentLoaded", () => {
 
     app.ports.insertArticleContent.subscribe(function(html) {
         var trixEl = document.querySelector("trix-editor");
-        trixEl.editor.insertHTML(html);
+        if (trixEl) trixEl.editor.insertHTML(html);
     });
-});
 
-//TODO: Handle file uploads
-document.addEventListener("trix-attachment-add", function(event) {
-    var attachment;
-    attachment = event.attachment;
-    if (attachment.file) {
-        //return uploadAttachment(attachment);
-        //console.log(attachment.file);
-    }
+    document.addEventListener("trix-initialize", function(event) {
+        app.ports.trixInitialize.send(null);
+    });
+
+    //TODO: Handle file uploads
+    document.addEventListener("trix-attachment-add", function(event) {
+        var attachment;
+        attachment = event.attachment;
+        if (attachment.file) {
+            //return uploadAttachment(attachment);
+            //console.log(attachment.file);
+        }
+    });
+
+    document.addEventListener("trix-change", function(event) {
+        app.ports.trixChange.send(event.target.innerHTML);
+    });
 });

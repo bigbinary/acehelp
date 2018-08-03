@@ -12,8 +12,10 @@ import Task exposing (Task)
 import Field exposing (..)
 import Field.ValidationResult exposing (..)
 import Helpers exposing (..)
+import Process exposing (Id)
 import Admin.Ports exposing (insertArticleContent)
 import GraphQL.Client.Http as GQLClient
+import Admin.Ports exposing (..)
 
 
 -- Model
@@ -26,6 +28,7 @@ type alias Model =
     , categories : List Category
     , categoryId : Field String String
     , error : Maybe String
+    , keyboardInputTaskId : Maybe Id
     }
 
 
@@ -37,6 +40,7 @@ initModel articleId =
     , categories = []
     , categoryId = Field (validateEmpty "Category Id") ""
     , error = Nothing
+    , keyboardInputTaskId = Nothing
     }
 
 
@@ -54,11 +58,11 @@ init articleId =
 type Msg
     = TitleInput String
     | DescInput String
-    | SaveArticle
     | SaveArticleResponse (Result GQLClient.Error Article)
     | ArticleLoaded (Result GQLClient.Error Article)
     | CategoriesLoaded (Result GQLClient.Error (List Category))
     | CategorySelected String
+    | TrixInitialize ()
 
 
 
@@ -67,49 +71,65 @@ type Msg
 
 update : Msg -> Model -> NodeEnv -> ApiKey -> ( Model, Cmd Msg )
 update msg model nodeEnv organizationKey =
-    case msg of
-        TitleInput title ->
-            ( { model | title = Field.update model.title title }, Cmd.none )
+    let
+        errorsIn fields =
+            validateAll fields
+                |> filterFailures
+                |> List.map
+                    (\result ->
+                        case result of
+                            Failed err ->
+                                err
 
-        DescInput desc ->
-            ( { model | desc = Field.update model.desc desc }, Cmd.none )
+                            Passed _ ->
+                                "Unknown Error"
+                    )
+                |> String.join ", "
+                |> stringToMaybe
+    in
+        case msg of
+            TitleInput title ->
+                ( { model | title = Field.update model.title title, error = errorsIn [ Field.update model.title title, model.desc, model.categoryId ] }, Cmd.none )
 
-        SaveArticle ->
-            save model nodeEnv organizationKey
+            DescInput desc ->
+                ( { model | desc = Field.update model.desc desc, error = errorsIn [ Field.update model.desc desc, model.title, model.categoryId ] }, Cmd.none )
 
-        SaveArticleResponse (Ok id) ->
-            ( { model
-                | title = Field.update model.title ""
-                , desc = Field.update model.desc ""
-              }
-            , Cmd.none
-            )
+            SaveArticleResponse (Ok id) ->
+                ( { model
+                    | title = Field.update model.title ""
+                    , desc = Field.update model.desc ""
+                  }
+                , Cmd.none
+                )
 
-        SaveArticleResponse (Err error) ->
-            ( { model | error = Just (toString error) }, Cmd.none )
+            SaveArticleResponse (Err error) ->
+                ( { model | error = Just (toString error) }, Cmd.none )
 
-        ArticleLoaded (Ok article) ->
-            ( { model
-                | title = Field.update model.title article.title
-                , desc = Field.update model.desc article.desc
-                , categories = article.categories
-              }
-            , insertArticleContent article.desc
-            )
+            ArticleLoaded (Ok article) ->
+                ( { model
+                    | title = Field.update model.title article.title
+                    , desc = Field.update model.desc article.desc
+                    , categories = article.categories
+                  }
+                , insertArticleContent article.desc
+                )
 
-        ArticleLoaded (Err err) ->
-            ( { model | error = Just "There was an error loading up the article" }
-            , Cmd.none
-            )
+            ArticleLoaded (Err err) ->
+                ( { model | error = Just "There was an error loading up the article" }
+                , Cmd.none
+                )
 
-        CategoriesLoaded (Ok categories) ->
-            ( { model | categories = categories }, Cmd.none )
+            CategoriesLoaded (Ok categories) ->
+                ( { model | categories = categories }, Cmd.none )
 
-        CategoriesLoaded (Err err) ->
-            ( { model | error = Just (toString err) }, Cmd.none )
+            CategoriesLoaded (Err err) ->
+                ( { model | error = Just (toString err) }, Cmd.none )
 
-        CategorySelected categoryId ->
-            ( { model | categoryId = Field.update model.categoryId categoryId }, Cmd.none )
+            CategorySelected categoryId ->
+                ( { model | categoryId = Field.update model.categoryId categoryId, error = errorsIn [ Field.update model.categoryId categoryId, model.desc, model.title ] }, Cmd.none )
+
+            TrixInitialize _ ->
+                ( model, insertArticleContent <| Field.value model.desc )
 
 
 
@@ -253,3 +273,15 @@ save model nodeEnv organizationKey =
             ( model, cmd )
         else
             ( { model | error = Just errors }, Cmd.none )
+
+
+
+-- Subscriptions
+
+
+subscriptions : Model -> Sub Msg
+subscriptions model =
+    Sub.batch
+        [ trixInitialize <| TrixInitialize
+        , trixChange <| DescInput
+        ]

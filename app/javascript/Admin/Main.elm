@@ -462,7 +462,7 @@ update msg model =
                         model.nodeEnv
                         model.organizationKey
             in
-                ( { model | currentPage = TransitioningTo (ArticleEdit articleEditModel) }
+                ( { model | currentPage = Loaded (ArticleEdit articleEditModel) }
                 , Cmd.map ArticleEditMsg articleEditCmd
                 )
 
@@ -781,7 +781,15 @@ getOrganizationId orgId =
 
 subscriptions : Model -> Sub Msg
 subscriptions model =
-    Sub.none
+    case model.currentPage of
+        Loaded (ArticleEdit articleEditModel) ->
+            Sub.map ArticleEditMsg <| ArticleEdit.subscriptions articleEditModel
+
+        TransitioningTo (ArticleEdit articleEditModel) ->
+            Sub.map ArticleEditMsg <| ArticleEdit.subscriptions articleEditModel
+
+        _ ->
+            Sub.none
 
 
 
