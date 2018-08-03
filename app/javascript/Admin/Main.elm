@@ -599,7 +599,11 @@ update msg model =
                             CategoryList.initModel model.organizationKey
 
                 ( categoryListModel, categoryListCmd ) =
-                    CategoryList.update clMsg currentPageModel
+                    CategoryList.update
+                        clMsg
+                        currentPageModel
+                        model.nodeEnv
+                        model.organizationKey
             in
                 ( { model | currentPage = Loaded (CategoryList categoryListModel) }
                 , Cmd.map CategoryListMsg categoryListCmd
