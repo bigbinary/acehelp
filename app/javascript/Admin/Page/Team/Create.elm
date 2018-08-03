@@ -3,7 +3,8 @@ module Page.Team.Create exposing (..)
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
-import Admin.Request.Url exposing (..)
+import Admin.Request.Team exposing (..)
+import Admin.Data.Team exposing (..)
 import Request.Helpers exposing (NodeEnv, ApiKey)
 import Reader exposing (Reader)
 import Task exposing (Task)
@@ -48,32 +49,29 @@ init =
 
 
 type Msg
-    = FirstName String
-    | LastName String
-    | Email String
+    = FirstNameInput String
+    | LastNameInput String
+    | EmailInput String
     | SaveTeam
-    | SaveTeamResponse (Result GQLClient.Error TeamMemberData)
+    | SaveTeamResponse (Result GQLClient.Error TeamMember)
 
 
 update : Msg -> Model -> NodeEnv -> ApiKey -> ( Model, Cmd Msg )
 update msg model nodeEnv organizationKey =
     case msg of
-        FirstName firstName ->
+        FirstNameInput firstName ->
             ( { model | firstName = firstName }, Cmd.none )
 
-        LastName lastName ->
+        LastNameInput lastName ->
             ( { model | lastName = lastName }, Cmd.none )
 
-        Email email ->
-            ( { model | email = email }, Cmd.none )
+        EmailInput email ->
+            ( { model | email = Field.update model.email email }, Cmd.none )
 
-        TitleInput title ->
-            ( { model | urlTitle = Field.update model.urlTitle title }, Cmd.none )
-
-        SaveUrl ->
+        SaveTeam ->
             let
                 fields =
-                    [ model.url, model.urlTitle ]
+                    [ model.email ]
 
                 errors =
                     validateAll fields
@@ -94,10 +92,10 @@ update msg model nodeEnv organizationKey =
                 else
                     ( { model | error = Just errors }, Cmd.none )
 
-        SaveUrlResponse (Ok id) ->
-            ( model, Route.modifyUrl <| Route.UrlList organizationKey )
+        SaveTeamResponse (Ok id) ->
+            ( model, Route.modifyUrl <| Route.TeamList organizationKey )
 
-        SaveUrlResponse (Err error) ->
+        SaveTeamResponse (Err error) ->
             ( { model | error = Just (toString error) }, Cmd.none )
 
 
@@ -108,7 +106,7 @@ update msg model nodeEnv organizationKey =
 view : Model -> Html Msg
 view model =
     div [ class "container" ]
-        [ Html.form [ onSubmit SaveUrl ]
+        [ Html.form [ onSubmit SaveTeam ]
             [ div []
                 [ Maybe.withDefault (text "") <|
                     Maybe.map
@@ -123,20 +121,29 @@ view model =
                         model.error
                 ]
             , div []
-                [ label [] [ text "URL: " ]
+                [ label [] [ text "First Name : " ]
                 , input
                     [ type_ "text"
-                    , placeholder "Url..."
-                    , onInput UrlInput
+                    , placeholder "First Name"
+                    , onInput FirstNameInput
                     ]
                     []
                 ]
             , div []
-                [ label [] [ text "URL Title: " ]
+                [ label [] [ text "Last Name: " ]
                 , input
                     [ type_ "text"
-                    , placeholder "Title..."
-                    , onInput TitleInput
+                    , placeholder "Last Name"
+                    , onInput LastNameInput
+                    ]
+                    []
+                ]
+            , div []
+                [ label [] [ text "Email : " ]
+                , input
+                    [ type_ "text"
+                    , placeholder "Email"
+                    , onInput EmailInput
                     ]
                     []
                 ]
@@ -149,11 +156,14 @@ save : Model -> NodeEnv -> ApiKey -> ( Model, Cmd Msg )
 save model nodeEnv apiKey =
     let
         cmd =
-            Task.attempt SaveUrlResponse
-                (Reader.run (createUrl)
+            Task.attempt SaveTeamResponse
+                (Reader.run (createTeamMember)
                     ( nodeEnv
                     , apiKey
-                    , { url = Field.value model.url }
+                    , { email = Field.value model.email
+                      , firstName = model.firstName
+                      , lastName = model.lastName
+                      }
                     )
                 )
     in

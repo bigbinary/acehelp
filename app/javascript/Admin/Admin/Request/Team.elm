@@ -16,3 +16,13 @@ requestTeam =
                 GQLBuilder.request {} requestTeamQuery
             )
         )
+
+
+createTeamMember : Reader ( NodeEnv, ApiKey, TeamMemberInput ) (Task GQLClient.Error TeamMember)
+createTeamMember =
+    Reader.Reader
+        (\( nodeEnv, apiKey, createTeamMemberInput ) ->
+            (GQLClient.customSendMutation (requestOptions nodeEnv apiKey) <|
+                GQLBuilder.request createTeamMemberInput createTeamMemberMutation
+            )
+        )

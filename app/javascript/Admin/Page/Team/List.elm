@@ -4,6 +4,9 @@ module Page.Team.List exposing (..)
 
 import Html exposing (..)
 import Html.Attributes exposing (..)
+import Html.Events exposing (..)
+import Navigation exposing (..)
+import Route
 import Request.Helpers exposing (NodeEnv, ApiKey)
 import Admin.Request.Team exposing (..)
 import Admin.Data.Team exposing (..)
@@ -43,6 +46,7 @@ init organizationKey =
 
 type Msg
     = TeamListLoaded (Result GQLClient.Error (List TeamMember))
+    | Navigate Route.Route
 
 
 update : Msg -> Model -> ApiKey -> NodeEnv -> ( Model, Cmd Msg )
@@ -53,6 +57,9 @@ update msg model apiKey nodeEnv =
 
         TeamListLoaded (Err err) ->
             ( { model | error = Just (toString err) }, Cmd.none )
+
+        Navigate page ->
+            model ! [ Navigation.newUrl (Route.routeToString page) ]
 
 
 
@@ -76,7 +83,8 @@ view model =
         , div
             []
             [ Html.a
-                [ class "button primary"
+                [ onClick (Navigate <| Route.TeamMemberCreate model.organizationKey)
+                , class "button primary"
                 ]
                 [ text " + Add Team Member " ]
             ]
