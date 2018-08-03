@@ -33,6 +33,7 @@ class Ticket < ApplicationRecord
     return false if status == status_key.to_s
     update(status: status_key)
   end
+  
   private
     def parse_user_agent
       if user_agent.present?
