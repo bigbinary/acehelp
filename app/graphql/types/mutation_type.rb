@@ -44,4 +44,5 @@ Types::MutationType = GraphQL::ObjectType.define do
 
   field :assignTicketToAgent, field: Mutations::AssignTicketToAgentMutations::Perform.field
 
+  field :postCommentInTicket, field: Mutations::PostCommentInTicketMutations::Create.field
 end

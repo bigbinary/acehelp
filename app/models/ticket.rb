@@ -5,6 +5,7 @@ class Ticket < ApplicationRecord
   belongs_to :organization
 
   belongs_to :agent, required: false
+  has_many :comments, dependent: :destroy
 
   scope :for_organization, ->(org) { where(organization: org) }
 

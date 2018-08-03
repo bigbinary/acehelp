@@ -14,7 +14,6 @@ class Mutations::AssignTicketToAgentMutations
 
       ticket = Ticket.find_by(id: inputs[:ticket_id], organization_id: context[:organization].id)
       agent = Agent.find_by(id: inputs[:agent_id], organization_id: context[:organization].id)
-
       if ticket.nil?
         err_message = "Ticket not found"
       elsif agent.nil?
