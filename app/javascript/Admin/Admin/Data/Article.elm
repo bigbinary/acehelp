@@ -29,6 +29,14 @@ type alias CreateArticleInputs =
     }
 
 
+type alias UpdateArticleInputs =
+    { id : ArticleId
+    , title : String
+    , desc : String
+    , categoryId : Maybe String
+    }
+
+
 type alias ArticleSummary =
     { id : ArticleId
     , title : String
@@ -115,6 +123,41 @@ createArticleMutation =
                     [ ( "input"
                       , Arg.object
                             [ ( "title", Arg.variable titleVar )
+                            , ( "desc", Arg.variable descVar )
+                            , ( "category_id", Arg.variable categoryIdVar )
+                            ]
+                      )
+                    ]
+                    (GQLBuilder.extract <|
+                        GQLBuilder.field "article"
+                            []
+                            articleObject
+                    )
+                )
+
+
+updateArticleMutation : GQLBuilder.Document GQLBuilder.Mutation Article UpdateArticleInputs
+updateArticleMutation =
+    let
+        idVar =
+            Var.required "id" .id Var.string
+
+        titleVar =
+            Var.required "title" .title Var.string
+
+        descVar =
+            Var.required "desc" .desc Var.string
+
+        categoryIdVar =
+            Var.optional "category_id" .categoryId Var.string ""
+    in
+        GQLBuilder.mutationDocument <|
+            GQLBuilder.extract
+                (GQLBuilder.field "updateArticle"
+                    [ ( "input"
+                      , Arg.object
+                            [ ( "id", Arg.variable idVar )
+                            , ( "title", Arg.variable titleVar )
                             , ( "desc", Arg.variable descVar )
                             , ( "category_id", Arg.variable categoryIdVar )
                             ]

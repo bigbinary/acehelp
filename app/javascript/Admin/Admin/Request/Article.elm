@@ -32,6 +32,22 @@ requestCreateArticle articleInputs =
         )
 
 
+requestUpdateArticle : UpdateArticleInputs -> Reader ( NodeEnv, ApiKey ) (Task GQLClient.Error Article)
+requestUpdateArticle articleInputs =
+    Reader.Reader
+        (\( nodeEnv, apiKey ) ->
+            GQLClient.customSendMutation (requestOptions nodeEnv apiKey) <|
+                (GQLBuilder.request
+                    { id = articleInputs.id
+                    , title = articleInputs.title
+                    , desc = articleInputs.desc
+                    , categoryId = articleInputs.categoryId
+                    }
+                    updateArticleMutation
+                )
+        )
+
+
 requestArticleById : ArticleId -> Reader ( NodeEnv, ApiKey ) (Task GQLClient.Error Article)
 requestArticleById articleId =
     Reader.Reader

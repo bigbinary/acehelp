@@ -16,11 +16,10 @@ validateEmpty fieldName fieldValue =
             Passed fieldValue
 
 
-delayedTask : Time -> msg -> Task x Id
+delayedTask : Time -> msg -> Task x msg
 delayedTask time msg =
     Process.sleep time
         |> Task.andThen (always <| Task.succeed msg)
-        |> Process.spawn
 
 
 

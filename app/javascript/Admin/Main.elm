@@ -449,8 +449,8 @@ update msg model =
         ArticleEditMsg aeMsg ->
             let
                 currentPageModel =
-                    case model.currentPage of
-                        Loaded (ArticleEdit articleEditModel) ->
+                    case getPage model.currentPage of
+                        ArticleEdit articleEditModel ->
                             articleEditModel
 
                         _ ->
@@ -781,11 +781,8 @@ getOrganizationId orgId =
 
 subscriptions : Model -> Sub Msg
 subscriptions model =
-    case model.currentPage of
-        Loaded (ArticleEdit articleEditModel) ->
-            Sub.map ArticleEditMsg <| ArticleEdit.subscriptions articleEditModel
-
-        TransitioningTo (ArticleEdit articleEditModel) ->
+    case getPage model.currentPage of
+        ArticleEdit articleEditModel ->
             Sub.map ArticleEditMsg <| ArticleEdit.subscriptions articleEditModel
 
         _ ->

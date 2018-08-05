@@ -27,11 +27,24 @@ document.addEventListener("DOMContentLoaded", () => {
         user_email: user_email
     });
 
+    // INCOMING PORTS
     app.ports.insertArticleContent.subscribe(function(html) {
         var trixEl = document.querySelector("trix-editor");
         if (trixEl) trixEl.editor.insertHTML(html);
     });
 
+    app.ports.setTimeout.subscribe(function(time) {
+        var timeoutId = setTimeout(function() {
+            app.ports.timedOut.send(timeoutId);
+        }, time);
+        app.ports.timeoutInitialized.send(timeoutId);
+    });
+
+    app.ports.clearTimeout.subscribe(function(timeoutId) {
+        clearTimeout(timeoutId);
+    });
+
+    // OUTGOING PORTS
     document.addEventListener("trix-initialize", function(event) {
         app.ports.trixInitialize.send(null);
     });
