@@ -25,7 +25,7 @@ class ApplicationController < ActionController::Base
       if resource.organizations.exists?
         organization_articles_path(resource.organizations.first.api_key)
       else
-        root_path
+        new_organization_path
       end
     end
 end
