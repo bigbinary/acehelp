@@ -7,4 +7,8 @@ Types::TicketType = GraphQL::ObjectType.define do
   field :email, !types.String
   field :message, !types.String
   field :status, !types.String
+
+  field :agent, -> { Types::UserType }  do
+    resolve -> (obj, args, context) { obj.agent }
+  end
 end

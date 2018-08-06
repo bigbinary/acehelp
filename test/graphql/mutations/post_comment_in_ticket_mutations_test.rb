@@ -20,6 +20,9 @@ class Mutations::PostCommentInTicketMutationsTest < ActiveSupport::TestCase
             }
             ticket {
               id
+              agent {
+                first_name
+              }
             }
           }
           errors {
@@ -46,6 +49,17 @@ class Mutations::PostCommentInTicketMutationsTest < ActiveSupport::TestCase
     assert_equal @agent.id, result.data.post_comment_in_ticket.comment.agent.id
     assert_equal @agent.id, result.data.post_comment_in_ticket.comment.agent.id
     assert_equal @ticket.id, result.data.post_comment_in_ticket.comment.ticket.id
+    assert_equal @agent.first_name, result.data.post_comment_in_ticket.comment.ticket.agent.first_name
+  end
+
+  test "auto assign agent to ticket" do
+
+    assert_raise(Graphlient::Errors::GraphQLError) do
+      AceHelp::Client.execute(@mutation_query, comment_args: {
+        agent_id: @agent.id,
+        info: "Comment about a ticket by agent #{@agent.name}"
+      })
+    end
   end
 
   test "post comment without input arg : comment" do
@@ -75,7 +89,6 @@ class Mutations::PostCommentInTicketMutationsTest < ActiveSupport::TestCase
       })
     end
   end
-
 
 
 end
