@@ -60,9 +60,7 @@ categoryListDropdown categories selectedId onItemClick =
             ]
 
 
-articleInputs : { title : Field String String, desc : Field String String, categoryId : Field String String } -> CreateArticleInputs
-articleInputs { title, desc, categoryId } =
-    { title = Field.value title
-    , desc = Field.value desc
-    , categoryId = Just <| Field.value categoryId
-    }
+savingIndicator : Html msg
+savingIndicator =
+    div [ class "save-indicator" ]
+        [ text "Saving.." ]

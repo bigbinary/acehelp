@@ -342,14 +342,22 @@ navigateTo newRoute model =
 
             Route.ArticleEdit organizationKey articleId ->
                 let
-                    ( articleEditModel, articleEditCmd ) =
+                    ( articleEditModel, articleEditTask, articleCategoriesTask ) =
                         ArticleEdit.init articleId
 
-                    cmd =
+                    cmdArticle =
                         Cmd.map ArticleEditMsg <|
                             Task.attempt
-                                ArticleEdit.ArticleLoaded
-                                (Reader.run articleEditCmd
+                                (ArticleEdit.ArticleLoaded)
+                                (Reader.run (articleEditTask)
+                                    ( model.nodeEnv, model.organizationKey )
+                                )
+
+                    cmdCategories =
+                        Cmd.map ArticleEditMsg <|
+                            Task.attempt
+                                (ArticleEdit.CategoriesLoaded)
+                                (Reader.run (articleCategoriesTask)
                                     ( model.nodeEnv, model.organizationKey )
                                 )
                 in
@@ -359,7 +367,7 @@ navigateTo newRoute model =
                                 (ArticleEdit articleEditModel)
                         , route = newRoute
                       }
-                    , cmd
+                    , Cmd.batch [ cmdArticle, cmdCategories ]
                     )
 
             Route.CategoryEdit categoryId ->

@@ -5,8 +5,10 @@ import Html.Attributes exposing (..)
 import Html.Events exposing (..)
 import Admin.Data.Article exposing (..)
 import Admin.Request.Article exposing (..)
+import Admin.Request.Category exposing (..)
 import Request.Helpers exposing (NodeEnv, ApiKey)
 import Admin.Data.Category exposing (..)
+import Admin.Data.Url exposing (UrlData)
 import Reader exposing (Reader)
 import Task exposing (Task)
 import Time
@@ -14,6 +16,7 @@ import Field exposing (..)
 import Field.ValidationResult exposing (..)
 import Helpers exposing (..)
 import Admin.Ports exposing (..)
+import Page.Article.Common exposing (..)
 import GraphQL.Client.Http as GQLClient
 import Admin.Ports exposing (..)
 
@@ -26,10 +29,22 @@ type alias Model =
     , desc : Field String String
     , articleId : ArticleId
     , categories : List Category
+    , urls : List ArticleUrl
     , categoryId : Maybe CategoryId
     , error : Maybe String
     , keyboardInputTaskId : Maybe Int
+    , status : Status
     }
+
+
+type Status
+    = Saving
+    | None
+
+
+type ArticleUrl
+    = Selected UrlData
+    | Unselected UrlData
 
 
 initModel : ArticleId -> Model
@@ -38,16 +53,21 @@ initModel articleId =
     , desc = Field (validateEmpty "Article Content") ""
     , articleId = articleId
     , categories = []
+    , urls = []
     , categoryId = Nothing
     , error = Nothing
     , keyboardInputTaskId = Nothing
+    , status = None
     }
 
 
-init : ArticleId -> ( Model, Reader ( NodeEnv, ApiKey ) (Task GQLClient.Error Article) )
+init :
+    ArticleId
+    -> ( Model, Reader ( NodeEnv, ApiKey ) (Task GQLClient.Error Article), Reader ( NodeEnv, ApiKey ) (Task GQLClient.Error (List Category)) )
 init articleId =
     ( initModel articleId
     , requestArticleById articleId
+    , requestCategories
     )
 
 
@@ -135,7 +155,6 @@ update msg model nodeEnv organizationKey =
                 | articleId = article.id
                 , title = Field.update model.title article.title
                 , desc = Field.update model.desc article.desc
-                , categories = article.categories
               }
             , insertArticleContent article.desc
             )
@@ -192,7 +211,7 @@ errorsIn fields =
 view : Model -> Html Msg
 view model =
     div []
-        [ errorView model
+        [ errorView model.error
         , div [ class "row article-block" ]
             [ div [ class "col-md-8 article-title-content-block" ]
                 [ div
@@ -216,75 +235,14 @@ view model =
                     ]
                 ]
             , div [ class "col-sm article-meta-data-block" ]
-                [ categoryListDropdown model
-                , articleUrls model
+                [ categoryListDropdown model.categories (Maybe.withDefault "" model.categoryId) (CategorySelected)
                 ]
             ]
+        , if model.status == Saving then
+            savingIndicator
+          else
+            text ""
         ]
-
-
-errorView : Model -> Html Msg
-errorView model =
-    Maybe.withDefault (text "") <|
-        Maybe.map
-            (\err ->
-                div
-                    [ class "alert alert-danger alert-dismissible fade show"
-                    , attribute "role" "alert"
-                    ]
-                    [ text <| "Error: " ++ err
-                    ]
-            )
-            model.error
-
-
-articleUrls : Model -> Html Msg
-articleUrls model =
-    div []
-        [ h6 [] [ text "Linked URLs:" ]
-        , span [ class "badge badge-secondary" ] [ text "/getting-started/this-is-hardcoded" ]
-        ]
-
-
-categoryListDropdown : Model -> Html Msg
-categoryListDropdown model =
-    let
-        selectedCategory =
-            List.filter (\category -> category.id == Maybe.withDefault "" model.categoryId)
-                model.categories
-                |> List.map .name
-                |> List.head
-                |> Maybe.withDefault "Select Category"
-    in
-        div []
-            [ div [ class "dropdown" ]
-                [ a
-                    [ class "btn btn-secondary dropdown-toggle"
-                    , attribute "role" "button"
-                    , attribute "data-toggle" "dropdown"
-                    , attribute "aria-haspopup" "true"
-                    , attribute "aria-expanded" "false"
-                    ]
-                    [ text selectedCategory ]
-                , div
-                    [ class "dropdown-menu"
-                    , attribute
-                        "aria-labelledby"
-                        "dropdownMenuButton"
-                    ]
-                    (List.map
-                        (\category ->
-                            a
-                                [ class "dropdown-item"
-                                , onClick
-                                    (CategorySelected category.id)
-                                ]
-                                [ text category.name ]
-                        )
-                        model.categories
-                    )
-                ]
-            ]
 
 
 articleInputs : Model -> UpdateArticleInputs
@@ -310,7 +268,7 @@ save model nodeEnv organizationKey =
                 )
     in
         if Field.isAllValid fields then
-            ( { model | error = Nothing }, cmd )
+            ( { model | error = Nothing, status = Saving }, cmd )
         else
             ( { model | error = errorsIn fields }, Cmd.none )
 

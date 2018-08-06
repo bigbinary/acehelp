@@ -169,3 +169,11 @@ save model nodeEnv organizationKey =
                 )
     in
         ( model, cmd )
+
+
+articleInputs : { title : Field String String, desc : Field String String, categoryId : Field String String } -> CreateArticleInputs
+articleInputs { title, desc, categoryId } =
+    { title = Field.value title
+    , desc = Field.value desc
+    , categoryId = Just <| Field.value categoryId
+    }
