@@ -12,6 +12,7 @@ class Mutations::AssignUserToOrganizationMutations
     return_field :errors, types[Types::ErrorType]
 
     resolve -> (object, inputs, context) {
+      raise GraphQL::ExecutionError, "Not Loggedin" unless  context[:current_user]
       user = User.find_or_create_by(email: inputs[:email]) do |user|
         user.first_name = inputs[:firstName]
         user.last_name = inputs[:lastName]
@@ -22,6 +23,7 @@ class Mutations::AssignUserToOrganizationMutations
         errors = Utils::ErrorHandler.new.error("User not found/created", context)
       else
         user.assign_organization(context[:organization])
+        user.send_welcome_mail(sender_id: context[:current_user].id, org_id: context[:organization].id)
       end
       {
         user: user,

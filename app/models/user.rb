@@ -44,4 +44,11 @@ class User < ApplicationRecord
   def deallocate_from_organization
     update_attributes(organization_id: nil)
   end
+
+  def send_welcome_mail(sender_id:, org_id:)
+    token = set_reset_password_token
+    InviteUserMailer.welcome_email(self.id, org_id, sender_id, token).deliver_now
+  end
+  handle_asynchronously :send_welcome_mail, queue: 'devise'
+
 end
