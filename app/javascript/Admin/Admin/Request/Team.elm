@@ -26,3 +26,12 @@ createTeamMember =
                 GQLBuilder.request createTeamMemberInput createTeamMemberMutation
             )
         )
+
+removeTeamMember : Reader ( NodeEnv, ApiKey, UserEmailInput ) (Task GQLClient.Error (List TeamMember))
+removeTeamMember =
+    Reader.Reader
+        (\( nodeEnv, apiKey, userEmail ) ->
+            (GQLClient.customSendMutation (requestOptions nodeEnv apiKey) <|
+                GQLBuilder.request userEmail removeUserFromOrganization
+            )
+        )
