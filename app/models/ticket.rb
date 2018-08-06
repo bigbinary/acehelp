@@ -34,7 +34,6 @@ class Ticket < ApplicationRecord
     update(status: status_key)
   end
 
-
   private
     def parse_user_agent
       if user_agent.present?
@@ -57,5 +56,4 @@ class Ticket < ApplicationRecord
         end
       end
     end
-
 end
