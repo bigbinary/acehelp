@@ -29,16 +29,16 @@ class Mutations::AssignTicketToAgentMutationsTest < ActiveSupport::TestCase
 
   test "Assigning ticket to Fake agent" do
     result =  AceHelp::Client.execute(@query, ticket_agent: { agent_id: users(:hunt).id, ticket_id: @ticket.id })
-    assert_equal nil, result.data.assign_ticket_to_agent.status
+    assert_nil result.data.assign_ticket_to_agent.status
   end
 
   test "Assigning ticket to Fake ticket" do
     result =  AceHelp::Client.execute(@query, ticket_agent: { agent_id: @agent.id, ticket_id: "dummy_ticket_id" })
-    assert_equal nil, result.data.assign_ticket_to_agent.status
+    assert_nil result.data.assign_ticket_to_agent.status
   end
 
   test "Assigning ticket to Fake ticket and agent" do
     result =  AceHelp::Client.execute(@query, ticket_agent: { agent_id: users(:hunt).id, ticket_id: "dummy_ticket_id_2" })
-    assert_equal nil, result.data.assign_ticket_to_agent.status
+    assert_nil result.data.assign_ticket_to_agent.status
   end
 end
