@@ -25,22 +25,22 @@ class Mutations::ChangeTicketMutationsTest < ActiveSupport::TestCase
 
   test "update ticket status with OPEN" do
     result = AceHelp::Client.execute(@query, ticket_args: {ticket_id: @ticket.id, status: "OPEN"})
-    assert_equal 'open', result.data.change_ticket_status.ticket.status
+    assert_equal Ticket::STATUSES[:open], result.data.change_ticket_status.ticket.status
   end
 
   test "update ticket status with PENDING_ON_CUSTOMER" do
     result = AceHelp::Client.execute(@query, ticket_args: {ticket_id: @ticket.id, status: "PENDING_ON_CUSTOMER"})
-    assert_equal 'pending_on_customer', result.data.change_ticket_status.ticket.status
+    assert_equal Ticket::STATUSES[:pending_on_customer], result.data.change_ticket_status.ticket.status
   end
 
   test "update ticket status with RESOLVED" do
     result = AceHelp::Client.execute(@query, ticket_args: {ticket_id: @ticket.id, status: "RESOLVED"})
-    assert_equal 'resolved', result.data.change_ticket_status.ticket.status
+    assert_equal Ticket::STATUSES[:resolved], result.data.change_ticket_status.ticket.status
   end
 
   test "update ticket status with CLOSED" do
     result = AceHelp::Client.execute(@query, ticket_args: {ticket_id: @ticket.id, status: "CLOSED"})
-    assert_equal 'closed', result.data.change_ticket_status.ticket.status
+    assert_equal Ticket::STATUSES[:closed], result.data.change_ticket_status.ticket.status
   end
 
   test "update ticket with invalid status" do
