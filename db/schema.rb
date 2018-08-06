@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2018_08_03_132519) do
+ActiveRecord::Schema.define(version: 2018_08_06_104343) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "pgcrypto"
@@ -117,6 +117,8 @@ ActiveRecord::Schema.define(version: 2018_08_03_132519) do
     t.text "note"
     t.string "user_agent"
     t.json "device_info"
+    t.datetime "resolved_at"
+    t.datetime "closed_at"
     t.index ["organization_id"], name: "index_tickets_on_organization_id"
   end
 
