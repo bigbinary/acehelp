@@ -98,7 +98,6 @@ ActiveRecord::Schema.define(version: 2018_08_01_191529) do
     t.datetime "updated_at", null: false
     t.uuid "organization_id"
     t.uuid "agent_id"
-    t.string "status", default: "open", null: false
     t.index ["organization_id"], name: "index_tickets_on_organization_id"
   end
 

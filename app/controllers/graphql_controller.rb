@@ -27,9 +27,8 @@ class GraphqlController < ApplicationController
     end
 
     def context
-      {
-          organization: @organization
-      }
+      {}
+      { organization: @organization } if @organization.present?
     end
 
     def ensure_hash(ambiguous_param)

@@ -9,6 +9,7 @@ Types::UserType = GraphQL::ObjectType.define do
   field :last_name, types.String
   field :role, types.String
   field :organization_id, types.String
+  field :organizations, types[Types::OrganizationType]
 
   field :name, -> { types.String } do
     resolve -> (obj, args, context) { obj.name }

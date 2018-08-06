@@ -32,7 +32,7 @@ class ExamplesControllerTest < ActionDispatch::IntegrationTest
 
   def test_load_organization_when_header_is_missing
     get "/example_index", params: @params
-    assert_response :unauthorized
+    assert_response :success
   end
 
   def test_load_organization_when_wrong_api_key_is_passed

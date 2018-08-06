@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 Rails.application.routes.draw do
-  devise_for :users
+  devise_for :users, controllers: {registrations: "registrations"}
 
   root to: "home#index"
 
@@ -10,6 +10,10 @@ Rails.application.routes.draw do
   get "/pages/aceinvoice/getting_started", to: "home#getting_started"
   get "/pages/aceinvoice/integrations", to: "home#integrations"
   get "/pages/aceinvoice/pricing", to: "home#pricing"
+
+  scope module: 'admin' do
+    resources :organizations, only: :new
+  end
 
   resources :organizations, only: [:show], param: :api_key do
     resources :articles
