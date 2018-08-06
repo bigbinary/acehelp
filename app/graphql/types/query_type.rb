@@ -27,4 +27,7 @@ Types::QueryType = GraphQL::ObjectType.define do
   hash = { type: Types::CategoryType, model: Category }
   field :category, Types::CategoryType, field: Resolvers::Fields::FetchField.build(hash)
 
+  hash = { type: Types::FeedbackType, model: Feedback }
+  field :feedback, Types::FeedbackType, field: Resolvers::Fields::FetchField.build(hash)
+
 end

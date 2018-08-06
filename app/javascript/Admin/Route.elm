@@ -1,9 +1,11 @@
 module Route exposing (Route(..), fromLocation, modifyUrl, routeToString)
 
+import Admin.Data.Article exposing (ArticleId)
+import Admin.Data.Category exposing (CategoryId)
+import Admin.Data.Feedback exposing (FeedbackId)
+import Admin.Data.Url exposing (UrlId)
 import Navigation exposing (Location)
 import UrlParser as Url exposing ((</>), Parser, oneOf, parsePath, s, string)
-import Admin.Data.Article exposing (ArticleId)
-import Admin.Data.Url exposing (UrlId)
 
 
 -- ROUTING --
@@ -19,11 +21,13 @@ type Route
     | ArticleEdit OrganizationApiKey ArticleId
     | CategoryList OrganizationApiKey
     | CategoryCreate OrganizationApiKey
+    | CategoryEdit CategoryId
     | UrlList OrganizationApiKey
     | UrlCreate OrganizationApiKey
     | UrlEdit OrganizationApiKey UrlId
     | TicketList OrganizationApiKey
     | FeedbackList OrganizationApiKey
+    | FeedbackShow OrganizationApiKey FeedbackId
     | Settings OrganizationApiKey
     | Dashboard
     | NotFound
@@ -39,6 +43,7 @@ routeMatcher =
         , Url.map CategoryList (s "organizations" </> string </> s "categories")
         , Url.map TicketList (s "organizations" </> string </> s "tickets")
         , Url.map FeedbackList (s "organizations" </> string </> s "feedbacks")
+        , Url.map FeedbackShow (s "organizations" </> string </> s "feedbacks" </> string)
         , Url.map Settings (s "organizations" </> string </> s "settings")
 
         , Url.map ArticleCreate (s "organizations" </> string </> s "articles" </> s "new")
@@ -47,6 +52,7 @@ routeMatcher =
         , Url.map ArticleEdit (s "organizations" </> string </> s "articles" </> string)
         , Url.map UrlEdit (s "organizations" </> string </> s "urls" </> string </> s "edit")
         , Url.map OrganizationCreate (s "organizations" </> s "new")
+        , Url.map CategoryEdit (s "categories" </> string)
         ]
 
 
@@ -75,6 +81,9 @@ routeToString page =
                 FeedbackList organizationApiKey ->
                     [ "organizations", organizationApiKey, "feedbacks" ]
 
+                FeedbackShow organizationApiKey feedbackId ->
+                    [ "organizations", organizationApiKey, "feedbacks", feedbackId ]
+
                 Settings organizationApiKey ->
                     [ "organizations", organizationApiKey, "settings" ]
 
@@ -96,10 +105,13 @@ routeToString page =
                 OrganizationCreate ->
                     [ "organizations", "new" ]
 
+                CategoryEdit categoryId ->
+                    [ "categories", categoryId ]
+
                 NotFound ->
                     []
     in
-        "/" ++ String.join "/" pieces
+    "/" ++ String.join "/" pieces
 
 
 modifyUrl : Route -> Cmd msg

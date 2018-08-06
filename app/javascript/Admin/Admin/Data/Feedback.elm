@@ -8,10 +8,13 @@ import GraphQL.Request.Builder as GQLBuilder
 type alias FeedbackId =
     String
 
-
 type alias FeedbackStatus =
     String
 
+type alias FeedbackStatusInput =
+    { id : String
+    , status : String
+    }
 
 type alias Feedback =
     { id : FeedbackId
@@ -35,6 +38,47 @@ requestFeedbacksQuery =
                         feedbackExtractor
                     )
                 )
+
+
+feedbackByIdQuery : GQLBuilder.Document GQLBuilder.Query Feedback { vars | id : String }
+feedbackByIdQuery =
+    let
+        idVar =
+            Var.required "id" .id Var.string
+    in
+        GQLBuilder.queryDocument
+            (GQLBuilder.extract
+                (GQLBuilder.field "feedback"
+                    [ ( "id", Arg.variable idVar ) ]
+                    feedbackExtractor
+                )
+            )
+
+
+updateFeedabackStatusMutation : GQLBuilder.Document GQLBuilder.Mutation Feedback FeedbackStatusInput
+updateFeedabackStatusMutation =
+    let
+        idVar =
+            Var.required "id" .id Var.string
+
+        statusVar =
+            Var.required "status" .status Var.string
+    in
+        GQLBuilder.mutationDocument <|
+            GQLBuilder.extract <|
+                GQLBuilder.field "updateFeedbackStatus"
+                    [ ( "input"
+                      , Arg.object
+                            [ ( "id", Arg.variable idVar )
+                            , ( "status", Arg.variable statusVar )
+                            ]
+                      )
+                    ]
+                    (GQLBuilder.extract <|
+                        GQLBuilder.field "feedback"
+                            []
+                            feedbackExtractor
+                    )
 
 
 feedbackExtractor : GQLBuilder.ValueSpec GQLBuilder.NonNull GQLBuilder.ObjectType Feedback vars

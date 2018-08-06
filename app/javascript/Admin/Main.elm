@@ -1,20 +1,24 @@
 module Main exposing (..)
 
+import Admin.Data.Category exposing (Category)
+import Admin.Data.Organization exposing (OrganizationId)
+import Admin.Data.Url exposing (UrlData)
+import Admin.Request.Helper exposing (ApiKey, NodeEnv, logoutRequest)
+import GraphQL.Client.Http as GQLClient
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
 import Http
 import Navigation exposing (..)
-import Page.Article.List as ArticleList
 import Page.Article.Create as ArticleCreate
 import Page.Article.Edit as ArticleEdit
-import Page.Url.List as UrlList
-import Page.Url.Create as UrlCreate
-import Page.Url.Edit as UrlEdit
-import Page.Category.List as CategoryList
-import Page.Ticket.List as TicketList
-import Page.Feedback.List as FeedbackList
+import Page.Article.List as ArticleList
 import Page.Category.Create as CategoryCreate
+import Page.Category.Edit as CategoryEdit
+import Page.Category.List as CategoryList
+import Page.Errors as Errors
+import Page.Feedback.List as FeedbackList
+import Page.Feedback.Show as FeedbackShow
 import Page.Settings as Settings
 import Page.Organization.Create as OrganizationCreate
 import Page.Errors as Errors
@@ -26,8 +30,14 @@ import Admin.Request.Helper exposing (NodeEnv, ApiKey, logoutRequest)
 import Route
 import Task exposing (Task)
 import GraphQL.Client.Http as GQLClient
+import Page.Ticket.List as TicketList
+import Page.Url.Create as UrlCreate
+import Page.Url.Edit as UrlEdit
+import Page.Url.List as UrlList
 import Reader exposing (Reader)
+import Route
 import Task exposing (Task)
+import UrlParser as Url exposing (..)
 
 
 -- MODEL
@@ -47,6 +57,7 @@ type Page
     | ArticleEdit ArticleEdit.Model
     | CategoryList CategoryList.Model
     | CategoryCreate CategoryCreate.Model
+    | CategoryEdit CategoryEdit.Model
     | UrlList UrlList.Model
     | UrlCreate UrlCreate.Model
     | UrlEdit UrlEdit.Model
@@ -54,6 +65,7 @@ type Page
     | OrganizationCreate OrganizationCreate.Model
     | TicketList TicketList.Model
     | FeedbackList FeedbackList.Model
+    | FeedbackShow FeedbackShow.Model
     | Dashboard
     | NotFound
     | Blank
@@ -91,7 +103,7 @@ init flags location =
             , error = Nothing
             }
     in
-        ( initModel, pageCmd )
+    ( initModel, pageCmd )
 
 
 
@@ -110,9 +122,11 @@ type Msg
     | UrlsLoaded (Result GQLClient.Error (List UrlData))
     | CategoryListMsg CategoryList.Msg
     | CategoryCreateMsg CategoryCreate.Msg
+    | CategoryEditMsg CategoryEdit.Msg
     | CategoriesLoaded (Result GQLClient.Error (List Category))
     | TicketListMsg TicketList.Msg
     | FeedbackListMsg FeedbackList.Msg
+    | FeedbackShowMsg FeedbackShow.Msg
     | SettingsMsg Settings.Msg
     | OnLocationChange Navigation.Location
     | SignOut
@@ -140,7 +154,7 @@ setRoute location model =
         newRoute =
             Route.fromLocation location
     in
-        navigateTo newRoute model
+    navigateTo newRoute model
 
 
 navigateTo : Route.Route -> Model -> ( Model, Cmd Msg )
@@ -149,190 +163,234 @@ navigateTo newRoute model =
         transitionTo page msg =
             Tuple.mapFirst
                 (\pageModel ->
-                    ({ model
+                    { model
                         | currentPage =
                             TransitioningTo (page pageModel)
                         , route = newRoute
-                     }
-                    )
+                    }
                 )
                 >> Tuple.mapSecond
                     (Cmd.map msg)
     in
-        case newRoute of
-            Route.ArticleList organizationKey ->
-                let
-                    ( articleListModel, articleListRequest ) =
-                        ArticleList.init organizationKey
+    case newRoute of
+        Route.ArticleList organizationKey ->
+            let
+                ( articleListModel, articleListRequest ) =
+                    ArticleList.init organizationKey
 
-                    cmd =
-                        Cmd.map ArticleListMsg <|
-                            Task.attempt
-                                ArticleList.ArticleListLoaded
-                                (Reader.run (articleListRequest)
-                                    ( model.nodeEnv
-                                    , organizationKey
-                                    )
-                                )
-                in
-                    ( { model
-                        | currentPage =
-                            TransitioningTo
-                                (ArticleList articleListModel)
-                        , route = newRoute
-                        , organizationKey = organizationKey
-                      }
-                    , cmd
-                    )
-
-            Route.ArticleCreate organizationKey ->
-                let
-                    ( articleCreateModel, categoriesRequest ) =
-                        ArticleCreate.init
-
-                    cmd =
-                        Task.attempt ArticleCategoriesLoaded
-                            (Reader.run (categoriesRequest)
+                cmd =
+                    Cmd.map ArticleListMsg <|
+                        Task.attempt
+                            ArticleList.ArticleListLoaded
+                            (Reader.run articleListRequest
                                 ( model.nodeEnv
                                 , model.organizationKey
                                 )
                             )
-                in
-                    ( { model
-                        | currentPage =
-                            TransitioningTo
-                                (ArticleCreate articleCreateModel)
-                        , route = newRoute
-                      }
-                    , cmd
-                    )
+            in
+            ( { model
+                | currentPage =
+                    TransitioningTo
+                        (ArticleList articleListModel)
+                , route = newRoute
+              }
+            , cmd
+            )
 
-            Route.CategoryList organizationKey ->
-                let
-                    ( categoryListModel, categoriesRequest ) =
-                        CategoryList.init organizationKey
+        Route.ArticleCreate organizationKey ->
+            let
+                ( articleCreateModel, categoriesRequest ) =
+                    ArticleCreate.init
 
-                    cmd =
-                        Task.attempt CategoriesLoaded
-                            (Reader.run
-                                (categoriesRequest)
+                cmd =
+                    Task.attempt ArticleCategoriesLoaded
+                        (Reader.run categoriesRequest
+                            ( model.nodeEnv
+                            , model.organizationKey
+                            )
+                        )
+            in
+            ( { model
+                | currentPage =
+                    TransitioningTo
+                        (ArticleCreate articleCreateModel)
+                , route = newRoute
+              }
+            , cmd
+            )
+
+        Route.CategoryList organizationKey ->
+            let
+                ( categoryListModel, categoriesRequest ) =
+                    CategoryList.init organizationKey
+
+                cmd =
+                    Task.attempt CategoriesLoaded
+                        (Reader.run
+                            categoriesRequest
+                            ( model.nodeEnv, model.organizationKey )
+                        )
+            in
+            ( { model
+                | currentPage =
+                    TransitioningTo
+                        (CategoryList
+                            categoryListModel
+                        )
+                , route = newRoute
+              }
+            , cmd
+            )
+
+        Route.CategoryCreate organizationKey ->
+            CategoryCreate.init
+                |> transitionTo CategoryCreate CategoryCreateMsg
+
+        Route.UrlList organizationKey ->
+            let
+                ( urlListModel, urlListRequest ) =
+                    UrlList.init organizationKey
+
+                cmd =
+                    Task.attempt UrlsLoaded
+                        (Reader.run
+                            urlListRequest
+                            ( model.nodeEnv, model.organizationKey )
+                        )
+            in
+            ( { model
+                | currentPage =
+                    TransitioningTo
+                        (UrlList urlListModel)
+                , route = newRoute
+              }
+            , cmd
+            )
+
+        Route.UrlCreate organizationKey ->
+            UrlCreate.init
+                |> transitionTo UrlCreate UrlCreateMsg
+
+        Route.TicketList organizationKey ->
+            TicketList.init model.nodeEnv model.organizationKey
+                |> transitionTo TicketList TicketListMsg
+
+        Route.UrlEdit organizationKey urlId ->
+            let
+                ( urlEditModel, urlEditCmd ) =
+                    UrlEdit.init urlId
+
+                cmd =
+                    Cmd.map UrlEditMsg <| Task.attempt UrlEdit.UrlLoaded (Reader.run urlEditCmd ( model.nodeEnv, model.organizationKey ))
+            in
+            ( { model | currentPage = TransitioningTo (UrlEdit urlEditModel), route = newRoute }, cmd )
+
+        Route.FeedbackList organizationKey ->
+            let
+                ( feedbackListModel, feedbackListRequest ) =
+                    FeedbackList.init organizationKey
+
+                cmd =
+                    Cmd.map FeedbackListMsg <|
+                        Task.attempt
+                            FeedbackList.FeedbackListLoaded
+                            (Reader.run feedbackListRequest
+                                ( model.nodeEnv
+                                , model.organizationKey
+                                , "open"
+                                )
+                            )
+            in
+            ( { model
+                | currentPage =
+                    TransitioningTo
+                        (FeedbackList feedbackListModel)
+                , route = newRoute
+              }
+            , cmd
+            )
+
+        Route.FeedbackShow organizationKey feedbackId ->
+            let
+                ( feedbackShowModel, feedbackShowRequest ) =
+                    FeedbackShow.init feedbackId
+
+                cmd =
+                    Cmd.map FeedbackShowMsg <|
+                        Task.attempt
+                            FeedbackShow.FeedbackLoaded
+                            (Reader.run feedbackShowRequest
                                 ( model.nodeEnv, model.organizationKey )
                             )
-                in
-                    ( { model
-                        | currentPage =
-                            TransitioningTo
-                                (CategoryList
-                                    categoryListModel
-                                )
-                        , route = newRoute
-                      }
-                    , cmd
-                    )
+            in
+            ( { model
+                | currentPage =
+                    TransitioningTo
+                        (FeedbackShow feedbackShowModel)
+                , route = newRoute
+              }
+            , cmd
+            )
 
-            Route.CategoryCreate organizationKey ->
-                (CategoryCreate.init)
-                    |> transitionTo CategoryCreate CategoryCreateMsg
+        Route.Settings organizationKey ->
+            Settings.init model.organizationKey
+                |> transitionTo Settings SettingsMsg
 
-            Route.UrlList organizationKey ->
-                let
-                    ( urlListModel, urlListRequest ) =
-                        UrlList.init organizationKey
+        Route.Dashboard ->
+            ( { model | currentPage = Loaded Blank }, Cmd.none )
 
-                    cmd =
-                        Task.attempt UrlsLoaded
-                            (Reader.run
-                                (urlListRequest)
+        Route.ArticleEdit organizationKey articleId ->
+            let
+                ( articleEditModel, articleEditCmd ) =
+                    ArticleEdit.init articleId
+
+                cmd =
+                    Cmd.map ArticleEditMsg <|
+                        Task.attempt
+                            ArticleEdit.ArticleLoaded
+                            (Reader.run articleEditCmd
                                 ( model.nodeEnv, model.organizationKey )
                             )
-                in
-                    ( { model
-                        | currentPage =
-                            TransitioningTo
-                                (UrlList urlListModel)
-                        , route = newRoute
-                      }
-                    , cmd
-                    )
+            in
+            ( { model
+                | currentPage =
+                    TransitioningTo
+                        (ArticleEdit articleEditModel)
+                , route = newRoute
+              }
+            , cmd
+            )
 
-            Route.UrlCreate organizationKey ->
-                (UrlCreate.init)
-                    |> transitionTo UrlCreate UrlCreateMsg
+        Route.CategoryEdit categoryId ->
+            let
+                ( categoryEditModel, categoryEditCmd ) =
+                    CategoryEdit.init categoryId
 
-            Route.TicketList organizationKey ->
-                (TicketList.init model.nodeEnv model.organizationKey)
-                    |> transitionTo TicketList TicketListMsg
+                cmd =
+                    Cmd.map CategoryEditMsg <|
+                        Task.attempt
+                            CategoryEdit.CategoryLoaded
+                            (Reader.run categoryEditCmd
+                                ( model.nodeEnv, model.organizationKey )
+                            )
+            in
+            ( { model
+                | currentPage =
+                    TransitioningTo
+                        (CategoryEdit categoryEditModel)
+                , route = newRoute
+              }
+            , cmd
+            )
 
-            Route.UrlEdit organizationKey urlId ->
-                let
-                    ( urlEditModel, urlEditCmd ) =
-                        UrlEdit.init urlId
+        Route.OrganizationCreate ->
+            (OrganizationCreate.init model.userId)
+                |> transitionTo OrganizationCreate OrganizationCreateMsg
 
-                    cmd =
-                        Cmd.map UrlEditMsg <| Task.attempt (UrlEdit.UrlLoaded) (Reader.run (urlEditCmd) ( model.nodeEnv, model.organizationKey ))
-                in
-                    ( { model | currentPage = TransitioningTo (UrlEdit urlEditModel), route = newRoute }, cmd )
+      
 
-            Route.FeedbackList organizationKey ->
-                let
-                    ( feedbackListModel, feedbackListRequest ) =
-                        FeedbackList.init organizationKey
-
-                    cmd =
-                        Cmd.map FeedbackListMsg <|
-                            Task.attempt
-                                FeedbackList.FeedbackListLoaded
-                                (Reader.run (feedbackListRequest)
-                                    ( model.nodeEnv
-                                    , model.organizationKey
-                                    , "open"
-                                    )
-                                )
-                in
-                    ( { model
-                        | currentPage =
-                            TransitioningTo
-                                (FeedbackList feedbackListModel)
-                        , route = newRoute
-                      }
-                    , cmd
-                    )
-
-            Route.Settings organizationKey ->
-                (Settings.init model.organizationKey)
-                    |> transitionTo Settings SettingsMsg
-
-            Route.Dashboard ->
-                ( { model | currentPage = Loaded Blank }, Cmd.none )
-
-            Route.ArticleEdit organizationKey articleId ->
-                let
-                    ( articleEditModel, articleEditCmd ) =
-                        ArticleEdit.init articleId
-
-                    cmd =
-                        Cmd.map ArticleEditMsg <|
-                            Task.attempt
-                                (ArticleEdit.ArticleLoaded)
-                                (Reader.run (articleEditCmd)
-                                    ( model.nodeEnv, model.organizationKey )
-                                )
-                in
-                    ( { model
-                        | currentPage =
-                            TransitioningTo
-                                (ArticleEdit articleEditModel)
-                        , route = newRoute
-                      }
-                    , cmd
-                    )
-
-            Route.OrganizationCreate ->
-                (OrganizationCreate.init model.userId)
-                    |> transitionTo OrganizationCreate OrganizationCreateMsg
-
-            Route.NotFound ->
-                ( { model | currentPage = Loaded NotFound }, Cmd.none )
+        Route.NotFound ->
+            ( { model | currentPage = Loaded NotFound }, Cmd.none )
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -365,9 +423,9 @@ update msg model =
                         model.organizationKey
                         model.nodeEnv
             in
-                ( { model | currentPage = Loaded (ArticleList articleListModel) }
-                , Cmd.map ArticleListMsg articleListCmd
-                )
+            ( { model | currentPage = Loaded (ArticleList articleListModel) }
+            , Cmd.map ArticleListMsg articleListCmd
+            )
 
         ArticleCreateMsg caMsg ->
             let
@@ -385,9 +443,9 @@ update msg model =
                         model.nodeEnv
                         model.organizationKey
             in
-                ( { model | currentPage = Loaded (ArticleCreate articleCreateModel) }
-                , Cmd.map ArticleCreateMsg createArticleCmd
-                )
+            ( { model | currentPage = Loaded (ArticleCreate articleCreateModel) }
+            , Cmd.map ArticleCreateMsg createArticleCmd
+            )
 
         ArticleEditMsg aeMsg ->
             let
@@ -405,9 +463,9 @@ update msg model =
                         model.nodeEnv
                         model.organizationKey
             in
-                ( { model | currentPage = TransitioningTo (ArticleEdit articleEditModel) }
-                , Cmd.map ArticleEditMsg articleEditCmd
-                )
+            ( { model | currentPage = TransitioningTo (ArticleEdit articleEditModel) }
+            , Cmd.map ArticleEditMsg articleEditCmd
+            )
 
         ArticleCategoriesLoaded (Ok categoriesList) ->
             let
@@ -419,15 +477,15 @@ update msg model =
                         _ ->
                             ArticleCreate.initModel
             in
-                ( { model
-                    | currentPage =
-                        Loaded
-                            (ArticleCreate
-                                { currentPageModel | categories = categoriesList }
-                            )
-                  }
-                , Cmd.none
-                )
+            ( { model
+                | currentPage =
+                    Loaded
+                        (ArticleCreate
+                            { currentPageModel | categories = categoriesList }
+                        )
+              }
+            , Cmd.none
+            )
 
         ArticleCategoriesLoaded (Err error) ->
             ( { model | error = Just (toString error) }, Cmd.none )
@@ -448,9 +506,9 @@ update msg model =
                         model.nodeEnv
                         model.organizationKey
             in
-                ( { model | currentPage = Loaded (UrlCreate createUrlModel) }
-                , Cmd.map UrlCreateMsg createUrlCmds
-                )
+            ( { model | currentPage = Loaded (UrlCreate createUrlModel) }
+            , Cmd.map UrlCreateMsg createUrlCmds
+            )
 
         UrlEditMsg ueMsg ->
             let
@@ -465,9 +523,9 @@ update msg model =
                 ( urlEditModel, urlEditCmd ) =
                     UrlEdit.update ueMsg currentPageModel model.nodeEnv model.organizationKey
             in
-                ( { model | currentPage = Loaded (UrlEdit urlEditModel) }
-                , Cmd.map UrlEditMsg urlEditCmd
-                )
+            ( { model | currentPage = Loaded (UrlEdit urlEditModel) }
+            , Cmd.map UrlEditMsg urlEditCmd
+            )
 
         UrlListMsg ulMsg ->
             let
@@ -482,9 +540,9 @@ update msg model =
                 ( urlListModel, urlListCmds ) =
                     UrlList.update ulMsg currentPageModel model.nodeEnv model.organizationKey
             in
-                ( { model | currentPage = Loaded (UrlList urlListModel) }
-                , Cmd.map UrlListMsg urlListCmds
-                )
+            ( { model | currentPage = Loaded (UrlList urlListModel) }
+            , Cmd.map UrlListMsg urlListCmds
+            )
 
         UrlsLoaded (Ok urlsList) ->
             let
@@ -496,17 +554,17 @@ update msg model =
                         _ ->
                             UrlList.initModel model.organizationKey
             in
-                ( { model
-                    | currentPage =
-                        Loaded
-                            (UrlList
-                                { currentPageModel
-                                    | urls = urlsList
-                                }
-                            )
-                  }
-                , Cmd.none
-                )
+            ( { model
+                | currentPage =
+                    Loaded
+                        (UrlList
+                            { currentPageModel
+                                | urls = urlsList
+                            }
+                        )
+              }
+            , Cmd.none
+            )
 
         UrlsLoaded (Err error) ->
             ( model, Cmd.none )
@@ -527,9 +585,9 @@ update msg model =
                         model.nodeEnv
                         model.organizationKey
             in
-                ( { model | currentPage = Loaded (TicketList ticketListModel) }
-                , Cmd.map TicketListMsg ticketListCmds
-                )
+            ( { model | currentPage = Loaded (TicketList ticketListModel) }
+            , Cmd.map TicketListMsg ticketListCmds
+            )
 
         CategoryListMsg clMsg ->
             let
@@ -544,9 +602,9 @@ update msg model =
                 ( categoryListModel, categoryListCmd ) =
                     CategoryList.update clMsg currentPageModel
             in
-                ( { model | currentPage = Loaded (CategoryList categoryListModel) }
-                , Cmd.map CategoryListMsg categoryListCmd
-                )
+            ( { model | currentPage = Loaded (CategoryList categoryListModel) }
+            , Cmd.map CategoryListMsg categoryListCmd
+            )
 
         CategoriesLoaded (Ok categoriesList) ->
             let
@@ -558,15 +616,15 @@ update msg model =
                         _ ->
                             CategoryList.initModel model.organizationKey
             in
-                ( { model
-                    | currentPage =
-                        Loaded
-                            (CategoryList
-                                { currentPageModel | categories = categoriesList }
-                            )
-                  }
-                , Cmd.none
-                )
+            ( { model
+                | currentPage =
+                    Loaded
+                        (CategoryList
+                            { currentPageModel | categories = categoriesList }
+                        )
+              }
+            , Cmd.none
+            )
 
         CategoriesLoaded (Err err) ->
             ( model, Cmd.none )
@@ -587,11 +645,11 @@ update msg model =
                         model.nodeEnv
                         model.organizationKey
             in
-                ( { model
-                    | currentPage = Loaded (CategoryCreate categoryCreateModel)
-                  }
-                , Cmd.map CategoryCreateMsg categoryCreateCmd
-                )
+            ( { model
+                | currentPage = Loaded (CategoryCreate categoryCreateModel)
+              }
+            , Cmd.map CategoryCreateMsg categoryCreateCmd
+            )
 
         FeedbackListMsg flmsg ->
             let
@@ -609,9 +667,49 @@ update msg model =
                         model.organizationKey
                         model.nodeEnv
             in
-                ( { model | currentPage = Loaded (FeedbackList feedbackListModel) }
-                , Cmd.map FeedbackListMsg feedbackListCmd
-                )
+            ( { model | currentPage = Loaded (FeedbackList feedbackListModel) }
+            , Cmd.map FeedbackListMsg feedbackListCmd
+            )
+
+        FeedbackShowMsg fsMsg ->
+            let
+                currentPageModel =
+                    case model.currentPage of
+                        Loaded (FeedbackShow feedbackShowModel) ->
+                            feedbackShowModel
+
+                        _ ->
+                            FeedbackShow.initModel "0"
+
+                ( feedbackShowModel, feedbackShowCmd ) =
+                    FeedbackShow.update fsMsg
+                        currentPageModel
+                        model.nodeEnv
+                        model.organizationKey
+            in
+            ( { model | currentPage = TransitioningTo (FeedbackShow feedbackShowModel) }
+            , Cmd.map FeedbackShowMsg feedbackShowCmd
+            )
+
+        CategoryEditMsg ctMsg ->
+            let
+                currentPageModel =
+                    case model.currentPage of
+                        Loaded (CategoryEdit categoryEditModel) ->
+                            categoryEditModel
+
+                        _ ->
+                            CategoryEdit.initModel "0"
+
+                ( categoryEditModel, categoryEditCmd ) =
+                    CategoryEdit.update ctMsg
+                        currentPageModel
+                        model.nodeEnv
+                        model.organizationKey
+            in
+            ( { model | currentPage = Loaded (CategoryEdit categoryEditModel) }
+            , Cmd.map CategoryEditMsg categoryEditCmd
+            )
 
         SettingsMsg settingsMsg ->
             let
@@ -626,11 +724,11 @@ update msg model =
                 ( settingsModel, settingsCmd ) =
                     Settings.update settingsMsg currentPageModel
             in
-                ( { model
-                    | currentPage = Loaded (Settings settingsModel)
-                  }
-                , Cmd.map SettingsMsg settingsCmd
-                )
+            ( { model
+                | currentPage = Loaded (Settings settingsModel)
+              }
+            , Cmd.map SettingsMsg settingsCmd
+            )
 
         OrganizationCreateMsg oCMsg ->
             let
@@ -665,7 +763,7 @@ retriveOrganizationFromUrl location =
         org =
             parsePath (Url.s "admin" </> Url.s "organization" </> string) location
     in
-        getOrganizationId (org)
+    getOrganizationId org
 
 
 getOrganizationId : Maybe String -> OrganizationId
@@ -693,7 +791,7 @@ subscriptions model =
 
 view : Model -> Html Msg
 view model =
-    case (getPage model.currentPage) of
+    case getPage model.currentPage of
         ArticleList articleListModel ->
             adminLayout model
                 (Html.map ArticleListMsg
@@ -736,6 +834,12 @@ view model =
                     (CategoryCreate.view categoryCreateModel)
                 )
 
+        CategoryEdit categoryEditModel ->
+            adminLayout model
+                (Html.map CategoryEditMsg
+                    (CategoryEdit.view categoryEditModel)
+                )
+
         Settings settingsModel ->
             adminLayout model
                 (Html.map SettingsMsg
@@ -758,6 +862,12 @@ view model =
             adminLayout model
                 (Html.map FeedbackListMsg
                     (FeedbackList.view feedbackListModel)
+                )
+
+        FeedbackShow feedbackShowModel ->
+            adminLayout model
+                (Html.map FeedbackShowMsg
+                    (FeedbackShow.view feedbackShowModel)
                 )
 
         Dashboard ->
@@ -795,9 +905,8 @@ adminHeader model =
                         [ ( "nav-link", True )
                         , ( "active"
                           , (model.route
-                                == (Route.ArticleList
-                                        model.organizationKey
-                                   )
+                                == Route.ArticleList
+                                    model.organizationKey
                             )
                                 || (model.route == Route.ArticleCreate model.organizationKey)
                           )
@@ -811,7 +920,7 @@ adminHeader model =
                     [ classList
                         [ ( "nav-link", True )
                         , ( "active"
-                          , (model.route == (Route.UrlList model.organizationKey))
+                          , (model.route == Route.UrlList model.organizationKey)
                                 || (model.route == Route.UrlCreate model.organizationKey)
                           )
                         ]
@@ -824,7 +933,7 @@ adminHeader model =
                     [ classList
                         [ ( "nav-link", True )
                         , ( "active"
-                          , (model.route == (Route.CategoryList model.organizationKey))
+                          , (model.route == Route.CategoryList model.organizationKey)
                                 || (model.route == Route.CategoryCreate model.organizationKey)
                           )
                         ]
@@ -836,7 +945,7 @@ adminHeader model =
                 [ Html.a
                     [ classList
                         [ ( "nav-link", True )
-                        , ( "active", (model.route == (Route.TicketList model.organizationKey)) )
+                        , ( "active", model.route == Route.TicketList model.organizationKey )
                         ]
                     , onClick <| NavigateTo (Route.TicketList model.organizationKey)
                     ]
@@ -846,7 +955,7 @@ adminHeader model =
                 [ Html.a
                     [ classList
                         [ ( "nav-link", True )
-                        , ( "active", (model.route == (Route.FeedbackList model.organizationKey)) )
+                        , ( "active", model.route == Route.FeedbackList model.organizationKey )
                         ]
                     , onClick <| NavigateTo (Route.FeedbackList model.organizationKey)
                     ]
@@ -856,7 +965,7 @@ adminHeader model =
                 [ Html.a
                     [ classList
                         [ ( "nav-link", True )
-                        , ( "active", (model.route == (Route.Settings model.organizationKey)) )
+                        , ( "active", model.route == Route.Settings model.organizationKey )
                         ]
                     , onClick <| NavigateTo (Route.Settings model.organizationKey)
                     ]
