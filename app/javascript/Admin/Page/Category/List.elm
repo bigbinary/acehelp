@@ -71,10 +71,10 @@ update msg model nodeEnv organizationKey =
                 categories =
                     List.filter (\m -> m.id /= id) model.categories
             in
-                ( { model | categories = categories }, Cmd.none )
+                ( { model | categories = categories, error = Nothing }, Cmd.none )
 
         DeleteCategoryResponse (Err error) ->
-            ( model, Cmd.none )
+            ( { model | error = Just (toString error) }, Cmd.none )
 
 
 
@@ -86,6 +86,19 @@ view model =
     div
         []
         [ div
+            []
+            [ Maybe.withDefault (text "") <|
+                Maybe.map
+                    (\err ->
+                        div
+                            [ class "alert alert-danger alert-dismissible fade show"
+                            , attribute "role" "alert"
+                            ]
+                            [ text <| "Error: " ++ err ]
+                    )
+                    model.error
+            ]
+        , div
             [ class "buttonDiv" ]
             [ Html.a
                 [ onClick (Navigate <| Route.CategoryCreate model.organizationKey)
