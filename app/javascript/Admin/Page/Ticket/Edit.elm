@@ -36,7 +36,7 @@ initModel ticketId =
     }
 
 
-init : TicketId -> ( Model, Reader ( NodeEnv, ApiKey ) (Task GQLClient.Error Ticket) )
+init : TicketId -> ( Model, Reader ( NodeEnv, ApiKey ) (Task GQLClient.Error TicketEditData) )
 init ticketId =
     ( initModel ticketId
     , requestTicketById ticketId
@@ -50,8 +50,8 @@ init ticketId =
 type Msg
     = NoteInput String
     | UpdateTicket
-    | UpdateTicketResponse (Result GQLClient.Error UrlData)
-    | UrlLoaded (Result GQLClient.Error UrlData)
+    | UpdateTicketResponse (Result GQLClient.Error TicketEditData)
+    | TicketLoaded (Result GQLClient.Error TicketEditData)
 
 
 update : Msg -> Model -> NodeEnv -> ApiKey -> ( Model, Cmd Msg )
@@ -63,7 +63,7 @@ update msg model nodeEnv organizationKey =
         UpdateTicket ->
             let
                 fields =
-                    [ model.note ]
+                    []
 
                 errors =
                     validateAll fields
@@ -84,9 +84,9 @@ update msg model nodeEnv organizationKey =
                 else
                     ( { model | error = Just errors }, Cmd.none )
 
-        UpdateTicketResponse (Ok id) ->
+        UpdateTicketResponse (Ok ticket) ->
             ( { model
-                | note = Field.update model.note id.note
+                | note = ticket.note
                 , success = Just "Ticket Updated Successfully."
               }
             , Cmd.none
@@ -115,7 +115,7 @@ update msg model nodeEnv organizationKey =
 view : Model -> Html Msg
 view model =
     div [ class "container" ]
-        [ Html.form [ onSubmit UpdateTicket ]
+        [ Html.form []
             [ div []
                 [ Maybe.withDefault (text "") <|
                     Maybe.map
@@ -139,7 +139,7 @@ view model =
             , div []
                 [ label [] [ text "Note: " ]
                 , input
-                    [ Html.Attributes.value <| Field.value model.note
+                    [ Html.Attributes.value <| model.note
                     , type_ "text"
                     , placeholder "Url..."
                     , onInput NoteInput

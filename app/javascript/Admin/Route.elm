@@ -26,6 +26,7 @@ type Route
     | UrlCreate OrganizationApiKey
     | UrlEdit OrganizationApiKey UrlId
     | TicketList OrganizationApiKey
+    | TicketEdit OrganizationApiKey String
     | FeedbackList OrganizationApiKey
     | FeedbackShow OrganizationApiKey FeedbackId
     | Settings OrganizationApiKey
@@ -45,12 +46,12 @@ routeMatcher =
         , Url.map FeedbackList (s "organizations" </> string </> s "feedbacks")
         , Url.map FeedbackShow (s "organizations" </> string </> s "feedbacks" </> string)
         , Url.map Settings (s "organizations" </> string </> s "settings")
-
         , Url.map ArticleCreate (s "organizations" </> string </> s "articles" </> s "new")
         , Url.map UrlCreate (s "organizations" </> string </> s "urls" </> s "new")
         , Url.map CategoryCreate (s "organizations" </> string </> s "categories" </> s "new")
         , Url.map ArticleEdit (s "organizations" </> string </> s "articles" </> string)
         , Url.map UrlEdit (s "organizations" </> string </> s "urls" </> string </> s "edit")
+        , Url.map TicketEdit (s "organizations" </> string </> s "tickets" </> string)
         , Url.map OrganizationCreate (s "organizations" </> s "new")
         , Url.map CategoryEdit (s "categories" </> string)
         ]
@@ -59,6 +60,7 @@ routeMatcher =
 
 -- INTERNAL --
 
+
 routeToString : Route -> String
 routeToString page =
     let
@@ -66,6 +68,7 @@ routeToString page =
             case page of
                 Dashboard ->
                     []
+
                 ArticleList organizationApiKey ->
                     [ "organizations", organizationApiKey, "articles" ]
 
@@ -102,6 +105,9 @@ routeToString page =
                 ArticleEdit organizationApiKey articleId ->
                     [ "organizations", organizationApiKey, "articles", articleId ]
 
+                TicketEdit organizationApiKey ticketId ->
+                    [ "organizations", organizationApiKey, "articles", ticketId ]
+
                 OrganizationCreate ->
                     [ "organizations", "new" ]
 
@@ -111,7 +117,7 @@ routeToString page =
                 NotFound ->
                     []
     in
-    "/" ++ String.join "/" pieces
+        "/" ++ String.join "/" pieces
 
 
 modifyUrl : Route -> Cmd msg

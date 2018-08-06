@@ -17,10 +17,13 @@ requestTickets =
         )
 
 
-requestTicketById : TicketId -> Reader ( NodeEnv, ApiKey ) (Task GQLClient.Error Ticket)
+requestTicketById : TicketId -> Reader ( NodeEnv, ApiKey ) (Task GQLClient.Error TicketEditData)
 requestTicketById ticketId =
     Reader.Reader
         (\( env, apiKey ) ->
             GQLClient.customSendQuery (requestOptions env apiKey) <|
-                GQLBuilder.request { id = ticketId } requestTicketByIdQuery
+                (GQLBuilder.request
+                    { id = ticketId }
+                    requestTicketByIdQuery
+                )
         )
