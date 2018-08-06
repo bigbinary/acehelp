@@ -15,7 +15,7 @@ class User < ApplicationRecord
 
   scope :agents, -> { where(role: :agent) }
 
-  scope :for_organization, ->(org) { joins(organization_users: :organization) }
+  scope :for_organization, ->(org) { joins(organization_users: :organization).where(organization_users: { organization_id: org.id }) }
 
   def name
     ("#{first_name} #{last_name}".squish).presence || "Anonymous"
@@ -41,7 +41,7 @@ class User < ApplicationRecord
     org_data
   end
 
-  def deallocate_from_organization
-    update_attributes(organization_id: nil)
+  def deallocate_from_organization(organization_id)
+    organization_users.where(organization_id: organization_id).destroy_all
   end
 end
