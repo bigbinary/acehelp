@@ -35,6 +35,7 @@ import Route
 import Task exposing (Task)
 import GraphQL.Client.Http as GQLClient
 import Page.Ticket.List as TicketList
+import Page.Ticket.Edit as TicketEdit
 import Page.Url.Create as UrlCreate
 import Page.Url.Edit as UrlEdit
 import Page.Url.List as UrlList
@@ -68,6 +69,7 @@ type Page
     | Settings Settings.Model
     | OrganizationCreate OrganizationCreate.Model
     | TicketList TicketList.Model
+    | TicketEdit TicketEdit.Model
     | FeedbackList FeedbackList.Model
     | FeedbackShow FeedbackShow.Model
     | TeamList TeamList.Model
@@ -134,6 +136,7 @@ type Msg
     | FeedbackShowMsg FeedbackShow.Msg
     | TeamListMsg TeamList.Msg
     | TeamCreateMsg TeamMemberCreate.Msg
+    | TicketEditMsg TicketEdit.Msg
     | SettingsMsg Settings.Msg
     | OnLocationChange Navigation.Location
     | SignOut
@@ -369,6 +372,28 @@ navigateTo newRoute model =
                         | currentPage =
                             TransitioningTo
                                 (TeamList teamListModel)
+                        , route = newRoute
+                      }
+                    , cmd
+                    )
+
+            Route.TicketEdit organizationKey ticketId ->
+                let
+                    ( ticketEditModel, ticketEditRequest ) =
+                        TicketEdit.init ticketId
+
+                    cmd =
+                        Cmd.map TicketEditMsg <|
+                            Task.attempt
+                                TicketEdit.TicketLoaded
+                                (Reader.run ticketEditRequest
+                                    ( model.nodeEnv, model.organizationKey )
+                                )
+                in
+                    ( { model
+                        | currentPage =
+                            TransitioningTo
+                                (TicketEdit ticketEditModel)
                         , route = newRoute
                       }
                     , cmd
@@ -792,6 +817,26 @@ update msg model =
                 , Cmd.map TeamCreateMsg createTeamCmds
                 )
 
+        TicketEditMsg teMsg ->
+            let
+                currentPageModel =
+                    case model.currentPage of
+                        Loaded (TicketEdit ticketEditModel) ->
+                            ticketEditModel
+
+                        _ ->
+                            TicketEdit.initModel "0"
+
+                ( ticketEditModel, ticketEditCmd ) =
+                    TicketEdit.update teMsg
+                        currentPageModel
+                        model.nodeEnv
+                        model.organizationKey
+            in
+                ( { model | currentPage = TransitioningTo (TicketEdit ticketEditModel) }
+                , Cmd.map TicketEditMsg ticketEditCmd
+                )
+
         SettingsMsg settingsMsg ->
             let
                 currentPageModel =
@@ -966,6 +1011,12 @@ view model =
             adminLayout model
                 (Html.map TeamCreateMsg
                     (TeamMemberCreate.view teamMemberCreateModel)
+                )
+
+        TicketEdit ticketEditModel ->
+            adminLayout model
+                (Html.map TicketEditMsg
+                    (TicketEdit.view ticketEditModel)
                 )
 
         Dashboard ->

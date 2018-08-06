@@ -7,20 +7,13 @@ import Html.Attributes exposing (..)
 import Page.Common.View exposing (renderError)
 import Admin.Request.Ticket exposing (..)
 import Request.Helpers exposing (NodeEnv, ApiKey)
+import Admin.Data.Ticket exposing (..)
 import Task exposing (Task)
 import Reader exposing (Reader)
 import GraphQL.Client.Http as GQLClient
 
 
 -- MODEL
-
-
-type alias Ticket =
-    { id : String
-    , name : String
-    , email : String
-    , message : String
-    }
 
 
 type alias Model =
