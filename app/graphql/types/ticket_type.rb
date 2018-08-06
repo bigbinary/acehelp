@@ -6,4 +6,5 @@ Types::TicketType = GraphQL::ObjectType.define do
   field :name, types.String
   field :email, !types.String
   field :message, !types.String
+  field :status, !types.String
 end
