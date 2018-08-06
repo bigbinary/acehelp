@@ -13,6 +13,15 @@ type alias Ticket =
     }
 
 
+type alias TicketId =
+    String
+
+
+type alias TicketIdInput =
+    { id : String
+    }
+
+
 requestTicketQuery : GQLBuilder.Document GQLBuilder.Query (List Ticket) vars
 requestTicketQuery =
     GQLBuilder.queryDocument
@@ -29,3 +38,24 @@ requestTicketQuery =
                 )
             )
         )
+
+
+requestTicketByIdQuery : GQLBuilder.Document GQLBuilder.Query Ticket { vars | id : String }
+requestTicketByIdQuery =
+    let
+        idVar =
+            Var.required "id" .id Var.string
+    in
+        GQLBuilder.queryDocument
+            (GQLBuilder.extract
+                (GQLBuilder.field "ticket"
+                    [ ( "id", Arg.variable idVar )
+                    ]
+                    (GQLBuilder.object Ticket
+                        |> GQLBuilder.with (GQLBuilder.field "id" [] GQLBuilder.string)
+                        |> GQLBuilder.with (GQLBuilder.field "name" [] GQLBuilder.string)
+                        |> GQLBuilder.with (GQLBuilder.field "email" [] GQLBuilder.string)
+                        |> GQLBuilder.with (GQLBuilder.field "message" [] GQLBuilder.string)
+                    )
+                )
+            )
