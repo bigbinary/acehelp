@@ -6,9 +6,10 @@ import Html.Events exposing (..)
 import Admin.Data.Article exposing (..)
 import Admin.Request.Article exposing (..)
 import Admin.Request.Category exposing (..)
+import Admin.Request.Url exposing (..)
 import Request.Helpers exposing (NodeEnv, ApiKey)
 import Admin.Data.Category exposing (..)
-import Admin.Data.Url exposing (UrlData)
+import Admin.Data.Url exposing (UrlData, UrlId)
 import Reader exposing (Reader)
 import Task exposing (Task)
 import Time
@@ -37,16 +38,6 @@ type alias Model =
     }
 
 
-type Status
-    = Saving
-    | None
-
-
-type ArticleUrl
-    = Selected UrlData
-    | Unselected UrlData
-
-
 initModel : ArticleId -> Model
 initModel articleId =
     { title = Field (validateEmpty "Title") ""
@@ -63,11 +54,12 @@ initModel articleId =
 
 init :
     ArticleId
-    -> ( Model, Reader ( NodeEnv, ApiKey ) (Task GQLClient.Error Article), Reader ( NodeEnv, ApiKey ) (Task GQLClient.Error (List Category)) )
+    -> ( Model, Reader ( NodeEnv, ApiKey ) (Task GQLClient.Error Article), Reader ( NodeEnv, ApiKey ) (Task GQLClient.Error (List Category)), Reader ( NodeEnv, ApiKey ) (Task GQLClient.Error (List UrlData)) )
 init articleId =
     ( initModel articleId
     , requestArticleById articleId
     , requestCategories
+    , requestUrls
     )
 
 
@@ -83,6 +75,8 @@ type Msg
     | ArticleLoaded (Result GQLClient.Error Article)
     | CategoriesLoaded (Result GQLClient.Error (List Category))
     | CategorySelected String
+    | UrlsLoaded (Result GQLClient.Error (List UrlData))
+    | UrlSelected (List UrlId)
     | TrixInitialize ()
     | ReceivedTimeoutId Int
     | TimedOut Int
@@ -134,7 +128,7 @@ update msg model nodeEnv organizationKey =
                 errors =
                     errorsIn [ newDesc, model.title ]
             in
-                ( { model | desc = newDesc, error = errors }, Cmd.none )
+                ( { model | desc = newDesc, error = errors }, setTimeout delayTime )
 
         SaveArticle ->
             save model nodeEnv organizationKey
@@ -143,12 +137,13 @@ update msg model nodeEnv organizationKey =
             ( { model
                 | title = Field.update model.title ""
                 , desc = Field.update model.desc ""
+                , status = None
               }
             , Cmd.none
             )
 
         SaveArticleResponse (Err error) ->
-            ( { model | error = Just (toString error) }, Cmd.none )
+            ( { model | error = Just (toString error), status = None }, Cmd.none )
 
         ArticleLoaded (Ok article) ->
             ( { model
@@ -178,7 +173,37 @@ update msg model nodeEnv organizationKey =
                 errors =
                     errorsIn [ model.desc, model.title ]
             in
-                ( { model | categoryId = newCategoryId, error = errors }, Cmd.none )
+                ( { model | categoryId = newCategoryId, error = errors }, setTimeout delayTime )
+
+        UrlsLoaded (Ok urls) ->
+            ( { model | urls = List.map Unselected urls }, Cmd.none )
+
+        UrlsLoaded (Err err) ->
+            ( { model | error = Just (toString err) }, Cmd.none )
+
+        UrlSelected selectedUrlIds ->
+            let
+                urlSelection urlItem =
+                    if List.member urlItem.id selectedUrlIds then
+                        Selected urlItem
+                    else
+                        Unselected urlItem
+            in
+                ( { model
+                    | urls =
+                        List.map
+                            (\url ->
+                                case url of
+                                    Selected urlItem ->
+                                        urlSelection urlItem
+
+                                    Unselected urlItem ->
+                                        urlSelection urlItem
+                            )
+                            model.urls
+                  }
+                , setTimeout delayTime
+                )
 
         TrixInitialize _ ->
             ( model, insertArticleContent <| Field.value model.desc )
@@ -236,6 +261,7 @@ view model =
                 ]
             , div [ class "col-sm article-meta-data-block" ]
                 [ categoryListDropdown model.categories (Maybe.withDefault "" model.categoryId) (CategorySelected)
+                , multiSelectUrlList "Urls:" model.urls UrlSelected
                 ]
             ]
         , if model.status == Saving then

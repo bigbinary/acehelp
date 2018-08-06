@@ -6,7 +6,19 @@ import Html.Events exposing (..)
 import Admin.Data.Category exposing (..)
 import Admin.Data.Article exposing (..)
 import Admin.Data.Url exposing (..)
+import Json.Decode as Json
+import Json.Decode.Extra as JsonEx
 import Field exposing (..)
+
+
+type Status
+    = Saving
+    | None
+
+
+type ArticleUrl
+    = Selected UrlData
+    | Unselected UrlData
 
 
 errorView : Maybe String -> Html msg
@@ -64,3 +76,29 @@ savingIndicator : Html msg
 savingIndicator =
     div [ class "save-indicator" ]
         [ text "Saving.." ]
+
+
+targetSelectedOptions : Json.Decoder (List String)
+targetSelectedOptions =
+    Json.at [ "target", "selectedOptions" ] <|
+        JsonEx.collection <|
+            Json.at [ "value" ] <|
+                Json.string
+
+
+multiSelectUrlList : String -> List ArticleUrl -> (List String -> msg) -> Html msg
+multiSelectUrlList title urls onselect =
+    div []
+        [ h6 [] [ text title ]
+        , select [ on "change" (Json.map onselect targetSelectedOptions), multiple True, class "form-control select-checkbox", size 5 ] <|
+            List.map
+                (\url ->
+                    case url of
+                        Selected urlItem ->
+                            option [ Html.Attributes.value urlItem.id, selected True ] [ text urlItem.url ]
+
+                        Unselected urlItem ->
+                            option [ Html.Attributes.value urlItem.id, selected False ] [ text urlItem.url ]
+                )
+                urls
+        ]
