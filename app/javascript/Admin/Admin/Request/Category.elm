@@ -37,3 +37,12 @@ requestUpdateCategory =
                     categoryInputs
                     udpateCategoryMutation
         )
+
+
+deleteCategory : Reader ( NodeEnv, ApiKey, DeleteCategoryInput ) (Task GQLClient.Error CategoryId)
+deleteCategory =
+    Reader.Reader
+        (\( nodeEnv, apiKey, categoryId ) ->
+            GQLClient.customSendMutation (requestOptions nodeEnv apiKey) <|
+                GQLBuilder.request categoryId deleteCategoryMutation
+        )

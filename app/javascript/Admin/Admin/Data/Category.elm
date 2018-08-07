@@ -35,6 +35,11 @@ type alias UpdateCategoryInputs =
     }
 
 
+type alias DeleteCategoryInput =
+    { id : CategoryId
+    }
+
+
 categoriesQuery : GQLBuilder.Document GQLBuilder.Query (List Category) vars
 categoriesQuery =
     GQLBuilder.queryDocument
@@ -112,3 +117,24 @@ categoryObject =
     GQLBuilder.object Category
         |> GQLBuilder.with (GQLBuilder.field "id" [] GQLBuilder.string)
         |> GQLBuilder.with (GQLBuilder.field "name" [] GQLBuilder.string)
+
+
+deleteCategoryMutation : GQLBuilder.Document GQLBuilder.Mutation CategoryId DeleteCategoryInput
+deleteCategoryMutation =
+    let
+        idVar =
+            Var.required "id" .id Var.string
+    in
+        GQLBuilder.mutationDocument <|
+            GQLBuilder.extract <|
+                GQLBuilder.field "deleteCategory"
+                    [ ( "input"
+                      , Arg.object
+                            [ ( "id", Arg.variable idVar ) ]
+                      )
+                    ]
+                    (GQLBuilder.extract <|
+                        GQLBuilder.field "deletedId"
+                            []
+                            GQLBuilder.string
+                    )
