@@ -4,12 +4,12 @@ Types::TicketCommentType = GraphQL::ObjectType.define do
   name "TicketComment"
 
   field :id, !types.String
-  field :agent_id, !types.String
+  field :commenter_id, !types.String
   field :ticket_id, !types.String
   field :info, !types.String
 
-  field :agent, -> { !Types::UserType }  do
-    resolve -> (obj, args, context) { obj.agent }
+  field :commentable, -> { !Types::UserType }  do
+    resolve -> (obj, args, context) { obj.commentable }
   end
 
   field :ticket, -> { !Types::TicketType }  do
