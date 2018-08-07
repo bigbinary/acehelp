@@ -27,8 +27,12 @@ class GraphqlController < ApplicationController
     end
 
     def context
-      {}
-      { organization: @organization } if @organization.present?
+      context = {}
+      context[:organization] = @organization if @organization.present?
+      if request_is_mutation_for?("addTicket")
+        context[:user_agent] = request.user_agent
+      end
+      context
     end
 
     def ensure_hash(ambiguous_param)
@@ -59,5 +63,13 @@ class GraphqlController < ApplicationController
       logger.error e.backtrace.join("\n")
 
       raise e if Rails.env.test?
+    end
+
+    def request_is_mutation?
+      params[:query].starts_with?("mutation")
+    end
+
+    def request_is_mutation_for?(mutation_type)
+      request_is_mutation? && params[:query] =~ /#{mutation_type}/
     end
 end
