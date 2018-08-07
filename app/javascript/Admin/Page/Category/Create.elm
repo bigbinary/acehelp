@@ -9,9 +9,9 @@ import Helpers exposing (..)
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
-import Navigation exposing (modifyUrl)
 import Reader exposing (Reader)
 import Request.Helpers exposing (..)
+import Route
 import Task exposing (Task)
 
 
@@ -86,7 +86,7 @@ update msg model nodeEnv organizationKey =
                 , name = Field.update model.name ""
                 , error = Nothing
               }
-            , modifyUrl ("/organizations/" ++ organizationKey ++ "/categories")
+            , Route.modifyUrl <| Route.CategoryList organizationKey
             )
 
         SaveCategoryResponse (Err error) ->

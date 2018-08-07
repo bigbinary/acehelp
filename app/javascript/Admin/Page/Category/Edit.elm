@@ -11,6 +11,7 @@ import Html.Attributes exposing (..)
 import Html.Events exposing (..)
 import Reader exposing (Reader)
 import Request.Helpers exposing (..)
+import Route
 import Task exposing (Task)
 
 
@@ -98,7 +99,7 @@ update msg model nodeEnv organizationKey =
                     ( { model | error = Just errors }, Cmd.none )
 
         UpdateCategoryResponse (Ok id) ->
-            ( model, Cmd.none )
+            ( model, Route.modifyUrl <| Route.CategoryList organizationKey )
 
         UpdateCategoryResponse (Err error) ->
             ( { model | error = Just (toString error) }, Cmd.none )
