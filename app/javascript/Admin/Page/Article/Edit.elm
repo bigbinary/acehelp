@@ -35,6 +35,7 @@ type alias Model =
     , error : Maybe String
     , keyboardInputTaskId : Maybe Int
     , status : Status
+    , articleLoaded : Bool
     }
 
 
@@ -48,6 +49,7 @@ initModel articleId =
     , error = Nothing
     , keyboardInputTaskId = Nothing
     , status = None
+    , articleLoaded = False
     }
 
 
@@ -149,12 +151,13 @@ update msg model nodeEnv organizationKey =
                 | articleId = article.id
                 , title = Field.update model.title article.title
                 , desc = Field.update model.desc article.desc
+                , articleLoaded = True
               }
             , insertArticleContent article.desc
             )
 
         ArticleLoaded (Err err) ->
-            ( { model | error = Just "There was an error loading up the article" }
+            ( { model | error = Just "There was an error loading up the article", articleLoaded = False }
             , Cmd.none
             )
 
@@ -305,7 +308,7 @@ save model nodeEnv organizationKey =
                     ( nodeEnv, organizationKey )
                 )
     in
-        if Field.isAllValid fields then
+        if Field.isAllValid fields && model.articleLoaded == True then
             ( { model | error = Nothing, status = Saving }, cmd )
         else
             ( { model | error = errorsIn fields }, Cmd.none )
