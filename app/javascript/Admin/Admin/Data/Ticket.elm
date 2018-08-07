@@ -13,12 +13,19 @@ type alias Ticket =
     }
 
 
+type alias TicketStatus =
+    { key : String
+    , value : String
+    }
+
+
 type alias TicketEditData =
     { id : String
     , name : String
     , email : String
     , message : String
     , note : String
+    , statuses : List TicketStatus
     }
 
 
@@ -65,6 +72,20 @@ requestTicketByIdQuery =
                         |> GQLBuilder.with (GQLBuilder.field "email" [] GQLBuilder.string)
                         |> GQLBuilder.with (GQLBuilder.field "message" [] GQLBuilder.string)
                         |> GQLBuilder.with (GQLBuilder.field "note" [] GQLBuilder.string)
+                        |> GQLBuilder.with
+                            (GQLBuilder.field "statuses"
+                                []
+                                (GQLBuilder.list
+                                    ticketStatusObject
+                                )
+                            )
                     )
                 )
             )
+
+
+ticketStatusObject : GQLBuilder.ValueSpec GQLBuilder.NonNull GQLBuilder.ObjectType TicketStatus vars
+ticketStatusObject =
+    GQLBuilder.object TicketStatus
+        |> GQLBuilder.with (GQLBuilder.field "key" [] GQLBuilder.string)
+        |> GQLBuilder.with (GQLBuilder.field "value" [] GQLBuilder.string)
