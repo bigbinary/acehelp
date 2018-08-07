@@ -47,7 +47,7 @@ class Mutations::AssignUserToOrganizationMutationsTest < ActiveSupport::TestCase
 
   test "assign organization with name" do
     new_email_2 =
-    result = AceHelp::Client.execute(@query, user_keys: { email: "new_email_2@example.com", name: "Sagar Alias Jackey" })
+    result = AceHelp::Client.execute(@query, user_keys: { email: "new_email_2@example.com", firstName: "Sagar", lastName: "Alias Jackey" })
     assert_equal "Sagar",  result.data.assign_user_to_organization.user.first_name
     assert_equal "Alias Jackey",  result.data.assign_user_to_organization.user.last_name
   end
