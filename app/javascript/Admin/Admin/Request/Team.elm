@@ -27,7 +27,8 @@ createTeamMember =
             )
         )
 
-removeTeamMember : Reader ( NodeEnv, ApiKey, UserEmailInput ) (Task GQLClient.Error (List TeamMember))
+
+removeTeamMember : Reader ( NodeEnv, ApiKey, UserEmailInput ) (Task GQLClient.Error (List Team))
 removeTeamMember =
     Reader.Reader
         (\( nodeEnv, apiKey, userEmail ) ->

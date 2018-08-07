@@ -9,6 +9,11 @@ type alias UserId =
     String
 
 
+type alias UserEmailInput =
+    { email : String
+    }
+
+
 type alias Team =
     { id : UserId
     , name : String
@@ -74,7 +79,7 @@ teamMemberExtractor =
     )
 
 
-removeUserFromOrganization : GQLBuilder.Document GQLBuilder.Mutation (List TeamMember) UserEmailInput
+removeUserFromOrganization : GQLBuilder.Document GQLBuilder.Mutation (List Team) UserEmailInput
 removeUserFromOrganization =
     let
         emailVar =

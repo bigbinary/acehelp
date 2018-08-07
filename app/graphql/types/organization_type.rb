@@ -8,10 +8,12 @@ Types::OrganizationType = GraphQL::ObjectType.define do
   field :api_key, !types.String
 
   field :articles, -> { !types[Types::ArticleType] }  do
+    preload :articles
     resolve -> (org, args, context) { org.articles }
   end
 
   field :urls, -> { !types[Types::UrlType] }  do
+    preload :urls
     resolve -> (org, args, context) { org.urls }
   end
 end
