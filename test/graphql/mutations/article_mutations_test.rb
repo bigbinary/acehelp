@@ -6,6 +6,7 @@ require "graphql/client_host"
 class Mutations::ArticleMutationsTest < ActiveSupport::TestCase
   setup do
     @category = categories :novel
+    @url = urls :bigbinary
     org = organizations :bigbinary
     @article = @category.articles.create!(title: "test_article", desc: "Only for test",  organization_id: org.id)
   end
@@ -22,7 +23,7 @@ class Mutations::ArticleMutationsTest < ActiveSupport::TestCase
               }
             GRAPHQL
 
-    result = AceHelp::Client.execute(query, input: { title: "Create Article", desc: "New article creation", category_id: @category.id })
+    result = AceHelp::Client.execute(query, input: { title: "Create Article", desc: "New article creation", category_ids: [@category.id], url_ids: [@url.id] })
 
     assert_equal result.data.add_article.article.title, "Create Article"
   end
@@ -39,7 +40,7 @@ class Mutations::ArticleMutationsTest < ActiveSupport::TestCase
               }
             GRAPHQL
 
-    result = AceHelp::Client.execute(query, input: { title: "", desc: "New article creation", category_id: @category.id })
+    result = AceHelp::Client.execute(query, input: { title: "", desc: "New article creation", category_ids: [@category.id], url_ids: [@url.id] })
     assert_nil result.data.add_article.article
   end
 
@@ -60,7 +61,7 @@ class Mutations::ArticleMutationsTest < ActiveSupport::TestCase
               }
     GRAPHQL
 
-    result = AceHelp::Client.execute(query, input: { title: "", desc: "New article creation", category_id: @category.id })
+    result = AceHelp::Client.execute(query, input: { title: "", desc: "New article creation", category_ids: [@category.id], url_ids: [@url.id] })
     assert_not_empty result.data.add_article.errors.flat_map(&:path) & ["addArticle", "title"]
   end
 
