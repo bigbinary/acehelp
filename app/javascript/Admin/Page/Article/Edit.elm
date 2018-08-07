@@ -5,15 +5,22 @@ import Html.Attributes exposing (..)
 import Html.Events exposing (..)
 import Admin.Data.Article exposing (..)
 import Admin.Request.Article exposing (..)
+import Admin.Request.Category exposing (..)
+import Admin.Request.Url exposing (..)
 import Request.Helpers exposing (NodeEnv, ApiKey)
 import Admin.Data.Category exposing (..)
+import Admin.Data.Url exposing (UrlData, UrlId)
+import Admin.Data.Common exposing (..)
 import Reader exposing (Reader)
 import Task exposing (Task)
+import Time
 import Field exposing (..)
 import Field.ValidationResult exposing (..)
 import Helpers exposing (..)
-import Admin.Ports exposing (insertArticleContent)
+import Admin.Ports exposing (..)
+import Page.Article.Common exposing (..)
 import GraphQL.Client.Http as GQLClient
+import Admin.Ports exposing (..)
 
 
 -- Model
@@ -23,9 +30,12 @@ type alias Model =
     { title : Field String String
     , desc : Field String String
     , articleId : ArticleId
-    , categories : List Category
-    , categoryId : Field String String
+    , categories : List (Option Category)
+    , urls : List (Option UrlData)
     , error : Maybe String
+    , keyboardInputTaskId : Maybe Int
+    , status : Status
+    , articleLoaded : Bool
     }
 
 
@@ -35,15 +45,22 @@ initModel articleId =
     , desc = Field (validateEmpty "Article Content") ""
     , articleId = articleId
     , categories = []
-    , categoryId = Field (validateEmpty "Category Id") ""
+    , urls = []
     , error = Nothing
+    , keyboardInputTaskId = Nothing
+    , status = None
+    , articleLoaded = False
     }
 
 
-init : ArticleId -> ( Model, Reader ( NodeEnv, ApiKey ) (Task GQLClient.Error Article) )
+init :
+    ArticleId
+    -> ( Model, Reader ( NodeEnv, ApiKey ) (Task GQLClient.Error Article), Reader ( NodeEnv, ApiKey ) (Task GQLClient.Error (List Category)), Reader ( NodeEnv, ApiKey ) (Task GQLClient.Error (List UrlData)) )
 init articleId =
     ( initModel articleId
     , requestArticleById articleId
+    , requestCategories
+    , requestUrls
     )
 
 
@@ -58,79 +75,141 @@ type Msg
     | SaveArticleResponse (Result GQLClient.Error Article)
     | ArticleLoaded (Result GQLClient.Error Article)
     | CategoriesLoaded (Result GQLClient.Error (List Category))
-    | CategorySelected String
+    | CategorySelected (List CategoryId)
+    | UrlsLoaded (Result GQLClient.Error (List UrlData))
+    | UrlSelected (List UrlId)
+    | TrixInitialize ()
+    | ReceivedTimeoutId Int
+    | TimedOut Int
+    | Killed ()
 
 
 
 -- TODO: Fetch categories to populate categories dropdown
 
 
+delayTime : Float
+delayTime =
+    Time.second * 3
+
+
 update : Msg -> Model -> NodeEnv -> ApiKey -> ( Model, Cmd Msg )
 update msg model nodeEnv organizationKey =
     case msg of
         TitleInput title ->
-            ( { model | title = Field.update model.title title }, Cmd.none )
-
-        DescInput desc ->
-            ( { model | desc = Field.update model.desc desc }, Cmd.none )
-
-        SaveArticle ->
             let
-                fields =
-                    [ model.title, model.desc, model.categoryId ]
+                newTitle =
+                    Field.update model.title title
 
                 errors =
-                    validateAll fields
-                        |> filterFailures
-                        |> List.map
-                            (\result ->
-                                case result of
-                                    Failed err ->
-                                        err
-
-                                    Passed _ ->
-                                        "Unknown Error"
-                            )
-                        |> String.join ", "
+                    errorsIn [ newTitle, model.desc ]
             in
-                if isAllValid fields then
-                    save model nodeEnv organizationKey
-                else
-                    ( { model | error = Just <| Debug.log "" errors }, Cmd.none )
+                ( { model | title = newTitle, error = errors }, setTimeout delayTime )
+
+        ReceivedTimeoutId id ->
+            let
+                killCmd =
+                    case model.keyboardInputTaskId of
+                        Just oldId ->
+                            clearTimeout oldId
+
+                        Nothing ->
+                            Cmd.none
+            in
+                ( { model | keyboardInputTaskId = Just id }, killCmd )
+
+        TimedOut id ->
+            save model nodeEnv organizationKey
+
+        DescInput desc ->
+            let
+                newDesc =
+                    Field.update model.desc desc
+
+                errors =
+                    errorsIn [ newDesc, model.title ]
+            in
+                ( { model | desc = newDesc, error = errors }, setTimeout delayTime )
+
+        SaveArticle ->
+            save model nodeEnv organizationKey
 
         SaveArticleResponse (Ok id) ->
             ( { model
                 | title = Field.update model.title ""
                 , desc = Field.update model.desc ""
+                , status = None
               }
             , Cmd.none
             )
 
         SaveArticleResponse (Err error) ->
-            ( { model | error = Just (toString error) }, Cmd.none )
+            ( { model | error = Just (toString error), status = None }, Cmd.none )
 
         ArticleLoaded (Ok article) ->
             ( { model
-                | title = Field.update model.title article.title
+                | articleId = article.id
+                , title = Field.update model.title article.title
                 , desc = Field.update model.desc article.desc
-                , categories = article.categories
+                , articleLoaded = True
               }
             , insertArticleContent article.desc
             )
 
         ArticleLoaded (Err err) ->
-            ( { model | error = Just "There was an error loading up the article" }
+            ( { model | error = Just "There was an error loading up the article", articleLoaded = False }
             , Cmd.none
             )
 
         CategoriesLoaded (Ok categories) ->
-            ( { model | categories = categories }, Cmd.none )
+            ( { model | categories = List.map Unselected categories }, Cmd.none )
 
         CategoriesLoaded (Err err) ->
             ( { model | error = Just (toString err) }, Cmd.none )
 
-        CategorySelected categoryId ->
-            ( { model | categoryId = Field.update model.categoryId categoryId }, Cmd.none )
+        CategorySelected categoryIds ->
+            ( { model
+                | categories = itemSelection categoryIds model.categories
+              }
+            , setTimeout delayTime
+            )
+
+        UrlsLoaded (Ok urls) ->
+            ( { model | urls = List.map Unselected urls }, Cmd.none )
+
+        UrlsLoaded (Err err) ->
+            ( { model | error = Just (toString err) }, Cmd.none )
+
+        UrlSelected selectedUrlIds ->
+            ( { model
+                | urls =
+                    itemSelection selectedUrlIds model.urls
+              }
+            , setTimeout delayTime
+            )
+
+        TrixInitialize _ ->
+            ( model, insertArticleContent <| Field.value model.desc )
+
+        Killed _ ->
+            ( model, Cmd.none )
+
+
+errorsIn : List (Field String v) -> Maybe String
+errorsIn fields =
+    validateAll fields
+        |> filterFailures
+        |> List.map
+            (\result ->
+                case result of
+                    Failed err ->
+                        err
+
+                    Passed _ ->
+                        "Unknown Error"
+            )
+        |> String.join ", "
+        |> stringToMaybe
 
 
 
@@ -140,7 +219,7 @@ update msg model nodeEnv organizationKey =
 view : Model -> Html Msg
 view model =
     div []
-        [ errorView model
+        [ errorView model.error
         , div [ class "row article-block" ]
             [ div [ class "col-md-8 article-title-content-block" ]
                 [ div
@@ -164,93 +243,86 @@ view model =
                     ]
                 ]
             , div [ class "col-sm article-meta-data-block" ]
-                [ categoryListDropdown model
-                , articleUrls model
+                [ multiSelectCategoryList "Categories:" model.categories CategorySelected
+                , multiSelectUrlList "Urls:" model.urls UrlSelected
                 ]
             ]
+        , if model.status == Saving then
+            savingIndicator
+          else
+            text ""
         ]
 
 
-errorView : Model -> Html Msg
-errorView model =
-    Maybe.withDefault (text "") <|
-        Maybe.map
-            (\err ->
-                div
-                    [ class "alert alert-danger alert-dismissible fade show"
-                    , attribute "role" "alert"
-                    ]
-                    [ text <| "Error: " ++ err
-                    ]
-            )
-            model.error
-
-
-articleUrls : Model -> Html Msg
-articleUrls model =
-    div []
-        [ h6 [] [ text "Linked URLs:" ]
-        , span [ class "badge badge-secondary" ] [ text "/getting-started/this-is-hardcoded" ]
-        ]
-
-
-categoryListDropdown : Model -> Html Msg
-categoryListDropdown model =
+itemSelection : List a -> List (Option { b | id : a }) -> List (Option { b | id : a })
+itemSelection selectedItemList itemList =
     let
-        selectedCategory =
-            List.filter (\category -> category.id == (Field.value model.categoryId))
-                model.categories
-                |> List.map .name
-                |> List.head
-                |> Maybe.withDefault "Select Category"
+        switchItem item =
+            if List.member item.id selectedItemList then
+                Selected item
+            else
+                Unselected item
     in
-        div []
-            [ div [ class "dropdown" ]
-                [ a
-                    [ class "btn btn-secondary dropdown-toggle"
-                    , attribute "role" "button"
-                    , attribute "data-toggle" "dropdown"
-                    , attribute "aria-haspopup" "true"
-                    , attribute "aria-expanded" "false"
-                    ]
-                    [ text selectedCategory ]
-                , div
-                    [ class "dropdown-menu"
-                    , attribute
-                        "aria-labelledby"
-                        "dropdownMenuButton"
-                    ]
-                    (List.map
-                        (\category ->
-                            a
-                                [ class "dropdown-item"
-                                , onClick
-                                    (CategorySelected category.id)
-                                ]
-                                [ text category.name ]
-                        )
-                        model.categories
-                    )
-                ]
-            ]
+        List.map
+            (\item ->
+                case item of
+                    Selected innerItem ->
+                        switchItem innerItem
+
+                    Unselected innerItem ->
+                        switchItem innerItem
+            )
+            itemList
 
 
-articleInputs : Model -> CreateArticleInputs
-articleInputs { title, desc, categoryId } =
-    { title = Field.value title
+articleInputs : Model -> UpdateArticleInputs
+articleInputs { articleId, title, desc, categories } =
+    { id = articleId
+    , title = Field.value title
     , desc = Field.value desc
-    , categoryId = Just (Field.value categoryId)
+    , categoryId =
+        List.filterMap
+            (\option ->
+                case option of
+                    Selected category ->
+                        Just category.id
+
+                    _ ->
+                        Nothing
+            )
+            categories
+            |> List.head
     }
 
 
 save : Model -> NodeEnv -> ApiKey -> ( Model, Cmd Msg )
 save model nodeEnv organizationKey =
     let
+        fields =
+            [ model.title, model.desc ]
+
         cmd =
             Task.attempt SaveArticleResponse
                 (Reader.run
-                    (requestCreateArticle)
-                    ( nodeEnv, organizationKey, (articleInputs model) )
+                    (requestUpdateArticle (articleInputs model))
+                    ( nodeEnv, organizationKey )
                 )
     in
-        ( model, cmd )
+        if Field.isAllValid fields && model.articleLoaded == True then
+            ( { model | error = Nothing, status = Saving }, cmd )
+        else
+            ( { model | error = errorsIn fields }, Cmd.none )
+
+
+
+-- Subscriptions
+
+
+subscriptions : Model -> Sub Msg
+subscriptions model =
+    Sub.batch
+        [ trixInitialize <| TrixInitialize
+        , trixChange <| DescInput
+        , timeoutInitialized <| ReceivedTimeoutId
+        , timedOut <| TimedOut
+        ]

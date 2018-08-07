@@ -346,14 +346,30 @@ navigateTo newRoute model =
 
             Route.ArticleEdit organizationKey articleId ->
                 let
-                    ( articleEditModel, articleEditCmd ) =
+                    ( articleEditModel, articleEditTask, articleCategoriesTask, articleUrlsTask ) =
                         ArticleEdit.init articleId
 
-                    cmd =
+                    cmdArticle =
                         Cmd.map ArticleEditMsg <|
                             Task.attempt
-                                ArticleEdit.ArticleLoaded
-                                (Reader.run articleEditCmd
+                                (ArticleEdit.ArticleLoaded)
+                                (Reader.run (articleEditTask)
+                                    ( model.nodeEnv, model.organizationKey )
+                                )
+
+                    cmdCategories =
+                        Cmd.map ArticleEditMsg <|
+                            Task.attempt
+                                (ArticleEdit.CategoriesLoaded)
+                                (Reader.run (articleCategoriesTask)
+                                    ( model.nodeEnv, model.organizationKey )
+                                )
+
+                    cmdUrls =
+                        Cmd.map ArticleEditMsg <|
+                            Task.attempt
+                                (ArticleEdit.UrlsLoaded)
+                                (Reader.run (articleUrlsTask)
                                     ( model.nodeEnv, model.organizationKey )
                                 )
                 in
@@ -363,7 +379,7 @@ navigateTo newRoute model =
                                 (ArticleEdit articleEditModel)
                         , route = newRoute
                       }
-                    , cmd
+                    , Cmd.batch [ cmdArticle, cmdCategories, cmdUrls ]
                     )
 
             Route.CategoryEdit categoryId ->
@@ -477,8 +493,8 @@ update msg model =
         ArticleEditMsg aeMsg ->
             let
                 currentPageModel =
-                    case model.currentPage of
-                        Loaded (ArticleEdit articleEditModel) ->
+                    case getPage model.currentPage of
+                        ArticleEdit articleEditModel ->
                             articleEditModel
 
                         _ ->
@@ -490,7 +506,7 @@ update msg model =
                         model.nodeEnv
                         model.organizationKey
             in
-                ( { model | currentPage = TransitioningTo (ArticleEdit articleEditModel) }
+                ( { model | currentPage = Loaded (ArticleEdit articleEditModel) }
                 , Cmd.map ArticleEditMsg articleEditCmd
                 )
 
@@ -833,7 +849,12 @@ getOrganizationId orgId =
 
 subscriptions : Model -> Sub Msg
 subscriptions model =
-    Sub.none
+    case getPage model.currentPage of
+        ArticleEdit articleEditModel ->
+            Sub.map ArticleEditMsg <| ArticleEdit.subscriptions articleEditModel
+
+        _ ->
+            Sub.none
 
 
 

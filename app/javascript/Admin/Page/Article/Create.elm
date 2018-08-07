@@ -13,6 +13,7 @@ import Task exposing (Task)
 import Field exposing (..)
 import Field.ValidationResult exposing (..)
 import Helpers exposing (..)
+import Page.Article.Common exposing (..)
 import GraphQL.Client.Http as GQLClient
 
 
@@ -121,7 +122,7 @@ update msg model nodeEnv organizationKey =
 view : Model -> Html Msg
 view model =
     div []
-        [ errorView model
+        [ errorView model.error
         , div [ class "row article-block" ]
             [ div [ class "col-md-8 article-title-content-block" ]
                 [ div
@@ -144,88 +145,12 @@ view model =
                     ]
                 ]
             , div [ class "col-sm article-meta-data-block" ]
-                [ categoryListDropdown model
-                , articleUrls model
-                , button
-                    [ id "create-article"
-                    , type_ "button"
-                    , class "btn btn-success"
-                    , onClick SaveArticle
-                    ]
-                    [ text "Create Article" ]
+                [ -- categoryListDropdown model.categories (Field.value model.categoryId) (CategorySelected)
+                  -- , articleUrls model.
+                  button [ id "create-article", type_ "button", class "btn btn-success", onClick SaveArticle ] [ text "Create Article" ]
                 ]
             ]
         ]
-
-
-errorView : Model -> Html Msg
-errorView model =
-    Maybe.withDefault (text "") <|
-        Maybe.map
-            (\err ->
-                div
-                    [ class "alert alert-danger alert-dismissible fade show"
-                    , attribute "role" "alert"
-                    ]
-                    [ text <| "Error: " ++ err
-                    ]
-            )
-            model.error
-
-
-articleUrls : Model -> Html Msg
-articleUrls model =
-    div []
-        [ h6 [] [ text "Linked URLs:" ]
-        , span [ class "badge badge-secondary" ]
-            [ text "/getting-started/this-is-hardcoded"
-            ]
-        ]
-
-
-categoryListDropdown : Model -> Html Msg
-categoryListDropdown model =
-    let
-        selectedCategory =
-            List.filter (\category -> category.id == (Field.value model.categoryId))
-                model.categories
-                |> List.map .name
-                |> List.head
-                |> Maybe.withDefault "Select Category"
-    in
-        div []
-            [ div [ class "dropdown" ]
-                [ a
-                    [ class "btn btn-secondary dropdown-toggle"
-                    , attribute "role" "button"
-                    , attribute "data-toggle" "dropdown"
-                    , attribute "aria-haspopup" "true"
-                    , attribute "aria-expanded" "false"
-                    ]
-                    [ text selectedCategory ]
-                , div
-                    [ class "dropdown-menu", attribute "aria-labelledby" "dropdownMenuButton" ]
-                    (List.map
-                        (\category ->
-                            a
-                                [ class "dropdown-item"
-                                , onClick
-                                    (CategorySelected category.id)
-                                ]
-                                [ text category.name ]
-                        )
-                        model.categories
-                    )
-                ]
-            ]
-
-
-articleInputs : Model -> CreateArticleInputs
-articleInputs { title, desc, categoryId } =
-    { title = Field.value title
-    , desc = Field.value desc
-    , categoryId = Just (Field.value categoryId)
-    }
 
 
 save : Model -> NodeEnv -> ApiKey -> ( Model, Cmd Msg )
@@ -233,8 +158,21 @@ save model nodeEnv organizationKey =
     let
         cmd =
             Task.attempt SaveArticleResponse
-                (Reader.run (requestCreateArticle)
-                    ( nodeEnv, organizationKey, (articleInputs model) )
+                (Reader.run
+                    (requestCreateArticle
+                        (articleInputs
+                            { title = model.title, desc = model.desc, categoryId = model.categoryId }
+                        )
+                    )
+                    ( nodeEnv, organizationKey )
                 )
     in
         ( model, cmd )
+
+
+articleInputs : { title : Field String String, desc : Field String String, categoryId : Field String String } -> CreateArticleInputs
+articleInputs { title, desc, categoryId } =
+    { title = Field.value title
+    , desc = Field.value desc
+    , categoryId = Just <| Field.value categoryId
+    }

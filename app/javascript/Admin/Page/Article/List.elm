@@ -56,7 +56,7 @@ update msg model organizationKey nodeEnv =
             ( { model | error = Just (toString err) }, Cmd.none )
 
         Navigate page ->
-            model ! [ Navigation.newUrl (Route.routeToString page) ]
+            ( model, Navigation.newUrl (Route.routeToString page) )
 
 
 
