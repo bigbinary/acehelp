@@ -6,6 +6,9 @@ import Admin.Data.Category exposing (..)
 import Admin.Data.Url exposing (..)
 import Admin.Data.Common exposing (..)
 import Page.Common.View exposing (..)
+import Field exposing (..)
+import Field.ValidationResult exposing (..)
+import Helpers exposing (..)
 
 
 type Status
@@ -79,3 +82,41 @@ urlToValue url =
                 { id = item.id
                 , value = item.url
                 }
+
+
+itemSelection : List a -> List (Option { b | id : a }) -> List (Option { b | id : a })
+itemSelection selectedItemList itemList =
+    let
+        switchItem item =
+            if List.member item.id selectedItemList then
+                Selected item
+            else
+                Unselected item
+    in
+        List.map
+            (\item ->
+                case item of
+                    Selected innerItem ->
+                        switchItem innerItem
+
+                    Unselected innerItem ->
+                        switchItem innerItem
+            )
+            itemList
+
+
+errorsIn : List (Field String v) -> Maybe String
+errorsIn fields =
+    validateAll fields
+        |> filterFailures
+        |> List.map
+            (\result ->
+                case result of
+                    Failed err ->
+                        err
+
+                    Passed _ ->
+                        "Unknown Error"
+            )
+        |> String.join ", "
+        |> stringToMaybe

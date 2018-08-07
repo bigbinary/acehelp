@@ -35,7 +35,8 @@ type alias Model =
     , error : Maybe String
     , keyboardInputTaskId : Maybe Int
     , status : Status
-    , articleLoaded : Bool
+    , articleDescInserted : Bool
+    , originalArticle : Maybe Article
     }
 
 
@@ -49,7 +50,8 @@ initModel articleId =
     , error = Nothing
     , keyboardInputTaskId = Nothing
     , status = None
-    , articleLoaded = False
+    , articleDescInserted = False
+    , originalArticle = Nothing
     }
 
 
@@ -129,7 +131,12 @@ update msg model nodeEnv organizationKey =
                 errors =
                     errorsIn [ newDesc, model.title ]
             in
-                ( { model | desc = newDesc, error = errors }, setTimeout delayTime )
+                ( { model | desc = newDesc, error = errors, articleDescInserted = True }
+                , if model.articleDescInserted then
+                    setTimeout delayTime
+                  else
+                    Cmd.none
+                )
 
         SaveArticle ->
             save model nodeEnv organizationKey
@@ -151,18 +158,29 @@ update msg model nodeEnv organizationKey =
                 | articleId = article.id
                 , title = Field.update model.title article.title
                 , desc = Field.update model.desc article.desc
-                , articleLoaded = True
+                , categories = itemSelection (List.map .id article.categories) model.categories
+                , originalArticle = Just article
               }
             , insertArticleContent article.desc
             )
 
         ArticleLoaded (Err err) ->
-            ( { model | error = Just "There was an error loading up the article", articleLoaded = False }
+            ( { model | error = Just "There was an error loading up the article", originalArticle = Nothing }
             , Cmd.none
             )
 
         CategoriesLoaded (Ok categories) ->
-            ( { model | categories = List.map Unselected categories }, Cmd.none )
+            ( { model
+                | categories =
+                    case model.originalArticle of
+                        Just article ->
+                            itemSelection (List.map .id article.categories) model.categories
+
+                        Nothing ->
+                            List.map Unselected categories
+              }
+            , Cmd.none
+            )
 
         CategoriesLoaded (Err err) ->
             ( { model | error = Just (toString err) }, Cmd.none )
@@ -193,23 +211,6 @@ update msg model nodeEnv organizationKey =
 
         Killed _ ->
             ( model, Cmd.none )
-
-
-errorsIn : List (Field String v) -> Maybe String
-errorsIn fields =
-    validateAll fields
-        |> filterFailures
-        |> List.map
-            (\result ->
-                case result of
-                    Failed err ->
-                        err
-
-                    Passed _ ->
-                        "Unknown Error"
-            )
-        |> String.join ", "
-        |> stringToMaybe
 
 
 
@@ -254,27 +255,6 @@ view model =
         ]
 
 
-itemSelection : List a -> List (Option { b | id : a }) -> List (Option { b | id : a })
-itemSelection selectedItemList itemList =
-    let
-        switchItem item =
-            if List.member item.id selectedItemList then
-                Selected item
-            else
-                Unselected item
-    in
-        List.map
-            (\item ->
-                case item of
-                    Selected innerItem ->
-                        switchItem innerItem
-
-                    Unselected innerItem ->
-                        switchItem innerItem
-            )
-            itemList
-
-
 articleInputs : Model -> UpdateArticleInputs
 articleInputs { articleId, title, desc, categories } =
     { id = articleId
@@ -308,7 +288,7 @@ save model nodeEnv organizationKey =
                     ( nodeEnv, organizationKey )
                 )
     in
-        if Field.isAllValid fields && model.articleLoaded == True then
+        if Field.isAllValid fields && maybeToBool model.originalArticle then
             ( { model | error = Nothing, status = Saving }, cmd )
         else
             ( { model | error = errorsIn fields }, Cmd.none )
