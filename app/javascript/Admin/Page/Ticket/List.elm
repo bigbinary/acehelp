@@ -92,7 +92,7 @@ rows model ticket =
         , span [ class "row-name" ] [ text ticket.name ]
         , span [ class "row-email" ] [ text ticket.email ]
         , span [ class "row-message" ] [ text ticket.message ]
-        , span [ onClick <| Navigate <| Route.TicketEdit model.organizationKey ticket.id ] [ text "Edit Ticket" ]
+        , span [ onClick <| Navigate <| Route.TicketEdit model.organizationKey ticket.id ] [ text " | Edit Ticket" ]
         ]
 
 

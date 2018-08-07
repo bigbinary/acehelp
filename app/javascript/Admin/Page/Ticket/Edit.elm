@@ -23,7 +23,7 @@ type alias Model =
     , note : String
     , message : String
     , ticketId : TicketId
-    , status : String
+    , status : TicketStatusEnum
     , statuses : List TicketStatus
     }
 
@@ -35,7 +35,7 @@ initModel ticketId =
     , note = ""
     , message = ""
     , ticketId = ticketId
-    , status = "open"
+    , status = ""
     , statuses = []
     }
 
@@ -54,9 +54,9 @@ init ticketId =
 type Msg
     = NoteInput String
     | UpdateTicket
-    | UpdateTicketResponse (Result GQLClient.Error TicketEditData)
+    | UpdateTicketResponse (Result GQLClient.Error TicketInput)
     | TicketLoaded (Result GQLClient.Error TicketEditData)
-    | UpdateTicketStatus TicketId String
+    | UpdateTicketStatus Model String
 
 
 update : Msg -> Model -> NodeEnv -> ApiKey -> ( Model, Cmd Msg )
@@ -91,8 +91,9 @@ update msg model nodeEnv organizationKey =
 
         UpdateTicketResponse (Ok ticket) ->
             ( { model
-                | note = ticket.note
-                , success = Just "Ticket Updated Successfully."
+                | ticketId = ticket.id
+                , status = ticket.status
+                , success = Just "Ticket Updated Successfully..."
               }
             , Cmd.none
             )
@@ -106,6 +107,7 @@ update msg model nodeEnv organizationKey =
                 , ticketId = ticket.id
                 , message = ticket.message
                 , statuses = ticket.statuses
+                , status = ticket.status
               }
             , Cmd.none
             )
@@ -113,8 +115,8 @@ update msg model nodeEnv organizationKey =
         TicketLoaded (Err err) ->
             ( { model | error = Just (toString err) }, Cmd.none )
 
-        UpdateTicketStatus ticketId status ->
-            ( model, Cmd.none )
+        UpdateTicketStatus model status ->
+            updateTicketStatus model { id = model.ticketId, status = status } nodeEnv organizationKey
 
 
 
@@ -168,21 +170,29 @@ view model =
         ]
 
 
-
---urlInputs : Model -> UrlData
---urlInputs { url, urlId } =
---    { url = Field.value url
---    , id = urlId
---    }
+ticketInputs : TicketInput -> TicketInput
+ticketInputs { id, status } =
+    { status = status
+    , id = id
+    }
 
 
 save : Model -> NodeEnv -> ApiKey -> ( Model, Cmd Msg )
 save model nodeEnv organizationKey =
     --let
     --    cmd =
-    --        Task.attempt UpdateTicketResponse (Reader.run (updateUrl) ( nodeEnv, organizationKey, urlInputs model ))
+    --        Task.attempt UpdateTicketResponse (Reader.run (updateUrl) ( nodeEnv, organizationKey, urlInputs {  } ))
     --in
     ( model, Cmd.none )
+
+
+updateTicketStatus : Model -> TicketInput -> NodeEnv -> ApiKey -> ( Model, Cmd Msg )
+updateTicketStatus model ticketInput nodeEnv organizationKey =
+    let
+        cmd =
+            Task.attempt UpdateTicketResponse (Reader.run (updateTicket) ( nodeEnv, organizationKey, ticketInputs (ticketInput) ))
+    in
+        ( model, cmd )
 
 
 ticketStatusDropDown : Model -> Html Msg
@@ -210,7 +220,9 @@ ticketStatusDropDown model =
                     (List.map
                         (\status ->
                             a
-                                [ class "dropdown-item" ]
+                                [ onClick (UpdateTicketStatus model status.key)
+                                , class "dropdown-item"
+                                ]
                                 [ text status.key ]
                         )
                         model.statuses

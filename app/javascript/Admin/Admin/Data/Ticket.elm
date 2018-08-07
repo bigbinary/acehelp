@@ -25,7 +25,20 @@ type alias TicketEditData =
     , email : String
     , message : String
     , note : String
+    , status : TicketStatusEnum
     , statuses : List TicketStatus
+    }
+
+
+type alias TicketInput =
+    { id : TicketId
+    , status : TicketStatusEnum
+    }
+
+
+type alias TicketOutput =
+    { id : String
+    , status : TicketStatusEnum
     }
 
 
@@ -36,6 +49,13 @@ type alias TicketId =
 type alias TicketIdInput =
     { id : String
     }
+
+
+type TicketStatusEnum
+    = Open
+    | Closed
+    | Resolved
+    | PendingOnCustomer
 
 
 requestTicketQuery : GQLBuilder.Document GQLBuilder.Query (List Ticket) vars
@@ -72,6 +92,7 @@ requestTicketByIdQuery =
                         |> GQLBuilder.with (GQLBuilder.field "email" [] GQLBuilder.string)
                         |> GQLBuilder.with (GQLBuilder.field "message" [] GQLBuilder.string)
                         |> GQLBuilder.with (GQLBuilder.field "note" [] GQLBuilder.string)
+                        |> GQLBuilder.with (GQLBuilder.field "status" [] ticketStatusEnum)
                         |> GQLBuilder.with
                             (GQLBuilder.field "statuses"
                                 []
@@ -89,3 +110,63 @@ ticketStatusObject =
     GQLBuilder.object TicketStatus
         |> GQLBuilder.with (GQLBuilder.field "key" [] GQLBuilder.string)
         |> GQLBuilder.with (GQLBuilder.field "value" [] GQLBuilder.string)
+
+
+ticketStatusEnumSymbol : TicketStatusEnum -> String
+ticketStatusEnumSymbol status =
+    case status of
+        Open ->
+            "open"
+
+        Closed ->
+            "closed"
+
+        Resolved ->
+            "resolved"
+
+        PendingOnCustomer ->
+            "pending_on_customer"
+
+
+ticketStatusVar : Var.Variable { v | status : TicketStatusEnum }
+ticketStatusVar =
+    Var.required
+        "status"
+        .status
+        (Var.enum "status" ticketStatusEnumSymbol)
+
+
+ticketStatusEnum : GQLBuilder.ValueSpec GQLBuilder.NonNull GQLBuilder.EnumType TicketStatusEnum vars
+ticketStatusEnum =
+    GQLBuilder.enum
+        [ ( "open", Open )
+        , ( "closed", Closed )
+        , ( "resolved", Resolved )
+        , ( "pending_on_customer", PendingOnCustomer )
+        ]
+
+
+updateTicketMutation : GQLBuilder.Document GQLBuilder.Mutation TicketOutput TicketInput
+updateTicketMutation =
+    let
+        idVar =
+            Var.required "id" .id Var.string
+    in
+        GQLBuilder.mutationDocument <|
+            GQLBuilder.extract <|
+                GQLBuilder.field "changeTicketStatus"
+                    [ ( "input"
+                      , Arg.object
+                            [ ( "status", Arg.variable ticketStatusVar )
+                            , ( "id", Arg.variable idVar )
+                            ]
+                      )
+                    ]
+                    (GQLBuilder.extract <|
+                        GQLBuilder.field "ticket"
+                            []
+                            (GQLBuilder.object TicketOutput
+                                |> GQLBuilder.with (GQLBuilder.field "id" [] GQLBuilder.string)
+                                |> GQLBuilder.with (GQLBuilder.field "status" [] ticketStatusEnum)
+                            )
+                    )
