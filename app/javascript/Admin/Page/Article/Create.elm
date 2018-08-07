@@ -145,10 +145,9 @@ view model =
                     ]
                 ]
             , div [ class "col-sm article-meta-data-block" ]
-                [ categoryListDropdown model.categories (Field.value model.categoryId) (CategorySelected)
-
-                -- , articleUrls model.
-                , button [ id "create-article", type_ "button", class "btn btn-success", onClick SaveArticle ] [ text "Create Article" ]
+                [ -- categoryListDropdown model.categories (Field.value model.categoryId) (CategorySelected)
+                  -- , articleUrls model.
+                  button [ id "create-article", type_ "button", class "btn btn-success", onClick SaveArticle ] [ text "Create Article" ]
                 ]
             ]
         ]

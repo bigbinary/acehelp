@@ -10,6 +10,7 @@ import Admin.Request.Url exposing (..)
 import Request.Helpers exposing (NodeEnv, ApiKey)
 import Admin.Data.Category exposing (..)
 import Admin.Data.Url exposing (UrlData, UrlId)
+import Admin.Data.Common exposing (..)
 import Reader exposing (Reader)
 import Task exposing (Task)
 import Time
@@ -29,9 +30,8 @@ type alias Model =
     { title : Field String String
     , desc : Field String String
     , articleId : ArticleId
-    , categories : List Category
-    , urls : List ArticleUrl
-    , categoryId : Maybe CategoryId
+    , categories : List (Option Category)
+    , urls : List (Option UrlData)
     , error : Maybe String
     , keyboardInputTaskId : Maybe Int
     , status : Status
@@ -45,7 +45,6 @@ initModel articleId =
     , articleId = articleId
     , categories = []
     , urls = []
-    , categoryId = Nothing
     , error = Nothing
     , keyboardInputTaskId = Nothing
     , status = None
@@ -74,7 +73,7 @@ type Msg
     | SaveArticleResponse (Result GQLClient.Error Article)
     | ArticleLoaded (Result GQLClient.Error Article)
     | CategoriesLoaded (Result GQLClient.Error (List Category))
-    | CategorySelected String
+    | CategorySelected (List CategoryId)
     | UrlsLoaded (Result GQLClient.Error (List UrlData))
     | UrlSelected (List UrlId)
     | TrixInitialize ()
@@ -160,20 +159,17 @@ update msg model nodeEnv organizationKey =
             )
 
         CategoriesLoaded (Ok categories) ->
-            ( { model | categories = categories }, Cmd.none )
+            ( { model | categories = List.map Unselected categories }, Cmd.none )
 
         CategoriesLoaded (Err err) ->
             ( { model | error = Just (toString err) }, Cmd.none )
 
-        CategorySelected categoryId ->
-            let
-                newCategoryId =
-                    Just categoryId
-
-                errors =
-                    errorsIn [ model.desc, model.title ]
-            in
-                ( { model | categoryId = newCategoryId, error = errors }, setTimeout delayTime )
+        CategorySelected categoryIds ->
+            ( { model
+                | categories = itemSelection categoryIds model.categories
+              }
+            , setTimeout delayTime
+            )
 
         UrlsLoaded (Ok urls) ->
             ( { model | urls = List.map Unselected urls }, Cmd.none )
@@ -182,28 +178,12 @@ update msg model nodeEnv organizationKey =
             ( { model | error = Just (toString err) }, Cmd.none )
 
         UrlSelected selectedUrlIds ->
-            let
-                urlSelection urlItem =
-                    if List.member urlItem.id selectedUrlIds then
-                        Selected urlItem
-                    else
-                        Unselected urlItem
-            in
-                ( { model
-                    | urls =
-                        List.map
-                            (\url ->
-                                case url of
-                                    Selected urlItem ->
-                                        urlSelection urlItem
-
-                                    Unselected urlItem ->
-                                        urlSelection urlItem
-                            )
-                            model.urls
-                  }
-                , setTimeout delayTime
-                )
+            ( { model
+                | urls =
+                    itemSelection selectedUrlIds model.urls
+              }
+            , setTimeout delayTime
+            )
 
         TrixInitialize _ ->
             ( model, insertArticleContent <| Field.value model.desc )
@@ -260,7 +240,7 @@ view model =
                     ]
                 ]
             , div [ class "col-sm article-meta-data-block" ]
-                [ categoryListDropdown model.categories (Maybe.withDefault "" model.categoryId) (CategorySelected)
+                [ multiSelectCategoryList "Categories:" model.categories CategorySelected
                 , multiSelectUrlList "Urls:" model.urls UrlSelected
                 ]
             ]
@@ -271,12 +251,44 @@ view model =
         ]
 
 
+itemSelection : List a -> List (Option { b | id : a }) -> List (Option { b | id : a })
+itemSelection selectedItemList itemList =
+    let
+        switchItem item =
+            if List.member item.id selectedItemList then
+                Selected item
+            else
+                Unselected item
+    in
+        List.map
+            (\item ->
+                case item of
+                    Selected innerItem ->
+                        switchItem innerItem
+
+                    Unselected innerItem ->
+                        switchItem innerItem
+            )
+            itemList
+
+
 articleInputs : Model -> UpdateArticleInputs
-articleInputs { articleId, title, desc, categoryId } =
+articleInputs { articleId, title, desc, categories } =
     { id = articleId
     , title = Field.value title
     , desc = Field.value desc
-    , categoryId = categoryId
+    , categoryId =
+        List.filterMap
+            (\option ->
+                case option of
+                    Selected category ->
+                        Just category.id
+
+                    _ ->
+                        Nothing
+            )
+            categories
+            |> List.head
     }
 
 

@@ -2,23 +2,15 @@ module Page.Article.Common exposing (..)
 
 import Html exposing (..)
 import Html.Attributes exposing (..)
-import Html.Events exposing (..)
 import Admin.Data.Category exposing (..)
-import Admin.Data.Article exposing (..)
 import Admin.Data.Url exposing (..)
-import Json.Decode as Json
-import Json.Decode.Extra as JsonEx
-import Field exposing (..)
+import Admin.Data.Common exposing (..)
+import Page.Common.View exposing (..)
 
 
 type Status
     = Saving
     | None
-
-
-type ArticleUrl
-    = Selected UrlData
-    | Unselected UrlData
 
 
 errorView : Maybe String -> Html msg
@@ -41,35 +33,9 @@ articleUrls urls =
         ]
 
 
-categoryListDropdown : List Category -> CategoryId -> (CategoryId -> msg) -> Html msg
-categoryListDropdown categories selectedId onItemClick =
-    let
-        selectedCategory =
-            List.filter (\category -> category.id == selectedId) categories
-                |> List.map .name
-                |> List.head
-                |> Maybe.withDefault "Select Category"
-    in
-        div []
-            [ div [ class "dropdown" ]
-                [ a
-                    [ class "btn btn-secondary dropdown-toggle"
-                    , attribute "role" "button"
-                    , attribute "data-toggle" "dropdown"
-                    , attribute "aria-haspopup" "true"
-                    , attribute "aria-expanded" "false"
-                    ]
-                    [ text selectedCategory ]
-                , div
-                    [ class "dropdown-menu", attribute "aria-labelledby" "dropdownMenuButton" ]
-                    (List.map
-                        (\category ->
-                            a [ class "dropdown-item", onClick (onItemClick category.id) ] [ text category.name ]
-                        )
-                        categories
-                    )
-                ]
-            ]
+multiSelectCategoryList : String -> List (Option Category) -> (List CategoryId -> msg) -> Html msg
+multiSelectCategoryList title categories onItemClick =
+    multiSelectMenu title (List.map categoryToValue categories) onItemClick
 
 
 savingIndicator : Html msg
@@ -78,27 +44,38 @@ savingIndicator =
         [ text "Saving.." ]
 
 
-targetSelectedOptions : Json.Decoder (List String)
-targetSelectedOptions =
-    Json.at [ "target", "selectedOptions" ] <|
-        JsonEx.collection <|
-            Json.at [ "value" ] <|
-                Json.string
-
-
-multiSelectUrlList : String -> List ArticleUrl -> (List String -> msg) -> Html msg
+multiSelectUrlList : String -> List (Option UrlData) -> (List UrlId -> msg) -> Html msg
 multiSelectUrlList title urls onselect =
-    div []
-        [ h6 [] [ text title ]
-        , select [ on "change" (Json.map onselect targetSelectedOptions), multiple True, class "form-control select-checkbox", size 5 ] <|
-            List.map
-                (\url ->
-                    case url of
-                        Selected urlItem ->
-                            option [ Html.Attributes.value urlItem.id, selected True ] [ text urlItem.url ]
+    multiSelectMenu title (List.map urlToValue urls) onselect
 
-                        Unselected urlItem ->
-                            option [ Html.Attributes.value urlItem.id, selected False ] [ text urlItem.url ]
-                )
-                urls
-        ]
+
+categoryToValue : Option Category -> Option Value
+categoryToValue category =
+    case category of
+        Selected item ->
+            Selected
+                { id = item.id
+                , value = item.name
+                }
+
+        Unselected item ->
+            Unselected
+                { id = item.id
+                , value = item.name
+                }
+
+
+urlToValue : Option UrlData -> Option Value
+urlToValue url =
+    case url of
+        Selected item ->
+            Selected
+                { id = item.id
+                , value = item.url
+                }
+
+        Unselected item ->
+            Unselected
+                { id = item.id
+                , value = item.url
+                }
