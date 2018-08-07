@@ -23,6 +23,8 @@ type alias Model =
     , note : String
     , message : String
     , ticketId : TicketId
+    , status : String
+    , statuses : List TicketStatus
     }
 
 
@@ -33,6 +35,8 @@ initModel ticketId =
     , note = ""
     , message = ""
     , ticketId = ticketId
+    , status = "open"
+    , statuses = []
     }
 
 
@@ -52,6 +56,7 @@ type Msg
     | UpdateTicket
     | UpdateTicketResponse (Result GQLClient.Error TicketEditData)
     | TicketLoaded (Result GQLClient.Error TicketEditData)
+    | UpdateTicketStatus TicketId String
 
 
 update : Msg -> Model -> NodeEnv -> ApiKey -> ( Model, Cmd Msg )
@@ -100,12 +105,16 @@ update msg model nodeEnv organizationKey =
                 | note = ticket.note
                 , ticketId = ticket.id
                 , message = ticket.message
+                , statuses = ticket.statuses
               }
             , Cmd.none
             )
 
         TicketLoaded (Err err) ->
             ( { model | error = Just (toString err) }, Cmd.none )
+
+        UpdateTicketStatus ticketId status ->
+            ( model, Cmd.none )
 
 
 
@@ -114,43 +123,48 @@ update msg model nodeEnv organizationKey =
 
 view : Model -> Html Msg
 view model =
-    div [ class "container" ]
-        [ Html.form []
-            [ div []
-                [ Maybe.withDefault (text "") <|
-                    Maybe.map
-                        (\err ->
-                            div [ class "alert alert-danger alert-dismissible fade show", attribute "role" "alert" ]
-                                [ text <| "Error: " ++ err
-                                ]
-                        )
-                        model.error
-                ]
-            , div []
-                [ Maybe.withDefault (text "") <|
-                    Maybe.map
-                        (\message ->
-                            div [ class "alert alert-success alert-dismissible fade show", attribute "role" "alert" ]
-                                [ text <| message
-                                ]
-                        )
-                        model.success
-                ]
-            , div []
-                [ label [] [ text "Note: " ]
-                , input
-                    [ Html.Attributes.value <| model.note
-                    , type_ "text"
-                    , placeholder "add notes here..."
-                    , onInput NoteInput
+    div [ class "row ticket-block" ]
+        [ div
+            [ class "col-md-8" ]
+            [ Html.form []
+                [ div []
+                    [ Maybe.withDefault (text "") <|
+                        Maybe.map
+                            (\err ->
+                                div [ class "alert alert-danger alert-dismissible fade show", attribute "role" "alert" ]
+                                    [ text <| "Error: " ++ err
+                                    ]
+                            )
+                            model.error
                     ]
-                    []
+                , div []
+                    [ Maybe.withDefault (text "") <|
+                        Maybe.map
+                            (\message ->
+                                div [ class "alert alert-success alert-dismissible fade show", attribute "role" "alert" ]
+                                    [ text <| message
+                                    ]
+                            )
+                            model.success
+                    ]
+                , div []
+                    [ label [] [ text <| "Message: " ++ model.message ]
+                    ]
+                , div []
+                    [ label [] [ text "Note: " ]
+                    , input
+                        [ Html.Attributes.value <| model.note
+                        , type_ "text"
+                        , placeholder "add notes here..."
+                        , onInput NoteInput
+                        ]
+                        []
+                    ]
+                , button [ type_ "submit", class "button primary" ] [ text "Update URL" ]
                 ]
-            , div []
-                [ label [] [ text model.message ]
-                ]
-            , button [ type_ "submit", class "button primary" ] [ text "Update URL" ]
             ]
+        , div [ class "col-sm" ]
+            [ ticketStatusDropDown model ]
         ]
 
 
@@ -169,3 +183,37 @@ save model nodeEnv organizationKey =
     --        Task.attempt UpdateTicketResponse (Reader.run (updateUrl) ( nodeEnv, organizationKey, urlInputs model ))
     --in
     ( model, Cmd.none )
+
+
+ticketStatusDropDown : Model -> Html Msg
+ticketStatusDropDown model =
+    let
+        selectedCategory =
+            List.filter (\status -> status.value == model.status)
+                model.statuses
+                |> List.map .key
+                |> List.head
+                |> Maybe.withDefault "Select Status"
+    in
+        div []
+            [ div [ class "dropdown" ]
+                [ a
+                    [ class "btn btn-secondary dropdown-toggle"
+                    , attribute "role" "button"
+                    , attribute "data-toggle" "dropdown"
+                    , attribute "aria-haspopup" "true"
+                    , attribute "aria-expanded" "false"
+                    ]
+                    [ text selectedCategory ]
+                , div
+                    [ class "dropdown-menu", attribute "aria-labelledby" "dropdownMenuButton" ]
+                    (List.map
+                        (\status ->
+                            a
+                                [ class "dropdown-item" ]
+                                [ text status.key ]
+                        )
+                        model.statuses
+                    )
+                ]
+            ]

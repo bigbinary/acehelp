@@ -8,4 +8,7 @@ Types::TicketType = GraphQL::ObjectType.define do
   field :message, !types.String
   field :status, !types.String
   field :note, types.String
+  field :statuses, -> { types[Types::TicketStatusesType] } do
+    resolve ->(obj, args, context) { Ticket::statuses }
+  end
 end

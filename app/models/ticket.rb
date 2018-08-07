@@ -1,6 +1,8 @@
 # frozen_string_literal: true
 
 class Ticket < ApplicationRecord
+  enum status: { open: "open", closed: "closed" }
+
   validates :email, :message, presence: true
   belongs_to :organization
 
