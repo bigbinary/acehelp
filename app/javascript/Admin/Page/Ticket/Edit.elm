@@ -105,7 +105,7 @@ update msg model nodeEnv organizationKey =
             )
 
         TicketLoaded (Err err) ->
-            ( { model | error = Just "There was an error loading up the ticket data." }, Cmd.none )
+            ( { model | error = Just (toString err) }, Cmd.none )
 
 
 
@@ -141,10 +141,13 @@ view model =
                 , input
                     [ Html.Attributes.value <| model.note
                     , type_ "text"
-                    , placeholder "Url..."
+                    , placeholder "add notes here..."
                     , onInput NoteInput
                     ]
                     []
+                ]
+            , div []
+                [ label [] [ text model.message ]
                 ]
             , button [ type_ "submit", class "button primary" ] [ text "Update URL" ]
             ]

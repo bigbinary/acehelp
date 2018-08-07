@@ -601,7 +601,7 @@ update msg model =
                             ticketListModel
 
                         _ ->
-                            TicketList.initModel
+                            TicketList.initModel model.organizationKey
 
                 ( ticketListModel, ticketListCmds ) =
                     TicketList.update tlMsg
