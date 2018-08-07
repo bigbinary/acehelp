@@ -336,7 +336,7 @@ navigateTo newRoute model =
                         | currentPage =
                             TransitioningTo
                                 (FeedbackShow feedbackShowModel)
-                                , route = newRoute
+                        , route = newRoute
                       }
                     , cmd
                     )
@@ -360,7 +360,7 @@ navigateTo newRoute model =
                         | currentPage =
                             TransitioningTo
                                 (TeamList teamListModel)
-                                , route = newRoute
+                        , route = newRoute
                       }
                     , cmd
                     )
@@ -773,8 +773,8 @@ update msg model =
         TeamCreateMsg tcmsg ->
             let
                 currentPageModel =
-                    case model.currentPage of
-                        Loaded (TeamMemberCreate teamCreateModel) ->
+                    case getPage model.currentPage of
+                        TeamMemberCreate teamCreateModel ->
                             teamCreateModel
 
                         _ ->

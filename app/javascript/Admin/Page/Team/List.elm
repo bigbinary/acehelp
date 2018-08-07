@@ -19,7 +19,7 @@ import GraphQL.Client.Http as GQLClient
 
 
 type alias Model =
-    { teamList : List TeamMember
+    { teamList : List Team
     , organizationKey : String
     , error : Maybe String
     }
@@ -33,7 +33,7 @@ initModel organizationKey =
     }
 
 
-init : ApiKey -> ( Model, Reader ( NodeEnv, ApiKey ) (Task GQLClient.Error (List TeamMember)) )
+init : ApiKey -> ( Model, Reader ( NodeEnv, ApiKey ) (Task GQLClient.Error (List Team)) )
 init organizationKey =
     ( initModel organizationKey
     , requestTeam
@@ -45,7 +45,7 @@ init organizationKey =
 
 
 type Msg
-    = TeamListLoaded (Result GQLClient.Error (List TeamMember))
+    = TeamListLoaded (Result GQLClient.Error (List Team))
     | Navigate Route.Route
 
 
@@ -98,7 +98,7 @@ view model =
         ]
 
 
-row : TeamMember -> Html Msg
+row : Team -> Html Msg
 row teamMember =
     div [ id teamMember.id ]
         [ div

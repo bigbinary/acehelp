@@ -9,27 +9,21 @@ type alias UserId =
     String
 
 
-type alias TeamMember =
+type alias Team =
     { id : UserId
     , name : String
     , email : String
     }
 
 
-type alias TeamMemberInput =
+type alias TeamMember =
     { firstName : String
     , lastName : String
     , email : String
     }
 
 
-type alias TeamData =
-    { id : UserId
-    , email : String
-    }
-
-
-requestTeamQuery : GQLBuilder.Document GQLBuilder.Query (List TeamMember) vars
+requestTeamQuery : GQLBuilder.Document GQLBuilder.Query (List Team) vars
 requestTeamQuery =
     GQLBuilder.queryDocument <|
         GQLBuilder.extract
@@ -41,7 +35,7 @@ requestTeamQuery =
             )
 
 
-createTeamMemberMutation : GQLBuilder.Document GQLBuilder.Mutation TeamMember TeamMemberInput
+createTeamMemberMutation : GQLBuilder.Document GQLBuilder.Mutation Team TeamMember
 createTeamMemberMutation =
     let
         emailVar =
@@ -71,9 +65,9 @@ createTeamMemberMutation =
                     )
 
 
-teamMemberExtractor : GQLBuilder.ValueSpec GQLBuilder.NonNull GQLBuilder.ObjectType TeamMember vars
+teamMemberExtractor : GQLBuilder.ValueSpec GQLBuilder.NonNull GQLBuilder.ObjectType Team vars
 teamMemberExtractor =
-    (GQLBuilder.object TeamMember
+    (GQLBuilder.object Team
         |> GQLBuilder.with (GQLBuilder.field "id" [] GQLBuilder.string)
         |> GQLBuilder.with (GQLBuilder.field "name" [] GQLBuilder.string)
         |> GQLBuilder.with (GQLBuilder.field "email" [] GQLBuilder.string)

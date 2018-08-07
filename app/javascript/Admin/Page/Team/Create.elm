@@ -20,7 +20,6 @@ import Route
 
 type alias Model =
     { error : Maybe String
-    , id : String
     , firstName : String
     , lastName : String
     , email : Field String String
@@ -30,7 +29,6 @@ type alias Model =
 initModel : Model
 initModel =
     { error = Nothing
-    , id = "0"
     , firstName = ""
     , lastName = ""
     , email = Field (validateEmpty "Email") ""
@@ -53,7 +51,7 @@ type Msg
     | LastNameInput String
     | EmailInput String
     | SaveTeam
-    | SaveTeamResponse (Result GQLClient.Error TeamMember)
+    | SaveTeamResponse (Result GQLClient.Error Team)
 
 
 update : Msg -> Model -> NodeEnv -> ApiKey -> ( Model, Cmd Msg )
