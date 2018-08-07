@@ -76,10 +76,16 @@ createCategoryMutation =
     in
         GQLBuilder.mutationDocument <|
             GQLBuilder.extract <|
-                GQLBuilder.field "category"
-                    [ ( "name", Arg.variable nameVar )
+                GQLBuilder.field "addCategory"
+                    [ ( "input"
+                      , Arg.object [ ( "name", Arg.variable nameVar ) ]
+                      )
                     ]
-                    categoryObject
+                    (GQLBuilder.extract <|
+                        GQLBuilder.field "category"
+                            []
+                            categoryObject
+                    )
 
 
 udpateCategoryMutation : GQLBuilder.Document GQLBuilder.Mutation Category UpdateCategoryInputs

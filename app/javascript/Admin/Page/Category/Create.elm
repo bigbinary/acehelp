@@ -1,14 +1,18 @@
 module Page.Category.Create exposing (..)
 
-import Http
+import Admin.Data.Category exposing (..)
+import Admin.Request.Category exposing (..)
+import Field exposing (..)
+import Field.ValidationResult exposing (..)
+import GraphQL.Client.Http as GQLClient
+import Helpers exposing (..)
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
-import Admin.Data.Category exposing (..)
+import Navigation exposing (modifyUrl)
+import Reader exposing (Reader)
 import Request.Helpers exposing (..)
-import Field exposing (..)
-import Field.ValidationResult exposing (..)
-import Helpers exposing (..)
+import Task exposing (Task)
 
 
 -- MODEL
@@ -43,7 +47,7 @@ init =
 type Msg
     = CategoryNameInput CategoryName
     | SaveCategory
-    | SaveCategoryResponse (Result Http.Error String)
+    | SaveCategoryResponse (Result GQLClient.Error Category)
 
 
 update : Msg -> Model -> NodeEnv -> ApiKey -> ( Model, Cmd Msg )
@@ -82,24 +86,11 @@ update msg model nodeEnv organizationKey =
                 , name = Field.update model.name ""
                 , error = Nothing
               }
-            , Cmd.none
+            , modifyUrl ("/organizations/" ++ organizationKey ++ "/categories")
             )
 
         SaveCategoryResponse (Err error) ->
-            let
-                errorMsg =
-                    case error of
-                        Http.BadStatus response ->
-                            response.body
-
-                        _ ->
-                            "Error while saving Category"
-            in
-                ( { model
-                    | error = Just errorMsg
-                  }
-                , Cmd.none
-                )
+            ( { model | error = Just (toString error) }, Cmd.none )
 
 
 
@@ -145,6 +136,19 @@ view model =
 -- TODO: Add request for category create when backend is ready
 
 
+categroyCeateInputs : Model -> CreateCategoryInputs
+categroyCeateInputs { name } =
+    { name = Field.value name
+    }
+
+
 saveCategory : Model -> NodeEnv -> ApiKey -> ( Model, Cmd Msg )
 saveCategory model nodeEnv organizationKey =
-    ( model, Cmd.none )
+    let
+        cmd =
+            Task.attempt SaveCategoryResponse
+                (Reader.run requestCreateCategory
+                    ( nodeEnv, organizationKey, categroyCeateInputs model )
+                )
+    in
+        ( model, cmd )
