@@ -22,8 +22,5 @@ requestTicketById ticketId =
     Reader.Reader
         (\( env, apiKey ) ->
             GQLClient.customSendQuery (requestOptions env apiKey) <|
-                (GQLBuilder.request
-                    { id = ticketId }
-                    requestTicketByIdQuery
-                )
+                (GQLBuilder.request { id = ticketId } requestTicketByIdQuery)
         )

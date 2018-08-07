@@ -116,7 +116,7 @@ routeToString page =
                     [ "organizations", organizationApiKey, "articles", articleId ]
 
                 TicketEdit organizationApiKey ticketId ->
-                    [ "organizations", organizationApiKey, "articles", ticketId ]
+                    [ "organizations", organizationApiKey, "tickets", ticketId ]
 
                 OrganizationCreate ->
                     [ "organizations", "new" ]
