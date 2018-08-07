@@ -5,15 +5,17 @@ class Mutations::AssignUserToOrganizationMutations
     name "AssignUserToOrganization"
 
     input_field :email, !types.String
-    input_field :name, types.String
+    input_field :firstName, types.String
+    input_field :lastName, types.String
 
     return_field :user, Types::UserType
     return_field :errors, types[Types::ErrorType]
 
     resolve -> (object, inputs, context) {
       user = User.find_or_create_by(email: inputs[:email]) do |user|
-        user.name = inputs[:name]
-        user.password = user.password_confirmation =  Devise.friendly_token.first(8)
+        user.first_name = inputs[:firstName]
+        user.last_name = inputs[:lastName]
+        user.password = user.password_confirmation = Devise.friendly_token.first(8)
       end
 
       if user.blank?

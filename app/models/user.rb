@@ -14,6 +14,7 @@ class User < ApplicationRecord
   has_many :organizations, through: :organization_users
 
   scope :agents, -> { where(role: :agent) }
+
   scope :for_organization, ->(org) { joins(organization_users: :organization) }
 
   def name

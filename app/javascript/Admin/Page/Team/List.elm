@@ -4,6 +4,9 @@ module Page.Team.List exposing (..)
 
 import Html exposing (..)
 import Html.Attributes exposing (..)
+import Html.Events exposing (..)
+import Navigation exposing (..)
+import Route
 import Request.Helpers exposing (NodeEnv, ApiKey)
 import Admin.Request.Team exposing (..)
 import Admin.Data.Team exposing (..)
@@ -16,7 +19,7 @@ import GraphQL.Client.Http as GQLClient
 
 
 type alias Model =
-    { teamList : List TeamMember
+    { teamList : List Team
     , organizationKey : String
     , error : Maybe String
     }
@@ -30,7 +33,7 @@ initModel organizationKey =
     }
 
 
-init : ApiKey -> ( Model, Reader ( NodeEnv, ApiKey ) (Task GQLClient.Error (List TeamMember)) )
+init : ApiKey -> ( Model, Reader ( NodeEnv, ApiKey ) (Task GQLClient.Error (List Team)) )
 init organizationKey =
     ( initModel organizationKey
     , requestTeam
@@ -42,7 +45,8 @@ init organizationKey =
 
 
 type Msg
-    = TeamListLoaded (Result GQLClient.Error (List TeamMember))
+    = TeamListLoaded (Result GQLClient.Error (List Team))
+    | Navigate Route.Route
 
 
 update : Msg -> Model -> ApiKey -> NodeEnv -> ( Model, Cmd Msg )
@@ -53,6 +57,9 @@ update msg model apiKey nodeEnv =
 
         TeamListLoaded (Err err) ->
             ( { model | error = Just (toString err) }, Cmd.none )
+
+        Navigate page ->
+            model ! [ Navigation.newUrl (Route.routeToString page) ]
 
 
 
@@ -73,6 +80,14 @@ view model =
                     )
                     model.error
             ]
+        , div
+            []
+            [ Html.a
+                [ onClick (Navigate <| Route.TeamMemberCreate model.organizationKey)
+                , class "button primary"
+                ]
+                [ text " + Add Team Member " ]
+            ]
         , div []
             (List.map
                 (\teamMember ->
@@ -83,7 +98,7 @@ view model =
         ]
 
 
-row : TeamMember -> Html Msg
+row : Team -> Html Msg
 row teamMember =
     div [ id teamMember.id ]
         [ div

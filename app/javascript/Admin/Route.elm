@@ -29,6 +29,7 @@ type Route
     | FeedbackList OrganizationApiKey
     | FeedbackShow OrganizationApiKey FeedbackId
     | TeamList OrganizationApiKey
+    | TeamMemberCreate OrganizationApiKey
     | Settings OrganizationApiKey
     | Dashboard
     | NotFound
@@ -51,6 +52,7 @@ routeMatcher =
         , Url.map ArticleCreate (s "organizations" </> string </> s "articles" </> s "new")
         , Url.map UrlCreate (s "organizations" </> string </> s "urls" </> s "new")
         , Url.map CategoryCreate (s "organizations" </> string </> s "categories" </> s "new")
+        , Url.map TeamMemberCreate (s "organizations" </> string </> s "team" </> s "new")
         , Url.map ArticleEdit (s "organizations" </> string </> s "articles" </> string)
         , Url.map UrlEdit (s "organizations" </> string </> s "urls" </> string </> s "edit")
         , Url.map OrganizationCreate (s "organizations" </> s "new")
@@ -100,6 +102,9 @@ routeToString page =
 
                 CategoryCreate organizationApiKey ->
                     [ "organizations", organizationApiKey, "categories", "new" ]
+
+                TeamMemberCreate organizationApiKey ->
+                    [ "organizations", organizationApiKey, "team", "new" ]
 
                 UrlEdit organizationApiKey urlId ->
                     [ "organizations", organizationApiKey, "urls", urlId, "edit" ]

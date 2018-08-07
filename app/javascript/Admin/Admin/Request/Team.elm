@@ -8,11 +8,21 @@ import GraphQL.Client.Http as GQLClient
 import GraphQL.Request.Builder as GQLBuilder
 
 
-requestTeam : Reader ( NodeEnv, ApiKey ) (Task GQLClient.Error (List TeamMember))
+requestTeam : Reader ( NodeEnv, ApiKey ) (Task GQLClient.Error (List Team))
 requestTeam =
     Reader.Reader
         (\( nodeEnv, apiKey ) ->
             (GQLClient.customSendQuery (requestOptions nodeEnv apiKey) <|
                 GQLBuilder.request {} requestTeamQuery
+            )
+        )
+
+
+createTeamMember : Reader ( NodeEnv, ApiKey, TeamMember ) (Task GQLClient.Error Team)
+createTeamMember =
+    Reader.Reader
+        (\( nodeEnv, apiKey, createTeamMemberInput ) ->
+            (GQLClient.customSendMutation (requestOptions nodeEnv apiKey) <|
+                GQLBuilder.request createTeamMemberInput createTeamMemberMutation
             )
         )
