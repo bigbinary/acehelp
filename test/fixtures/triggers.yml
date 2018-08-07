@@ -1,0 +1,19 @@
+# Read about fixtures at http://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+auto_update_user:
+  slug: auto_update_user
+  description: Automatically update user when the finish the game
+  active: true
+  configuration: 
+
+two:
+  slug: auto_change_watch_list
+  description: Change watch list once user finish watching the movie
+  active: true
+  configuration:
+
+inactive_trigger:
+  slug: disable_all_trigger
+  description: Disable All Triggers
+  active: false
+  configuration:
