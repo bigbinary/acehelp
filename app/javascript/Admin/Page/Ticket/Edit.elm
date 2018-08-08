@@ -5,12 +5,11 @@ import Html.Attributes exposing (..)
 import Html.Events exposing (..)
 import Admin.Request.Ticket exposing (..)
 import Request.Helpers exposing (NodeEnv, ApiKey)
+import Admin.Data.Common exposing (..)
 import Admin.Data.Ticket exposing (..)
 import Reader exposing (Reader)
 import Task exposing (Task)
-import Field exposing (..)
 import Helpers exposing (..)
-import Field.ValidationResult exposing (..)
 import GraphQL.Client.Http as GQLClient
 
 
@@ -56,7 +55,7 @@ type Msg
     | UpdateTicket
     | UpdateTicketResponse (Result GQLClient.Error Ticket)
     | TicketLoaded (Result GQLClient.Error Ticket)
-    | UpdateTicketStatus Model String
+    | UpdateTicketStatus String
 
 
 update : Msg -> Model -> NodeEnv -> ApiKey -> ( Model, Cmd Msg )
@@ -66,28 +65,7 @@ update msg model nodeEnv organizationKey =
             ( { model | note = note }, Cmd.none )
 
         UpdateTicket ->
-            let
-                fields =
-                    []
-
-                errors =
-                    validateAll fields
-                        |> filterFailures
-                        |> List.map
-                            (\result ->
-                                case result of
-                                    Failed err ->
-                                        err
-
-                                    Passed _ ->
-                                        "Unknown Error"
-                            )
-                        |> String.join ", "
-            in
-                if isAllValid fields then
-                    save model nodeEnv organizationKey
-                else
-                    ( { model | error = Just errors }, Cmd.none )
+            ( model, Cmd.none )
 
         UpdateTicketResponse (Ok ticket) ->
             ( { model
@@ -117,7 +95,7 @@ update msg model nodeEnv organizationKey =
         TicketLoaded (Err err) ->
             ( { model | error = Just (toString err) }, Cmd.none )
 
-        UpdateTicketStatus model status ->
+        UpdateTicketStatus status ->
             updateTicketStatus model { id = model.ticketId, status = status } nodeEnv organizationKey
 
 
@@ -199,35 +177,19 @@ updateTicketStatus model ticketInput nodeEnv organizationKey =
 
 ticketStatusDropDown : Model -> Html Msg
 ticketStatusDropDown model =
-    let
-        selectedCategory =
-            List.filter (\status -> status.value == model.status)
-                model.statuses
-                |> List.map .key
-                |> List.head
-                |> Maybe.withDefault "Select Status"
-    in
-        div []
-            [ div [ class "dropdown" ]
-                [ a
-                    [ class "btn btn-secondary dropdown-toggle"
-                    , attribute "role" "button"
-                    , attribute "data-toggle" "dropdown"
-                    , attribute "aria-haspopup" "true"
-                    , attribute "aria-expanded" "false"
-                    ]
-                    [ text selectedCategory ]
-                , div
-                    [ class "dropdown-menu", attribute "aria-labelledby" "dropdownMenuButton" ]
-                    (List.map
-                        (\status ->
-                            a
-                                [ onClick (UpdateTicketStatus model status.value)
-                                , class "dropdown-item"
-                                ]
-                                [ text status.key ]
-                        )
-                        model.statuses
-                    )
+    div []
+        [ div [ class "status-selection" ]
+            [ div []
+                [ h2 [] [ text "Status Selector" ]
+                , select [ onInput UpdateTicketStatus ]
+                    (List.map (statusOption model) model.statuses)
                 ]
             ]
+        ]
+
+
+statusOption model status =
+    if status.value == model.status then
+        option [ value (status.value), selected True ] [ text (status.key) ]
+    else
+        option [ value (status.value) ] [ text (status.key) ]
