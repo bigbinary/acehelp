@@ -10,23 +10,15 @@ type alias Ticket =
     , name : String
     , email : String
     , message : String
+    , note : String
+    , status : String
+    , statuses : List TicketStatus
     }
 
 
 type alias TicketStatus =
     { key : String
     , value : String
-    }
-
-
-type alias TicketEditData =
-    { id : String
-    , name : String
-    , email : String
-    , message : String
-    , note : String
-    , status : String
-    , statuses : List TicketStatus
     }
 
 
@@ -52,18 +44,13 @@ requestTicketQuery =
             (GQLBuilder.field "tickets"
                 []
                 (GQLBuilder.list
-                    (GQLBuilder.object Ticket
-                        |> GQLBuilder.with (GQLBuilder.field "id" [] GQLBuilder.string)
-                        |> GQLBuilder.with (GQLBuilder.field "name" [] GQLBuilder.string)
-                        |> GQLBuilder.with (GQLBuilder.field "email" [] GQLBuilder.string)
-                        |> GQLBuilder.with (GQLBuilder.field "message" [] GQLBuilder.string)
-                    )
+                    (ticketObject)
                 )
             )
         )
 
 
-requestTicketByIdQuery : GQLBuilder.Document GQLBuilder.Query TicketEditData { vars | id : String }
+requestTicketByIdQuery : GQLBuilder.Document GQLBuilder.Query Ticket { vars | id : String }
 requestTicketByIdQuery =
     let
         idVar =
@@ -85,7 +72,7 @@ ticketStatusObject =
         |> GQLBuilder.with (GQLBuilder.field "value" [] GQLBuilder.string)
 
 
-updateTicketMutation : GQLBuilder.Document GQLBuilder.Mutation TicketEditData TicketInput
+updateTicketMutation : GQLBuilder.Document GQLBuilder.Mutation Ticket TicketInput
 updateTicketMutation =
     let
         idVar =
@@ -111,9 +98,9 @@ updateTicketMutation =
                     )
 
 
-ticketObject : GQLBuilder.ValueSpec GQLBuilder.NonNull GQLBuilder.ObjectType TicketEditData vars
+ticketObject : GQLBuilder.ValueSpec GQLBuilder.NonNull GQLBuilder.ObjectType Ticket vars
 ticketObject =
-    GQLBuilder.object TicketEditData
+    GQLBuilder.object Ticket
         |> GQLBuilder.with (GQLBuilder.field "id" [] GQLBuilder.string)
         |> GQLBuilder.with (GQLBuilder.field "name" [] GQLBuilder.string)
         |> GQLBuilder.with (GQLBuilder.field "email" [] GQLBuilder.string)

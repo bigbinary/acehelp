@@ -17,7 +17,7 @@ requestTickets =
         )
 
 
-requestTicketById : TicketId -> Reader ( NodeEnv, ApiKey ) (Task GQLClient.Error TicketEditData)
+requestTicketById : TicketId -> Reader ( NodeEnv, ApiKey ) (Task GQLClient.Error Ticket)
 requestTicketById ticketId =
     Reader.Reader
         (\( env, apiKey ) ->
@@ -26,7 +26,7 @@ requestTicketById ticketId =
         )
 
 
-updateTicket : Reader ( NodeEnv, ApiKey, TicketInput ) (Task GQLClient.Error TicketEditData)
+updateTicket : Reader ( NodeEnv, ApiKey, TicketInput ) (Task GQLClient.Error Ticket)
 updateTicket =
     Reader.Reader
         (\( nodeEnv, apiKey, ticketInput ) ->

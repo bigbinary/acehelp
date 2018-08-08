@@ -40,7 +40,7 @@ initModel ticketId =
     }
 
 
-init : TicketId -> ( Model, Reader ( NodeEnv, ApiKey ) (Task GQLClient.Error TicketEditData) )
+init : TicketId -> ( Model, Reader ( NodeEnv, ApiKey ) (Task GQLClient.Error Ticket) )
 init ticketId =
     ( initModel ticketId
     , requestTicketById ticketId
@@ -54,8 +54,8 @@ init ticketId =
 type Msg
     = NoteInput String
     | UpdateTicket
-    | UpdateTicketResponse (Result GQLClient.Error TicketEditData)
-    | TicketLoaded (Result GQLClient.Error TicketEditData)
+    | UpdateTicketResponse (Result GQLClient.Error Ticket)
+    | TicketLoaded (Result GQLClient.Error Ticket)
     | UpdateTicketStatus Model String
 
 
