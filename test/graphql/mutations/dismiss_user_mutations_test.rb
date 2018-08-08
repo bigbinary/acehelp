@@ -4,7 +4,6 @@ require "test_helper"
 require "graphql/client_host"
 
 class Mutations::DismissUserMutationsTest < ActiveSupport::TestCase
-
   setup do
     @ethan = users(:hunt)
     @ethan.organization_id = organizations(:bigbinary).id
@@ -13,6 +12,11 @@ class Mutations::DismissUserMutationsTest < ActiveSupport::TestCase
         mutation($user_keys: DismissUserFromOrganizationInput!) {
             dismissUser(input: $user_keys) {
               status
+              team {
+                id
+                name
+                email
+              }
               errors {
                 message
                 path
@@ -23,21 +27,13 @@ class Mutations::DismissUserMutationsTest < ActiveSupport::TestCase
   end
 
   test "dismiss user from organization" do
-    result = AceHelp::Client.execute(@query, user_keys: {email: @ethan.email})
-    assert_equal true, result.data.dismiss_user.status
-  end
-
-  test "dismiss user from different organization" do
-    result = AceHelp::CustomClient.call(organizations(:zindi).api_key).execute(@query, user_keys: {email: @ethan.email})
-    assert_nil result.data.dismiss_user.status
-    assert_includes result.data.dismiss_user.errors.flat_map(&:message), "Authorization failure. User is not a part of this organization"
+    result = AceHelp::Client.execute(@query, user_keys: { email: @ethan.email })
+    assert_not_nil true, result.data.dismiss_user.team
   end
 
   test "dismiss user not signed up" do
-    result = AceHelp::Client.execute(@query, user_keys: {email: "random@email.com"})
+    result = AceHelp::Client.execute(@query, user_keys: { email: "random@email.com" })
     assert_nil result.data.dismiss_user.status
     assert_includes result.data.dismiss_user.errors.flat_map(&:message), "User not found"
   end
-
-
 end

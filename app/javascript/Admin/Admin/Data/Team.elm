@@ -9,6 +9,11 @@ type alias UserId =
     String
 
 
+type alias UserEmailInput =
+    { email : String
+    }
+
+
 type alias Team =
     { id : UserId
     , name : String
@@ -72,3 +77,27 @@ teamMemberExtractor =
         |> GQLBuilder.with (GQLBuilder.field "name" [] GQLBuilder.string)
         |> GQLBuilder.with (GQLBuilder.field "email" [] GQLBuilder.string)
     )
+
+
+removeUserFromOrganization : GQLBuilder.Document GQLBuilder.Mutation (List Team) UserEmailInput
+removeUserFromOrganization =
+    let
+        emailVar =
+            Var.required "email" .email Var.string
+    in
+        GQLBuilder.mutationDocument <|
+            GQLBuilder.extract <|
+                GQLBuilder.field "dismissUser"
+                    [ ( "input"
+                      , Arg.object
+                            [ ( "email", Arg.variable emailVar ) ]
+                      )
+                    ]
+                    (GQLBuilder.extract
+                        (GQLBuilder.field "team"
+                            []
+                            (GQLBuilder.list
+                                teamMemberExtractor
+                            )
+                        )
+                    )

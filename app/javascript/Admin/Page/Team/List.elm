@@ -47,7 +47,8 @@ init organizationKey =
 type Msg
     = TeamListLoaded (Result GQLClient.Error (List Team))
     | Navigate Route.Route
-
+    | DeleteTeamMember String
+    | DeleteTeamMemberResponse (Result GQLClient.Error (List Team))
 
 update : Msg -> Model -> ApiKey -> NodeEnv -> ( Model, Cmd Msg )
 update msg model apiKey nodeEnv =
@@ -60,6 +61,15 @@ update msg model apiKey nodeEnv =
 
         Navigate page ->
             model ! [ Navigation.newUrl (Route.routeToString page) ]
+
+        DeleteTeamMember teamMemberEmail ->
+            deleteRecord model nodeEnv apiKey ({ email = teamMemberEmail })
+
+        DeleteTeamMemberResponse (Ok teamList) ->
+            ( { model | teamList = teamList }, Cmd.none )
+
+        DeleteTeamMemberResponse (Err error) ->
+            ( { model | error = Just (toString error) }, Cmd.none )
 
 
 
@@ -104,5 +114,22 @@ row teamMember =
         [ div
             []
             [ text <| (teamMember.name ++ " | " ++ teamMember.email) ]
+        , div
+            []
+            [ Html.a
+                [ onClick (DeleteTeamMember teamMember.email)
+                , class "button primary deleteTeamMember"
+                ]
+                [ text "Remove Team Member" ]
+            ]
         , hr [] []
         ]
+
+
+deleteRecord : Model -> NodeEnv -> ApiKey -> UserEmailInput -> ( Model, Cmd Msg )
+deleteRecord model nodeEnv apiKey userEmail =
+    let
+        cmd =
+            Task.attempt TeamListLoaded (Reader.run (removeTeamMember) ( nodeEnv, apiKey, userEmail ))
+    in
+        ( model, cmd )
