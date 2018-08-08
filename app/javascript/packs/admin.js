@@ -19,9 +19,12 @@ document.addEventListener("DOMContentLoaded", () => {
     var user_email_target = document.querySelector("meta[name=user_email]");
     var org_key = org_key_target.getAttribute("value");
     var user_id = user_id_target.getAttribute("value");
+    var heroku_url = process.env.HEROKU_URL;
+    console.log(heroku_url);
     var user_email = user_email_target.getAttribute("value");
     var app = Elm.Main.embed(node, {
         node_env: process.env.NODE_ENV,
+        heroku_url: process.env.HEROKU_URL,
         organization_key: org_key,
         user_id: user_id,
         user_email: user_email

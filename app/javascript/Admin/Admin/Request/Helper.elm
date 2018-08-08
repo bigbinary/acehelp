@@ -38,8 +38,11 @@ type alias RequestData =
 baseUrl : NodeEnv -> Url
 baseUrl env =
     case env of
-        "production" ->
+        "staging" ->
             "https://staging.acehelp.com/"
+
+        "production" ->
+            "https://app.acehelp.com/"
 
         "development" ->
             "http://localhost:3000/"
@@ -94,8 +97,11 @@ constructUrl url params =
 graphqlUrl : String -> String
 graphqlUrl env =
     case env of
-        "production" ->
+        "staging" ->
             "https://staging.acehelp.com/graphql/"
+
+        "production" ->
+            "https://app.acehelp.com/graphql/"
 
         _ ->
             "/graphql/"

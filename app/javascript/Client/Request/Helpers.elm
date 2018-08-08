@@ -51,8 +51,11 @@ type alias ApiErrorMessage =
 apiUrl : String -> String -> String
 apiUrl env str =
     case env of
-        "production" ->
+        "staging" ->
             "https://staging.acehelp.com/api/v1/" ++ str
+
+        "production" ->
+            "https://app.acehelp.com/api/v1/" ++ str
 
         _ ->
             "/api/v1/" ++ str
@@ -61,8 +64,11 @@ apiUrl env str =
 graphqlUrl : String -> String
 graphqlUrl env =
     case env of
-        "production" ->
+        "staging" ->
             "https://staging.acehelp.com/graphql/"
+
+        "production" ->
+            "https://app.acehelp.com/graphql/"
 
         _ ->
             "/graphql/"

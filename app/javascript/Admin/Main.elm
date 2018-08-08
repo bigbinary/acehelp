@@ -30,7 +30,6 @@ import Admin.Data.Organization exposing (OrganizationId)
 import Admin.Data.Category exposing (Category)
 import Admin.Data.Url exposing (UrlData)
 import UrlParser as Url exposing (..)
-import Admin.Request.Helper exposing (NodeEnv, ApiKey, logoutRequest)
 import Route
 import Task exposing (Task)
 import GraphQL.Client.Http as GQLClient
