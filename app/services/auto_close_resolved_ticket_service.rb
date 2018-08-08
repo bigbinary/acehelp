@@ -6,7 +6,7 @@ class AutoCloseResolvedTicketService
 
   def process
     tickets = Ticket.all_resolved_before_n_days(ALLOWED_MAX_DAYS_IN_RESOLVED)
-    tickets.map(&:close_ticket!)
+    tickets.map(&:closed!)
   end
 
 end
