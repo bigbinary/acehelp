@@ -37,6 +37,8 @@ init organizationKey =
     , requestCategories
     )
 
+
+
 -- UPDATE
 
 
@@ -107,7 +109,7 @@ view model =
                 [ text "New Category" ]
             ]
         , div
-            []
+            [ class "categorySection" ]
             (List.map
                 (\category ->
                     categoryRow category
@@ -120,16 +122,26 @@ view model =
 categoryRow : Category -> Html Msg
 categoryRow category =
     div
-        []
-        [ span
-            [ class "deleteIcon"
-            , onClick (DeleteCategory category.id)
-            ]
-            [ text "x" ]
-        , span
-            [ onClick <| Navigate <| Route.CategoryEdit category.id
-            ]
+        [ class "categoryRow" ]
+        [ div
+            [ class "textColumn" ]
             [ text category.name ]
+        , div
+            [ class "actionButtonColumn" ]
+            [ span
+                [ class "actionButton button primary"
+                , onClick <| Navigate <| Route.CategoryEdit category.id
+                ]
+                [ text "Edit Category" ]
+            ]
+        , div
+            [ class "actionButtonColumn" ]
+            [ span
+                [ class "actionButton button primary"
+                , onClick (DeleteCategory category.id)
+                ]
+                [ text "Delete Category" ]
+            ]
         ]
 
 

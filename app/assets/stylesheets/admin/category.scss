@@ -1,8 +1,34 @@
-.deleteIcon{
-    margin: 0px 20px 0px 20px;
-    color: red
-}
+.categorySection {
+    border-collapse: collapse;
+    overflow-x:auto;
+    width: 70%;
+    display: table;
 
-.deleteIcon:hover {
-    cursor: pointer
+    .actionButton {
+        opacity: 0;
+    }
+
+    .categoryRow {
+        display: table-row;
+
+        &:hover {
+            background-color: #ddd;
+        }
+
+        &:hover .actionButton {
+            opacity: 1;
+            cursor: pointer;
+        }
+
+        .textColumn {
+            width: 60%;
+            display: table-cell;
+            padding-left: 10px;
+        }
+
+        .actionButtonColumn {
+            width: 20%;
+            display: table-cell;
+        }
+    }
 }
