@@ -820,8 +820,8 @@ update msg model =
         TicketEditMsg teMsg ->
             let
                 currentPageModel =
-                    case model.currentPage of
-                        Loaded (TicketEdit ticketEditModel) ->
+                    case getPage model.currentPage of
+                        TicketEdit ticketEditModel ->
                             ticketEditModel
 
                         _ ->

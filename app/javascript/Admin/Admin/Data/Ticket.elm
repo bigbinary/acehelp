@@ -73,21 +73,7 @@ requestTicketByIdQuery =
             (GQLBuilder.extract
                 (GQLBuilder.field "ticket"
                     [ ( "id", Arg.variable idVar ) ]
-                    (GQLBuilder.object TicketEditData
-                        |> GQLBuilder.with (GQLBuilder.field "id" [] GQLBuilder.string)
-                        |> GQLBuilder.with (GQLBuilder.field "name" [] GQLBuilder.string)
-                        |> GQLBuilder.with (GQLBuilder.field "email" [] GQLBuilder.string)
-                        |> GQLBuilder.with (GQLBuilder.field "message" [] GQLBuilder.string)
-                        |> GQLBuilder.with (GQLBuilder.field "note" [] GQLBuilder.string)
-                        |> GQLBuilder.with (GQLBuilder.field "status" [] GQLBuilder.string)
-                        |> GQLBuilder.with
-                            (GQLBuilder.field "statuses"
-                                []
-                                (GQLBuilder.list
-                                    ticketStatusObject
-                                )
-                            )
-                    )
+                    (ticketObject)
                 )
             )
 
@@ -121,19 +107,23 @@ updateTicketMutation =
                     (GQLBuilder.extract <|
                         GQLBuilder.field "ticket"
                             []
-                            (GQLBuilder.object TicketEditData
-                                |> GQLBuilder.with (GQLBuilder.field "id" [] GQLBuilder.string)
-                                |> GQLBuilder.with (GQLBuilder.field "name" [] GQLBuilder.string)
-                                |> GQLBuilder.with (GQLBuilder.field "email" [] GQLBuilder.string)
-                                |> GQLBuilder.with (GQLBuilder.field "message" [] GQLBuilder.string)
-                                |> GQLBuilder.with (GQLBuilder.field "note" [] GQLBuilder.string)
-                                |> GQLBuilder.with (GQLBuilder.field "status" [] GQLBuilder.string)
-                                |> GQLBuilder.with
-                                    (GQLBuilder.field "statuses"
-                                        []
-                                        (GQLBuilder.list
-                                            ticketStatusObject
-                                        )
-                                    )
-                            )
+                            (ticketObject)
                     )
+
+
+ticketObject : GQLBuilder.ValueSpec GQLBuilder.NonNull GQLBuilder.ObjectType TicketEditData vars
+ticketObject =
+    GQLBuilder.object TicketEditData
+        |> GQLBuilder.with (GQLBuilder.field "id" [] GQLBuilder.string)
+        |> GQLBuilder.with (GQLBuilder.field "name" [] GQLBuilder.string)
+        |> GQLBuilder.with (GQLBuilder.field "email" [] GQLBuilder.string)
+        |> GQLBuilder.with (GQLBuilder.field "message" [] GQLBuilder.string)
+        |> GQLBuilder.with (GQLBuilder.field "note" [] GQLBuilder.string)
+        |> GQLBuilder.with (GQLBuilder.field "status" [] GQLBuilder.string)
+        |> GQLBuilder.with
+            (GQLBuilder.field "statuses"
+                []
+                (GQLBuilder.list
+                    ticketStatusObject
+                )
+            )
