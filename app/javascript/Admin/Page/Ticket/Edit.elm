@@ -158,7 +158,6 @@ ticketInputs { id, status } =
     , id = id
     }
 
-
 updateTicketStatus : Model -> TicketInput -> NodeEnv -> ApiKey -> ( Model, Cmd Msg )
 updateTicketStatus model ticketInput nodeEnv organizationKey =
     let
