@@ -24,3 +24,13 @@ requestTicketById ticketId =
             GQLClient.customSendQuery (requestOptions env apiKey) <|
                 (GQLBuilder.request { id = ticketId } requestTicketByIdQuery)
         )
+
+
+updateTicket : Reader ( NodeEnv, ApiKey, TicketInput ) (Task GQLClient.Error TicketEditData)
+updateTicket =
+    Reader.Reader
+        (\( nodeEnv, apiKey, ticketInput ) ->
+            (GQLClient.customSendMutation (requestOptions nodeEnv apiKey) <|
+                GQLBuilder.request ticketInput updateTicketMutation
+            )
+        )
