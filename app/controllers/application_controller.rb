@@ -23,7 +23,7 @@ class ApplicationController < ActionController::Base
 
     def after_sign_in_path_for(resource)
       if resource.organizations.exists?
-        organization_articles_path(resource.organizations.first.api_key)
+        "/organizations/#{resource.organizations.first.api_key}/articles"
       else
         new_organization_path
       end
