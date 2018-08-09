@@ -1,0 +1,8 @@
+p
+  = "Hi #{@email_carrier.receiver_name}"
+
+p
+  = "#{@email_carrier.sender_name} has added you #{@email_carrier.organization.name} in AceHelp"
+
+p
+  = link_to 'Set password and join your team', edit_user_password_url(reset_password_token: @token)
