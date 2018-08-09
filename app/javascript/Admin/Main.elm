@@ -29,6 +29,7 @@ import Page.Session.SignUp as SignUp
 import Page.Errors as Errors
 import Admin.Data.Organization exposing (OrganizationId)
 import Admin.Data.Category exposing (Category)
+import Admin.Data.User exposing (..)
 import Admin.Data.Url exposing (UrlData)
 import UrlParser as Url exposing (..)
 import Admin.Request.Helper exposing (NodeEnv, ApiKey, logoutRequest)
@@ -143,7 +144,7 @@ type Msg
     | OnLocationChange Navigation.Location
     | SignOut
     | SignedOut (Result Http.Error String)
-      --| SignUpMsg (Result GQLClient.Error String)
+    | SignUpMsg SignUp.Msg
     | OrganizationCreateMsg OrganizationCreate.Msg
 
 
@@ -476,6 +477,10 @@ navigateTo newRoute model =
             Route.OrganizationCreate ->
                 (OrganizationCreate.init model.userId)
                     |> transitionTo OrganizationCreate OrganizationCreateMsg
+
+            Route.SignUp ->
+                (SignUp.init)
+                    |> transitionTo SignUp SignUpMsg
 
             Route.NotFound ->
                 ( { model | currentPage = Loaded NotFound }, Cmd.none )
@@ -876,6 +881,23 @@ update msg model =
                 , Cmd.map OrganizationCreateMsg createOrgCmds
                 )
 
+        SignUpMsg suMsg ->
+            let
+                currentPageModel =
+                    case model.currentPage of
+                        Loaded (SignUp signUpModel) ->
+                            signUpModel
+
+                        _ ->
+                            SignUp.initModel
+
+                ( signUpModel, signUpCmds ) =
+                    SignUp.update suMsg currentPageModel
+            in
+                ( { model | currentPage = Loaded (SignUp signUpModel) }
+                , Cmd.map SignUpMsg signUpCmds
+                )
+
         OnLocationChange location ->
             setRoute location model
 
@@ -884,16 +906,6 @@ update msg model =
 
         SignedOut _ ->
             ( model, load (Admin.Request.Helper.baseUrl model.nodeEnv) )
-
-        _ ->
-            ( model, Cmd.none )
-
-
-
---SignUp (Ok token) ->
---    ( model, Cmd.none )
---SignUp (Err error) ->
---    ( model, Cmd.none )
 
 
 retriveOrganizationFromUrl : Location -> OrganizationId
@@ -1041,11 +1053,17 @@ view model =
                     (OrganizationCreate.view orgCreateModel)
                 )
 
+        SignUp signupModel ->
+            adminLayout model
+                (Html.map SignUpMsg
+                    (SignUp.view signupModel)
+                )
+
         NotFound ->
             Errors.notFound
 
         Blank ->
-            div [] [ text "blank" ]
+            div [] [ text "blankked" ]
 
 
 adminLayout : Model -> Html Msg -> Html Msg
