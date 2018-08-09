@@ -30,7 +30,27 @@ document.addEventListener("DOMContentLoaded", () => {
     // INCOMING PORTS
     app.ports.insertArticleContent.subscribe(function(html) {
         var trixEl = document.querySelector("trix-editor");
-        if (trixEl) trixEl.editor.insertHTML(html);
+        if (trixEl) {
+            trixEl.editor.loadHTML(html);
+        }
+
+        var divEl = document.getElementById("trix-show");
+        if (divEl) {
+            divEl.innerHTML = html;
+        }
+    });
+
+    app.ports.removeTrixEditor.subscribe(function() {
+        var trixEl = document.querySelector("trix-editor");
+        if (trixEl) {
+            var editorEl = trixEl.editor.element;
+            var editorContentEl = document.getElementById(
+                editorEl.getAttribute("input")
+            );
+            if (editorEl) editorEl.parentNode.removeChild(editorEl);
+            if (editorContentEl)
+                editorContentEl.parentNode.removeChild(editorContentEl);
+        }
     });
 
     app.ports.setTimeout.subscribe(function(time) {

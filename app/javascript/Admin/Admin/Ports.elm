@@ -26,6 +26,9 @@ port timedOut : (Int -> msg) -> Sub msg
 port insertArticleContent : String -> Cmd msg
 
 
+port removeTrixEditor : () -> Cmd msg
+
+
 port setTimeout : Time -> Cmd msg
 
 
