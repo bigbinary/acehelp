@@ -4,9 +4,10 @@ require "test_helper"
 require "graphql/client_host"
 
 class Mutations::AssignUserToOrganizationMutationsTest < ActiveSupport::TestCase
+  include Devise::Test::IntegrationHelpers
   setup do
     @ethan = users(:hunt)
-
+    sign_in @ethan
     @query = <<-GRAPHQL
         mutation($user_keys: AssignUserToOrganizationInput!) {
             assign_user_to_organization(input: $user_keys) {
