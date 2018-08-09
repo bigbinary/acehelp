@@ -1,16 +1,16 @@
 module Page.Url.List exposing (..)
 
+import Admin.Data.Url exposing (..)
+import Admin.Request.Helper exposing (..)
+import Admin.Request.Url exposing (..)
+import GraphQL.Client.Http as GQLClient
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
 import Navigation exposing (..)
-import Route
-import Admin.Request.Url exposing (..)
-import Admin.Request.Helper exposing (..)
-import Admin.Data.Url exposing (..)
 import Reader exposing (Reader)
+import Route
 import Task exposing (Task)
-import GraphQL.Client.Http as GQLClient
 
 
 -- MODEL
@@ -68,7 +68,7 @@ update msg model nodeEnv organizationKey =
             model ! [ Navigation.newUrl (Route.routeToString page) ]
 
         DeleteUrl urlId ->
-            deleteRecord model nodeEnv organizationKey ({ id = urlId })
+            deleteRecord model nodeEnv organizationKey { id = urlId }
 
         DeleteUrlResponse (Ok id) ->
             let
@@ -114,7 +114,8 @@ view model =
             , class "btn btn-primary"
             ]
             [ text "New Url" ]
-        , div []
+        , div
+            [ class "listingSection" ]
             (List.map
                 (\url ->
                     urlRow model url
@@ -126,20 +127,27 @@ view model =
 
 urlRow : Model -> UrlData -> Html Msg
 urlRow model url =
-    div [ id url.id ]
+    div
+        [ id url.id
+        , class "listingRow"
+        ]
         [ div
-            []
+            [ class "textColumn" ]
             [ text url.url ]
-        , button
-            [ onClick (DeleteUrl url.id)
-            , class "btn btn-primary deleteUrl"
+        , div [ class "actionButtonColumn" ]
+            [ button
+                [ onClick (Navigate <| Route.UrlEdit model.organizationKey url.id)
+                , class "actionButton btn btn-primary"
+                ]
+                [ text "Edit Url" ]
             ]
-            [ text "Delete Url" ]
-        , button
-            [ onClick (Navigate <| Route.UrlEdit model.organizationKey url.id)
-            , class "btn btn-primary"
+        , div [ class "actionButtonColumn" ]
+            [ button
+                [ onClick (DeleteUrl url.id)
+                , class "actionButton btn btn-primary deleteUrl"
+                ]
+                [ text "Delete Url" ]
             ]
-            [ text "Edit Url" ]
         ]
 
 

@@ -1,4 +1,4 @@
-.categorySection {
+.listingSection {
     border-collapse: collapse;
     overflow-x:auto;
     width: 70%;
@@ -8,8 +8,9 @@
         opacity: 0;
     }
 
-    .categoryRow {
+    .listingRow {
         display: table-row;
+        margin: 5px 0px 5px 0px;
 
         &:hover {
             background-color: #ddd;
