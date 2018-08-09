@@ -1002,102 +1002,104 @@ adminLayout : Model -> Html Msg -> Html Msg
 adminLayout model page =
     div []
         [ adminHeader model
-        , div [ class "container-fluid p-3" ] [ page ]
+        , div [ class "container main-wrapper" ] [ page ]
         ]
 
 
 adminHeader : Model -> Html Msg
 adminHeader model =
-    nav [ class "navbar navbar-dark bg-primary navbar-expand flex-column flex-md-row" ]
-        [ ul
-            [ class "navbar-nav mr-auto mt-2 mt-lg-0 " ]
-            [ li [ class "nav-item" ]
-                [ Html.a
-                    [ classList
-                        [ ( "nav-link", True )
-                        , ( "active"
-                          , (model.route
-                                == Route.ArticleList
-                                    model.organizationKey
-                            )
-                                || (model.route == Route.ArticleCreate model.organizationKey)
-                          )
+    nav [ class "header navbar navbar-dark bg-primary navbar-expand flex-column flex-md-row" ]
+        [ div [ class "container" ]
+            [ ul
+                [ class "navbar-nav mr-auto mt-2 mt-lg-0 " ]
+                [ li [ class "nav-item" ]
+                    [ Html.a
+                        [ classList
+                            [ ( "nav-link", True )
+                            , ( "active"
+                              , (model.route
+                                    == Route.ArticleList
+                                        model.organizationKey
+                                )
+                                    || (model.route == Route.ArticleCreate model.organizationKey)
+                              )
+                            ]
+                        , onClick <| NavigateTo (Route.ArticleList model.organizationKey)
                         ]
-                    , onClick <| NavigateTo (Route.ArticleList model.organizationKey)
+                        [ text "Articles" ]
                     ]
-                    [ text "Articles" ]
-                ]
-            , li [ class "nav-item" ]
-                [ Html.a
-                    [ classList
-                        [ ( "nav-link", True )
-                        , ( "active"
-                          , (model.route == Route.UrlList model.organizationKey)
-                                || (model.route == Route.UrlCreate model.organizationKey)
-                          )
+                , li [ class "nav-item" ]
+                    [ Html.a
+                        [ classList
+                            [ ( "nav-link", True )
+                            , ( "active"
+                              , (model.route == Route.UrlList model.organizationKey)
+                                    || (model.route == Route.UrlCreate model.organizationKey)
+                              )
+                            ]
+                        , onClick <| NavigateTo (Route.UrlList model.organizationKey)
                         ]
-                    , onClick <| NavigateTo (Route.UrlList model.organizationKey)
+                        [ text "URL" ]
                     ]
-                    [ text "URL" ]
-                ]
-            , li [ class "nav-item" ]
-                [ Html.a
-                    [ classList
-                        [ ( "nav-link", True )
-                        , ( "active"
-                          , (model.route == Route.CategoryList model.organizationKey)
-                                || (model.route == Route.CategoryCreate model.organizationKey)
-                          )
+                , li [ class "nav-item" ]
+                    [ Html.a
+                        [ classList
+                            [ ( "nav-link", True )
+                            , ( "active"
+                              , (model.route == Route.CategoryList model.organizationKey)
+                                    || (model.route == Route.CategoryCreate model.organizationKey)
+                              )
+                            ]
+                        , onClick <| NavigateTo (Route.CategoryList model.organizationKey)
                         ]
-                    , onClick <| NavigateTo (Route.CategoryList model.organizationKey)
+                        [ text "Category" ]
                     ]
-                    [ text "Category" ]
-                ]
-            , li [ class "nav-item" ]
-                [ Html.a
-                    [ classList
-                        [ ( "nav-link", True )
-                        , ( "active", model.route == Route.TicketList model.organizationKey )
+                , li [ class "nav-item" ]
+                    [ Html.a
+                        [ classList
+                            [ ( "nav-link", True )
+                            , ( "active", model.route == Route.TicketList model.organizationKey )
+                            ]
+                        , onClick <| NavigateTo (Route.TicketList model.organizationKey)
                         ]
-                    , onClick <| NavigateTo (Route.TicketList model.organizationKey)
+                        [ text "Ticket" ]
                     ]
-                    [ text "Ticket" ]
-                ]
-            , li [ class "nav-item" ]
-                [ Html.a
-                    [ classList
-                        [ ( "nav-link", True )
-                        , ( "active", model.route == Route.FeedbackList model.organizationKey )
+                , li [ class "nav-item" ]
+                    [ Html.a
+                        [ classList
+                            [ ( "nav-link", True )
+                            , ( "active", model.route == Route.FeedbackList model.organizationKey )
+                            ]
+                        , onClick <| NavigateTo (Route.FeedbackList model.organizationKey)
                         ]
-                    , onClick <| NavigateTo (Route.FeedbackList model.organizationKey)
+                        [ text "Feedback" ]
                     ]
-                    [ text "Feedback" ]
-                ]
-            , li [ class "nav-item" ]
-                [ Html.a
-                    [ classList
-                        [ ( "nav-link", True )
-                        , ( "active", (model.route == (Route.TeamList model.organizationKey)) )
+                , li [ class "nav-item" ]
+                    [ Html.a
+                        [ classList
+                            [ ( "nav-link", True )
+                            , ( "active", (model.route == (Route.TeamList model.organizationKey)) )
+                            ]
+                        , onClick <| NavigateTo (Route.TeamList model.organizationKey)
                         ]
-                    , onClick <| NavigateTo (Route.TeamList model.organizationKey)
+                        [ text "Team" ]
                     ]
-                    [ text "Team" ]
-                ]
-            , li [ class "nav-item" ]
-                [ Html.a
-                    [ classList
-                        [ ( "nav-link", True )
-                        , ( "active", (model.route == (Route.Settings model.organizationKey)) )
+                , li [ class "nav-item" ]
+                    [ Html.a
+                        [ classList
+                            [ ( "nav-link", True )
+                            , ( "active", (model.route == (Route.Settings model.organizationKey)) )
+                            ]
+                        , onClick <| NavigateTo (Route.Settings model.organizationKey)
                         ]
-                    , onClick <| NavigateTo (Route.Settings model.organizationKey)
+                        [ text "Settings" ]
                     ]
-                    [ text "Settings" ]
                 ]
-            ]
-        , ul [ class "navbar-nav ml-auto" ]
-            [ li [ class "nav-item " ]
-                [ Html.a [ class "nav-link", onClick SignOut ]
-                    [ text "Logout" ]
+            , ul [ class "navbar-nav ml-auto" ]
+                [ li [ class "nav-item " ]
+                    [ Html.a [ class "nav-link", onClick SignOut ]
+                        [ text "Logout" ]
+                    ]
                 ]
             ]
         ]

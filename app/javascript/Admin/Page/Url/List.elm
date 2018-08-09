@@ -109,14 +109,11 @@ view model =
                     )
                     model.error
             ]
-        , div
-            [ class "buttonDiv" ]
-            [ Html.a
-                [ onClick (Navigate <| Route.UrlCreate model.organizationKey)
-                , class "button primary"
-                ]
-                [ text "New Url" ]
+        , button
+            [ onClick (Navigate <| Route.UrlCreate model.organizationKey)
+            , class "btn btn-primary"
             ]
+            [ text "New Url" ]
         , div []
             (List.map
                 (\url ->
@@ -133,22 +130,16 @@ urlRow model url =
         [ div
             []
             [ text url.url ]
-        , div
-            []
-            [ Html.a
-                [ onClick (DeleteUrl url.id)
-                , class "button primary deleteUrl"
-                ]
-                [ text "Delete Url" ]
+        , button
+            [ onClick (DeleteUrl url.id)
+            , class "btn btn-primary deleteUrl"
             ]
-        , div
-            []
-            [ Html.a
-                [ onClick (Navigate <| Route.UrlEdit model.organizationKey url.id)
-                , class "button primary"
-                ]
-                [ text "Edit Url" ]
+            [ text "Delete Url" ]
+        , button
+            [ onClick (Navigate <| Route.UrlEdit model.organizationKey url.id)
+            , class "btn btn-primary"
             ]
+            [ text "Edit Url" ]
         ]
 
 

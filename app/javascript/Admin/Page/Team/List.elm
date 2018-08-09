@@ -50,6 +50,7 @@ type Msg
     | DeleteTeamMember String
     | DeleteTeamMemberResponse (Result GQLClient.Error (List Team))
 
+
 update : Msg -> Model -> ApiKey -> NodeEnv -> ( Model, Cmd Msg )
 update msg model apiKey nodeEnv =
     case msg of
@@ -90,14 +91,11 @@ view model =
                     )
                     model.error
             ]
-        , div
-            []
-            [ Html.a
-                [ onClick (Navigate <| Route.TeamMemberCreate model.organizationKey)
-                , class "button primary"
-                ]
-                [ text " + Add Team Member " ]
+        , button
+            [ onClick (Navigate <| Route.TeamMemberCreate model.organizationKey)
+            , class "btn btn-primary"
             ]
+            [ text " + Add Team Member " ]
         , div []
             (List.map
                 (\teamMember ->
@@ -114,14 +112,11 @@ row teamMember =
         [ div
             []
             [ text <| (teamMember.name ++ " | " ++ teamMember.email) ]
-        , div
-            []
-            [ Html.a
-                [ onClick (DeleteTeamMember teamMember.email)
-                , class "button primary deleteTeamMember"
-                ]
-                [ text "Remove Team Member" ]
+        , button
+            [ onClick (DeleteTeamMember teamMember.email)
+            , class "btn btn-primary deleteTeamMember"
             ]
+            [ text "Remove Team Member" ]
         , hr [] []
         ]
 

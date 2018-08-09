@@ -37,6 +37,8 @@ init organizationKey =
     , requestCategories
     )
 
+
+
 -- UPDATE
 
 
@@ -98,14 +100,11 @@ view model =
                     )
                     model.error
             ]
-        , div
-            [ class "buttonDiv" ]
-            [ Html.a
-                [ onClick (Navigate <| Route.CategoryCreate model.organizationKey)
-                , class "button primary"
-                ]
-                [ text "New Category" ]
+        , button
+            [ onClick (Navigate <| Route.CategoryCreate model.organizationKey)
+            , class "btn btn-primary"
             ]
+            [ text "New Category" ]
         , div
             []
             (List.map

@@ -79,14 +79,11 @@ view model =
                 )
                 model.articles
             )
-        , div
-            [ class "buttonDiv" ]
-            [ Html.a
-                [ onClick (Navigate <| Route.ArticleCreate model.organizationKey)
-                , class "button primary"
-                ]
-                [ text "New Article" ]
+        , button
+            [ onClick (Navigate <| Route.ArticleCreate model.organizationKey)
+            , class "btn btn-primary"
             ]
+            [ text "New Article" ]
         ]
 
 

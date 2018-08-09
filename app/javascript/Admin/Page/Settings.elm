@@ -62,7 +62,7 @@ jsCodeView organizationKey =
     div
         []
         [ textarea
-            [ class "code disabled"
+            [ class "js-snippet"
             , disabled True
             ]
             [ text (codeSnippet organizationKey)
