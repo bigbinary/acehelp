@@ -106,7 +106,7 @@ view model =
             ]
             [ text "New Category" ]
         , div
-            [ class "categorySection" ]
+            [ class "listingSection" ]
             (List.map
                 (\category ->
                     categoryRow category
@@ -119,22 +119,22 @@ view model =
 categoryRow : Category -> Html Msg
 categoryRow category =
     div
-        [ class "categoryRow" ]
+        [ class "listingRow" ]
         [ div
             [ class "textColumn" ]
             [ text category.name ]
         , div
             [ class "actionButtonColumn" ]
-            [ span
-                [ class "actionButton button primary"
+            [ button
+                [ class "actionButton btn btn-primary"
                 , onClick <| Navigate <| Route.CategoryEdit category.id
                 ]
                 [ text "Edit Category" ]
             ]
         , div
             [ class "actionButtonColumn" ]
-            [ span
-                [ class "actionButton button primary"
+            [ button
+                [ class "actionButton btn btn-primary"
                 , onClick (DeleteCategory category.id)
                 ]
                 [ text "Delete Category" ]
