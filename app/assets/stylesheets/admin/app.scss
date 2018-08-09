@@ -16,6 +16,13 @@ $blueThemeColor: rgb(60, 170, 249);
     background-color: #cdcdcd;
     color: #000;
   }
+  
+  .nav-link.active{
+    span{
+      padding-bottom: 3px;
+      border-bottom:2px solid #fff;
+    }
+  }
 
   #content-wrapper {
     padding: 0 50px;
