@@ -4,7 +4,8 @@ class Mutations::ArticleMutations
   Create = GraphQL::Relay::Mutation.define do
     name "CreateArticle"
 
-    input_field :category_id, types.String
+    input_field :category_ids, types[types.String]
+    input_field :url_ids, types[types.String]
     input_field :title, !types.String
     input_field :desc, !types.String
 
@@ -19,9 +20,13 @@ class Mutations::ArticleMutations
       )
 
       if new_article.save
-        if inputs[:category_id].present?
-          category = Category.find_by!(id: inputs[:category_id])
-          new_article.categories << category
+        if inputs[:category_ids].present?
+          valid_category_ids = Category.where(id: inputs[:category_ids]).pluck(:id)
+          new_article.category_ids = valid_category_ids
+        end
+        if inputs[:url_ids].present?
+          valid_url_ids = Url.where(id: inputs[:url_ids]).pluck(:id)
+          new_article.url_ids = valid_url_ids
         end
         article = new_article
       else
