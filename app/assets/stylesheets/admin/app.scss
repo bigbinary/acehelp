@@ -1,6 +1,22 @@
 $blueThemeColor: rgb(60, 170, 249);
 
 #admin-hook {
+
+  .header{
+    height : 70px;
+  }
+
+  .main-wrapper{
+    margin-top:20px;
+  }
+
+  .js-snippet{
+    width: 100%;
+    min-height: 240px;
+    background-color: #cdcdcd;
+    color: #000;
+  }
+
   #content-wrapper {
     padding: 0 50px;
     height: 100%;

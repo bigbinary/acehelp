@@ -145,7 +145,7 @@ view model =
                     ]
                     []
                 ]
-            , button [ type_ "submit", class "button primary" ] [ text "Save URL" ]
+            , button [ type_ "submit", class "btn btn-primary" ] [ text "Save URL" ]
             ]
         ]
 

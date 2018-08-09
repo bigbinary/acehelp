@@ -85,22 +85,16 @@ view model =
                     )
                     model.error
             ]
-        , div
-            [ class "buttonDiv" ]
-            [ Html.a
-                [ onClick (FeedbackListReloaded "closed")
-                , class "button primary"
-                ]
-                [ text "Closed Feedback" ]
+        , button
+            [ onClick (FeedbackListReloaded "closed")
+            , class "btn btn-primary"
             ]
-        , div
-            [ class "buttonDiv" ]
-            [ Html.a
-                [ onClick (FeedbackListReloaded "open")
-                , class "button primary"
-                ]
-                [ text "Open Feedback" ]
+            [ text "Closed Feedback" ]
+        , button
+            [ onClick (FeedbackListReloaded "open")
+            , class "btn btn-primary"
             ]
+            [ text "Open Feedback" ]
         , div []
             (List.map
                 (\feedback ->
