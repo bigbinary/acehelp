@@ -5,7 +5,8 @@
     "license": "BSD3",
     "source-directories": [
         "app/javascript/Client",
-        "app/javascript/Admin"
+        "app/javascript/Admin",
+        "app/javascript/User"
     ],
     "exposed-modules": [],
     "dependencies": {
