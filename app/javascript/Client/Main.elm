@@ -11,7 +11,6 @@ import Section.Article as ArticleSection
 import Section.ArticleList as ArticleListSection
 import Section.Error as ErrorSection
 import Section.ContactUs as ContactUsSection
-import Section.SignUp as Signup
 import Views.Container exposing (topBar)
 import Views.Loading exposing (sectionLoadingView)
 import Views.Tabs as Tabs

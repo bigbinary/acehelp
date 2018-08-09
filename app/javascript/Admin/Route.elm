@@ -32,6 +32,7 @@ type Route
     | TeamList OrganizationApiKey
     | TeamMemberCreate OrganizationApiKey
     | Settings OrganizationApiKey
+    | SignUp
     | Dashboard
     | NotFound
     | OrganizationCreate
@@ -58,6 +59,7 @@ routeMatcher =
         , Url.map TicketEdit (s "organizations" </> string </> s "tickets" </> string)
         , Url.map OrganizationCreate (s "organizations" </> s "new")
         , Url.map CategoryEdit (s "categories" </> string)
+        , Url.map SignUp (s "users" </> s "sign_up")
         ]
 
 
@@ -123,6 +125,9 @@ routeToString page =
 
                 CategoryEdit categoryId ->
                     [ "categories", categoryId ]
+
+                SignUp ->
+                    [ "users", "sign_up" ]
 
                 NotFound ->
                     []

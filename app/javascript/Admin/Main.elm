@@ -25,6 +25,7 @@ import Page.Category.Create as CategoryCreate
 import Page.Team.Create as TeamMemberCreate
 import Page.Settings as Settings
 import Page.Organization.Create as OrganizationCreate
+import Page.Session.SignUp as SignUp
 import Page.Errors as Errors
 import Admin.Data.Organization exposing (OrganizationId)
 import Admin.Data.Category exposing (Category)
@@ -74,6 +75,7 @@ type Page
     | FeedbackShow FeedbackShow.Model
     | TeamList TeamList.Model
     | TeamMemberCreate TeamMemberCreate.Model
+    | SignUp SignUp.Model
     | Dashboard
     | NotFound
     | Blank
@@ -141,6 +143,7 @@ type Msg
     | OnLocationChange Navigation.Location
     | SignOut
     | SignedOut (Result Http.Error String)
+      --| SignUpMsg (Result GQLClient.Error String)
     | OrganizationCreateMsg OrganizationCreate.Msg
 
 
@@ -881,6 +884,16 @@ update msg model =
 
         SignedOut _ ->
             ( model, load (Admin.Request.Helper.baseUrl model.nodeEnv) )
+
+        _ ->
+            ( model, Cmd.none )
+
+
+
+--SignUp (Ok token) ->
+--    ( model, Cmd.none )
+--SignUp (Err error) ->
+--    ( model, Cmd.none )
 
 
 retriveOrganizationFromUrl : Location -> OrganizationId
