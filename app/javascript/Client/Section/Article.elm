@@ -192,7 +192,7 @@ view model =
         div [ id "content-wrapper" ]
             [ div [ class "article-wrapper" ]
                 [ h1 [] [ text article.title ]
-                , div [ class "article-content" ]
+                , div [ class "article-content trix-content" ]
                     [ p [] [ text article.content ]
                     ]
                 , feebackView

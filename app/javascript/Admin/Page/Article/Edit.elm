@@ -15,7 +15,6 @@ import Reader exposing (Reader)
 import Task exposing (Task)
 import Time
 import Field exposing (..)
-import Field.ValidationResult exposing (..)
 import Helpers exposing (..)
 import Admin.Ports exposing (..)
 import Page.Article.Common exposing (..)
@@ -33,9 +32,10 @@ type alias Model =
     , categories : List (Option Category)
     , urls : List (Option UrlData)
     , error : Maybe String
-    , keyboardInputTaskId : Maybe Int
+    , updateTaskId : Maybe Int
     , status : Status
-    , articleLoaded : Bool
+    , originalArticle : Maybe Article
+    , isEditable : Bool
     }
 
 
@@ -47,9 +47,10 @@ initModel articleId =
     , categories = []
     , urls = []
     , error = Nothing
-    , keyboardInputTaskId = Nothing
+    , updateTaskId = Nothing
     , status = None
-    , articleLoaded = False
+    , originalArticle = Nothing
+    , isEditable = False
     }
 
 
@@ -82,6 +83,8 @@ type Msg
     | ReceivedTimeoutId Int
     | TimedOut Int
     | Killed ()
+    | EditArticle
+    | ResetArticle
 
 
 
@@ -90,7 +93,7 @@ type Msg
 
 delayTime : Float
 delayTime =
-    Time.second * 3
+    Time.second * 2
 
 
 update : Msg -> Model -> NodeEnv -> ApiKey -> ( Model, Cmd Msg )
@@ -104,19 +107,19 @@ update msg model nodeEnv organizationKey =
                 errors =
                     errorsIn [ newTitle, model.desc ]
             in
-                ( { model | title = newTitle, error = errors }, setTimeout delayTime )
+                ( { model | title = newTitle, error = errors }, Cmd.none )
 
         ReceivedTimeoutId id ->
             let
                 killCmd =
-                    case model.keyboardInputTaskId of
+                    case model.updateTaskId of
                         Just oldId ->
                             clearTimeout oldId
 
                         Nothing ->
                             Cmd.none
             in
-                ( { model | keyboardInputTaskId = Just id }, killCmd )
+                ( { model | updateTaskId = Just id }, killCmd )
 
         TimedOut id ->
             save model nodeEnv organizationKey
@@ -129,7 +132,9 @@ update msg model nodeEnv organizationKey =
                 errors =
                     errorsIn [ newDesc, model.title ]
             in
-                ( { model | desc = newDesc, error = errors }, setTimeout delayTime )
+                ( { model | desc = newDesc, error = errors }
+                , Cmd.none
+                )
 
         SaveArticle ->
             save model nodeEnv organizationKey
@@ -151,18 +156,29 @@ update msg model nodeEnv organizationKey =
                 | articleId = article.id
                 , title = Field.update model.title article.title
                 , desc = Field.update model.desc article.desc
-                , articleLoaded = True
+                , categories = itemSelection (List.map .id article.categories) model.categories
+                , originalArticle = Just article
               }
             , insertArticleContent article.desc
             )
 
         ArticleLoaded (Err err) ->
-            ( { model | error = Just "There was an error loading up the article", articleLoaded = False }
+            ( { model | error = Just "There was an error loading up the article", originalArticle = Nothing }
             , Cmd.none
             )
 
         CategoriesLoaded (Ok categories) ->
-            ( { model | categories = List.map Unselected categories }, Cmd.none )
+            ( { model
+                | categories =
+                    case model.originalArticle of
+                        Just article ->
+                            itemSelection (List.map .id article.categories) model.categories
+
+                        Nothing ->
+                            List.map Unselected categories
+              }
+            , Cmd.none
+            )
 
         CategoriesLoaded (Err err) ->
             ( { model | error = Just (toString err) }, Cmd.none )
@@ -194,22 +210,25 @@ update msg model nodeEnv organizationKey =
         Killed _ ->
             ( model, Cmd.none )
 
+        EditArticle ->
+            ( { model | isEditable = True }, Cmd.none )
 
-errorsIn : List (Field String v) -> Maybe String
-errorsIn fields =
-    validateAll fields
-        |> filterFailures
-        |> List.map
-            (\result ->
-                case result of
-                    Failed err ->
-                        err
+        ResetArticle ->
+            case model.originalArticle of
+                Just article ->
+                    ( { model
+                        | articleId = article.id
+                        , title = Field.update model.title article.title
+                        , desc = Field.update model.desc article.desc
+                        , categories = itemSelection (List.map .id article.categories) model.categories
+                        , originalArticle = Just article
+                        , isEditable = False
+                      }
+                    , insertArticleContent article.desc
+                    )
 
-                    Passed _ ->
-                        "Unknown Error"
-            )
-        |> String.join ", "
-        |> stringToMaybe
+                Nothing ->
+                    ( { model | isEditable = False }, Cmd.none )
 
 
 
@@ -222,24 +241,31 @@ view model =
         [ errorView model.error
         , div [ class "row article-block" ]
             [ div [ class "col-md-8 article-title-content-block" ]
-                [ div
+                [ editAndSaveView model.isEditable
+                , div
                     [ class "row article-title" ]
                     [ input
                         [ Html.Attributes.value <| Field.value model.title
                         , type_ "text"
-                        , class "form-control"
+                        , classList [ ( "form-control", True ), ( "hidden", not model.isEditable ) ]
                         , placeholder "Title"
                         , onInput TitleInput
                         ]
                         []
+                    , h1 [ classList [ ( "hidden", model.isEditable ) ] ] [ text <| Field.value model.title ]
                     ]
                 , div
                     [ class "row article-content" ]
-                    [ node "trix-editor"
-                        [ placeholder "Article content goes here.."
-                        , onInput DescInput
+                    [ div [ classList [ ( "hidden", not model.isEditable ) ] ]
+                        [ node "trix-editor"
+                            [ classList [ ( "trix-content", True ) ]
+                            , id "dubi"
+                            , placeholder "Article content goes here.."
+                            , onInput DescInput
+                            ]
+                            []
                         ]
-                        []
+                    , div [ id "trix-show", classList [ ( "trix-content", True ), ( "hidden", model.isEditable ) ] ] []
                     ]
                 ]
             , div [ class "col-sm article-meta-data-block" ]
@@ -254,25 +280,18 @@ view model =
         ]
 
 
-itemSelection : List a -> List (Option { b | id : a }) -> List (Option { b | id : a })
-itemSelection selectedItemList itemList =
-    let
-        switchItem item =
-            if List.member item.id selectedItemList then
-                Selected item
-            else
-                Unselected item
-    in
-        List.map
-            (\item ->
-                case item of
-                    Selected innerItem ->
-                        switchItem innerItem
+editAndSaveView : Bool -> Html Msg
+editAndSaveView isisEditable =
+    case isisEditable of
+        True ->
+            div [ class "row article-save-edit" ]
+                [ button [ class "btn btn-primary", onClick SaveArticle ] [ text "Save" ]
+                , button [ class "btn btn-primary", onClick ResetArticle ] [ text "Cancel" ]
+                ]
 
-                    Unselected innerItem ->
-                        switchItem innerItem
-            )
-            itemList
+        False ->
+            div [ class "row article-save-edit" ]
+                [ button [ class "btn btn-primary", onClick EditArticle ] [ text "Edit" ] ]
 
 
 articleInputs : Model -> UpdateArticleInputs
@@ -308,7 +327,7 @@ save model nodeEnv organizationKey =
                     ( nodeEnv, organizationKey )
                 )
     in
-        if Field.isAllValid fields && model.articleLoaded == True then
+        if Field.isAllValid fields && maybeToBool model.originalArticle then
             ( { model | error = Nothing, status = Saving }, cmd )
         else
             ( { model | error = errorsIn fields }, Cmd.none )

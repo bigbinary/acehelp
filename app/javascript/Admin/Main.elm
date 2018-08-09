@@ -120,7 +120,6 @@ type Msg
     = NavigateTo Route.Route
     | ArticleListMsg ArticleList.Msg
     | ArticleCreateMsg ArticleCreate.Msg
-    | ArticleCategoriesLoaded (Result GQLClient.Error (List Category))
     | ArticleEditMsg ArticleEdit.Msg
     | UrlCreateMsg UrlCreate.Msg
     | UrlEditMsg UrlEdit.Msg
@@ -208,16 +207,26 @@ navigateTo newRoute model =
 
             Route.ArticleCreate organizationKey ->
                 let
-                    ( articleCreateModel, categoriesRequest ) =
+                    ( articleCreateModel, categoriesRequest, urlsRequest ) =
                         ArticleCreate.init
 
-                    cmd =
-                        Task.attempt ArticleCategoriesLoaded
-                            (Reader.run categoriesRequest
-                                ( model.nodeEnv
-                                , model.organizationKey
+                    cmdCategoriesRequest =
+                        Cmd.map ArticleCreateMsg <|
+                            Task.attempt ArticleCreate.CategoriesLoaded
+                                (Reader.run categoriesRequest
+                                    ( model.nodeEnv
+                                    , model.organizationKey
+                                    )
                                 )
-                            )
+
+                    cmdUrlsRequest =
+                        Cmd.map ArticleCreateMsg <|
+                            Task.attempt ArticleCreate.UrlsLoaded
+                                (Reader.run urlsRequest
+                                    ( model.nodeEnv
+                                    , model.organizationKey
+                                    )
+                                )
                 in
                     ( { model
                         | currentPage =
@@ -225,7 +234,7 @@ navigateTo newRoute model =
                                 (ArticleCreate articleCreateModel)
                         , route = newRoute
                       }
-                    , cmd
+                    , Cmd.batch [ cmdCategoriesRequest, cmdUrlsRequest ]
                     )
 
             Route.CategoryList organizationKey ->
@@ -517,29 +526,6 @@ update msg model =
                 ( { model | currentPage = Loaded (ArticleEdit articleEditModel) }
                 , Cmd.map ArticleEditMsg articleEditCmd
                 )
-
-        ArticleCategoriesLoaded (Ok categoriesList) ->
-            let
-                currentPageModel =
-                    case model.currentPage of
-                        Loaded (ArticleCreate articleCreateModel) ->
-                            articleCreateModel
-
-                        _ ->
-                            ArticleCreate.initModel
-            in
-                ( { model
-                    | currentPage =
-                        Loaded
-                            (ArticleCreate
-                                { currentPageModel | categories = categoriesList }
-                            )
-                  }
-                , Cmd.none
-                )
-
-        ArticleCategoriesLoaded (Err error) ->
-            ( { model | error = Just (toString error) }, Cmd.none )
 
         UrlCreateMsg cuMsg ->
             let

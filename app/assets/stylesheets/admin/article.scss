@@ -1,6 +1,12 @@
 .article-block{
     margin: 0 10px;
 
+    .article-save-edit{
+        flex-direction: row-reverse;
+        button{
+            margin: 5px;
+        }
+    }
     
     .article-title-content-block{
         flex-direction: column;
