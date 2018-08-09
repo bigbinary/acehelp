@@ -22,12 +22,11 @@ class Mutations::PostCommentInTicketMutations
       new_comment = Comment.add_comment(inputs[:comment].to_h)
 
       if new_comment
-        new_comment.assign_agent_to_ticket(inputs[:comment][:agent_id])
+        new_comment.assign_agent_to_ticket(inputs[:comment][:user_id])
         comment = new_comment
       else
         errors = Utils::ErrorHandler.new.detailed_error(new_comment, context)
       end
-
       {
         comment: comment,
         errors: errors

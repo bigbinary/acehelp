@@ -21,6 +21,7 @@ class Mutations::PostCommentInTicketMutationsTest < ActiveSupport::TestCase
             }
             ticket {
               id
+              status
               agent {
                 first_name
               }
@@ -57,7 +58,7 @@ class Mutations::PostCommentInTicketMutationsTest < ActiveSupport::TestCase
 
     assert_raise(Graphlient::Errors::GraphQLError) do
       AceHelp::Client.execute(@mutation_query, comment_args: {
-        agent_id: @agent.id,
+        user_id: @agent.id,
         info: "Comment about a ticket by agent #{@agent.name}"
       })
     end
