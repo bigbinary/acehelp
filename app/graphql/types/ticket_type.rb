@@ -14,4 +14,8 @@ Types::TicketType = GraphQL::ObjectType.define do
   field :statuses, -> { types[Types::TicketStatusesType] } do
     resolve ->(obj, args, context) { Ticket::statuses }
   end
+  field :comments, -> { !types[Types::TicketCommentType] } do
+    preload :comments
+    resolve ->(obj, args, context) { obj.comments }
+  end
 end
