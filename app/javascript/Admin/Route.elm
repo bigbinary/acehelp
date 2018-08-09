@@ -34,6 +34,7 @@ type Route
     | Dashboard
     | NotFound
     | OrganizationCreate
+    | UserCreate
 
 
 routeMatcher : Parser (Route -> a) a
@@ -48,7 +49,6 @@ routeMatcher =
         , Url.map FeedbackShow (s "organizations" </> string </> s "feedbacks" </> string)
         , Url.map TeamList (s "organizations" </> string </> s "team")
         , Url.map Settings (s "organizations" </> string </> s "settings")
-
         , Url.map ArticleCreate (s "organizations" </> string </> s "articles" </> s "new")
         , Url.map UrlCreate (s "organizations" </> string </> s "urls" </> s "new")
         , Url.map CategoryCreate (s "organizations" </> string </> s "categories" </> s "new")
@@ -56,12 +56,14 @@ routeMatcher =
         , Url.map ArticleEdit (s "organizations" </> string </> s "articles" </> string)
         , Url.map UrlEdit (s "organizations" </> string </> s "urls" </> string </> s "edit")
         , Url.map OrganizationCreate (s "organizations" </> s "new")
+        , Url.map UserCreate (s "users" </> s "sign_up")
         , Url.map CategoryEdit (s "categories" </> string)
         ]
 
 
 
 -- INTERNAL --
+
 
 routeToString : Route -> String
 routeToString page =
@@ -70,6 +72,7 @@ routeToString page =
             case page of
                 Dashboard ->
                     []
+
                 ArticleList organizationApiKey ->
                     [ "organizations", organizationApiKey, "articles" ]
 
@@ -114,6 +117,9 @@ routeToString page =
 
                 OrganizationCreate ->
                     [ "organizations", "new" ]
+
+                UserCreate ->
+                    [ "users", "sign_up" ]
 
                 CategoryEdit categoryId ->
                     [ "categories", categoryId ]

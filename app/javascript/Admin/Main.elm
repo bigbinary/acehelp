@@ -25,6 +25,7 @@ import Page.Category.Create as CategoryCreate
 import Page.Team.Create as TeamMemberCreate
 import Page.Settings as Settings
 import Page.Organization.Create as OrganizationCreate
+import Page.User.Create as UserCreate
 import Page.Errors as Errors
 import Admin.Data.Organization exposing (OrganizationId)
 import Admin.Data.Category exposing (Category)
@@ -72,6 +73,7 @@ type Page
     | FeedbackShow FeedbackShow.Model
     | TeamList TeamList.Model
     | TeamMemberCreate TeamMemberCreate.Model
+    | UserCreate UserCreate.Model
     | Dashboard
     | NotFound
     | Blank
@@ -139,6 +141,7 @@ type Msg
     | OnLocationChange Navigation.Location
     | SignOut
     | SignedOut (Result Http.Error String)
+    | UserCreateMsg UserCreate.Msg
     | OrganizationCreateMsg OrganizationCreate.Msg
 
 
@@ -439,6 +442,10 @@ navigateTo newRoute model =
             Route.OrganizationCreate ->
                 (OrganizationCreate.init model.userId)
                     |> transitionTo OrganizationCreate OrganizationCreateMsg
+
+            Route.UserCreate ->
+                (UserCreate.init)
+                    |> transitionTo UserCreate UserCreateMsg
 
             Route.NotFound ->
                 ( { model | currentPage = Loaded NotFound }, Cmd.none )
@@ -842,6 +849,24 @@ update msg model =
                 , Cmd.map OrganizationCreateMsg createOrgCmds
                 )
 
+        UserCreateMsg tcmsg ->
+            let
+                currentPageModel =
+                    case getPage model.currentPage of
+                        UserCreate teamCreateModel ->
+                            teamCreateModel
+
+                        _ ->
+                            UserCreate.initModel
+
+                ( createTeamModel, createTeamCmds ) =
+                    UserCreate.update tcmsg
+                        currentPageModel
+            in
+                ( { model | currentPage = Loaded (UserCreate createTeamModel) }
+                , Cmd.map UserCreateMsg createTeamCmds
+                )
+
         OnLocationChange location ->
             setRoute location model
 
@@ -980,6 +1005,12 @@ view model =
             adminLayout model
                 (Html.map TeamCreateMsg
                     (TeamMemberCreate.view teamMemberCreateModel)
+                )
+
+        UserCreate userCreateModel ->
+            adminLayout model
+                (Html.map UserCreateMsg
+                    (UserCreate.view userCreateModel)
                 )
 
         Dashboard ->
