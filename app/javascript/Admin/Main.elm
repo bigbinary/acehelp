@@ -1026,7 +1026,7 @@ adminHeader model =
                             ]
                         , onClick <| NavigateTo (Route.ArticleList model.organizationKey)
                         ]
-                        [ text "Articles" ]
+                        [ span [] [ text "Articles" ] ]
                     ]
                 , li [ class "nav-item" ]
                     [ Html.a
@@ -1039,7 +1039,7 @@ adminHeader model =
                             ]
                         , onClick <| NavigateTo (Route.UrlList model.organizationKey)
                         ]
-                        [ text "URL" ]
+                        [ span [] [ text "URL" ] ]
                     ]
                 , li [ class "nav-item" ]
                     [ Html.a
@@ -1052,7 +1052,7 @@ adminHeader model =
                             ]
                         , onClick <| NavigateTo (Route.CategoryList model.organizationKey)
                         ]
-                        [ text "Category" ]
+                        [ span [] [ text "Category" ] ]
                     ]
                 , li [ class "nav-item" ]
                     [ Html.a
@@ -1062,7 +1062,7 @@ adminHeader model =
                             ]
                         , onClick <| NavigateTo (Route.TicketList model.organizationKey)
                         ]
-                        [ text "Ticket" ]
+                        [ span [] [ text "Ticket" ] ]
                     ]
                 , li [ class "nav-item" ]
                     [ Html.a
@@ -1072,7 +1072,7 @@ adminHeader model =
                             ]
                         , onClick <| NavigateTo (Route.FeedbackList model.organizationKey)
                         ]
-                        [ text "Feedback" ]
+                        [ span [] [ text "Feedback" ] ]
                     ]
                 , li [ class "nav-item" ]
                     [ Html.a
@@ -1082,7 +1082,7 @@ adminHeader model =
                             ]
                         , onClick <| NavigateTo (Route.TeamList model.organizationKey)
                         ]
-                        [ text "Team" ]
+                        [ span [] [ text "Team" ] ]
                     ]
                 , li [ class "nav-item" ]
                     [ Html.a
@@ -1092,7 +1092,7 @@ adminHeader model =
                             ]
                         , onClick <| NavigateTo (Route.Settings model.organizationKey)
                         ]
-                        [ text "Settings" ]
+                        [ span [] [ text "Settings" ] ]
                     ]
                 ]
             , ul [ class "navbar-nav ml-auto" ]
