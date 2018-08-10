@@ -4,6 +4,9 @@ $blueThemeColor: rgb(60, 170, 249);
 
   .header{
     height : 70px;
+    .nav-item {
+      cursor: pointer;
+    }
   }
 
   .main-wrapper{
