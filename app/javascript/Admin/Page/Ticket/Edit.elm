@@ -157,15 +157,6 @@ ticketInputs { id, status } =
     }
 
 
-save : Model -> NodeEnv -> ApiKey -> ( Model, Cmd Msg )
-save model nodeEnv organizationKey =
-    --let
-    --    cmd =
-    --        Task.attempt UpdateTicketResponse (Reader.run (updateUrl) ( nodeEnv, organizationKey, urlInputs {  } ))
-    --in
-    ( model, Cmd.none )
-
-
 updateTicketStatus : Model -> TicketInput -> NodeEnv -> ApiKey -> ( Model, Cmd Msg )
 updateTicketStatus model ticketInput nodeEnv organizationKey =
     let
