@@ -7,14 +7,18 @@ class Mutations::LoginMutations
     input_field :email, !types.String
     input_field :password, !types.String
 
-    return_field :authentication_token, types.String
+
+    return_field :token, Types::TokenType
+
     return_field :errors, types[Types::ErrorType]
 
     resolve ->(object, inputs, context) {
       user = User.find_by_email(inputs[:email])
       if user
         if user.valid_password?(inputs[:password])
-          token = user.authentication_token
+
+          token_hash = user.create_new_auth_token
+          user.save
         else
           errors = Utils::ErrorHandler.new.error("You have entered an invalid username or password", context)
         end
@@ -23,7 +27,7 @@ class Mutations::LoginMutations
       end
 
       {
-        authentication_token: token,
+        token: token_hash,
         errors: errors
       }
     }

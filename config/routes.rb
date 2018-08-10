@@ -1,7 +1,10 @@
 # frozen_string_literal: true
 
 Rails.application.routes.draw do
-  devise_for :users, controllers: {registrations: "registrations"}
+  mount_devise_token_auth_for 'User', at: 'users', controllers: {
+    registrations: "registrations",
+    sessions: "devise_sessions"
+  }
 
   root to: "home#index"
 

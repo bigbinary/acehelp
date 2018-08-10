@@ -14,7 +14,9 @@ class Mutations::LoginMutationsTest < ActiveSupport::TestCase
     @query = <<-GRAPHQL
               mutation($login_keys: LoginUserInput!) {
                   loginUser(input: $login_keys) {
-                    authentication_token
+                    token {
+                      uid
+                    }
                     errors {
                       message
                       path
@@ -26,7 +28,7 @@ class Mutations::LoginMutationsTest < ActiveSupport::TestCase
 
   test "Authentication Token should present" do
     result =  AceHelp::Client.execute(@query, login_keys: { email: @ethan.email, password: "SelfDestructIn5" })
-    assert_equal @ethan.authentication_token, result.data.login_user.authentication_token
+    assert_equal @ethan.email, result.data.login_user.uid
   end
 
   test "With wrong password" do

@@ -30,9 +30,7 @@ class GraphqlController < ApplicationController
       context = {}
       context[:organization] = @organization if @organization.present?
       context[:current_user] = current_user if current_user
-      if request_is_mutation_for?("addTicket")
-        context[:user_agent] = request.user_agent
-      end
+      context[:request] = request
       context
     end
 
