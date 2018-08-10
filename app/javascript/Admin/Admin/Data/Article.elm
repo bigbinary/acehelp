@@ -34,6 +34,7 @@ type alias UpdateArticleInputs =
     , title : String
     , desc : String
     , categoryId : Maybe String
+    , urlId : Maybe String
     }
 
 
@@ -150,6 +151,9 @@ updateArticleMutation =
 
         categoryIdVar =
             Var.optional "category_id" .categoryId Var.string ""
+
+        urlIdVar =
+            Var.optional "url_id" .urlId Var.string ""
     in
         GQLBuilder.mutationDocument <|
             GQLBuilder.extract
@@ -160,6 +164,7 @@ updateArticleMutation =
                             , ( "title", Arg.variable titleVar )
                             , ( "desc", Arg.variable descVar )
                             , ( "category_id", Arg.variable categoryIdVar )
+                            , ( "url_id", Arg.variable urlIdVar )
                             ]
                       )
                     ]
