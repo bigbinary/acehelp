@@ -13,6 +13,10 @@ type alias ArticleId =
     String
 
 
+type alias ArticleIdInput =
+    { id : ArticleId }
+
+
 type alias Article =
     { id : ArticleId
     , title : String
@@ -169,6 +173,27 @@ updateArticleMutation =
                             articleObject
                     )
                 )
+
+
+deleteArticleMutation : GQLBuilder.Document GQLBuilder.Mutation UrlId ArticleIdInput
+deleteArticleMutation =
+    let
+        idVar =
+            Var.required "id" .id Var.string
+    in
+        GQLBuilder.mutationDocument <|
+            GQLBuilder.extract <|
+                GQLBuilder.field "deleteArticle"
+                    [ ( "input"
+                      , Arg.object
+                            [ ( "id", Arg.variable idVar ) ]
+                      )
+                    ]
+                    (GQLBuilder.extract <|
+                        GQLBuilder.field "deletedId"
+                            []
+                            GQLBuilder.string
+                    )
 
 
 articleObject : GQLBuilder.ValueSpec GQLBuilder.NonNull GQLBuilder.ObjectType Article vars
