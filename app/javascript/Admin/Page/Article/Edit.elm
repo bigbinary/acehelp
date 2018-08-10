@@ -139,10 +139,10 @@ update msg model nodeEnv organizationKey =
         SaveArticle ->
             save model nodeEnv organizationKey
 
-        SaveArticleResponse (Ok id) ->
+        SaveArticleResponse (Ok article) ->
             ( { model
-                | title = Field.update model.title ""
-                , desc = Field.update model.desc ""
+                | title = Field.update model.title article.title
+                , desc = Field.update model.desc article.desc
                 , status = None
               }
             , Cmd.none
@@ -157,6 +157,7 @@ update msg model nodeEnv organizationKey =
                 , title = Field.update model.title article.title
                 , desc = Field.update model.desc article.desc
                 , categories = itemSelection (List.map .id article.categories) model.categories
+                , urls = itemSelection (List.map .id article.urls) model.urls
                 , originalArticle = Just article
               }
             , insertArticleContent article.desc
@@ -191,15 +192,24 @@ update msg model nodeEnv organizationKey =
             )
 
         UrlsLoaded (Ok urls) ->
-            ( { model | urls = List.map Unselected urls }, Cmd.none )
+            ( { model
+                | urls =
+                    case model.originalArticle of
+                        Just article ->
+                            itemSelection (List.map .id article.urls) model.urls
+
+                        Nothing ->
+                            List.map Unselected urls
+              }
+            , Cmd.none
+            )
 
         UrlsLoaded (Err err) ->
             ( { model | error = Just (toString err) }, Cmd.none )
 
         UrlSelected selectedUrlIds ->
             ( { model
-                | urls =
-                    itemSelection selectedUrlIds model.urls
+                | urls = itemSelection selectedUrlIds model.urls
               }
             , setTimeout delayTime
             )
@@ -221,6 +231,7 @@ update msg model nodeEnv organizationKey =
                         , title = Field.update model.title article.title
                         , desc = Field.update model.desc article.desc
                         , categories = itemSelection (List.map .id article.categories) model.categories
+                        , urls = itemSelection (List.map .id article.urls) model.urls
                         , originalArticle = Just article
                         , isEditable = False
                       }
@@ -295,7 +306,7 @@ editAndSaveView isisEditable =
 
 
 articleInputs : Model -> UpdateArticleInputs
-articleInputs { articleId, title, desc, categories } =
+articleInputs { articleId, title, desc, categories, urls } =
     { id = articleId
     , title = Field.value title
     , desc = Field.value desc
@@ -310,6 +321,18 @@ articleInputs { articleId, title, desc, categories } =
                         Nothing
             )
             categories
+            |> List.head
+    , urlId =
+        List.filterMap
+            (\option ->
+                case option of
+                    Selected url ->
+                        Just url.id
+
+                    _ ->
+                        Nothing
+            )
+            urls
             |> List.head
     }
 
