@@ -4,9 +4,8 @@ class User < ApplicationRecord
   # Include default devise modules. Others available are:
   # :confirmable, :lockable, :timeoutable and :omniauthable
   devise :database_authenticatable, :registerable,
-         :recoverable, :rememberable, :trackable, :validatable
-
-  acts_as_token_authenticatable
+          :recoverable, :rememberable, :trackable, :validatable
+  include DeviseTokenAuth::Concerns::User
 
   belongs_to :organization, autosave: true, dependent: :destroy, required: false
 
@@ -52,5 +51,6 @@ class User < ApplicationRecord
     token = set_reset_password_token
     InviteUserMailer.welcome_email(self.id, org_id, sender_id, token).deliver_now
   end
-  # handle_asynchronously :send_welcome_mail, queue: 'devise'
+  handle_asynchronously :send_welcome_mail, queue: 'devise'
+
 end

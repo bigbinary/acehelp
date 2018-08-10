@@ -15,7 +15,7 @@ class Mutations::TicketMutations
       new_ticket = Ticket.new(name: inputs[:name],
                               email: inputs[:email],
                               message: inputs[:message],
-                              user_agent: context[:user_agent],
+                              user_agent: context[:request].user_agent,
                               organization_id: context[:organization].id
                               )
 

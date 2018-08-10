@@ -1,13 +1,12 @@
 # frozen_string_literal: true
 
 class ApplicationController < ActionController::Base
+  include DeviseTokenAuth::Concerns::SetUserByToken
   include ::Concerns::ErrorHandlers
 
   before_action :configure_permitted_parameters, if: :devise_controller?
   rescue_from ActiveRecord::RecordNotFound, with: :render_not_found
   skip_before_action :verify_authenticity_token
-
-  acts_as_token_authentication_handler_for User, fallback: :none
 
   private
 
