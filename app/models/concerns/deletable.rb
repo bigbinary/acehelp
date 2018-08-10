@@ -6,4 +6,8 @@ module Deletable
   included do
     default_scope { where(deleted_at: nil) }
   end
+
+  def soft_delete
+    update_attributes(deleted_at: DateTime.now)
+  end
 end
