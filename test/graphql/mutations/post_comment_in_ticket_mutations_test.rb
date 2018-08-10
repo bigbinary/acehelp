@@ -93,14 +93,14 @@ class Mutations::PostCommentInTicketMutationsTest < ActiveSupport::TestCase
   end
 
   test "post comment as a user" do
-    @ticket.update status: Ticket::STATUSES[:resolved]
-    assert_equal Ticket::STATUSES[:resolved], @ticket.status
+    @ticket.update status: Ticket.statuses[:resolved]
+    assert_equal Ticket.statuses[:resolved], @ticket.status
     result = AceHelp::Client.execute(@mutation_query, comment_args: {comment: {
       user_id: @user.id,
       ticket_id: @ticket.id,
       info: "Comment about a ticket by a user #{@agent.name}"
     }})
-    assert_equal Ticket::STATUSES[:open], result.data.post_comment_in_ticket.comment.ticket.status
+    assert_equal Ticket.statuses[:open], result.data.post_comment_in_ticket.comment.ticket.status
   end
 
 
