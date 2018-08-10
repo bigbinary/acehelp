@@ -37,7 +37,7 @@ initModel ticketId =
     , status = ""
     , statuses = []
     , comments = []
-    , comment = Comment ticketId "" ""
+    , comment = Comment ticketId ""
     }
 
 
@@ -54,6 +54,7 @@ init ticketId =
 
 type Msg
     = NoteInput String
+    | CommentInput String
     | UpdateTicket
     | DeleteTicket
     | UpdateTicketResponse (Result GQLClient.Error Ticket)
@@ -68,8 +69,11 @@ update msg model =
         NoteInput note ->
             ( { model | note = note }, [] )
 
+        CommentInput comment ->
+            ( { model | comment = (Comment model.ticketId comment) }, [] )
+
         UpdateTicket ->
-            ( model, [] )
+            save model
 
         DeleteTicket ->
             deleteTicket model
@@ -80,6 +84,8 @@ update msg model =
                 , status = ticket.status
                 , statuses = ticket.statuses
                 , message = ticket.message
+                , comment = Comment ticket.id ""
+                , comments = ticket.comments
                 , success = Just "Ticket Updated Successfully..."
               }
             , []
@@ -101,6 +107,7 @@ update msg model =
                 , message = ticket.message
                 , statuses = ticket.statuses
                 , status = ticket.status
+                , comments = ticket.comments
               }
             , []
             )
@@ -121,7 +128,7 @@ view model =
     div [ class "row ticket-block" ]
         [ div
             [ class "col-md-8" ]
-            [ Html.form []
+            [ Html.form [ onSubmit UpdateTicket ]
                 [ div []
                     [ Maybe.withDefault (text "") <|
                         Maybe.map
@@ -176,15 +183,15 @@ view model =
                                 model.comments
                             )
                         , input
-                            [ Html.Attributes.value <| model.note
+                            [ Html.Attributes.value <| model.comment.info
                             , type_ "text"
                             , placeholder "add comments here..."
-                            , onInput NoteInput
+                            , onInput CommentInput
                             ]
                             []
                         ]
                     ]
-                , button [ type_ "submit", class "btn btn-primary" ] [ text "Update URL" ]
+                , button [ type_ "submit", class "button primary" ] [ text "Submit" ]
                 ]
             ]
         , div [ class "col-sm" ]
@@ -193,6 +200,21 @@ view model =
             , deleteTicketButton model
             ]
         ]
+
+
+ticketInputs : TicketInput -> TicketInput
+ticketInputs { id, status } =
+    { status = status
+    , id = id
+    }
+
+
+ticketNoteComment : Model -> TicketNoteComment
+ticketNoteComment model =
+    { comment = model.comment.info
+    , id = model.ticketId
+    , note = model.note
+    }
 
 
 updateTicketStatus : Model -> TicketInput -> ( Model, List (ReaderCmd Msg) )
@@ -209,6 +231,15 @@ deleteTicket model =
     let
         cmd =
             Strict <| Reader.map (Task.attempt DeleteTicketResponse) (deleteTicketRequest model.ticketId)
+    in
+        ( model, [ cmd ] )
+
+save : Model -> ( Model, List (ReaderCmd Msg) )
+save model =
+    let
+        cmd =
+            Strict <|
+                 Reader.map (Task.attempt UpdateTicketResponse) (addNotesAndCommentToTicket (ticketNoteComment model))
     in
         ( model, [ cmd ] )
 
@@ -260,6 +291,6 @@ commentRows : Comment -> Html Msg
 commentRows comment =
     div
         [ class "comment-row" ]
-        [ span [ class "row-id" ] [ text comment.ticket_id ]
+        [ span [ class "row-id", id comment.ticket_id ] [ text "Comment : " ]
         , span [ class "row-name" ] [ text comment.info ]
         ]
