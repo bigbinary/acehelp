@@ -44,3 +44,12 @@ deleteTicketRequest ticketId =
                 GQLBuilder.request { id = ticketId } deleteTicketMutation
             )
         )
+
+addNotesAndCommentToTicket : Reader ( NodeEnv, ApiKey, TicketNoteComment ) (Task GQLClient.Error Ticket)
+addNotesAndCommentToTicket =
+    Reader.Reader
+        (\( nodeEnv, apiKey, ticket ) ->
+            (GQLClient.customSendMutation (requestOptions nodeEnv apiKey) <|
+                GQLBuilder.request ticket addTicketNotesAndCommentMutation
+            )
+        )
