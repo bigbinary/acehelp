@@ -42,9 +42,38 @@ class Mutations::TicketMutations
 
     resolve ->(object, inputs, context) {
       ticket = Ticket.find_by!(id: inputs[:id])
-
       if ticket.soft_delete
         ticket = ticket
+      else
+        errors = Utils::ErrorHandler.new.detailed_error(ticket, context)
+      end
+
+      {
+        ticket: ticket,
+        errors: errors
+      }
+    }
+  end
+
+
+  Update = GraphQL::Relay::Mutation.define do
+    name "UpdateTicket"
+
+    input_field :id, types.String
+    input_field :note, types.String
+    input_field :comment, types.String
+
+    return_field :ticket, Types::TicketType
+    return_field :errors, types[Types::ErrorType]
+
+    resolve ->(object, inputs, context) {
+      ticket = Ticket.find(inputs[:id])
+      if ticket.present?
+        Comment.create!(
+          agent_id: context[:current_user].id,
+          info: inputs[:comment],
+          ticket_id: ticket.id
+        ) if inputs[:comment].present?
       else
         errors = Utils::ErrorHandler.new.detailed_error(ticket, context)
       end
