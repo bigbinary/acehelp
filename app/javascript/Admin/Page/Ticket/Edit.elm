@@ -146,7 +146,9 @@ view model =
                 ]
             ]
         , div [ class "col-sm" ]
-            [ ticketStatusDropDown model ]
+            [ ticketStatusDropDown model
+            , closeTicketButton model
+            ]
         ]
 
 
@@ -184,3 +186,14 @@ statusOption model status =
         option [ value (status.value), selected True ] [ text (status.key) ]
     else
         option [ value (status.value) ] [ text (status.key) ]
+
+
+closeTicketButton : Model -> Html Msg
+closeTicketButton model =
+    div []
+        [ button
+            [ onClick (UpdateTicketStatus "closed")
+            , class "button primary closeTicket"
+            ]
+            [ text "Close Ticket" ]
+        ]

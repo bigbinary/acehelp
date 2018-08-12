@@ -21,16 +21,13 @@ type alias TicketStatus =
     , value : String
     }
 
-
 type alias TicketInput =
     { id : TicketId
     , status : String
     }
 
-
 type alias TicketId =
     String
-
 
 type alias TicketIdInput =
     { id : String

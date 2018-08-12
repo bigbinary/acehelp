@@ -19,7 +19,7 @@ Rails.application.routes.draw do
     resources :articles
     resources :urls
     resources :categories
-    resources :tickets, only: [:index]
+    resources :tickets, only: [:index, :show]
     resources :feedbacks, only: [:index, :show]
     resources :team, only: [:index]
   end
