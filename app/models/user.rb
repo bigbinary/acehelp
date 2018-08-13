@@ -13,6 +13,8 @@ class User < ApplicationRecord
   has_many :organization_users, dependent: :destroy
   has_many :organizations, through: :organization_users
 
+  has_many :comments, as: :commentable, dependent: :destroy
+
   scope :agents, -> { where(role: :agent) }
 
   scope :for_organization, ->(org) { joins(organization_users: :organization).where(organization_users: { organization_id: org.id }) }

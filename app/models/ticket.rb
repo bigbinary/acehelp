@@ -20,6 +20,10 @@ class Ticket < ApplicationRecord
   after_save :parse_user_agent, if: :saved_change_to_user_agent?
   after_save :mark_status_updates, if: :saved_change_to_status?
 
+  def set_open!
+    update status: STATUSES[:open]
+  end
+
   def assign_agent(agent_id)
     return false if !Agent.exists?(id: agent_id)
     update_attributes(agent_id: agent_id)
@@ -33,8 +37,7 @@ class Ticket < ApplicationRecord
     return false if status == status_key.to_s
     update(status: status_key)
   end
-
-
+  
   private
     def parse_user_agent
       if user_agent.present?
@@ -57,5 +60,4 @@ class Ticket < ApplicationRecord
         end
       end
     end
-
 end

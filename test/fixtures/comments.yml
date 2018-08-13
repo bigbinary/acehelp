@@ -2,10 +2,12 @@
 
 one:
   info: First Comment
-  agent: illya_kuryakin
+  commentable: illya_kuryakin
+  commentable_type: Agent
   ticket: payment_issue_ticket
 
 two:
   info: Second Comment
-  agent: napoleon_solo
+  commentable: hunt
+  commentable_type: User
   ticket: payment_issue_ticket
