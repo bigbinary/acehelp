@@ -10,6 +10,7 @@ import Html.Attributes exposing (..)
 import Html.Events exposing (..)
 import Http
 import Navigation exposing (..)
+import Page.Session.Login as Login
 import Page.Article.Create as ArticleCreate
 import Page.Article.Edit as ArticleEdit
 import Page.Article.List as ArticleList
@@ -77,8 +78,9 @@ type Page
     | TeamMemberCreate TeamMemberCreate.Model
     | SignUp SignUp.Model
     | Dashboard
-    | Blank
+    | Login Login.Model
     | NotFound
+    | Blank
 
 
 type PageState
@@ -140,6 +142,7 @@ type Msg
     | TicketEditMsg TicketEdit.Msg
     | SettingsMsg Settings.Msg
     | OnLocationChange Navigation.Location
+    | LoginMsg Login.Msg
     | SignOut
     | SignedOut (Result Http.Error String)
     | SignUpMsg SignUp.Msg
@@ -172,17 +175,23 @@ setRoute location model =
 navigateTo : Route.Route -> Model -> ( Model, Cmd Msg )
 navigateTo newRoute model =
     let
-        transitionTo page msg =
+        mapState state page msg =
             Tuple.mapFirst
                 (\pageModel ->
                     { model
                         | currentPage =
-                            TransitioningTo (page pageModel)
+                            state (page pageModel)
                         , route = newRoute
                     }
                 )
                 >> Tuple.mapSecond
                     (Cmd.map msg)
+
+        transitionTo =
+            mapState TransitioningTo
+
+        loadedIn =
+            mapState Loaded
     in
         case newRoute of
             Route.ArticleList organizationKey ->
@@ -488,6 +497,10 @@ navigateTo newRoute model =
             Route.OrganizationCreate ->
                 (OrganizationCreate.init model.userId)
                     |> transitionTo OrganizationCreate OrganizationCreateMsg
+
+            Route.Login ->
+                Login.init
+                    |> loadedIn Login LoginMsg
 
             Route.NotFound ->
                 ( { model
@@ -886,6 +899,9 @@ update msg model =
                 , Cmd.map SignUpMsg signUpCmds
                 )
 
+        LoginMsg loginMsg ->
+            ( model, Cmd.none )
+
         OnLocationChange location ->
             setRoute location model
 
@@ -1045,6 +1061,9 @@ view model =
             (Html.map SignUpMsg
                 (SignUp.view signupModel)
             )
+
+        Login loginModel ->
+            Html.map LoginMsg (Login.view loginModel)
 
         NotFound ->
             Errors.notFound

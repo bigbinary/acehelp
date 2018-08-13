@@ -46,3 +46,30 @@ signupMutation =
                             []
                             userObject
                     )
+
+
+loginMutation : GQLBuilder.Document GQLBuilder.Mutation String { a | email : String, password : String }
+loginMutation =
+    let
+        emailVar =
+            Var.required "email" .email Var.string
+
+        passwordVar =
+            Var.required "password" .password Var.string
+    in
+        GQLBuilder.mutationDocument <|
+            GQLBuilder.extract
+                (GQLBuilder.field "loginUser"
+                    [ ( "input"
+                      , Arg.object
+                            [ ( "email", Arg.variable emailVar )
+                            , ( "password", Arg.variable passwordVar )
+                            ]
+                      )
+                    ]
+                    (GQLBuilder.extract <|
+                        GQLBuilder.field "authentication_token"
+                            []
+                            GQLBuilder.string
+                    )
+                )

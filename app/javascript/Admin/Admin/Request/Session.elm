@@ -23,3 +23,23 @@ signupRequest signupInputs =
                     signupMutation
                 )
         )
+
+
+requestLogin : { a | email : String, password : String } -> Reader NodeEnv (Task GQLClient.Error String)
+requestLogin authInputs =
+    Reader.Reader
+        (\nodeEnv ->
+            GQLClient.customSendMutation
+                ({ method = "POST"
+                 , url = graphqlUrl nodeEnv
+                 , headers = []
+                 , timeout = Nothing
+                 , withCredentials = False
+                 }
+                )
+            <|
+                (GQLBuilder.request
+                    authInputs
+                    loginMutation
+                )
+        )

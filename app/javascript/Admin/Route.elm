@@ -36,6 +36,7 @@ type Route
     | Dashboard
     | NotFound
     | OrganizationCreate
+    | Login
 
 
 routeMatcher : Parser (Route -> a) a
@@ -60,6 +61,7 @@ routeMatcher =
         , Url.map OrganizationCreate (s "organizations" </> s "new")
         , Url.map CategoryEdit (s "categories" </> string)
         , Url.map SignUp (s "users" </> s "sign_up")
+        , Url.map Login (s "users" </> s "sign_in")
         ]
 
 
@@ -128,6 +130,9 @@ routeToString page =
 
                 SignUp ->
                     [ "users", "sign_up" ]
+
+                Login ->
+                    [ "login" ]
 
                 NotFound ->
                     []
