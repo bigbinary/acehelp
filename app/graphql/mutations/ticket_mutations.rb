@@ -69,11 +69,12 @@ class Mutations::TicketMutations
     resolve ->(object, inputs, context) {
       ticket = Ticket.find(inputs[:id])
       if ticket.present?
-        Comment.create!(
-          agent_id: context[:current_user].id,
+        new_comment = Comment.add_comment(
           info: inputs[:comment],
+          user_id: context[:current_user].id,
           ticket_id: ticket.id
         ) if inputs[:comment].present?
+        new_comment.assign_agent_to_ticket(context[:current_user].id) if new_comment
       else
         errors = Utils::ErrorHandler.new.detailed_error(ticket, context)
       end
