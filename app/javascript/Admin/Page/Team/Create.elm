@@ -1,18 +1,18 @@
 module Page.Team.Create exposing (..)
 
+import Admin.Data.Team exposing (..)
+import Admin.Request.Team exposing (..)
+import Field exposing (..)
+import Field.ValidationResult exposing (..)
+import GraphQL.Client.Http as GQLClient
+import Helpers exposing (..)
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
-import Admin.Request.Team exposing (..)
-import Admin.Data.Team exposing (..)
-import Request.Helpers exposing (NodeEnv, ApiKey)
 import Reader exposing (Reader)
-import Task exposing (Task)
-import GraphQL.Client.Http as GQLClient
-import Field exposing (..)
-import Field.ValidationResult exposing (..)
-import Helpers exposing (..)
+import Request.Helpers exposing (ApiKey, NodeEnv)
 import Route
+import Task exposing (Task)
 
 
 -- MODEL
@@ -145,7 +145,9 @@ view model =
                     ]
                     []
                 ]
-            , button [ type_ "submit", class "btn btn-primary" ] [ text "Save URL" ]
+            , button
+                [ type_ "submit", class "btn btn-primary" ]
+                [ text "Save Member" ]
             ]
         ]
 
@@ -155,7 +157,7 @@ save model nodeEnv apiKey =
     let
         cmd =
             Task.attempt SaveTeamResponse
-                (Reader.run (createTeamMember)
+                (Reader.run createTeamMember
                     ( nodeEnv
                     , apiKey
                     , { email = Field.value model.email
