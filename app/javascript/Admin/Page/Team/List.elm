@@ -2,17 +2,17 @@ module Page.Team.List exposing (..)
 
 --import Http
 
+import Admin.Data.Team exposing (..)
+import Admin.Request.Team exposing (..)
+import GraphQL.Client.Http as GQLClient
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
 import Navigation exposing (..)
-import Route
-import Request.Helpers exposing (NodeEnv, ApiKey)
-import Admin.Request.Team exposing (..)
-import Admin.Data.Team exposing (..)
-import Task exposing (Task)
 import Reader exposing (Reader)
-import GraphQL.Client.Http as GQLClient
+import Request.Helpers exposing (ApiKey, NodeEnv)
+import Route
+import Task exposing (Task)
 
 
 -- MODEL
@@ -64,7 +64,7 @@ update msg model apiKey nodeEnv =
             model ! [ Navigation.newUrl (Route.routeToString page) ]
 
         DeleteTeamMember teamMemberEmail ->
-            deleteRecord model nodeEnv apiKey ({ email = teamMemberEmail })
+            deleteRecord model nodeEnv apiKey { email = teamMemberEmail }
 
         DeleteTeamMemberResponse (Ok teamList) ->
             ( { model | teamList = teamList }, Cmd.none )
@@ -96,7 +96,7 @@ view model =
             , class "btn btn-primary"
             ]
             [ text " + Add Team Member " ]
-        , div []
+        , div [ class "listingSection" ]
             (List.map
                 (\teamMember ->
                     row teamMember
@@ -108,16 +108,21 @@ view model =
 
 row : Team -> Html Msg
 row teamMember =
-    div [ id teamMember.id ]
+    div
+        [ id teamMember.id
+        , class "listingRow"
+        ]
         [ div
-            []
+            [ class "textColumn" ]
             [ text <| (teamMember.name ++ " | " ++ teamMember.email) ]
-        , button
-            [ onClick (DeleteTeamMember teamMember.email)
-            , class "btn btn-primary deleteTeamMember"
+        , div
+            [ class "actionButtonColumn" ]
+            [ button
+                [ onClick (DeleteTeamMember teamMember.email)
+                , class "actionButton btn btn-primary deleteTeamMember"
+                ]
+                [ text "Remove Team Member" ]
             ]
-            [ text "Remove Team Member" ]
-        , hr [] []
         ]
 
 
@@ -125,6 +130,6 @@ deleteRecord : Model -> NodeEnv -> ApiKey -> UserEmailInput -> ( Model, Cmd Msg 
 deleteRecord model nodeEnv apiKey userEmail =
     let
         cmd =
-            Task.attempt TeamListLoaded (Reader.run (removeTeamMember) ( nodeEnv, apiKey, userEmail ))
+            Task.attempt TeamListLoaded (Reader.run removeTeamMember ( nodeEnv, apiKey, userEmail ))
     in
         ( model, cmd )
