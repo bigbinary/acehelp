@@ -15,7 +15,7 @@ class Resolvers::TriggersSearchTest < ActiveSupport::TestCase
   end
 
   test "get_all_categories_success" do
-    assert_equal find.pluck(:slug), ["auto_update_user", "auto_change_watch_list"]
+    assert_equal find.pluck(:slug), @triggers.pluck(:slug)
   end
 
   test "resolver graphql test" do
@@ -26,7 +26,7 @@ class Resolvers::TriggersSearchTest < ActiveSupport::TestCase
         }
       }
     GRAPHq
-    assert_empty (response.data.triggers.map(&:slug) - ["auto_update_user", "auto_change_watch_list"])
+    assert_empty (response.data.triggers.map(&:slug) - @triggers.pluck(:slug))
   end
 
 end
