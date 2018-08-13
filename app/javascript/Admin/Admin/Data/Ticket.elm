@@ -22,13 +22,16 @@ type alias TicketStatus =
     , value : String
     }
 
+
 type alias TicketInput =
     { id : TicketId
     , status : String
     }
 
+
 type alias TicketId =
     String
+
 
 type alias TicketIdInput =
     { id : String
@@ -37,7 +40,7 @@ type alias TicketIdInput =
 
 type alias Comment =
     { ticket_id : String
-    , agent_id : String
+    , commenter_id : String
     , info : String
     }
 
@@ -81,7 +84,7 @@ commentObject : GQLBuilder.ValueSpec GQLBuilder.NonNull GQLBuilder.ObjectType Co
 commentObject =
     GQLBuilder.object Comment
         |> GQLBuilder.with (GQLBuilder.field "ticket_id" [] GQLBuilder.string)
-        |> GQLBuilder.with (GQLBuilder.field "agent_id" [] GQLBuilder.string)
+        |> GQLBuilder.with (GQLBuilder.field "commenter_id" [] GQLBuilder.string)
         |> GQLBuilder.with (GQLBuilder.field "info" [] GQLBuilder.string)
 
 

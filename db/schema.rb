@@ -113,8 +113,8 @@ ActiveRecord::Schema.define(version: 2018_08_07_085117) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.uuid "organization_id"
-    t.uuid "agent_id"
     t.string "status", default: "open", null: false
+    t.uuid "agent_id"
     t.text "note"
     t.string "user_agent"
     t.json "device_info"
