@@ -94,8 +94,18 @@ update msg model nodeEnv apiKey =
                 else
                     ( { model | error = Just errors }, Cmd.none )
 
-        _ ->
-            ( model, Cmd.none )
+        SignUpResponse (Ok user) ->
+            ( { model
+                | firstName = Field.update model.firstName ""
+                , email = Field.update model.email ""
+                , password = Field.update model.password ""
+                , confirmPassword = Field.update model.confirmPassword ""
+              }
+            , Cmd.none
+            )
+
+        SignUpResponse (Err error) ->
+            ( { model | error = Just (toString error) }, Cmd.none )
 
 
 signUp : Model -> NodeEnv -> ApiKey -> ( Model, Cmd Msg )

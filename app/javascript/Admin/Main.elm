@@ -114,7 +114,7 @@ init flags location =
             , error = Nothing
             }
     in
-        ( initModel, pageCmd )
+        ( pageModel, pageCmd )
 
 
 
