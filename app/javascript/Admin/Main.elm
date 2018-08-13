@@ -474,13 +474,23 @@ navigateTo newRoute model =
                     , cmd
                     )
 
+            Route.SignUp ->
+                let
+                    ( signUpModel, signUpCmd ) =
+                        SignUp.init
+                in
+                    ( { model
+                        | currentPage =
+                            TransitioningTo
+                                (SignUp signUpModel)
+                        , route = newRoute
+                      }
+                    , Cmd.map SignUpMsg signUpCmd
+                    )
+
             Route.OrganizationCreate ->
                 (OrganizationCreate.init model.userId)
                     |> transitionTo OrganizationCreate OrganizationCreateMsg
-
-            Route.SignUp ->
-                (SignUp.init)
-                    |> transitionTo SignUp SignUpMsg
 
             Route.NotFound ->
                 ( { model | currentPage = Loaded NotFound }, Cmd.none )
@@ -892,7 +902,7 @@ update msg model =
                             SignUp.initModel
 
                 ( signUpModel, signUpCmds ) =
-                    SignUp.update suMsg currentPageModel
+                    SignUp.update suMsg currentPageModel model.nodeEnv model.organizationKey
             in
                 ( { model | currentPage = Loaded (SignUp signUpModel) }
                 , Cmd.map SignUpMsg signUpCmds
@@ -1054,16 +1064,15 @@ view model =
                 )
 
         SignUp signupModel ->
-            adminLayout model
-                (Html.map SignUpMsg
-                    (SignUp.view signupModel)
-                )
+            (Html.map SignUpMsg
+                (SignUp.view signupModel)
+            )
 
         NotFound ->
             Errors.notFound
 
         Blank ->
-            div [] [ text "blankked" ]
+            div [] [ text "blank" ]
 
 
 adminLayout : Model -> Html Msg -> Html Msg

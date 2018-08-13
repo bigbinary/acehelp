@@ -8,6 +8,10 @@ import Reader exposing (Reader)
 import Field exposing (..)
 import Field.ValidationResult exposing (..)
 import Helpers exposing (..)
+import Admin.Data.User exposing (..)
+import Admin.Data.Session exposing (..)
+import Request.Helpers exposing (NodeEnv, ApiKey)
+import Admin.Request.Session exposing (signupRequest)
 import GraphQL.Client.Http as GQLClient
 
 
@@ -19,6 +23,7 @@ type alias Model =
     , email : Field String String
     , password : Field String String
     , confirmPassword : Field String String
+    , error : Maybe String
     }
 
 
@@ -28,6 +33,7 @@ initModel =
     , email = Field (validateEmpty "Email") ""
     , password = Field (validateEmpty "Password") ""
     , confirmPassword = Field (validateEmpty "Confirm Password") ""
+    , error = Nothing
     }
 
 
@@ -45,10 +51,12 @@ type Msg
     | EmailInput String
     | PasswordInput String
     | ConfirmPasswordInput String
+    | SignUp
+    | SignUpResponse (Result GQLClient.Error User)
 
 
-update : Msg -> Model -> ( Model, Cmd Msg )
-update msg model =
+update : Msg -> Model -> NodeEnv -> ApiKey -> ( Model, Cmd Msg )
+update msg model nodeEnv apiKey =
     case msg of
         FirstNameInput firstName ->
             ( { model | firstName = Field.update model.firstName firstName }, Cmd.none )
@@ -62,6 +70,53 @@ update msg model =
         ConfirmPasswordInput password ->
             ( { model | confirmPassword = Field.update model.confirmPassword password }, Cmd.none )
 
+        SignUp ->
+            let
+                fields =
+                    [ model.firstName, model.email, model.password, model.confirmPassword ]
+
+                errors =
+                    validateAll fields
+                        |> filterFailures
+                        |> List.map
+                            (\result ->
+                                case result of
+                                    Failed err ->
+                                        err
+
+                                    Passed _ ->
+                                        "Unknown Error"
+                            )
+                        |> String.join ", "
+            in
+                if isAllValid fields then
+                    signUp model nodeEnv apiKey
+                else
+                    ( { model | error = Just errors }, Cmd.none )
+
+        _ ->
+            ( model, Cmd.none )
+
+
+signUp : Model -> NodeEnv -> ApiKey -> ( Model, Cmd Msg )
+signUp model nodeEnv apiKey =
+    let
+        cmd =
+            Task.attempt SignUpResponse
+                (Reader.run
+                    (signupRequest
+                        ({ firstName = Field.value model.firstName
+                         , email = Field.value model.email
+                         , password = Field.value model.password
+                         , confirmPassword = Field.value model.confirmPassword
+                         }
+                        )
+                    )
+                    ( nodeEnv, apiKey )
+                )
+    in
+        ( model, cmd )
+
 
 
 -- VIEW
@@ -70,7 +125,8 @@ update msg model =
 view : Model -> Html Msg
 view model =
     div [ class "container" ]
-        [ Html.form []
+        [ div [] [ h2 [] [ text "Sign Up" ] ]
+        , Html.form [ onSubmit SignUp ]
             [ div []
                 [ label [] [ text "First Name: " ]
                 , input

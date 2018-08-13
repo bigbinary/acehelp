@@ -1,9 +1,9 @@
 module Admin.Data.Session exposing (..)
 
 import Admin.Data.User exposing (..)
-import GQLBuilder.Request.Builder as GQLBuilder
-import GQLBuilder.Request.Builder.Variable as Var
-import GQLBuilder.Request.Builder.Arg as Arg
+import GraphQL.Request.Builder as GQLBuilder
+import GraphQL.Request.Builder.Variable as Var
+import GraphQL.Request.Builder.Arg as Arg
 
 
 type alias SignupInputs =
@@ -37,7 +37,7 @@ signupMutation =
                             [ ( "first_name", Arg.variable firstNameVar )
                             , ( "email", Arg.variable emailVar )
                             , ( "password", Arg.variable passwordVar )
-                            , ( "confirm", Arg.variable confirmPasswordVar )
+                            , ( "confirm_password", Arg.variable confirmPasswordVar )
                             ]
                       )
                     ]

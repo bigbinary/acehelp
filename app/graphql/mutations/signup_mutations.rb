@@ -17,8 +17,8 @@ class Mutations::SignupMutations
       if user
         errors = Utils::ErrorHandler.new.error("User with email is present", context)
       else
-        if inputs[:password] == inputs[:confirmPassword]
-          new_user = User.create(first_name: inputs[:firstName], password: inputs[:password], email: inputs[:email])
+        if inputs[:password] == inputs[:confirm_password]
+          new_user = User.create(first_name: inputs[:first_name], password: inputs[:password], email: inputs[:email])
         else
           errors = Utils::ErrorHandler.new.error("confirm password do not match", context)
         end
