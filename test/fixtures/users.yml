@@ -11,6 +11,7 @@ brad:
   first_name: Brad
   last_name: Pitt
   role: 'user'
+  organization: bigbinary
 
 hunt:
   email: ethan.hunt@example.com
