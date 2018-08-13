@@ -16,12 +16,10 @@ Rails.application.routes.draw do
   end
 
   resources :organizations, only: [:show], param: :api_key do
-    resources :articles
-    resources :urls
-    resources :categories
-    resources :tickets, only: [:index, :show]
-    resources :feedbacks, only: [:index, :show]
-    resources :team, only: [:index]
+    resources :articles, only: :index
+    get "*path", to: "admin/dashboard#index", constraints: -> (request) do
+      !request.xhr? && request.format.html?
+    end
   end
 
   namespace :admin do
