@@ -7,7 +7,7 @@ class Comment < ApplicationRecord
 
 
   def assign_agent_to_ticket(agent_id)
-    ticket.assign_agent(agent_id)
+    ticket.assign_agent(agent_id) if ticket.agent_id.blank?
   end
 
   def self.add_comment(args)
