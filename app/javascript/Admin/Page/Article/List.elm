@@ -3,14 +3,12 @@ module Page.Article.List exposing (..)
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
-import Navigation exposing (..)
-import Route
 import Admin.Request.Article exposing (..)
 import Admin.Data.Article exposing (..)
-import Request.Helpers exposing (NodeEnv, ApiKey)
 import Task exposing (Task)
 import Reader exposing (Reader)
 import GraphQL.Client.Http as GQLClient
+import Page.Helpers exposing (..)
 
 
 -- Model
@@ -18,22 +16,20 @@ import GraphQL.Client.Http as GQLClient
 
 type alias Model =
     { articles : List ArticleSummary
-    , organizationKey : String
     , error : Maybe String
     }
 
 
-initModel : ApiKey -> Model
-initModel organizationKey =
+initModel : Model
+initModel =
     { articles = []
-    , organizationKey = organizationKey
     , error = Nothing
     }
 
 
-init : ApiKey -> ( Model, Reader ( NodeEnv, ApiKey ) (Task GQLClient.Error (List ArticleSummary)) )
-init organizationKey =
-    ( initModel organizationKey, requestAllArticles )
+init : ( Model, List (PageCmd Msg) )
+init =
+    ( initModel, [ Reader.map (Task.attempt ArticleListLoaded) <| requestAllArticles ] )
 
 
 
@@ -42,35 +38,41 @@ init organizationKey =
 
 type Msg
     = ArticleListLoaded (Result GQLClient.Error (List ArticleSummary))
-    | Navigate Route.Route
+    | OnArticleEditClick ArticleId
+    | OnArticleCreateClick
     | DeleteArticle ArticleId
     | DeleteArticleResponse (Result GQLClient.Error ArticleId)
 
 
-update : Msg -> Model -> ApiKey -> NodeEnv -> ( Model, Cmd Msg )
-update msg model organizationKey nodeEnv =
+update : Msg -> Model -> ( Model, List (PageCmd Msg) )
+update msg model =
     case msg of
         ArticleListLoaded (Ok articlesList) ->
-            ( { model | articles = articlesList }, Cmd.none )
+            ( { model | articles = articlesList }, [] )
 
         ArticleListLoaded (Err err) ->
-            ( { model | error = Just (toString err) }, Cmd.none )
-
-        Navigate page ->
-            ( model, Navigation.newUrl (Route.routeToString page) )
+            ( { model | error = Just (toString err) }, [] )
 
         DeleteArticle articleId ->
-            deleteRecord model nodeEnv organizationKey ({ id = articleId })
+            ( model, [ Reader.map (Task.attempt DeleteArticleResponse) <| requestDeleteArticle articleId ] )
 
         DeleteArticleResponse (Ok id) ->
             let
                 articles =
                     List.filter (\m -> m.id /= id) model.articles
             in
-                ( { model | articles = articles }, Cmd.none )
+                ( { model | articles = articles }, [] )
 
         DeleteArticleResponse (Err error) ->
-            ( { model | error = Just (toString error) }, Cmd.none )
+            ( { model | error = Just (toString error) }, [] )
+
+        OnArticleCreateClick ->
+            -- NOTE: Handled in Main
+            ( model, [] )
+
+        OnArticleEditClick articleId ->
+            -- NOTE: Handled in Main
+            ( model, [] )
 
 
 
@@ -102,7 +104,7 @@ view model =
                 model.articles
             )
         , button
-            [ onClick (Navigate <| Route.ArticleCreate model.organizationKey)
+            [ onClick OnArticleCreateClick
             , class "btn btn-primary"
             ]
             [ text "New Article" ]
@@ -117,9 +119,7 @@ rows model article =
             [ class "textColumn" ]
             [ text article.title ]
         , button
-            [ Route.ArticleEdit model.organizationKey article.id
-                |> Navigate
-                |> onClick
+            [ onClick (OnArticleEditClick article.id)
             , class "actionButton btn btn-primary"
             ]
             [ text "Edit Article" ]
@@ -129,12 +129,3 @@ rows model article =
             ]
             [ text " Delete Article" ]
         ]
-
-
-deleteRecord : Model -> NodeEnv -> ApiKey -> ArticleIdInput -> ( Model, Cmd Msg )
-deleteRecord model nodeEnv apiKey articleId =
-    let
-        cmd =
-            Task.attempt DeleteArticleResponse (Reader.run (requestDeleteArticle) ( nodeEnv, apiKey, articleId ))
-    in
-        ( model, cmd )

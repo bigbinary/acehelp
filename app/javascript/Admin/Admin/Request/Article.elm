@@ -70,11 +70,11 @@ requestAllArticles =
         )
 
 
-requestDeleteArticle : Reader ( NodeEnv, ApiKey, ArticleIdInput ) (Task GQLClient.Error ArticleId)
-requestDeleteArticle =
+requestDeleteArticle : ArticleId -> Reader ( NodeEnv, ApiKey ) (Task GQLClient.Error ArticleId)
+requestDeleteArticle articleId =
     Reader.Reader
-        (\( nodeEnv, apiKey, articleId ) ->
+        (\( nodeEnv, apiKey ) ->
             (GQLClient.customSendMutation (requestOptions nodeEnv apiKey) <|
-                GQLBuilder.request articleId deleteArticleMutation
+                GQLBuilder.request { id = articleId } deleteArticleMutation
             )
         )

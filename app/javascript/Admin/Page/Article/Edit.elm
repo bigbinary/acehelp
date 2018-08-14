@@ -20,6 +20,7 @@ import Admin.Ports exposing (..)
 import Page.Article.Common exposing (..)
 import GraphQL.Client.Http as GQLClient
 import Admin.Ports exposing (..)
+import Page.Helpers exposing (..)
 
 
 -- Model
@@ -54,14 +55,13 @@ initModel articleId =
     }
 
 
-init :
-    ArticleId
-    -> ( Model, Reader ( NodeEnv, ApiKey ) (Task GQLClient.Error Article), Reader ( NodeEnv, ApiKey ) (Task GQLClient.Error (List Category)), Reader ( NodeEnv, ApiKey ) (Task GQLClient.Error (List UrlData)) )
+init : ArticleId -> ( Model, List (PageCmd Msg) )
 init articleId =
     ( initModel articleId
-    , requestArticleById articleId
-    , requestCategories
-    , requestUrls
+    , [ Reader.map (Task.attempt ArticleLoaded) (requestArticleById articleId)
+      , Reader.map (Task.attempt CategoriesLoaded) requestCategories
+      , Reader.map (Task.attempt UrlsLoaded) requestUrls
+      ]
     )
 
 
@@ -96,8 +96,8 @@ delayTime =
     Time.second * 2
 
 
-update : Msg -> Model -> NodeEnv -> ApiKey -> ( Model, Cmd Msg )
-update msg model nodeEnv organizationKey =
+update : Msg -> Model -> ( Model, List (PageCmd Msg) )
+update msg model =
     case msg of
         TitleInput title ->
             let
@@ -107,22 +107,22 @@ update msg model nodeEnv organizationKey =
                 errors =
                     errorsIn [ newTitle, model.desc ]
             in
-                ( { model | title = newTitle, error = errors }, Cmd.none )
+                ( { model | title = newTitle, error = errors }, [] )
 
         ReceivedTimeoutId id ->
             let
                 killCmd =
                     case model.updateTaskId of
                         Just oldId ->
-                            clearTimeout oldId
+                            [ Reader.Reader <| always <| clearTimeout oldId ]
 
                         Nothing ->
-                            Cmd.none
+                            []
             in
                 ( { model | updateTaskId = Just id }, killCmd )
 
         TimedOut id ->
-            save model nodeEnv organizationKey
+            save model
 
         DescInput desc ->
             let
@@ -133,11 +133,11 @@ update msg model nodeEnv organizationKey =
                     errorsIn [ newDesc, model.title ]
             in
                 ( { model | desc = newDesc, error = errors }
-                , Cmd.none
+                , []
                 )
 
         SaveArticle ->
-            save model nodeEnv organizationKey
+            save model
 
         SaveArticleResponse (Ok article) ->
             ( { model
@@ -145,11 +145,11 @@ update msg model nodeEnv organizationKey =
                 , desc = Field.update model.desc article.desc
                 , status = None
               }
-            , Cmd.none
+            , []
             )
 
         SaveArticleResponse (Err error) ->
-            ( { model | error = Just (toString error), status = None }, Cmd.none )
+            ( { model | error = Just (toString error), status = None }, [] )
 
         ArticleLoaded (Ok article) ->
             ( { model
@@ -160,12 +160,12 @@ update msg model nodeEnv organizationKey =
                 , urls = itemSelection (List.map .id article.urls) model.urls
                 , originalArticle = Just article
               }
-            , insertArticleContent article.desc
+            , [ Reader.Reader <| always <| insertArticleContent article.desc ]
             )
 
         ArticleLoaded (Err err) ->
             ( { model | error = Just "There was an error loading up the article", originalArticle = Nothing }
-            , Cmd.none
+            , []
             )
 
         CategoriesLoaded (Ok categories) ->
@@ -178,17 +178,17 @@ update msg model nodeEnv organizationKey =
                         Nothing ->
                             List.map Unselected categories
               }
-            , Cmd.none
+            , []
             )
 
         CategoriesLoaded (Err err) ->
-            ( { model | error = Just (toString err) }, Cmd.none )
+            ( { model | error = Just (toString err) }, [] )
 
         CategorySelected categoryIds ->
             ( { model
                 | categories = itemSelection categoryIds model.categories
               }
-            , setTimeout delayTime
+            , [ Reader.Reader <| always <| setTimeout delayTime ]
             )
 
         UrlsLoaded (Ok urls) ->
@@ -201,27 +201,27 @@ update msg model nodeEnv organizationKey =
                         Nothing ->
                             List.map Unselected urls
               }
-            , Cmd.none
+            , []
             )
 
         UrlsLoaded (Err err) ->
-            ( { model | error = Just (toString err) }, Cmd.none )
+            ( { model | error = Just (toString err) }, [] )
 
         UrlSelected selectedUrlIds ->
             ( { model
                 | urls = itemSelection selectedUrlIds model.urls
               }
-            , setTimeout delayTime
+            , [ Reader.Reader <| always <| setTimeout delayTime ]
             )
 
         TrixInitialize _ ->
-            ( model, insertArticleContent <| Field.value model.desc )
+            ( model, [ Reader.Reader <| always <| insertArticleContent <| Field.value model.desc ] )
 
         Killed _ ->
-            ( model, Cmd.none )
+            ( model, [] )
 
         EditArticle ->
-            ( { model | isEditable = True }, Cmd.none )
+            ( { model | isEditable = True }, [] )
 
         ResetArticle ->
             case model.originalArticle of
@@ -235,11 +235,11 @@ update msg model nodeEnv organizationKey =
                         , originalArticle = Just article
                         , isEditable = False
                       }
-                    , insertArticleContent article.desc
+                    , [ Reader.Reader <| always <| insertArticleContent article.desc ]
                     )
 
                 Nothing ->
-                    ( { model | isEditable = False }, Cmd.none )
+                    ( { model | isEditable = False }, [] )
 
 
 
@@ -337,23 +337,20 @@ articleInputs { articleId, title, desc, categories, urls } =
     }
 
 
-save : Model -> NodeEnv -> ApiKey -> ( Model, Cmd Msg )
-save model nodeEnv organizationKey =
+save : Model -> ( Model, List (PageCmd Msg) )
+save model =
     let
         fields =
             [ model.title, model.desc ]
 
         cmd =
-            Task.attempt SaveArticleResponse
-                (Reader.run
-                    (requestUpdateArticle (articleInputs model))
-                    ( nodeEnv, organizationKey )
-                )
+            Reader.map (Task.attempt SaveArticleResponse)
+                (requestUpdateArticle (articleInputs model))
     in
         if Field.isAllValid fields && maybeToBool model.originalArticle then
-            ( { model | error = Nothing, status = Saving }, cmd )
+            ( { model | error = Nothing, status = Saving }, [ cmd ] )
         else
-            ( { model | error = errorsIn fields }, Cmd.none )
+            ( { model | error = errorsIn fields }, [] )
 
 
 

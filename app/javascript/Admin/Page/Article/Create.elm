@@ -17,6 +17,8 @@ import Field exposing (..)
 import Helpers exposing (..)
 import Page.Article.Common exposing (..)
 import GraphQL.Client.Http as GQLClient
+import Admin.Ports exposing (..)
+import Page.Helpers exposing (..)
 
 
 -- Model
@@ -45,11 +47,12 @@ initModel =
     }
 
 
-init : ( Model, Reader ( NodeEnv, ApiKey ) (Task GQLClient.Error (List Category)), Reader ( NodeEnv, ApiKey ) (Task GQLClient.Error (List UrlData)) )
+init : ( Model, List (PageCmd Msg) )
 init =
     ( initModel
-    , requestCategories
-    , requestUrls
+    , [ Reader.map (Task.attempt CategoriesLoaded) requestCategories
+      , Reader.map (Task.attempt UrlsLoaded) requestUrls
+      ]
     )
 
 
@@ -68,50 +71,50 @@ type Msg
     | UrlSelected (List UrlId)
 
 
-update : Msg -> Model -> NodeEnv -> ApiKey -> ( Model, Cmd Msg )
-update msg model nodeEnv organizationKey =
+update : Msg -> Model -> ( Model, List (PageCmd Msg) )
+update msg model =
     case msg of
         TitleInput title ->
-            ( { model | title = Field.update model.title title }, Cmd.none )
+            ( { model | title = Field.update model.title title }, [] )
 
         DescInput desc ->
-            ( { model | desc = Field.update model.desc desc }, Cmd.none )
+            ( { model | desc = Field.update model.desc desc }, [] )
 
         SaveArticle ->
-            save model nodeEnv organizationKey
+            save model
 
         SaveArticleResponse (Ok id) ->
             ( { model
                 | title = Field.update model.title ""
                 , desc = Field.update model.desc ""
               }
-            , Cmd.none
+            , []
             )
 
         SaveArticleResponse (Err error) ->
-            ( { model | error = Just (toString error), status = None }, Cmd.none )
+            ( { model | error = Just (toString error), status = None }, [] )
 
         CategoriesLoaded (Ok categories) ->
-            ( { model | categories = List.map Unselected categories, status = None }, Cmd.none )
+            ( { model | categories = List.map Unselected categories, status = None }, [] )
 
         CategoriesLoaded (Err err) ->
-            ( { model | error = Just (toString err) }, Cmd.none )
+            ( { model | error = Just (toString err) }, [] )
 
         CategorySelected categoryIds ->
-            ( { model | categories = itemSelection categoryIds model.categories }, Cmd.none )
+            ( { model | categories = itemSelection categoryIds model.categories }, [] )
 
         UrlsLoaded (Ok urls) ->
-            ( { model | urls = List.map Unselected urls }, Cmd.none )
+            ( { model | urls = List.map Unselected urls }, [] )
 
         UrlsLoaded (Err err) ->
-            ( { model | error = Just (toString err) }, Cmd.none )
+            ( { model | error = Just (toString err) }, [] )
 
         UrlSelected selectedUrlIds ->
             ( { model
                 | urls =
                     itemSelection selectedUrlIds model.urls
               }
-            , Cmd.none
+            , []
             )
 
 
@@ -158,23 +161,20 @@ view model =
         ]
 
 
-save : Model -> NodeEnv -> ApiKey -> ( Model, Cmd Msg )
-save model nodeEnv organizationKey =
+save : Model -> ( Model, List (PageCmd Msg) )
+save model =
     let
         fields =
             [ model.title, model.desc ]
 
         cmd =
-            Task.attempt SaveArticleResponse
-                (Reader.run
-                    (requestCreateArticle (articleInputs model))
-                    ( nodeEnv, organizationKey )
-                )
+            Reader.map (Task.attempt SaveArticleResponse)
+                (requestCreateArticle (articleInputs model))
     in
         if Field.isAllValid fields then
-            ( { model | error = Nothing, status = Saving }, cmd )
+            ( { model | error = Nothing, status = Saving }, [ cmd ] )
         else
-            ( { model | error = errorsIn fields }, Cmd.none )
+            ( { model | error = errorsIn fields }, [] )
 
 
 articleInputs : Model -> CreateArticleInputs
