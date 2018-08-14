@@ -31,4 +31,28 @@ class Mutations::TicketMutations
       }
     }
   end
+
+  Delete = GraphQL::Relay::Mutation.define do
+    name "DeleteTicket"
+
+    input_field :id, !types.String
+
+    return_field :ticket, Types::TicketType
+    return_field :errors, types[Types::ErrorType]
+
+    resolve ->(object, inputs, context) {
+      ticket = Ticket.find_by!(id: inputs[:id])
+
+      if ticket.soft_delete
+        ticket = ticket
+      else
+        errors = Utils::ErrorHandler.new.detailed_error(ticket, context)
+      end
+
+      {
+        ticket: ticket,
+        errors: errors
+      }
+    }
+  end
 end

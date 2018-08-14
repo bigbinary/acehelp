@@ -4,6 +4,10 @@ require "test_helper"
 require "graphql/client_host"
 
 class Mutations::TicketMutationsTest < ActiveSupport::TestCase
+  def setup
+    @ticket = tickets :payment_issue_ticket
+  end
+
   test "create ticket mutations" do
     query = <<-'GRAPHQL'
               mutation($input: CreateTicketInput!) {
@@ -79,5 +83,24 @@ class Mutations::TicketMutationsTest < ActiveSupport::TestCase
     GRAPHQL
     result = AceHelp::Client.execute(query, input: { name: "", email: "", message: "Dummy" })
     assert_not_empty result.data.add_ticket.errors.flat_map(&:path) & ["addTicket", "email"]
+  end
+
+  test "delete ticket mutation success" do
+    query = <<-'GRAPHQL'
+              mutation($id: String!) {
+                deleteTicket(input: {id: $id}) {
+                  ticket {
+                    id
+                  }
+                  errors {
+                    message
+                    path
+                  }
+                }
+              }
+    GRAPHQL
+    result = AceHelp::Client.execute(query, id: @ticket.id)
+    @ticket.reload
+    assert_not_nil @ticket.deleted_at
   end
 end

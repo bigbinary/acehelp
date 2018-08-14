@@ -4,6 +4,7 @@ Types::MutationType = GraphQL::ObjectType.define do
   name "Mutation"
 
   field :addTicket, field: Mutations::TicketMutations::Create.field
+  field :deleteTicket, field: Mutations::TicketMutations::Delete.field
 
   field :addArticle, field: Mutations::ArticleMutations::Create.field
   field :updateArticle, field: Mutations::ArticleMutations::Update.field
