@@ -25,7 +25,6 @@ requestTicketById ticketId =
                 (GQLBuilder.request { id = ticketId } requestTicketByIdQuery)
         )
 
-
 updateTicket : Reader ( NodeEnv, ApiKey, TicketInput ) (Task GQLClient.Error Ticket)
 updateTicket =
     Reader.Reader

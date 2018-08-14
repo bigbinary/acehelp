@@ -13,6 +13,7 @@ type alias Ticket =
     , note : String
     , status : String
     , statuses : List TicketStatus
+    , comments : List Comment
     }
 
 
@@ -21,16 +22,26 @@ type alias TicketStatus =
     , value : String
     }
 
+
 type alias TicketInput =
     { id : TicketId
     , status : String
     }
 
+
 type alias TicketId =
     String
 
+
 type alias TicketIdInput =
     { id : String
+    }
+
+
+type alias Comment =
+    { ticket_id : String
+    , commenter_id : String
+    , info : String
     }
 
 
@@ -67,6 +78,14 @@ ticketStatusObject =
     GQLBuilder.object TicketStatus
         |> GQLBuilder.with (GQLBuilder.field "key" [] GQLBuilder.string)
         |> GQLBuilder.with (GQLBuilder.field "value" [] GQLBuilder.string)
+
+
+commentObject : GQLBuilder.ValueSpec GQLBuilder.NonNull GQLBuilder.ObjectType Comment vars
+commentObject =
+    GQLBuilder.object Comment
+        |> GQLBuilder.with (GQLBuilder.field "ticket_id" [] GQLBuilder.string)
+        |> GQLBuilder.with (GQLBuilder.field "commenter_id" [] GQLBuilder.string)
+        |> GQLBuilder.with (GQLBuilder.field "info" [] GQLBuilder.string)
 
 
 updateTicketMutation : GQLBuilder.Document GQLBuilder.Mutation Ticket TicketInput
@@ -109,5 +128,12 @@ ticketObject =
                 []
                 (GQLBuilder.list
                     ticketStatusObject
+                )
+            )
+        |> GQLBuilder.with
+            (GQLBuilder.field "comments"
+                []
+                (GQLBuilder.list
+                    commentObject
                 )
             )

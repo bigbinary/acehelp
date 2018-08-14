@@ -24,6 +24,8 @@ type alias Model =
     , ticketId : TicketId
     , status : String
     , statuses : List TicketStatus
+    , comments : List Comment
+    , comment : Comment
     }
 
 
@@ -36,6 +38,8 @@ initModel ticketId =
     , ticketId = ticketId
     , status = ""
     , statuses = []
+    , comments = []
+    , comment = Comment ticketId "" ""
     }
 
 
@@ -132,15 +136,44 @@ view model =
                 , div []
                     [ label [] [ text <| "Message: " ++ model.message ]
                     ]
-                , div []
-                    [ label [] [ text "Note: " ]
-                    , input
-                        [ Html.Attributes.value <| model.note
-                        , type_ "text"
-                        , placeholder "add notes here..."
-                        , onInput NoteInput
+                , ul [ class "nav nav-tabs" ]
+                    [ li [ class "active" ]
+                        [ a [ attribute "data-toggle" "tab", href "#notes" ]
+                            [ text "Internal Note" ]
                         ]
-                        []
+                    , li []
+                        [ a [ attribute "data-toggle" "tab", href "#comment" ]
+                            [ text "Reply to Customer" ]
+                        ]
+                    ]
+                , div [ class "tab-content" ]
+                    [ div [ class "tab-pane fade in active", id "notes" ]
+                        [ h3 [] [ text "Notes: " ]
+                        , input
+                            [ Html.Attributes.value <| model.note
+                            , type_ "text"
+                            , placeholder "add notes here..."
+                            , onInput NoteInput
+                            ]
+                            []
+                        ]
+                    , div [ class "tab-pane fade", id "comment" ]
+                        [ h3 [] [ text "Comment: " ]
+                        , div [ class "ticket-comments" ]
+                            (List.map
+                                (\comment ->
+                                    commentRows comment
+                                )
+                                model.comments
+                            )
+                        , input
+                            [ Html.Attributes.value <| model.note
+                            , type_ "text"
+                            , placeholder "add comments here..."
+                            , onInput NoteInput
+                            ]
+                            []
+                        ]
                     ]
                 , button [ type_ "submit", class "button primary" ] [ text "Update URL" ]
                 ]
@@ -157,7 +190,6 @@ ticketInputs { id, status } =
     { status = status
     , id = id
     }
-
 
 updateTicketStatus : Model -> TicketInput -> NodeEnv -> ApiKey -> ( Model, Cmd Msg )
 updateTicketStatus model ticketInput nodeEnv organizationKey =
@@ -196,4 +228,13 @@ closeTicketButton model =
             , class "button primary closeTicket"
             ]
             [ text "Close Ticket" ]
+        ]
+
+
+commentRows : Comment -> Html Msg
+commentRows comment =
+    div
+        [ class "comment-row" ]
+        [ span [ class "row-id" ] [ text comment.ticket_id ]
+        , span [ class "row-name" ] [ text comment.info ]
         ]
