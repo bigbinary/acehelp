@@ -35,7 +35,7 @@ class Mutations::TicketMutations
   Delete = GraphQL::Relay::Mutation.define do
     name "DeleteTicket"
 
-    input_field :id, types.String
+    input_field :id, !types.String
 
     return_field :ticket, Types::TicketType
     return_field :errors, types[Types::ErrorType]
