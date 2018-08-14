@@ -4,7 +4,7 @@ Types::TicketCommentType = GraphQL::ObjectType.define do
   name "TicketComment"
 
   field :id, !types.String
-  field :commenter_id, !types.String
+  field :commentable_id, !types.String
   field :ticket_id, !types.String
   field :info, !types.String
 
