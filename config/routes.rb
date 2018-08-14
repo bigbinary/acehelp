@@ -22,9 +22,8 @@ Rails.application.routes.draw do
     end
   end
 
-  namespace :admin do
-    resources :integrations, only: [:index]
-    resources :dashboard, only: [:index]
+  get "*path", to: "home#new", constraints: -> (request) do
+    !request.xhr? && request.format.html?
   end
 
   if Rails.env.development?

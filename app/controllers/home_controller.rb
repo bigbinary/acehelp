@@ -5,6 +5,10 @@ class HomeController < ApplicationController
     render
   end
 
+  def new
+    render
+  end
+
   def getting_started
     render "/pages/aceinvoice/getting_started"
   end
