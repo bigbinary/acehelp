@@ -79,7 +79,6 @@ type Page
     | SignUp SignUp.Model
     | Dashboard
     | NotFound
-    | Blank
 
 
 type PageState
@@ -105,7 +104,7 @@ init flags location =
             setRoute location initModel
 
         initModel =
-            { currentPage = Loaded Blank
+            { currentPage = Loaded NotFound
             , route = Route.fromLocation location
             , nodeEnv = flags.node_env
             , organizationKey = flags.organization_key
@@ -412,7 +411,7 @@ navigateTo newRoute model =
                     |> transitionTo Settings SettingsMsg
 
             Route.Dashboard ->
-                ( { model | currentPage = Loaded Blank }, Cmd.none )
+                ( { model | currentPage = Loaded Dashboard }, Cmd.none )
 
             Route.ArticleEdit organizationKey articleId ->
                 let
@@ -1070,9 +1069,6 @@ view model =
 
         NotFound ->
             Errors.notFound
-
-        Blank ->
-            div [] [ text "blank" ]
 
 
 adminLayout : Model -> Html Msg -> Html Msg
