@@ -5,6 +5,7 @@ module Deletable
 
   included do
     default_scope { where(deleted_at: nil) }
+    scope :with_deleted, -> { unscoped }
   end
 
   def soft_delete

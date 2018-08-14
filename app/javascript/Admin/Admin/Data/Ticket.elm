@@ -88,6 +88,27 @@ commentObject =
         |> GQLBuilder.with (GQLBuilder.field "info" [] GQLBuilder.string)
 
 
+deleteTicketMutation : GQLBuilder.Document GQLBuilder.Mutation Ticket TicketIdInput
+deleteTicketMutation =
+    let
+        idVar =
+            Var.required "id" .id Var.string
+    in
+        GQLBuilder.mutationDocument <|
+            GQLBuilder.extract <|
+                GQLBuilder.field "deleteTicket"
+                    [ ( "input"
+                      , Arg.object
+                            [ ( "id", Arg.variable idVar ) ]
+                      )
+                    ]
+                    (GQLBuilder.extract <|
+                        GQLBuilder.field "ticket"
+                            []
+                            (ticketObject)
+                    )
+
+
 updateTicketMutation : GQLBuilder.Document GQLBuilder.Mutation Ticket TicketInput
 updateTicketMutation =
     let

@@ -11,6 +11,7 @@ import Reader exposing (Reader)
 import Task exposing (Task)
 import Helpers exposing (..)
 import GraphQL.Client.Http as GQLClient
+import Route
 
 
 -- MODEL
@@ -57,7 +58,9 @@ init ticketId =
 type Msg
     = NoteInput String
     | UpdateTicket
+    | DeleteTicket
     | UpdateTicketResponse (Result GQLClient.Error Ticket)
+    | DeleteTicketResponse (Result GQLClient.Error Ticket)
     | TicketLoaded (Result GQLClient.Error Ticket)
     | UpdateTicketStatus String
 
@@ -71,6 +74,9 @@ update msg model nodeEnv organizationKey =
         UpdateTicket ->
             ( model, Cmd.none )
 
+        DeleteTicket ->
+            deleteTicket model nodeEnv organizationKey
+
         UpdateTicketResponse (Ok ticket) ->
             ( { model
                 | ticketId = ticket.id
@@ -83,6 +89,12 @@ update msg model nodeEnv organizationKey =
             )
 
         UpdateTicketResponse (Err error) ->
+            ( { model | error = Just (toString error) }, Cmd.none )
+
+        DeleteTicketResponse (Ok id) ->
+            ( model, Route.modifyUrl <| Route.TicketList organizationKey )
+
+        DeleteTicketResponse (Err error) ->
             ( { model | error = Just (toString error) }, Cmd.none )
 
         TicketLoaded (Ok ticket) ->
@@ -181,6 +193,7 @@ view model =
         , div [ class "col-sm" ]
             [ ticketStatusDropDown model
             , closeTicketButton model
+            , deleteTicketButton model
             ]
         ]
 
@@ -191,11 +204,21 @@ ticketInputs { id, status } =
     , id = id
     }
 
+
 updateTicketStatus : Model -> TicketInput -> NodeEnv -> ApiKey -> ( Model, Cmd Msg )
 updateTicketStatus model ticketInput nodeEnv organizationKey =
     let
         cmd =
             Task.attempt UpdateTicketResponse (Reader.run (updateTicket) ( nodeEnv, organizationKey, ticketInputs (ticketInput) ))
+    in
+        ( model, cmd )
+
+
+deleteTicket : Model -> NodeEnv -> ApiKey -> ( Model, Cmd Msg )
+deleteTicket model nodeEnv organizationKey =
+    let
+        cmd =
+            Task.attempt DeleteTicketResponse (Reader.run (deleteTicketRequest) ( nodeEnv, organizationKey, { id = model.ticketId } ))
     in
         ( model, cmd )
 
@@ -228,6 +251,17 @@ closeTicketButton model =
             , class "button primary closeTicket"
             ]
             [ text "Close Ticket" ]
+        ]
+
+
+deleteTicketButton : Model -> Html Msg
+deleteTicketButton model =
+    div []
+        [ button
+            [ onClick (DeleteTicket)
+            , class "button primary deleteTicket"
+            ]
+            [ text "Delete Ticket" ]
         ]
 
 
