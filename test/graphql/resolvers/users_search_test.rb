@@ -15,6 +15,6 @@ class Resolvers::UsersSearchTest < ActiveSupport::TestCase
   end
 
   test "get_all_users_success" do
-    assert_equal [@user.email], find(Hash.new).pluck(:email)
+    assert_equal [@user.email], find({}).pluck(:email)
   end
 end
