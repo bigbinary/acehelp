@@ -11,6 +11,7 @@ import Reader exposing (Reader)
 import Task exposing (Task)
 import Helpers exposing (..)
 import GraphQL.Client.Http as GQLClient
+import Route
 
 
 -- MODEL
@@ -59,6 +60,7 @@ type Msg
     | UpdateTicket
     | DeleteTicket
     | UpdateTicketResponse (Result GQLClient.Error Ticket)
+    | DeleteTicketResponse (Result GQLClient.Error Ticket)
     | TicketLoaded (Result GQLClient.Error Ticket)
     | UpdateTicketStatus String
 
@@ -87,6 +89,12 @@ update msg model nodeEnv organizationKey =
             )
 
         UpdateTicketResponse (Err error) ->
+            ( { model | error = Just (toString error) }, Cmd.none )
+
+        DeleteTicketResponse (Ok id) ->
+            ( model, Route.modifyUrl <| Route.TicketList organizationKey )
+
+        DeleteTicketResponse (Err error) ->
             ( { model | error = Just (toString error) }, Cmd.none )
 
         TicketLoaded (Ok ticket) ->
@@ -210,7 +218,7 @@ deleteTicket : Model -> NodeEnv -> ApiKey -> ( Model, Cmd Msg )
 deleteTicket model nodeEnv organizationKey =
     let
         cmd =
-            Task.attempt UpdateTicketResponse (Reader.run (deleteTicketRequest) ( nodeEnv, organizationKey, { id = model.ticketId } ))
+            Task.attempt DeleteTicketResponse (Reader.run (deleteTicketRequest) ( nodeEnv, organizationKey, { id = model.ticketId } ))
     in
         ( model, cmd )
 
