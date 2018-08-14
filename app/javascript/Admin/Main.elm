@@ -134,7 +134,6 @@ type Msg
     | CategoryListMsg CategoryList.Msg
     | CategoryCreateMsg CategoryCreate.Msg
     | CategoryEditMsg CategoryEdit.Msg
-    | CategoriesLoaded (Result GQLClient.Error (List Category))
     | TicketListMsg TicketList.Msg
     | FeedbackListMsg FeedbackList.Msg
     | FeedbackShowMsg FeedbackShow.Msg
@@ -209,31 +208,12 @@ navigateTo newRoute model =
                     |> newTransitionFrom ArticleCreateMsg
 
             Route.CategoryList organizationKey ->
-                let
-                    ( categoryListModel, categoriesRequest ) =
-                        CategoryList.init organizationKey
-
-                    cmd =
-                        Task.attempt CategoriesLoaded
-                            (Reader.run
-                                categoriesRequest
-                                ( model.nodeEnv, model.organizationKey )
-                            )
-                in
-                    ( { model
-                        | currentPage =
-                            TransitioningFrom
-                                (CategoryList
-                                    categoryListModel
-                                )
-                        , route = newRoute
-                      }
-                    , cmd
-                    )
+                CategoryList.init
+                    |> newTransitionFrom CategoryListMsg
 
             Route.CategoryCreate organizationKey ->
                 CategoryCreate.init
-                    |> transitionFrom CategoryCreate CategoryCreateMsg
+                    |> newTransitionFrom CategoryCreateMsg
 
             Route.UrlList organizationKey ->
                 let
@@ -379,26 +359,8 @@ navigateTo newRoute model =
                     |> newTransitionFrom ArticleEditMsg
 
             Route.CategoryEdit categoryId ->
-                let
-                    ( categoryEditModel, categoryEditCmd ) =
-                        CategoryEdit.init categoryId
-
-                    cmd =
-                        Cmd.map CategoryEditMsg <|
-                            Task.attempt
-                                CategoryEdit.CategoryLoaded
-                                (Reader.run categoryEditCmd
-                                    ( model.nodeEnv, model.organizationKey )
-                                )
-                in
-                    ( { model
-                        | currentPage =
-                            TransitioningFrom
-                                (CategoryEdit categoryEditModel)
-                        , route = newRoute
-                      }
-                    , cmd
-                    )
+                CategoryEdit.init categoryId
+                    |> newTransitionFrom CategoryEditMsg
 
             Route.SignUp ->
                 let
@@ -581,46 +543,21 @@ update msg model =
             CategoryListMsg clMsg ->
                 let
                     currentPageModel =
-                        case model.currentPage of
-                            Loaded (CategoryList categoryListModel) ->
+                        case getPage model.currentPage of
+                            CategoryList categoryListModel ->
                                 categoryListModel
 
                             _ ->
-                                CategoryList.initModel model.organizationKey
+                                CategoryList.initModel
 
-                    ( categoryListModel, categoryListCmd ) =
+                    ( newModel, cmds ) =
                         CategoryList.update
                             clMsg
                             currentPageModel
-                            model.nodeEnv
-                            model.organizationKey
                 in
-                    ( { model | currentPage = Loaded (CategoryList categoryListModel) }
-                    , Cmd.map CategoryListMsg categoryListCmd
+                    ( { model | currentPage = Loaded (CategoryList newModel) }
+                    , runCmds CategoryListMsg cmds
                     )
-
-            CategoriesLoaded (Ok categoriesList) ->
-                let
-                    currentPageModel =
-                        case model.currentPage of
-                            Loaded (CategoryList categoryListModel) ->
-                                categoryListModel
-
-                            _ ->
-                                CategoryList.initModel model.organizationKey
-                in
-                    ( { model
-                        | currentPage =
-                            Loaded
-                                (CategoryList
-                                    { currentPageModel | categories = categoriesList }
-                                )
-                      }
-                    , Cmd.none
-                    )
-
-            CategoriesLoaded (Err err) ->
-                ( model, Cmd.none )
 
             CategoryCreateMsg ccMsg ->
                 let
@@ -632,16 +569,14 @@ update msg model =
                             _ ->
                                 CategoryCreate.initModel
 
-                    ( categoryCreateModel, categoryCreateCmd ) =
+                    ( newModel, cmds ) =
                         CategoryCreate.update ccMsg
                             currentPageModel
-                            model.nodeEnv
-                            model.organizationKey
                 in
                     ( { model
-                        | currentPage = Loaded (CategoryCreate categoryCreateModel)
+                        | currentPage = Loaded (CategoryCreate newModel)
                       }
-                    , Cmd.map CategoryCreateMsg categoryCreateCmd
+                    , runCmds CategoryCreateMsg cmds
                     )
 
             FeedbackListMsg flmsg ->
@@ -687,21 +622,19 @@ update msg model =
             CategoryEditMsg ctMsg ->
                 let
                     currentPageModel =
-                        case model.currentPage of
-                            Loaded (CategoryEdit categoryEditModel) ->
+                        case getPage model.currentPage of
+                            CategoryEdit categoryEditModel ->
                                 categoryEditModel
 
                             _ ->
                                 CategoryEdit.initModel "0"
 
-                    ( categoryEditModel, categoryEditCmd ) =
+                    ( newModel, cmds ) =
                         CategoryEdit.update ctMsg
                             currentPageModel
-                            model.nodeEnv
-                            model.organizationKey
                 in
-                    ( { model | currentPage = Loaded (CategoryEdit categoryEditModel) }
-                    , Cmd.map CategoryEditMsg categoryEditCmd
+                    ( { model | currentPage = Loaded (CategoryEdit newModel) }
+                    , runCmds CategoryEditMsg cmds
                     )
 
             TeamListMsg tlmsg ->

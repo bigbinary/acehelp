@@ -2,15 +2,13 @@ module Page.Category.List exposing (..)
 
 import Admin.Data.Category exposing (..)
 import Admin.Request.Category exposing (..)
-import Admin.Request.Helper exposing (..)
 import GraphQL.Client.Http as GQLClient
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
-import Navigation exposing (..)
 import Reader exposing (Reader)
-import Route
 import Task exposing (Task)
+import Page.Helpers exposing (..)
 
 
 -- MODEL
@@ -19,22 +17,20 @@ import Task exposing (Task)
 type alias Model =
     { categories : List Category
     , error : Maybe String
-    , organizationKey : String
     }
 
 
-initModel : ApiKey -> Model
-initModel organizationKey =
+initModel : Model
+initModel =
     { categories = []
     , error = Nothing
-    , organizationKey = organizationKey
     }
 
 
-init : ApiKey -> ( Model, Reader ( NodeEnv, ApiKey ) (Task GQLClient.Error (List Category)) )
-init organizationKey =
-    ( initModel organizationKey
-    , requestCategories
+init : ( Model, List (PageCmd Msg) )
+init =
+    ( initModel
+    , [ Reader.map (Task.attempt CategoriesLoaded) requestCategories ]
     )
 
 
@@ -44,39 +40,41 @@ init organizationKey =
 
 type Msg
     = CategoriesLoaded (Result GQLClient.Error (List Category))
-    | Navigate Route.Route
-    | DeleteCategory String
+    | DeleteCategory CategoryId
     | DeleteCategoryResponse (Result GQLClient.Error CategoryId)
+    | OnCreateCategoryClick
+    | OnEditCategoryClick CategoryId
 
 
-update : Msg -> Model -> NodeEnv -> ApiKey -> ( Model, Cmd Msg )
-update msg model nodeEnv organizationKey =
+update : Msg -> Model -> ( Model, List (PageCmd Msg) )
+update msg model =
     case msg of
         CategoriesLoaded (Ok categories) ->
             ( { model
                 | categories = categories
               }
-            , Cmd.none
+            , []
             )
 
         CategoriesLoaded (Err error) ->
-            ( { model | error = Just (toString error) }, Cmd.none )
-
-        Navigate page ->
-            model ! [ Navigation.newUrl (Route.routeToString page) ]
+            ( { model | error = Just (toString error) }, [] )
 
         DeleteCategory categoryId ->
-            deleteCategoryById model nodeEnv organizationKey { id = categoryId }
+            deleteCategoryById model categoryId
 
         DeleteCategoryResponse (Ok id) ->
-            let
-                categories =
-                    List.filter (\m -> m.id /= id) model.categories
-            in
-                ( { model | categories = categories, error = Nothing }, Cmd.none )
+            ( { model | categories = List.filter (\m -> m.id /= id) model.categories, error = Nothing }, [] )
 
         DeleteCategoryResponse (Err error) ->
-            ( { model | error = Just (toString error) }, Cmd.none )
+            ( { model | error = Just (toString error) }, [] )
+
+        OnCreateCategoryClick ->
+            -- NOTE: Handled in Main
+            ( model, [] )
+
+        OnEditCategoryClick _ ->
+            -- NOTE: Handled in Main
+            ( model, [] )
 
 
 
@@ -101,7 +99,7 @@ view model =
                     model.error
             ]
         , button
-            [ onClick (Navigate <| Route.CategoryCreate model.organizationKey)
+            [ onClick OnCreateCategoryClick
             , class "btn btn-primary"
             ]
             [ text "New Category" ]
@@ -127,7 +125,7 @@ categoryRow category =
             [ class "actionButtonColumn" ]
             [ button
                 [ class "actionButton btn btn-primary"
-                , onClick <| Navigate <| Route.CategoryEdit category.id
+                , onClick (OnEditCategoryClick category.id)
                 ]
                 [ text "Edit Category" ]
             ]
@@ -142,10 +140,10 @@ categoryRow category =
         ]
 
 
-deleteCategoryById : Model -> NodeEnv -> ApiKey -> DeleteCategoryInput -> ( Model, Cmd Msg )
-deleteCategoryById model nodeEnv apiKey categoryId =
+deleteCategoryById : Model -> CategoryId -> ( Model, List (PageCmd Msg) )
+deleteCategoryById model categoryId =
     let
         cmd =
-            Task.attempt DeleteCategoryResponse (Reader.run deleteCategory ( nodeEnv, apiKey, categoryId ))
+            (Reader.map (Task.attempt DeleteCategoryResponse) (deleteCategory categoryId))
     in
-        ( model, cmd )
+        ( model, [ cmd ] )

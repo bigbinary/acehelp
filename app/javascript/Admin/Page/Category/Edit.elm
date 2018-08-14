@@ -13,6 +13,7 @@ import Reader exposing (Reader)
 import Request.Helpers exposing (..)
 import Route
 import Task exposing (Task)
+import Page.Helpers exposing (..)
 
 
 -- MODEL
@@ -33,10 +34,10 @@ initModel categoryId =
     }
 
 
-init : CategoryId -> ( Model, Reader ( NodeEnv, ApiKey ) (Task GQLClient.Error Category) )
+init : CategoryId -> ( Model, List (PageCmd Msg) )
 init categoryId =
     ( initModel categoryId
-    , requestCategoryById categoryId
+    , [ Reader.map (Task.attempt CategoryLoaded) (requestCategoryById categoryId) ]
     )
 
 
@@ -51,27 +52,27 @@ type Msg
     | UpdateCategoryResponse (Result GQLClient.Error Category)
 
 
-update : Msg -> Model -> NodeEnv -> ApiKey -> ( Model, Cmd Msg )
-update msg model nodeEnv organizationKey =
+update : Msg -> Model -> ( Model, List (PageCmd Msg) )
+update msg model =
     case msg of
         CategoryLoaded (Ok category) ->
             ( { model
                 | name = Field.update model.name category.name
                 , id = category.id
               }
-            , Cmd.none
+            , []
             )
 
         CategoryLoaded (Err err) ->
             ( { model | error = Just "There was an error loading up the article" }
-            , Cmd.none
+            , []
             )
 
         CategoryNameInput categoryName ->
             ( { model
                 | name = Field.update model.name categoryName
               }
-            , Cmd.none
+            , []
             )
 
         SaveCategory ->
@@ -94,15 +95,15 @@ update msg model nodeEnv organizationKey =
                         |> String.join ", "
             in
                 if isAllValid fields then
-                    updateCategory model nodeEnv organizationKey
+                    updateCategory model
                 else
-                    ( { model | error = Just errors }, Cmd.none )
+                    ( { model | error = Just errors }, [] )
 
         UpdateCategoryResponse (Ok id) ->
-            ( model, Route.modifyUrl <| Route.CategoryList organizationKey )
+            ( model, [] )
 
         UpdateCategoryResponse (Err error) ->
-            ( { model | error = Just (toString error) }, Cmd.none )
+            ( { model | error = Just (toString error) }, [] )
 
 
 
@@ -156,13 +157,10 @@ categoryUpdateInputs { id, name } =
     }
 
 
-updateCategory : Model -> NodeEnv -> ApiKey -> ( Model, Cmd Msg )
-updateCategory model nodeEnv organizationKey =
+updateCategory : Model -> ( Model, List (PageCmd Msg) )
+updateCategory model =
     let
         cmd =
-            Task.attempt UpdateCategoryResponse
-                (Reader.run requestUpdateCategory
-                    ( nodeEnv, organizationKey, categoryUpdateInputs model )
-                )
+            Reader.map (Task.attempt UpdateCategoryResponse) (requestUpdateCategory <| categoryUpdateInputs model)
     in
-        ( model, cmd )
+        ( model, [ cmd ] )

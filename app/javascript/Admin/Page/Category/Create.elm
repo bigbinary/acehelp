@@ -13,6 +13,7 @@ import Reader exposing (Reader)
 import Request.Helpers exposing (..)
 import Route
 import Task exposing (Task)
+import Page.Helpers exposing (..)
 
 
 -- MODEL
@@ -33,10 +34,10 @@ initModel =
     }
 
 
-init : ( Model, Cmd Msg )
+init : ( Model, List (PageCmd Msg) )
 init =
     ( initModel
-    , Cmd.none
+    , []
     )
 
 
@@ -50,11 +51,11 @@ type Msg
     | SaveCategoryResponse (Result GQLClient.Error Category)
 
 
-update : Msg -> Model -> NodeEnv -> ApiKey -> ( Model, Cmd Msg )
-update msg model nodeEnv organizationKey =
+update : Msg -> Model -> ( Model, List (PageCmd Msg) )
+update msg model =
     case msg of
         CategoryNameInput categoryName ->
-            ( { model | name = Field.update model.name categoryName }, Cmd.none )
+            ( { model | name = Field.update model.name categoryName }, [] )
 
         SaveCategory ->
             let
@@ -76,9 +77,9 @@ update msg model nodeEnv organizationKey =
                         |> String.join ", "
             in
                 if isAllValid fields then
-                    saveCategory model nodeEnv organizationKey
+                    saveCategory model
                 else
-                    ( { model | error = Just errors }, Cmd.none )
+                    ( { model | error = Just errors }, [] )
 
         SaveCategoryResponse (Ok id) ->
             ( { model
@@ -86,11 +87,11 @@ update msg model nodeEnv organizationKey =
                 , name = Field.update model.name ""
                 , error = Nothing
               }
-            , Route.modifyUrl <| Route.CategoryList organizationKey
+            , []
             )
 
         SaveCategoryResponse (Err error) ->
-            ( { model | error = Just (toString error) }, Cmd.none )
+            ( { model | error = Just (toString error) }, [] )
 
 
 
@@ -142,13 +143,10 @@ categroyCeateInputs { name } =
     }
 
 
-saveCategory : Model -> NodeEnv -> ApiKey -> ( Model, Cmd Msg )
-saveCategory model nodeEnv organizationKey =
+saveCategory : Model -> ( Model, List (PageCmd Msg) )
+saveCategory model =
     let
         cmd =
-            Task.attempt SaveCategoryResponse
-                (Reader.run requestCreateCategory
-                    ( nodeEnv, organizationKey, categroyCeateInputs model )
-                )
+            Reader.map (Task.attempt SaveCategoryResponse) (requestCreateCategory <| categroyCeateInputs model)
     in
-        ( model, cmd )
+        ( model, [ cmd ] )

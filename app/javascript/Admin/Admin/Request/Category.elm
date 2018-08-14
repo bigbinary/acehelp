@@ -28,10 +28,10 @@ requestCategoryById categoryId =
         )
 
 
-requestUpdateCategory : Reader ( NodeEnv, ApiKey, UpdateCategoryInputs ) (Task GQLClient.Error Category)
-requestUpdateCategory =
+requestUpdateCategory : UpdateCategoryInputs -> Reader ( NodeEnv, ApiKey ) (Task GQLClient.Error Category)
+requestUpdateCategory categoryInputs =
     Reader.Reader
-        (\( nodeEnv, apiKey, categoryInputs ) ->
+        (\( nodeEnv, apiKey ) ->
             GQLClient.customSendMutation (requestOptions nodeEnv apiKey) <|
                 GQLBuilder.request
                     categoryInputs
@@ -39,21 +39,21 @@ requestUpdateCategory =
         )
 
 
-deleteCategory : Reader ( NodeEnv, ApiKey, DeleteCategoryInput ) (Task GQLClient.Error CategoryId)
-deleteCategory =
+deleteCategory : CategoryId -> Reader ( NodeEnv, ApiKey ) (Task GQLClient.Error CategoryId)
+deleteCategory categoryId =
     Reader.Reader
-        (\( nodeEnv, apiKey, categoryId ) ->
+        (\( nodeEnv, apiKey ) ->
             GQLClient.customSendMutation (requestOptions nodeEnv apiKey) <|
                 GQLBuilder.request
-                    categoryId
+                    { id = categoryId }
                     deleteCategoryMutation
         )
 
 
-requestCreateCategory : Reader ( NodeEnv, ApiKey, CreateCategoryInputs ) (Task GQLClient.Error Category)
-requestCreateCategory =
+requestCreateCategory : CreateCategoryInputs -> Reader ( NodeEnv, ApiKey ) (Task GQLClient.Error Category)
+requestCreateCategory categoryInputs =
     Reader.Reader
-        (\( nodeEnv, apiKey, categoryInputs ) ->
+        (\( nodeEnv, apiKey ) ->
             GQLClient.customSendMutation (requestOptions nodeEnv apiKey) <|
                 GQLBuilder.request
                     categoryInputs
