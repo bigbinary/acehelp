@@ -12,6 +12,7 @@ import Field exposing (..)
 import Helpers exposing (..)
 import Field.ValidationResult exposing (..)
 import GraphQL.Client.Http as GQLClient
+import Page.Helpers exposing (..)
 
 
 -- MODEL
@@ -34,10 +35,10 @@ initModel urlId =
     }
 
 
-init : UrlId -> ( Model, Reader ( NodeEnv, ApiKey ) (Task GQLClient.Error UrlData) )
+init : UrlId -> ( Model, List (PageCmd Msg) )
 init urlId =
     ( initModel urlId
-    , requestUrlById urlId
+    , [ Reader.map (Task.attempt UrlLoaded) (requestUrlById urlId) ]
     )
 
 
@@ -52,11 +53,11 @@ type Msg
     | UrlLoaded (Result GQLClient.Error UrlData)
 
 
-update : Msg -> Model -> NodeEnv -> ApiKey -> ( Model, Cmd Msg )
-update msg model nodeEnv organizationKey =
+update : Msg -> Model -> ( Model, List (PageCmd Msg) )
+update msg model =
     case msg of
         UrlInput url ->
-            ( { model | url = Field.update model.url url }, Cmd.none )
+            ( { model | url = Field.update model.url url }, [] )
 
         UpdateUrl ->
             let
@@ -78,31 +79,31 @@ update msg model nodeEnv organizationKey =
                         |> String.join ", "
             in
                 if isAllValid fields then
-                    save model nodeEnv organizationKey
+                    save model
                 else
-                    ( { model | error = Just errors }, Cmd.none )
+                    ( { model | error = Just errors }, [] )
 
         UpdateUrlResponse (Ok id) ->
             ( { model
                 | url = Field.update model.url id.url
                 , success = Just "Url Updated Successfully."
               }
-            , Cmd.none
+            , []
             )
 
         UpdateUrlResponse (Err error) ->
-            ( { model | error = Just (toString error) }, Cmd.none )
+            ( { model | error = Just (toString error) }, [] )
 
         UrlLoaded (Ok url) ->
             ( { model
                 | url = Field.update model.url url.url
                 , urlId = url.id
               }
-            , Cmd.none
+            , []
             )
 
         UrlLoaded (Err err) ->
-            ( { model | error = Just "There was an error loading up the url" }, Cmd.none )
+            ( { model | error = Just "There was an error loading up the url" }, [] )
 
 
 
@@ -155,10 +156,10 @@ urlInputs { url, urlId } =
     }
 
 
-save : Model -> NodeEnv -> ApiKey -> ( Model, Cmd Msg )
-save model nodeEnv organizationKey =
+save : Model -> ( Model, List (PageCmd Msg) )
+save model =
     let
         cmd =
-            Task.attempt UpdateUrlResponse (Reader.run (updateUrl) ( nodeEnv, organizationKey, urlInputs model ))
+            (Reader.map (Task.attempt UpdateUrlResponse) (updateUrl <| urlInputs model))
     in
-        ( model, cmd )
+        ( model, [ cmd ] )

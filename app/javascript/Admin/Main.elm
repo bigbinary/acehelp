@@ -1,10 +1,7 @@
 module Main exposing (..)
 
-import Admin.Data.Category exposing (Category)
 import Admin.Data.Organization exposing (OrganizationId)
-import Admin.Data.Url exposing (UrlData)
 import Admin.Request.Helper exposing (ApiKey, NodeEnv, logoutRequest)
-import GraphQL.Client.Http as GQLClient
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
@@ -28,14 +25,10 @@ import Page.Organization.Create as OrganizationCreate
 import Page.Session.SignUp as SignUp
 import Page.Errors as Errors
 import Admin.Data.Organization exposing (OrganizationId)
-import Admin.Data.Category exposing (Category)
-import Admin.Data.User exposing (..)
-import Admin.Data.Url exposing (UrlData)
 import UrlParser as Url exposing (..)
 import Admin.Request.Helper exposing (NodeEnv, ApiKey, logoutRequest)
 import Route
 import Task exposing (Task)
-import GraphQL.Client.Http as GQLClient
 import Page.Helpers exposing (..)
 import Page.Ticket.List as TicketList
 import Page.Ticket.Edit as TicketEdit
@@ -216,39 +209,20 @@ navigateTo newRoute model =
                     |> newTransitionFrom CategoryCreateMsg
 
             Route.UrlList organizationKey ->
-                let
-                    ( urlListModel, urlListCmd ) =
-                        UrlList.init organizationKey
-
-                    cmd =
-                        Cmd.map UrlListMsg <| Task.attempt UrlList.UrlLoaded (Reader.run urlListCmd ( model.nodeEnv, model.organizationKey ))
-                in
-                    ( { model
-                        | currentPage =
-                            TransitioningFrom
-                                (UrlList urlListModel)
-                        , route = newRoute
-                      }
-                    , cmd
-                    )
+                UrlList.init
+                    |> newTransitionFrom UrlListMsg
 
             Route.UrlCreate organizationKey ->
                 UrlCreate.init
-                    |> transitionFrom UrlCreate UrlCreateMsg
+                    |> newTransitionFrom UrlCreateMsg
 
             Route.TicketList organizationKey ->
                 TicketList.init model.nodeEnv model.organizationKey
                     |> transitionFrom TicketList TicketListMsg
 
             Route.UrlEdit organizationKey urlId ->
-                let
-                    ( urlEditModel, urlEditCmd ) =
-                        UrlEdit.init urlId
-
-                    cmd =
-                        Cmd.map UrlEditMsg <| Task.attempt UrlEdit.UrlLoaded (Reader.run urlEditCmd ( model.nodeEnv, model.organizationKey ))
-                in
-                    ( { model | currentPage = TransitioningFrom (UrlEdit urlEditModel), route = newRoute }, cmd )
+                UrlEdit.init urlId
+                    |> newTransitionFrom UrlEditMsg
 
             Route.FeedbackList organizationKey ->
                 let
@@ -469,55 +443,53 @@ update msg model =
             UrlCreateMsg cuMsg ->
                 let
                     currentPageModel =
-                        case model.currentPage of
-                            Loaded (UrlCreate urlCreateModel) ->
+                        case getPage model.currentPage of
+                            UrlCreate urlCreateModel ->
                                 urlCreateModel
 
                             _ ->
                                 UrlCreate.initModel
 
-                    ( createUrlModel, createUrlCmds ) =
+                    ( newModel, cmds ) =
                         UrlCreate.update cuMsg
                             currentPageModel
-                            model.nodeEnv
-                            model.organizationKey
                 in
-                    ( { model | currentPage = Loaded (UrlCreate createUrlModel) }
-                    , Cmd.map UrlCreateMsg createUrlCmds
+                    ( { model | currentPage = Loaded (UrlCreate newModel) }
+                    , runCmds UrlCreateMsg cmds
                     )
 
             UrlEditMsg ueMsg ->
                 let
                     currentPageModel =
-                        case model.currentPage of
-                            Loaded (UrlEdit urlEditModel) ->
+                        case getPage model.currentPage of
+                            UrlEdit urlEditModel ->
                                 urlEditModel
 
                             _ ->
                                 UrlEdit.initModel "0"
 
-                    ( urlEditModel, urlEditCmd ) =
-                        UrlEdit.update ueMsg currentPageModel model.nodeEnv model.organizationKey
+                    ( newModel, cmds ) =
+                        UrlEdit.update ueMsg currentPageModel
                 in
-                    ( { model | currentPage = Loaded (UrlEdit urlEditModel) }
-                    , Cmd.map UrlEditMsg urlEditCmd
+                    ( { model | currentPage = Loaded (UrlEdit newModel) }
+                    , runCmds UrlEditMsg cmds
                     )
 
             UrlListMsg ulMsg ->
                 let
                     currentPageModel =
-                        case model.currentPage of
-                            Loaded (UrlList urlListModel) ->
+                        case getPage model.currentPage of
+                            UrlList urlListModel ->
                                 urlListModel
 
                             _ ->
-                                UrlList.initModel model.organizationKey
+                                UrlList.initModel
 
-                    ( urlListModel, urlListCmds ) =
-                        UrlList.update ulMsg currentPageModel model.nodeEnv model.organizationKey
+                    ( newModel, cmds ) =
+                        UrlList.update ulMsg currentPageModel
                 in
-                    ( { model | currentPage = Loaded (UrlList urlListModel) }
-                    , Cmd.map UrlListMsg urlListCmds
+                    ( { model | currentPage = Loaded (UrlList newModel) }
+                    , runCmds UrlListMsg cmds
                     )
 
             TicketListMsg tlMsg ->

@@ -12,7 +12,6 @@ import Field.ValidationResult exposing (..)
 import GraphQL.Client.Http as GQLClient
 import Regex exposing (Regex)
 import Task exposing (Task)
-import Navigation
 import Route
 
 

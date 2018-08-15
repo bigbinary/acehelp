@@ -18,28 +18,30 @@ requestUrls =
         )
 
 
-createUrl : Reader ( NodeEnv, ApiKey, CreateUrlInput ) (Task GQLClient.Error UrlData)
-createUrl =
+createUrl : CreateUrlInput -> Reader ( NodeEnv, ApiKey ) (Task GQLClient.Error UrlData)
+createUrl createUrlInput =
     Reader.Reader
-        (\( nodeEnv, apiKey, createUrlInput ) ->
+        (\( nodeEnv, apiKey ) ->
             (GQLClient.customSendMutation (requestOptions nodeEnv apiKey) <|
                 GQLBuilder.request createUrlInput createUrlMutation
             )
         )
 
-deleteUrl : Reader ( NodeEnv, ApiKey, UrlIdInput ) (Task GQLClient.Error UrlId)
-deleteUrl =
+
+deleteUrl : UrlId -> Reader ( NodeEnv, ApiKey ) (Task GQLClient.Error UrlId)
+deleteUrl urlId =
     Reader.Reader
-        (\( nodeEnv, apiKey, urlId ) ->
+        (\( nodeEnv, apiKey ) ->
             (GQLClient.customSendMutation (requestOptions nodeEnv apiKey) <|
-                GQLBuilder.request urlId deleteUrlMutation
+                GQLBuilder.request { id = urlId } deleteUrlMutation
             )
         )
 
-updateUrl : Reader ( NodeEnv, ApiKey, UrlData ) (Task GQLClient.Error UrlData)
-updateUrl =
+
+updateUrl : UrlData -> Reader ( NodeEnv, ApiKey ) (Task GQLClient.Error UrlData)
+updateUrl urlData =
     Reader.Reader
-        (\( nodeEnv, apiKey, urlData ) ->
+        (\( nodeEnv, apiKey ) ->
             (GQLClient.customSendMutation (requestOptions nodeEnv apiKey) <|
                 GQLBuilder.request urlData updateUrlMutation
             )
