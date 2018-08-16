@@ -13,14 +13,10 @@ import Admin.Data.Url exposing (UrlData, UrlId)
 import Admin.Data.Common exposing (..)
 import Reader exposing (Reader)
 import Task exposing (Task)
-import Time
 import Field exposing (..)
-import Field.ValidationResult exposing (..)
 import Helpers exposing (..)
-import Admin.Ports exposing (..)
 import Page.Article.Common exposing (..)
 import GraphQL.Client.Http as GQLClient
-import Admin.Ports exposing (..)
 
 
 -- Model
@@ -185,16 +181,16 @@ articleInputs : Model -> CreateArticleInputs
 articleInputs { title, desc, categories } =
     { title = Field.value title
     , desc = Field.value desc
-    , categoryId =
-        List.filterMap
-            (\option ->
-                case option of
-                    Selected category ->
-                        Just category.id
+    , categoryIds =
+        Just <|
+            List.filterMap
+                (\option ->
+                    case option of
+                        Selected category ->
+                            Just category.id
 
-                    _ ->
-                        Nothing
-            )
-            categories
-            |> List.head
+                        _ ->
+                            Nothing
+                )
+                categories
     }
