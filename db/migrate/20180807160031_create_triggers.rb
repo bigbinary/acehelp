@@ -1,7 +1,7 @@
 class CreateTriggers < ActiveRecord::Migration[5.2]
   def change
     create_table :triggers, id: :uuid do |t|
-      t.string :slug, null: false
+      t.string :slug, null: false, index: {unique: true}
       t.text :description
       t.boolean :active, default: true
       t.json :configuration
