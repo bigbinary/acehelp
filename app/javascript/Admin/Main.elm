@@ -28,16 +28,13 @@ import Admin.Data.Organization exposing (OrganizationId)
 import UrlParser as Url exposing (..)
 import Admin.Request.Helper exposing (NodeEnv, ApiKey, logoutRequest)
 import Route
-import Task exposing (Task)
 import Admin.Data.ReaderCmd exposing (..)
 import Page.Ticket.List as TicketList
 import Page.Ticket.Edit as TicketEdit
 import Page.Url.Create as UrlCreate
 import Page.Url.Edit as UrlEdit
 import Page.Url.List as UrlList
-import Reader exposing (Reader)
 import Route
-import Task exposing (Task)
 import UrlParser as Url exposing (..)
 
 
@@ -245,8 +242,8 @@ navigateTo newRoute model =
                     |> newTransitionFrom TeamCreateMsg
 
             Route.Settings organizationKey ->
-                Settings.init model.organizationKey
-                    |> transitionFrom Settings SettingsMsg
+                Settings.init
+                    |> newTransitionFrom SettingsMsg
 
             Route.Dashboard ->
                 ( { model | currentPage = Loaded Dashboard }, Cmd.none )
@@ -583,20 +580,20 @@ update msg model =
             SettingsMsg settingsMsg ->
                 let
                     currentPageModel =
-                        case model.currentPage of
-                            Loaded (Settings settingsPageModel) ->
+                        case getPage model.currentPage of
+                            Settings settingsPageModel ->
                                 settingsPageModel
 
                             _ ->
-                                Settings.initModel model.organizationKey
+                                Settings.initModel
 
-                    ( settingsModel, settingsCmd ) =
+                    ( newModel, cmds ) =
                         Settings.update settingsMsg currentPageModel
                 in
                     ( { model
-                        | currentPage = Loaded (Settings settingsModel)
+                        | currentPage = Loaded (Settings newModel)
                       }
-                    , Cmd.map SettingsMsg settingsCmd
+                    , runReaderCmds SettingsMsg cmds
                     )
 
             OrganizationCreateMsg oCMsg ->
@@ -737,7 +734,7 @@ view model =
         Settings settingsModel ->
             adminLayout model
                 (Html.map SettingsMsg
-                    (Settings.view settingsModel)
+                    (Settings.view model.organizationKey settingsModel)
                 )
 
         TicketList ticketListModel ->
