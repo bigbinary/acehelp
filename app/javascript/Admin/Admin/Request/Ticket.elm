@@ -63,3 +63,12 @@ addNotesAndCommentToTicket ticket =
                 GQLBuilder.request ticket addTicketNotesAndCommentMutation
             )
         )
+
+assignTicketToAgent : TicketAgentInput -> Reader ( NodeEnv, ApiKey ) (Task GQLClient.Error Ticket)
+assignTicketToAgent ticketAgentInput =
+    Reader.Reader
+        (\( nodeEnv, apiKey ) ->
+            (GQLClient.customSendMutation (requestOptions nodeEnv apiKey) <|
+                GQLBuilder.request ticketAgentInput assignTicketToAgentMutation
+            )
+        )

@@ -68,6 +68,7 @@ type Msg
     | TicketLoaded (Result GQLClient.Error Ticket)
     | AgentsLoaded (Result GQLClient.Error (List Agent))
     | UpdateTicketStatus String
+    | AssignTicketAgent String
 
 
 update : Msg -> Model -> ( Model, List (ReaderCmd Msg) )
@@ -94,6 +95,7 @@ update msg model =
                 , comment = Comment ticket.id ""
                 , comments = ticket.comments
                 , success = Just "Ticket Updated Successfully..."
+                , agent = ticket.agent
               }
             , []
             )
@@ -125,6 +127,9 @@ update msg model =
 
         UpdateTicketStatus status ->
             updateTicketStatus model { id = model.ticketId, status = status }
+
+        AssignTicketAgent agent_id ->
+            assignTicketAgent model { id = model.ticketId, agent_id = agent_id }
 
         AgentsLoaded (Ok agents) ->
             ( { model
@@ -260,6 +265,17 @@ updateTicketStatus model ticketInput =
         ( model, [ cmd ] )
 
 
+assignTicketAgent : Model -> TicketAgentInput -> ( Model, List (ReaderCmd Msg) )
+assignTicketAgent model ticketAgentInput =
+    let
+        --cmd =
+        --    Task.attempt UpdateTicketResponse (Reader.run (assignTicketToAgent) ( nodeEnv, organizationKey, { id = ticketAgentInput.id, agent_id = ticketAgentInput.agent_id } ))
+        cmd =
+            Strict <| Reader.map (Task.attempt UpdateTicketResponse) (assignTicketToAgent { id = ticketAgentInput.id, agent_id = ticketAgentInput.agent_id })
+    in
+        ( model, [ cmd ] )
+
+
 deleteTicket : Model -> ( Model, List (ReaderCmd Msg) )
 deleteTicket model =
     let
@@ -297,7 +313,7 @@ agentsDropDown model =
         [ div [ class "agent-selection" ]
             [ div []
                 [ h2 [] [ text "Agent Selector" ]
-                , select []
+                , select [ onInput AssignTicketAgent ]
                     (List.map (agentOption model) model.agents)
                 ]
             ]

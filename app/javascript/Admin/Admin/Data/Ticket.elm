@@ -35,6 +35,12 @@ type alias TicketNoteComment =
     , comment : String
     }
 
+type alias TicketAgentInput =
+    { id : TicketId
+    , agent_id : String
+    }
+
+
 type alias TicketId =
     String
 
@@ -179,6 +185,32 @@ addTicketNotesAndCommentMutation =
                             [ ( "comment", Arg.variable commentVar )
                             , ( "note", Arg.variable noteVar )
                             , ( "id", Arg.variable idVar )
+                            ]
+                      )
+                    ]
+                    (GQLBuilder.extract <|
+                        GQLBuilder.field "ticket"
+                            []
+                            (ticketObject)
+                    )
+
+
+assignTicketToAgentMutation : GQLBuilder.Document GQLBuilder.Mutation Ticket TicketAgentInput
+assignTicketToAgentMutation =
+    let
+        idVar =
+            Var.required "id" .id Var.string
+
+        agentIdVar =
+            Var.required "agent_id" .agent_id Var.string
+    in
+        GQLBuilder.mutationDocument <|
+            GQLBuilder.extract <|
+                GQLBuilder.field "assignTicketToAgent"
+                    [ ( "input"
+                      , Arg.object
+                            [ ( "agent_id", Arg.variable agentIdVar )
+                            , ( "ticket_id", Arg.variable idVar )
                             ]
                       )
                     ]
