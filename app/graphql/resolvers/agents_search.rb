@@ -4,7 +4,7 @@ class Resolvers::AgentsSearch < GraphQL::Function
   type !types[Types::UserType]
 
   def call(obj, args, context)
-    query = User.for_organization(
+    query = Agent.for_organization(
       context[:organization]
     )
     query

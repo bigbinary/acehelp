@@ -229,6 +229,7 @@ view model =
             ]
         , div [ class "col-sm" ]
             [ ticketStatusDropDown model
+            , agentsDropDown model
             , closeTicketButton model
             , deleteTicketButton model
             ]
@@ -293,11 +294,11 @@ ticketStatusDropDown model =
 agentsDropDown : Model -> Html Msg
 agentsDropDown model =
     div []
-        [ div [ class "status-selection" ]
+        [ div [ class "agent-selection" ]
             [ div []
-                [ h2 [] [ text "Status Selector" ]
-                , select [ onInput UpdateTicketStatus ]
-                    (List.map (statusOption model) model.statuses)
+                [ h2 [] [ text "Agent Selector" ]
+                , select []
+                    (List.map (agentOption model) model.agents)
                 ]
             ]
         ]
@@ -309,6 +310,17 @@ statusOption model status =
         option [ value (status.value), selected True ] [ text (status.key) ]
     else
         option [ value (status.value) ] [ text (status.key) ]
+
+
+agentOption model agent =
+    if agent == model.agent then
+        option [ value (agent.id), selected True ] [ text (agent.name) ]
+    else
+        option [ value (agent.id) ] [ text (agent.name) ]
+
+
+defaultOption _ =
+    option [ disabled True, selected True ] [ text "Select Agent" ]
 
 
 closeTicketButton : Model -> Html Msg
