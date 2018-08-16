@@ -225,51 +225,12 @@ navigateTo newRoute model =
                     |> newTransitionFrom UrlEditMsg
 
             Route.FeedbackList organizationKey ->
-                let
-                    ( feedbackListModel, feedbackListRequest ) =
-                        FeedbackList.init organizationKey
-
-                    cmd =
-                        Cmd.map FeedbackListMsg <|
-                            Task.attempt
-                                FeedbackList.FeedbackListLoaded
-                                (Reader.run feedbackListRequest
-                                    ( model.nodeEnv
-                                    , model.organizationKey
-                                    , "open"
-                                    )
-                                )
-                in
-                    ( { model
-                        | currentPage =
-                            TransitioningFrom
-                                (FeedbackList feedbackListModel)
-                        , route = newRoute
-                      }
-                    , cmd
-                    )
+                FeedbackList.init
+                    |> newTransitionFrom FeedbackListMsg
 
             Route.FeedbackShow organizationKey feedbackId ->
-                let
-                    ( feedbackShowModel, feedbackShowRequest ) =
-                        FeedbackShow.init feedbackId
-
-                    cmd =
-                        Cmd.map FeedbackShowMsg <|
-                            Task.attempt
-                                FeedbackShow.FeedbackLoaded
-                                (Reader.run feedbackShowRequest
-                                    ( model.nodeEnv, model.organizationKey )
-                                )
-                in
-                    ( { model
-                        | currentPage =
-                            TransitioningFrom
-                                (FeedbackShow feedbackShowModel)
-                        , route = newRoute
-                      }
-                    , cmd
-                    )
+                FeedbackShow.init feedbackId
+                    |> newTransitionFrom FeedbackShowMsg
 
             Route.TeamList organizationKey ->
                 let
@@ -554,41 +515,37 @@ update msg model =
             FeedbackListMsg flmsg ->
                 let
                     currentPageModel =
-                        case model.currentPage of
-                            Loaded (FeedbackList feedbackListModel) ->
+                        case getPage model.currentPage of
+                            FeedbackList feedbackListModel ->
                                 feedbackListModel
 
                             _ ->
-                                FeedbackList.initModel model.organizationKey
+                                FeedbackList.initModel
 
-                    ( feedbackListModel, feedbackListCmd ) =
+                    ( newModel, cmds ) =
                         FeedbackList.update flmsg
                             currentPageModel
-                            model.organizationKey
-                            model.nodeEnv
                 in
-                    ( { model | currentPage = Loaded (FeedbackList feedbackListModel) }
-                    , Cmd.map FeedbackListMsg feedbackListCmd
+                    ( { model | currentPage = Loaded (FeedbackList newModel) }
+                    , runReaderCmds FeedbackListMsg cmds
                     )
 
             FeedbackShowMsg fsMsg ->
                 let
                     currentPageModel =
-                        case model.currentPage of
-                            Loaded (FeedbackShow feedbackShowModel) ->
+                        case getPage model.currentPage of
+                            FeedbackShow feedbackShowModel ->
                                 feedbackShowModel
 
                             _ ->
                                 FeedbackShow.initModel "0"
 
-                    ( feedbackShowModel, feedbackShowCmd ) =
+                    ( newModel, cmds ) =
                         FeedbackShow.update fsMsg
                             currentPageModel
-                            model.nodeEnv
-                            model.organizationKey
                 in
-                    ( { model | currentPage = TransitioningFrom (FeedbackShow feedbackShowModel) }
-                    , Cmd.map FeedbackShowMsg feedbackShowCmd
+                    ( { model | currentPage = Loaded (FeedbackShow newModel) }
+                    , runReaderCmds FeedbackShowMsg cmds
                     )
 
             CategoryEditMsg ctMsg ->

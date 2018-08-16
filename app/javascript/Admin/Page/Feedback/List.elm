@@ -6,14 +6,12 @@ import Html exposing (..)
 import Html.Events exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
-import Request.Helpers exposing (NodeEnv, ApiKey)
-import Navigation exposing (..)
-import Route
 import Admin.Request.Feedback exposing (..)
 import Admin.Data.Feedback exposing (..)
 import Task exposing (Task)
 import Reader exposing (Reader)
 import GraphQL.Client.Http as GQLClient
+import Admin.Data.ReaderCmd exposing (..)
 
 
 -- MODEL
@@ -21,23 +19,21 @@ import GraphQL.Client.Http as GQLClient
 
 type alias Model =
     { feedbackList : List Feedback
-    , organizationKey : String
     , error : Maybe String
     }
 
 
-initModel : ApiKey -> Model
-initModel organizationKey =
+initModel : Model
+initModel =
     { feedbackList = []
-    , organizationKey = organizationKey
     , error = Nothing
     }
 
 
-init : ApiKey -> ( Model, Reader ( NodeEnv, ApiKey, FeedbackStatus ) (Task GQLClient.Error (List Feedback)) )
-init organizationKey =
-    ( initModel organizationKey
-    , requestFeedbacks
+init : ( Model, List (ReaderCmd Msg) )
+init =
+    ( initModel
+    , [ Strict <| Reader.map (Task.attempt FeedbackListLoaded) (requestFeedbacks "open") ]
     )
 
 
@@ -48,23 +44,24 @@ init organizationKey =
 type Msg
     = FeedbackListLoaded (Result GQLClient.Error (List Feedback))
     | FeedbackListReloaded FeedbackStatus
-    | Navigate Route.Route
+    | OnFeedbackClick FeedbackId
 
 
-update : Msg -> Model -> ApiKey -> NodeEnv -> ( Model, Cmd Msg )
-update msg model apiKey nodeEnv =
+update : Msg -> Model -> ( Model, List (ReaderCmd Msg) )
+update msg model =
     case msg of
         FeedbackListLoaded (Ok feedbacks) ->
-            ( { model | feedbackList = feedbacks }, Cmd.none )
+            ( { model | feedbackList = feedbacks }, [] )
 
         FeedbackListLoaded (Err err) ->
-            ( { model | error = Just (toString err) }, Cmd.none )
+            ( { model | error = Just (toString err) }, [] )
 
         FeedbackListReloaded status ->
-            requestFeedbacksList model apiKey nodeEnv status
+            requestFeedbacksList model status
 
-        Navigate page ->
-            model ! [ Navigation.newUrl (Route.routeToString page) ]
+        OnFeedbackClick feedbackId ->
+            -- NOTE: Handled in Main
+            ( model, [] )
 
 
 
@@ -109,7 +106,7 @@ row : Model -> Feedback -> Html Msg
 row model feedback =
     div [ id feedback.id ]
         [ div
-            [ onClick <| Navigate <| Route.FeedbackShow model.organizationKey feedback.id ]
+            [ onClick <| OnFeedbackClick feedback.id ]
             [ text feedback.name ]
         , div
             []
@@ -121,10 +118,10 @@ row model feedback =
         ]
 
 
-requestFeedbacksList : Model -> ApiKey -> NodeEnv -> FeedbackStatus -> ( Model, Cmd Msg )
-requestFeedbacksList model apiKey nodeEnv status =
+requestFeedbacksList : Model -> FeedbackStatus -> ( Model, List (ReaderCmd Msg) )
+requestFeedbacksList model status =
     let
         cmd =
-            Task.attempt FeedbackListLoaded (Reader.run (requestFeedbacks) ( nodeEnv, apiKey, status ))
+            Strict <| Reader.map (Task.attempt FeedbackListLoaded) (requestFeedbacks status)
     in
-        ( model, cmd )
+        ( model, [ cmd ] )
