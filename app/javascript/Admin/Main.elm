@@ -25,9 +25,11 @@ import Page.Category.Create as CategoryCreate
 import Page.Team.Create as TeamMemberCreate
 import Page.Settings as Settings
 import Page.Organization.Create as OrganizationCreate
+import Page.Session.SignUp as SignUp
 import Page.Errors as Errors
 import Admin.Data.Organization exposing (OrganizationId)
 import Admin.Data.Category exposing (Category)
+import Admin.Data.User exposing (..)
 import Admin.Data.Url exposing (UrlData)
 import UrlParser as Url exposing (..)
 import Admin.Request.Helper exposing (NodeEnv, ApiKey, logoutRequest)
@@ -74,6 +76,7 @@ type Page
     | FeedbackShow FeedbackShow.Model
     | TeamList TeamList.Model
     | TeamMemberCreate TeamMemberCreate.Model
+    | SignUp SignUp.Model
     | Dashboard
     | NotFound
     | Blank
@@ -111,7 +114,7 @@ init flags location =
             , error = Nothing
             }
     in
-        ( initModel, pageCmd )
+        ( pageModel, pageCmd )
 
 
 
@@ -141,6 +144,7 @@ type Msg
     | OnLocationChange Navigation.Location
     | SignOut
     | SignedOut (Result Http.Error String)
+    | SignUpMsg SignUp.Msg
     | OrganizationCreateMsg OrganizationCreate.Msg
 
 
@@ -468,6 +472,20 @@ navigateTo newRoute model =
                         , route = newRoute
                       }
                     , cmd
+                    )
+
+            Route.SignUp ->
+                let
+                    ( signUpModel, signUpCmd ) =
+                        SignUp.init
+                in
+                    ( { model
+                        | currentPage =
+                            TransitioningTo
+                                (SignUp signUpModel)
+                        , route = newRoute
+                      }
+                    , Cmd.map SignUpMsg signUpCmd
                     )
 
             Route.OrganizationCreate ->
@@ -873,6 +891,23 @@ update msg model =
                 , Cmd.map OrganizationCreateMsg createOrgCmds
                 )
 
+        SignUpMsg suMsg ->
+            let
+                currentPageModel =
+                    case model.currentPage of
+                        Loaded (SignUp signUpModel) ->
+                            signUpModel
+
+                        _ ->
+                            SignUp.initModel
+
+                ( signUpModel, signUpCmds ) =
+                    SignUp.update suMsg currentPageModel model.nodeEnv model.organizationKey
+            in
+                ( { model | currentPage = Loaded (SignUp signUpModel) }
+                , Cmd.map SignUpMsg signUpCmds
+                )
+
         OnLocationChange location ->
             setRoute location model
 
@@ -1027,6 +1062,11 @@ view model =
                 (Html.map OrganizationCreateMsg
                     (OrganizationCreate.view orgCreateModel)
                 )
+
+        SignUp signupModel ->
+            (Html.map SignUpMsg
+                (SignUp.view signupModel)
+            )
 
         NotFound ->
             Errors.notFound
