@@ -16,7 +16,6 @@ import Page.Article.List as ArticleList
 import Page.Category.Create as CategoryCreate
 import Page.Category.Edit as CategoryEdit
 import Page.Category.List as CategoryList
-import Page.Errors as Errors
 import Page.Ticket.List as TicketList
 import Page.Team.List as TeamList
 import Page.Feedback.List as FeedbackList
@@ -78,8 +77,8 @@ type Page
     | TeamMemberCreate TeamMemberCreate.Model
     | SignUp SignUp.Model
     | Dashboard
-    | NotFound
     | Blank
+    | NotFound
 
 
 type PageState
@@ -129,7 +128,6 @@ type Msg
     | UrlCreateMsg UrlCreate.Msg
     | UrlEditMsg UrlEdit.Msg
     | UrlListMsg UrlList.Msg
-    | UrlsLoaded (Result GQLClient.Error (List UrlData))
     | CategoryListMsg CategoryList.Msg
     | CategoryCreateMsg CategoryCreate.Msg
     | CategoryEditMsg CategoryEdit.Msg
@@ -273,20 +271,14 @@ navigateTo newRoute model =
 
             Route.UrlList organizationKey ->
                 let
-                    ( urlListModel, urlListRequest ) =
+                    ( urlListModel, urlListCmd ) =
                         UrlList.init organizationKey
 
                     cmd =
-                        Task.attempt UrlsLoaded
-                            (Reader.run
-                                urlListRequest
-                                ( model.nodeEnv, model.organizationKey )
-                            )
+                        Cmd.map UrlListMsg <| Task.attempt UrlList.UrlLoaded (Reader.run urlListCmd ( model.nodeEnv, model.organizationKey ))
                 in
                     ( { model
-                        | currentPage =
-                            TransitioningTo
-                                (UrlList urlListModel)
+                        | currentPage = TransitioningTo (UrlList urlListModel)
                         , route = newRoute
                       }
                     , cmd
@@ -308,7 +300,12 @@ navigateTo newRoute model =
                     cmd =
                         Cmd.map UrlEditMsg <| Task.attempt UrlEdit.UrlLoaded (Reader.run urlEditCmd ( model.nodeEnv, model.organizationKey ))
                 in
-                    ( { model | currentPage = TransitioningTo (UrlEdit urlEditModel), route = newRoute }, cmd )
+                    ( { model
+                        | currentPage = TransitioningTo (UrlEdit urlEditModel)
+                        , route = newRoute
+                      }
+                    , cmd
+                    )
 
             Route.FeedbackList organizationKey ->
                 let
@@ -412,7 +409,7 @@ navigateTo newRoute model =
                     |> transitionTo Settings SettingsMsg
 
             Route.Dashboard ->
-                ( { model | currentPage = Loaded Blank }, Cmd.none )
+                ( { model | currentPage = Loaded Dashboard }, Cmd.none )
 
             Route.ArticleEdit organizationKey articleId ->
                 let
@@ -493,7 +490,13 @@ navigateTo newRoute model =
                     |> transitionTo OrganizationCreate OrganizationCreateMsg
 
             Route.NotFound ->
-                ( { model | currentPage = Loaded NotFound }, Cmd.none )
+                ( { model
+                    | currentPage =
+                        TransitioningTo NotFound
+                    , route = newRoute
+                  }
+                , Cmd.none
+                )
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -623,31 +626,6 @@ update msg model =
                 ( { model | currentPage = Loaded (UrlList urlListModel) }
                 , Cmd.map UrlListMsg urlListCmds
                 )
-
-        UrlsLoaded (Ok urlsList) ->
-            let
-                currentPageModel =
-                    case model.currentPage of
-                        Loaded (UrlList urlListModel) ->
-                            urlListModel
-
-                        _ ->
-                            UrlList.initModel model.organizationKey
-            in
-                ( { model
-                    | currentPage =
-                        Loaded
-                            (UrlList
-                                { currentPageModel
-                                    | urls = urlsList
-                                }
-                            )
-                  }
-                , Cmd.none
-                )
-
-        UrlsLoaded (Err error) ->
-            ( model, Cmd.none )
 
         TicketListMsg tlMsg ->
             let
@@ -1072,7 +1050,7 @@ view model =
             Errors.notFound
 
         Blank ->
-            div [] [ text "blank" ]
+            div [] [ text "Blank" ]
 
 
 adminLayout : Model -> Html Msg -> Html Msg
