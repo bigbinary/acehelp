@@ -14,6 +14,7 @@ type alias Ticket =
     , status : String
     , statuses : List TicketStatus
     , comments : List Comment
+    , agent : Agent
     }
 
 
@@ -41,6 +42,12 @@ type alias TicketId =
 type alias Comment =
     { ticket_id : String
     , info : String
+    }
+
+
+type alias Agent =
+    { id : String
+    , name : String
     }
 
 
@@ -72,6 +79,19 @@ requestTicketByIdQuery =
             )
 
 
+requestAgentsQuery : GQLBuilder.Document GQLBuilder.Query (List Agent) vars
+requestAgentsQuery =
+    GQLBuilder.queryDocument
+        (GQLBuilder.extract
+            (GQLBuilder.field "agents"
+                []
+                (GQLBuilder.list
+                    (agentObject)
+                )
+            )
+        )
+
+
 ticketStatusObject : GQLBuilder.ValueSpec GQLBuilder.NonNull GQLBuilder.ObjectType TicketStatus vars
 ticketStatusObject =
     GQLBuilder.object TicketStatus
@@ -84,6 +104,12 @@ commentObject =
     GQLBuilder.object Comment
         |> GQLBuilder.with (GQLBuilder.field "ticket_id" [] GQLBuilder.string)
         |> GQLBuilder.with (GQLBuilder.field "info" [] GQLBuilder.string)
+
+agentObject : GQLBuilder.ValueSpec GQLBuilder.NonNull GQLBuilder.ObjectType Agent vars
+agentObject =
+    GQLBuilder.object Agent
+        |> GQLBuilder.with (GQLBuilder.field "id" [] GQLBuilder.string)
+        |> GQLBuilder.with (GQLBuilder.field "name" [] GQLBuilder.string)
 
 
 deleteTicketMutation : GQLBuilder.Document GQLBuilder.Mutation Ticket { var | id : TicketId }
@@ -185,4 +211,9 @@ ticketObject =
                 (GQLBuilder.list
                     commentObject
                 )
+            )
+        |> GQLBuilder.with
+            (GQLBuilder.field "agent"
+                []
+                (agentObject)
             )

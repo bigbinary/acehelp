@@ -17,6 +17,15 @@ requestTickets =
         )
 
 
+requestAgents : Reader ( NodeEnv, ApiKey ) (Task GQLClient.Error (List Agent))
+requestAgents =
+    Reader.Reader
+        (\( env, apiKey ) ->
+            GQLClient.customSendQuery (requestOptions env apiKey) <|
+                GQLBuilder.request {} requestAgentsQuery
+        )
+
+
 requestTicketById : TicketId -> Reader ( NodeEnv, ApiKey, AppUrl ) (Task GQLClient.Error Ticket)
 requestTicketById ticketId =
     Reader.Reader

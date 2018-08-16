@@ -24,6 +24,8 @@ type alias Model =
     , statuses : List TicketStatus
     , comments : List Comment
     , comment : Comment
+    , agents : List Agent
+    , agent : Agent
     }
 
 
@@ -38,13 +40,17 @@ initModel ticketId =
     , statuses = []
     , comments = []
     , comment = Comment ticketId ""
+    , agents = []
+    , agent = Agent "" ""
     }
 
 
 init : TicketId -> ( Model, List (ReaderCmd Msg) )
 init ticketId =
     ( initModel ticketId
-    , [ Strict <| Reader.map (Task.attempt TicketLoaded) (requestTicketById ticketId) ]
+    , [ Strict <| Reader.map (Task.attempt TicketLoaded) (requestTicketById ticketId)
+      , Strict <| Reader.map (Task.attempt AgentsLoaded) (requestAgents)
+      ]
     )
 
 
@@ -60,6 +66,7 @@ type Msg
     | UpdateTicketResponse (Result GQLClient.Error Ticket)
     | DeleteTicketResponse (Result GQLClient.Error Ticket)
     | TicketLoaded (Result GQLClient.Error Ticket)
+    | AgentsLoaded (Result GQLClient.Error (List Agent))
     | UpdateTicketStatus String
 
 
@@ -108,6 +115,7 @@ update msg model =
                 , statuses = ticket.statuses
                 , status = ticket.status
                 , comments = ticket.comments
+                , agent = ticket.agent
               }
             , []
             )
@@ -117,6 +125,16 @@ update msg model =
 
         UpdateTicketStatus status ->
             updateTicketStatus model { id = model.ticketId, status = status }
+
+        AgentsLoaded (Ok agents) ->
+            ( { model
+                | agents = agents
+              }
+            , []
+            )
+
+        AgentsLoaded (Err err) ->
+            ( { model | error = Just (toString err) }, [] )
 
 
 
@@ -267,6 +285,18 @@ ticketStatusDropDown model =
             [ div []
                 [ h2 [] [ text "Status Selector" ]
                 , select [ onInput UpdateTicketStatus, class "custom-select custom-select-lg mb-3" ]
+                    (List.map (statusOption model) model.statuses)
+                ]
+            ]
+        ]
+
+agentsDropDown : Model -> Html Msg
+agentsDropDown model =
+    div []
+        [ div [ class "status-selection" ]
+            [ div []
+                [ h2 [] [ text "Status Selector" ]
+                , select [ onInput UpdateTicketStatus ]
                     (List.map (statusOption model) model.statuses)
                 ]
             ]
