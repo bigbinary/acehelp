@@ -25,7 +25,7 @@ requestCreateArticle articleInputs =
                 (GQLBuilder.request
                     { title = articleInputs.title
                     , desc = articleInputs.desc
-                    , categoryId = articleInputs.categoryId
+                    , categoryIds = articleInputs.categoryIds
                     }
                     createArticleMutation
                 )
