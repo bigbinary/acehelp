@@ -7,7 +7,7 @@ class Mutations::AssignTicketToAgentMutations
     input_field :ticket_id, !types.String
     input_field :agent_id, !types.String
 
-    # return_field :status, types.Boolean
+    return_field :status, types.Boolean
     return_field :ticket, Types::TicketType
     return_field :errors, types[Types::ErrorType]
 
@@ -24,6 +24,7 @@ class Mutations::AssignTicketToAgentMutations
       end
 
       {
+        status: status,
         ticket: updated_ticket,
         errors: errors
       }
