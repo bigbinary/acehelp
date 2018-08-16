@@ -31,6 +31,7 @@ import Page.Ticket.Edit as TicketEdit
 import Page.Url.Create as UrlCreate
 import Page.Url.Edit as UrlEdit
 import Page.Url.List as UrlList
+import Page.Common.View exposing (..)
 import Route
 
 
@@ -267,7 +268,7 @@ navigateTo newRoute model =
 
             Route.Login ->
                 Login.init
-                    |> transitionFrom Login LoginMsg
+                    |> transitionTo Login LoginMsg
 
             Route.NotFound ->
                 ( { model
@@ -710,132 +711,121 @@ subscriptions model =
 
 view : Model -> Html Msg
 view model =
-    case getPage model.currentPage of
-        ArticleList articleListModel ->
-            adminLayout model
-                (Html.map ArticleListMsg
-                    (ArticleList.view articleListModel)
+    let
+        viewContent =
+            case getPage model.currentPage of
+                ArticleList articleListModel ->
+                    Html.map ArticleListMsg
+                        (ArticleList.view articleListModel)
+
+                ArticleCreate articleCreateModel ->
+                    Html.map ArticleCreateMsg
+                        (ArticleCreate.view articleCreateModel)
+
+                ArticleEdit articleEditModel ->
+                    Html.map ArticleEditMsg
+                        (ArticleEdit.view articleEditModel)
+
+                UrlCreate urlCreateModel ->
+                    Html.map UrlCreateMsg
+                        (UrlCreate.view urlCreateModel)
+
+                UrlList urlListModel ->
+                    Html.map UrlListMsg
+                        (UrlList.view urlListModel)
+
+                CategoryList categoryListModel ->
+                    Html.map CategoryListMsg
+                        (CategoryList.view categoryListModel)
+
+                CategoryCreate categoryCreateModel ->
+                    Html.map CategoryCreateMsg
+                        (CategoryCreate.view categoryCreateModel)
+
+                CategoryEdit categoryEditModel ->
+                    Html.map CategoryEditMsg
+                        (CategoryEdit.view categoryEditModel)
+
+                Settings settingsModel ->
+                    Html.map SettingsMsg
+                        (Settings.view model.organizationKey settingsModel)
+
+                TicketList ticketListModel ->
+                    Html.map TicketListMsg
+                        (TicketList.view ticketListModel)
+
+                UrlEdit urlEditModel ->
+                    Html.map UrlEditMsg
+                        (UrlEdit.view urlEditModel)
+
+                FeedbackList feedbackListModel ->
+                    Html.map FeedbackListMsg
+                        (FeedbackList.view feedbackListModel)
+
+                FeedbackShow feedbackShowModel ->
+                    Html.map FeedbackShowMsg
+                        (FeedbackShow.view feedbackShowModel)
+
+                TeamList teamListModel ->
+                    Html.map TeamListMsg
+                        (TeamList.view teamListModel)
+
+                TeamMemberCreate teamMemberCreateModel ->
+                    Html.map TeamCreateMsg
+                        (TeamMemberCreate.view teamMemberCreateModel)
+
+                TicketEdit ticketEditModel ->
+                    Html.map TicketEditMsg
+                        (TicketEdit.view ticketEditModel)
+
+                Dashboard ->
+                    div [] [ text "Dashboard" ]
+
+                OrganizationCreate orgCreateModel ->
+                    Html.map OrganizationCreateMsg
+                        (OrganizationCreate.view orgCreateModel)
+
+                NotFound ->
+                    Errors.notFound
+
+                Blank ->
+                    text ""
+
+                SignUp _ ->
+                    text ""
+
+                Login _ ->
+                    text ""
+    in
+        case model.currentPage of
+            TransitioningFrom (Login loginModel) ->
+                Html.map LoginMsg (Login.view loginModel)
+
+            Loaded (Login loginModel) ->
+                Html.map LoginMsg (Login.view loginModel)
+
+            TransitioningFrom (SignUp signupModel) ->
+                (Html.map SignUpMsg
+                    (SignUp.view signupModel)
                 )
 
-        ArticleCreate articleCreateModel ->
-            adminLayout model
-                (Html.map ArticleCreateMsg
-                    (ArticleCreate.view articleCreateModel)
+            Loaded (SignUp signupModel) ->
+                (Html.map SignUpMsg
+                    (SignUp.view signupModel)
                 )
 
-        ArticleEdit articleEditModel ->
-            adminLayout model
-                (Html.map ArticleEditMsg
-                    (ArticleEdit.view articleEditModel)
-                )
+            TransitioningFrom _ ->
+                adminLayout model [ viewContent, loadingIndicator ]
 
-        UrlCreate urlCreateModel ->
-            adminLayout model
-                (Html.map UrlCreateMsg
-                    (UrlCreate.view urlCreateModel)
-                )
-
-        UrlList urlListModel ->
-            adminLayout model
-                (Html.map UrlListMsg
-                    (UrlList.view urlListModel)
-                )
-
-        CategoryList categoryListModel ->
-            adminLayout model
-                (Html.map CategoryListMsg
-                    (CategoryList.view categoryListModel)
-                )
-
-        CategoryCreate categoryCreateModel ->
-            adminLayout model
-                (Html.map CategoryCreateMsg
-                    (CategoryCreate.view categoryCreateModel)
-                )
-
-        CategoryEdit categoryEditModel ->
-            adminLayout model
-                (Html.map CategoryEditMsg
-                    (CategoryEdit.view categoryEditModel)
-                )
-
-        Settings settingsModel ->
-            adminLayout model
-                (Html.map SettingsMsg
-                    (Settings.view model.organizationKey settingsModel)
-                )
-
-        TicketList ticketListModel ->
-            adminLayout model
-                (Html.map TicketListMsg
-                    (TicketList.view ticketListModel)
-                )
-
-        UrlEdit urlEditModel ->
-            adminLayout model
-                (Html.map UrlEditMsg
-                    (UrlEdit.view urlEditModel)
-                )
-
-        FeedbackList feedbackListModel ->
-            adminLayout model
-                (Html.map FeedbackListMsg
-                    (FeedbackList.view feedbackListModel)
-                )
-
-        FeedbackShow feedbackShowModel ->
-            adminLayout model
-                (Html.map FeedbackShowMsg
-                    (FeedbackShow.view feedbackShowModel)
-                )
-
-        TeamList teamListModel ->
-            adminLayout model
-                (Html.map TeamListMsg
-                    (TeamList.view teamListModel)
-                )
-
-        TeamMemberCreate teamMemberCreateModel ->
-            adminLayout model
-                (Html.map TeamCreateMsg
-                    (TeamMemberCreate.view teamMemberCreateModel)
-                )
-
-        TicketEdit ticketEditModel ->
-            adminLayout model
-                (Html.map TicketEditMsg
-                    (TicketEdit.view ticketEditModel)
-                )
-
-        Dashboard ->
-            div [] [ text "Dashboard" ]
-
-        OrganizationCreate orgCreateModel ->
-            adminLayout model
-                (Html.map OrganizationCreateMsg
-                    (OrganizationCreate.view orgCreateModel)
-                )
-
-        SignUp signupModel ->
-            (Html.map SignUpMsg
-                (SignUp.view signupModel)
-            )
-
-        Login loginModel ->
-            Html.map LoginMsg (Login.view loginModel)
-
-        NotFound ->
-            Errors.notFound
-
-        Blank ->
-            div [] [ text "Blank" ]
+            Loaded _ ->
+                adminLayout model [ viewContent ]
 
 
-adminLayout : Model -> Html Msg -> Html Msg
-adminLayout model page =
+adminLayout : Model -> List (Html Msg) -> Html Msg
+adminLayout model viewContent =
     div []
         [ adminHeader model
-        , div [ class "container main-wrapper" ] [ page ]
+        , div [ class "container main-wrapper" ] viewContent
         ]
 
 
