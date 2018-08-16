@@ -21,6 +21,7 @@ type alias Model =
     { id : String
     , name : Field String String
     , error : Maybe String
+    , success : Maybe String
     }
 
 
@@ -29,6 +30,7 @@ initModel categoryId =
     { name = Field (validateEmpty "Name") ""
     , id = categoryId
     , error = Nothing
+    , success = Nothing
     }
 
 
@@ -98,7 +100,7 @@ update msg model =
                     ( { model | error = Just errors }, [] )
 
         UpdateCategoryResponse (Ok id) ->
-            ( model, [] )
+            ( { model | success = Just "Category has been updated" }, [] )
 
         UpdateCategoryResponse (Err error) ->
             ( { model | error = Just (toString error) }, [] )
@@ -110,8 +112,7 @@ update msg model =
 
 view : Model -> Html Msg
 view model =
-    Html.form
-        [ onSubmit SaveCategory ]
+    div []
         [ div []
             [ Maybe.withDefault (text "") <|
                 Maybe.map
@@ -125,6 +126,16 @@ view model =
                     model.error
             ]
         , div []
+            [ Maybe.withDefault (text "") <|
+                Maybe.map
+                    (\message ->
+                        div [ class "alert alert-success alert-dismissible fade show", attribute "role" "alert" ]
+                            [ text <| message
+                            ]
+                    )
+                    model.success
+            ]
+        , div []
             [ label [] [ text "Category Name: " ]
             , input
                 [ type_ "text"
@@ -136,8 +147,9 @@ view model =
             ]
         , div []
             [ button
-                [ type_ "submit"
-                , class "button primary"
+                [ type_ "button"
+                , class "btn btn-primary"
+                , onSubmit SaveCategory
                 ]
                 [ text "Save" ]
             ]

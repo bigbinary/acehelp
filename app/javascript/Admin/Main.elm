@@ -1,6 +1,5 @@
 module Main exposing (..)
 
-import Admin.Data.Organization exposing (OrganizationId)
 import Admin.Request.Helper exposing (ApiKey, NodeEnv, logoutRequest)
 import Html exposing (..)
 import Html.Attributes exposing (..)
@@ -24,8 +23,6 @@ import Page.Settings as Settings
 import Page.Organization.Create as OrganizationCreate
 import Page.Session.SignUp as SignUp
 import Page.Errors as Errors
-import Admin.Data.Organization exposing (OrganizationId)
-import UrlParser as Url exposing (..)
 import Admin.Request.Helper exposing (NodeEnv, ApiKey, logoutRequest)
 import Route
 import Admin.Data.ReaderCmd exposing (..)
@@ -35,7 +32,6 @@ import Page.Url.Create as UrlCreate
 import Page.Url.Edit as UrlEdit
 import Page.Url.List as UrlList
 import Route
-import UrlParser as Url exposing (..)
 
 
 -- MODEL
@@ -165,96 +161,91 @@ setRoute location model =
 navigateTo : Route.Route -> Model -> ( Model, Cmd Msg )
 navigateTo newRoute model =
     let
-        transitionFrom page msg =
-            Tuple.mapFirst
-                (\pageModel ->
-                    { model
-                        | currentPage =
-                            TransitioningFrom (page pageModel)
+        transitionTo page msg ( pageModel, pageCmds ) =
+            case pageCmds of
+                [] ->
+                    ( { model
+                        | currentPage = Loaded (page pageModel)
                         , route = newRoute
-                    }
-                )
-                >> Tuple.mapSecond
-                    (Cmd.map msg)
+                      }
+                    , Cmd.none
+                    )
 
-        newTransitionFrom msg =
-            Tuple.mapFirst
-                (\pageModel ->
-                    { model
+                _ ->
+                    ( { model
                         | currentPage = TransitioningFrom (getPage model.currentPage)
                         , route = newRoute
-                    }
-                )
-                >> Tuple.mapSecond
-                    (readerCmdToCmd model.nodeEnv model.organizationKey msg)
+                      }
+                    , readerCmdToCmd model.nodeEnv model.organizationKey msg pageCmds
+                    )
     in
         case newRoute of
             Route.ArticleList organizationKey ->
                 ArticleList.init
-                    |> newTransitionFrom ArticleListMsg
+                    |> transitionTo ArticleList ArticleListMsg
 
             Route.ArticleCreate organizationKey ->
                 ArticleCreate.init
-                    |> newTransitionFrom ArticleCreateMsg
+                    |> transitionTo ArticleCreate ArticleCreateMsg
 
             Route.CategoryList organizationKey ->
                 CategoryList.init
-                    |> newTransitionFrom CategoryListMsg
+                    |> transitionTo CategoryList CategoryListMsg
 
             Route.CategoryCreate organizationKey ->
                 CategoryCreate.init
-                    |> newTransitionFrom CategoryCreateMsg
+                    |> transitionTo CategoryCreate CategoryCreateMsg
 
             Route.UrlList organizationKey ->
                 UrlList.init
-                    |> newTransitionFrom UrlListMsg
+                    |> transitionTo UrlList UrlListMsg
 
             Route.UrlCreate organizationKey ->
                 UrlCreate.init
-                    |> newTransitionFrom UrlCreateMsg
+                    |> transitionTo UrlCreate UrlCreateMsg
 
             Route.TicketList organizationKey ->
                 TicketList.init
-                    |> newTransitionFrom TicketListMsg
+                    |> transitionTo TicketList TicketListMsg
 
             Route.UrlEdit organizationKey urlId ->
                 UrlEdit.init urlId
-                    |> newTransitionFrom UrlEditMsg
+                    |> transitionTo UrlEdit UrlEditMsg
 
             Route.FeedbackList organizationKey ->
                 FeedbackList.init
-                    |> newTransitionFrom FeedbackListMsg
+                    |> transitionTo FeedbackList FeedbackListMsg
 
             Route.FeedbackShow organizationKey feedbackId ->
                 FeedbackShow.init feedbackId
-                    |> newTransitionFrom FeedbackShowMsg
+                    |> transitionTo FeedbackShow FeedbackShowMsg
 
             Route.TeamList organizationKey ->
                 TeamList.init
-                    |> newTransitionFrom TeamListMsg
+                    |> transitionTo TeamList TeamListMsg
 
             Route.TicketEdit organizationKey ticketId ->
                 TicketEdit.init ticketId
-                    |> newTransitionFrom TicketEditMsg
+                    |> transitionTo TicketEdit TicketEditMsg
 
             Route.TeamMemberCreate organizationKey ->
                 TeamMemberCreate.init
-                    |> newTransitionFrom TeamCreateMsg
+                    |> transitionTo TeamMemberCreate TeamCreateMsg
 
             Route.Settings organizationKey ->
                 Settings.init
-                    |> newTransitionFrom SettingsMsg
+                    |> transitionTo Settings SettingsMsg
 
             Route.Dashboard ->
                 ( { model | currentPage = Loaded Dashboard }, Cmd.none )
 
             Route.ArticleEdit organizationKey articleId ->
                 ArticleEdit.init articleId
-                    |> newTransitionFrom ArticleEditMsg
+                    |> transitionTo ArticleEdit ArticleEditMsg
 
-            Route.CategoryEdit categoryId ->
+            Route.CategoryEdit organizationKey categoryId ->
                 CategoryEdit.init categoryId
-                    |> newTransitionFrom CategoryEditMsg
+                    |> transitionTo CategoryEdit CategoryEditMsg
 
             Route.SignUp ->
                 let
@@ -272,7 +263,7 @@ navigateTo newRoute model =
 
             Route.OrganizationCreate ->
                 (OrganizationCreate.init model.userId)
-                    |> newTransitionFrom OrganizationCreateMsg
+                    |> transitionTo OrganizationCreate OrganizationCreateMsg
 
             Route.Login ->
                 Login.init
@@ -293,6 +284,9 @@ update msg model =
     let
         runReaderCmds =
             readerCmdToCmd model.nodeEnv model.organizationKey
+
+        updateNavigation =
+            flip update model
     in
         case msg of
             NavigateTo route ->
@@ -317,12 +311,19 @@ update msg model =
                                 ArticleList.initModel
 
                     ( newModel, cmds ) =
-                        ArticleList.update alMsg
-                            currentPageModel
+                        ArticleList.update alMsg currentPageModel
                 in
-                    ( { model | currentPage = Loaded (ArticleList newModel) }
-                    , runReaderCmds ArticleListMsg cmds
-                    )
+                    case alMsg of
+                        ArticleList.OnArticleCreateClick ->
+                            updateNavigation (NavigateTo (Route.ArticleCreate model.organizationKey))
+
+                        ArticleList.OnArticleEditClick articleId ->
+                            updateNavigation (NavigateTo (Route.ArticleEdit model.organizationKey articleId))
+
+                        _ ->
+                            ( { model | currentPage = Loaded (ArticleList newModel) }
+                            , runReaderCmds ArticleListMsg cmds
+                            )
 
             ArticleCreateMsg caMsg ->
                 let
@@ -338,9 +339,14 @@ update msg model =
                         ArticleCreate.update caMsg
                             currentPageModel
                 in
-                    ( { model | currentPage = Loaded (ArticleCreate newModel) }
-                    , runReaderCmds ArticleCreateMsg cmds
-                    )
+                    case caMsg of
+                        ArticleCreate.SaveArticleResponse (Ok id) ->
+                            updateNavigation (NavigateTo (Route.ArticleList model.organizationKey))
+
+                        _ ->
+                            ( { model | currentPage = Loaded (ArticleCreate newModel) }
+                            , runReaderCmds ArticleCreateMsg cmds
+                            )
 
             ArticleEditMsg aeMsg ->
                 let
@@ -374,9 +380,14 @@ update msg model =
                         UrlCreate.update cuMsg
                             currentPageModel
                 in
-                    ( { model | currentPage = Loaded (UrlCreate newModel) }
-                    , runReaderCmds UrlCreateMsg cmds
-                    )
+                    case cuMsg of
+                        UrlCreate.SaveUrlResponse (Ok id) ->
+                            updateNavigation (NavigateTo (Route.UrlList model.organizationKey))
+
+                        _ ->
+                            ( { model | currentPage = Loaded (UrlCreate newModel) }
+                            , runReaderCmds UrlCreateMsg cmds
+                            )
 
             UrlEditMsg ueMsg ->
                 let
@@ -408,9 +419,17 @@ update msg model =
                     ( newModel, cmds ) =
                         UrlList.update ulMsg currentPageModel
                 in
-                    ( { model | currentPage = Loaded (UrlList newModel) }
-                    , runReaderCmds UrlListMsg cmds
-                    )
+                    case ulMsg of
+                        UrlList.OnUrlCreateClick ->
+                            updateNavigation (NavigateTo (Route.UrlCreate model.organizationKey))
+
+                        UrlList.OnUrlEditClick urlId ->
+                            updateNavigation (NavigateTo (Route.UrlEdit model.organizationKey urlId))
+
+                        _ ->
+                            ( { model | currentPage = Loaded (UrlList newModel) }
+                            , runReaderCmds UrlListMsg cmds
+                            )
 
             TicketListMsg tlMsg ->
                 let
@@ -426,9 +445,14 @@ update msg model =
                         TicketList.update tlMsg
                             currentPageModel
                 in
-                    ( { model | currentPage = Loaded (TicketList newModel) }
-                    , runReaderCmds TicketListMsg cmds
-                    )
+                    case tlMsg of
+                        TicketList.OnEditTicketClick ticketId ->
+                            updateNavigation (NavigateTo (Route.TicketEdit model.organizationKey ticketId))
+
+                        _ ->
+                            ( { model | currentPage = Loaded (TicketList newModel) }
+                            , runReaderCmds TicketListMsg cmds
+                            )
 
             CategoryListMsg clMsg ->
                 let
@@ -445,15 +469,23 @@ update msg model =
                             clMsg
                             currentPageModel
                 in
-                    ( { model | currentPage = Loaded (CategoryList newModel) }
-                    , runReaderCmds CategoryListMsg cmds
-                    )
+                    case clMsg of
+                        CategoryList.OnCreateCategoryClick ->
+                            updateNavigation (NavigateTo (Route.CategoryCreate model.organizationKey))
+
+                        CategoryList.OnEditCategoryClick categoryId ->
+                            updateNavigation (NavigateTo (Route.CategoryEdit model.organizationKey categoryId))
+
+                        _ ->
+                            ( { model | currentPage = Loaded (CategoryList newModel) }
+                            , runReaderCmds CategoryListMsg cmds
+                            )
 
             CategoryCreateMsg ccMsg ->
                 let
                     currentPageModel =
-                        case model.currentPage of
-                            Loaded (CategoryCreate categoryCreateModel) ->
+                        case getPage model.currentPage of
+                            CategoryCreate categoryCreateModel ->
                                 categoryCreateModel
 
                             _ ->
@@ -463,13 +495,18 @@ update msg model =
                         CategoryCreate.update ccMsg
                             currentPageModel
                 in
-                    ( { model
-                        | currentPage = Loaded (CategoryCreate newModel)
-                      }
-                    , runReaderCmds CategoryCreateMsg cmds
-                    )
+                    case ccMsg of
+                        CategoryCreate.SaveCategoryResponse (Ok id) ->
+                            updateNavigation (NavigateTo (Route.CategoryList model.organizationKey))
 
-            FeedbackListMsg flmsg ->
+                        _ ->
+                            ( { model
+                                | currentPage = Loaded (CategoryCreate newModel)
+                              }
+                            , runReaderCmds CategoryCreateMsg cmds
+                            )
+
+            FeedbackListMsg flMsg ->
                 let
                     currentPageModel =
                         case getPage model.currentPage of
@@ -480,12 +517,17 @@ update msg model =
                                 FeedbackList.initModel
 
                     ( newModel, cmds ) =
-                        FeedbackList.update flmsg
+                        FeedbackList.update flMsg
                             currentPageModel
                 in
-                    ( { model | currentPage = Loaded (FeedbackList newModel) }
-                    , runReaderCmds FeedbackListMsg cmds
-                    )
+                    case flMsg of
+                        FeedbackList.OnFeedbackClick feedbackId ->
+                            updateNavigation (NavigateTo (Route.FeedbackShow model.organizationKey feedbackId))
+
+                        _ ->
+                            ( { model | currentPage = Loaded (FeedbackList newModel) }
+                            , runReaderCmds FeedbackListMsg cmds
+                            )
 
             FeedbackShowMsg fsMsg ->
                 let
@@ -537,9 +579,14 @@ update msg model =
                         TeamList.update tlmsg
                             currentPageModel
                 in
-                    ( { model | currentPage = Loaded (TeamList newModel) }
-                    , runReaderCmds TeamListMsg cmds
-                    )
+                    case tlmsg of
+                        TeamList.OnAddTeamMemberClick ->
+                            updateNavigation (NavigateTo (Route.TeamMemberCreate model.organizationKey))
+
+                        _ ->
+                            ( { model | currentPage = Loaded (TeamList newModel) }
+                            , runReaderCmds TeamListMsg cmds
+                            )
 
             TeamCreateMsg tcmsg ->
                 let
@@ -641,25 +688,6 @@ update msg model =
 
             SignedOut _ ->
                 ( model, load (Admin.Request.Helper.baseUrl model.nodeEnv) )
-
-
-retriveOrganizationFromUrl : Location -> OrganizationId
-retriveOrganizationFromUrl location =
-    let
-        org =
-            parsePath (Url.s "admin" </> Url.s "organization" </> string) location
-    in
-        getOrganizationId org
-
-
-getOrganizationId : Maybe String -> OrganizationId
-getOrganizationId orgId =
-    case orgId of
-        Just orgId ->
-            orgId
-
-        Nothing ->
-            ""
 
 
 

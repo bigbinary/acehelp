@@ -82,6 +82,7 @@ update msg model =
             save model
 
         SaveArticleResponse (Ok id) ->
+            -- NOTE: Redirection handled in Main
             ( { model
                 | title = Field.update model.title ""
                 , desc = Field.update model.desc ""

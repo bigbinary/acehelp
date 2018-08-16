@@ -147,13 +147,13 @@ feedbackStatusButton model status =
         "closed" ->
             Html.a
                 [ onClick (UpdateFeedabackStatus model.id "open")
-                , class "button primary"
+                , class "btn btn-primary"
                 ]
                 [ text <| "Open Feedback" ]
 
         _ ->
             Html.a
                 [ onClick (UpdateFeedabackStatus model.id "closed")
-                , class "button primary"
+                , class "btn btn-primary"
                 ]
                 [ text <| "Close Feedback" ]

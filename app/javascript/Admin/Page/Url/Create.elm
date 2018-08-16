@@ -88,6 +88,7 @@ update msg model =
                     ( { model | error = Just errors }, [] )
 
         SaveUrlResponse (Ok id) ->
+            -- NOTE: Redirection handled in Main
             ( model, [] )
 
         SaveUrlResponse (Err error) ->
@@ -133,7 +134,7 @@ view model =
                     ]
                     []
                 ]
-            , button [ type_ "submit", class "button primary" ] [ text "Save URL" ]
+            , button [ type_ "submit", class "btn btn-primary" ] [ text "Save URL" ]
             ]
         ]
 

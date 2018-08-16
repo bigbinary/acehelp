@@ -80,6 +80,7 @@ update msg model =
                     ( { model | error = Just errors }, [] )
 
         SaveCategoryResponse (Ok id) ->
+            -- NOTE: Redirection handled in Main
             ( { model
                 | id = "0"
                 , name = Field.update model.name ""
@@ -98,8 +99,7 @@ update msg model =
 
 view : Model -> Html Msg
 view model =
-    Html.form
-        [ onSubmit SaveCategory ]
+    div []
         [ div []
             [ Maybe.withDefault (text "") <|
                 Maybe.map
@@ -123,8 +123,9 @@ view model =
             ]
         , div []
             [ button
-                [ type_ "submit"
-                , class "button primary"
+                [ type_ "button"
+                , class "btn btn-primary"
+                , onClick SaveCategory
                 ]
                 [ text "Submit" ]
             ]

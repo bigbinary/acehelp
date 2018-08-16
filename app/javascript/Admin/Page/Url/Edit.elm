@@ -143,7 +143,7 @@ view model =
                     ]
                     []
                 ]
-            , button [ type_ "submit", class "button primary" ] [ text "Update URL" ]
+            , button [ type_ "submit", class "btn btn-primary" ] [ text "Update URL" ]
             ]
         ]
 

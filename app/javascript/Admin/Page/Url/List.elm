@@ -46,7 +46,7 @@ type Msg
     | DeleteUrl String
     | DeleteUrlResponse (Result GQLClient.Error UrlId)
     | OnUrlCreateClick
-    | OnUrlEditClick
+    | OnUrlEditClick UrlId
 
 
 update : Msg -> Model -> ( Model, List (ReaderCmd Msg) )
@@ -71,9 +71,11 @@ update msg model =
             ( { model | error = Just (toString error) }, [] )
 
         OnUrlCreateClick ->
+            -- Note: Handled in Main
             ( model, [] )
 
-        OnUrlEditClick ->
+        OnUrlEditClick _ ->
+            -- Note: Handled in Main
             ( model, [] )
 
 
@@ -105,15 +107,15 @@ view model =
             [ class "listingSection" ]
             (List.map
                 (\url ->
-                    urlRow model url
+                    urlRow url
                 )
                 model.urls
             )
         ]
 
 
-urlRow : Model -> UrlData -> Html Msg
-urlRow model url =
+urlRow : UrlData -> Html Msg
+urlRow url =
     div
         [ id url.id
         , class "listingRow"
@@ -123,7 +125,7 @@ urlRow model url =
             [ text url.url ]
         , div [ class "actionButtonColumn" ]
             [ button
-                [ onClick OnUrlEditClick
+                [ onClick (OnUrlEditClick url.id)
                 , class "actionButton btn btn-primary"
                 ]
                 [ text "Edit Url" ]
