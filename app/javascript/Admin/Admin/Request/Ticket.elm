@@ -26,21 +26,21 @@ requestTicketById ticketId =
         )
 
 
-updateTicket : Reader ( NodeEnv, ApiKey, TicketInput ) (Task GQLClient.Error Ticket)
-updateTicket =
+updateTicket : TicketInput -> Reader ( NodeEnv, ApiKey ) (Task GQLClient.Error Ticket)
+updateTicket ticketInput =
     Reader.Reader
-        (\( nodeEnv, apiKey, ticketInput ) ->
+        (\( nodeEnv, apiKey ) ->
             (GQLClient.customSendMutation (requestOptions nodeEnv apiKey) <|
                 GQLBuilder.request ticketInput updateTicketMutation
             )
         )
 
 
-deleteTicketRequest : Reader ( NodeEnv, ApiKey, TicketIdInput ) (Task GQLClient.Error Ticket)
-deleteTicketRequest =
+deleteTicketRequest : TicketId -> Reader ( NodeEnv, ApiKey ) (Task GQLClient.Error Ticket)
+deleteTicketRequest ticketId =
     Reader.Reader
-        (\( nodeEnv, apiKey, ticketId ) ->
+        (\( nodeEnv, apiKey ) ->
             (GQLClient.customSendMutation (requestOptions nodeEnv apiKey) <|
-                GQLBuilder.request ticketId deleteTicketMutation
+                GQLBuilder.request { id = ticketId } deleteTicketMutation
             )
         )

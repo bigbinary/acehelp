@@ -33,11 +33,6 @@ type alias TicketId =
     String
 
 
-type alias TicketIdInput =
-    { id : String
-    }
-
-
 type alias Comment =
     { ticket_id : String
     , commentable_id : String
@@ -88,7 +83,7 @@ commentObject =
         |> GQLBuilder.with (GQLBuilder.field "info" [] GQLBuilder.string)
 
 
-deleteTicketMutation : GQLBuilder.Document GQLBuilder.Mutation Ticket TicketIdInput
+deleteTicketMutation : GQLBuilder.Document GQLBuilder.Mutation Ticket { var | id : TicketId }
 deleteTicketMutation =
     let
         idVar =

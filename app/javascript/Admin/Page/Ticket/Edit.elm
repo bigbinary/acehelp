@@ -4,14 +4,11 @@ import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
 import Admin.Request.Ticket exposing (..)
-import Request.Helpers exposing (NodeEnv, ApiKey)
-import Admin.Data.Common exposing (..)
 import Admin.Data.Ticket exposing (..)
 import Reader exposing (Reader)
 import Task exposing (Task)
-import Helpers exposing (..)
 import GraphQL.Client.Http as GQLClient
-import Route
+import Admin.Data.ReaderCmd exposing (..)
 
 
 -- MODEL
@@ -44,10 +41,10 @@ initModel ticketId =
     }
 
 
-init : TicketId -> ( Model, Reader ( NodeEnv, ApiKey ) (Task GQLClient.Error Ticket) )
+init : TicketId -> ( Model, List (ReaderCmd Msg) )
 init ticketId =
     ( initModel ticketId
-    , requestTicketById ticketId
+    , [ Strict <| Reader.map (Task.attempt TicketLoaded) (requestTicketById ticketId) ]
     )
 
 
@@ -65,17 +62,17 @@ type Msg
     | UpdateTicketStatus String
 
 
-update : Msg -> Model -> NodeEnv -> ApiKey -> ( Model, Cmd Msg )
-update msg model nodeEnv organizationKey =
+update : Msg -> Model -> ( Model, List (ReaderCmd Msg) )
+update msg model =
     case msg of
         NoteInput note ->
-            ( { model | note = note }, Cmd.none )
+            ( { model | note = note }, [] )
 
         UpdateTicket ->
-            ( model, Cmd.none )
+            ( model, [] )
 
         DeleteTicket ->
-            deleteTicket model nodeEnv organizationKey
+            deleteTicket model
 
         UpdateTicketResponse (Ok ticket) ->
             ( { model
@@ -85,17 +82,17 @@ update msg model nodeEnv organizationKey =
                 , message = ticket.message
                 , success = Just "Ticket Updated Successfully..."
               }
-            , Cmd.none
+            , []
             )
 
         UpdateTicketResponse (Err error) ->
-            ( { model | error = Just (toString error) }, Cmd.none )
+            ( { model | error = Just (toString error) }, [] )
 
         DeleteTicketResponse (Ok id) ->
-            ( model, Route.modifyUrl <| Route.TicketList organizationKey )
+            ( model, [] )
 
         DeleteTicketResponse (Err error) ->
-            ( { model | error = Just (toString error) }, Cmd.none )
+            ( { model | error = Just (toString error) }, [] )
 
         TicketLoaded (Ok ticket) ->
             ( { model
@@ -105,14 +102,14 @@ update msg model nodeEnv organizationKey =
                 , statuses = ticket.statuses
                 , status = ticket.status
               }
-            , Cmd.none
+            , []
             )
 
         TicketLoaded (Err err) ->
-            ( { model | error = Just (toString err) }, Cmd.none )
+            ( { model | error = Just (toString err) }, [] )
 
         UpdateTicketStatus status ->
-            updateTicketStatus model { id = model.ticketId, status = status } nodeEnv organizationKey
+            updateTicketStatus model { id = model.ticketId, status = status }
 
 
 
@@ -198,29 +195,22 @@ view model =
         ]
 
 
-ticketInputs : TicketInput -> TicketInput
-ticketInputs { id, status } =
-    { status = status
-    , id = id
-    }
-
-
-updateTicketStatus : Model -> TicketInput -> NodeEnv -> ApiKey -> ( Model, Cmd Msg )
-updateTicketStatus model ticketInput nodeEnv organizationKey =
+updateTicketStatus : Model -> TicketInput -> ( Model, List (ReaderCmd Msg) )
+updateTicketStatus model ticketInput =
     let
         cmd =
-            Task.attempt UpdateTicketResponse (Reader.run (updateTicket) ( nodeEnv, organizationKey, ticketInputs (ticketInput) ))
+            Strict <| Reader.map (Task.attempt UpdateTicketResponse) (updateTicket ticketInput)
     in
-        ( model, cmd )
+        ( model, [ cmd ] )
 
 
-deleteTicket : Model -> NodeEnv -> ApiKey -> ( Model, Cmd Msg )
-deleteTicket model nodeEnv organizationKey =
+deleteTicket : Model -> ( Model, List (ReaderCmd Msg) )
+deleteTicket model =
     let
         cmd =
-            Task.attempt DeleteTicketResponse (Reader.run (deleteTicketRequest) ( nodeEnv, organizationKey, { id = model.ticketId } ))
+            Strict <| Reader.map (Task.attempt DeleteTicketResponse) (deleteTicketRequest model.ticketId)
     in
-        ( model, cmd )
+        ( model, [ cmd ] )
 
 
 ticketStatusDropDown : Model -> Html Msg
@@ -236,6 +226,7 @@ ticketStatusDropDown model =
         ]
 
 
+statusOption : Model -> TicketStatus -> Html Msg
 statusOption model status =
     if status.value == model.status then
         option [ value (status.value), selected True ] [ text (status.key) ]

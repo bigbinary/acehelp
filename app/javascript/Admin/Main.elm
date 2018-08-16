@@ -217,8 +217,8 @@ navigateTo newRoute model =
                     |> newTransitionFrom UrlCreateMsg
 
             Route.TicketList organizationKey ->
-                TicketList.init model.nodeEnv model.organizationKey
-                    |> transitionFrom TicketList TicketListMsg
+                TicketList.init
+                    |> newTransitionFrom TicketListMsg
 
             Route.UrlEdit organizationKey urlId ->
                 UrlEdit.init urlId
@@ -237,26 +237,8 @@ navigateTo newRoute model =
                     |> newTransitionFrom TeamListMsg
 
             Route.TicketEdit organizationKey ticketId ->
-                let
-                    ( ticketEditModel, ticketEditRequest ) =
-                        TicketEdit.init ticketId
-
-                    cmd =
-                        Cmd.map TicketEditMsg <|
-                            Task.attempt
-                                TicketEdit.TicketLoaded
-                                (Reader.run ticketEditRequest
-                                    ( model.nodeEnv, model.organizationKey )
-                                )
-                in
-                    ( { model
-                        | currentPage =
-                            TransitioningFrom
-                                (TicketEdit ticketEditModel)
-                        , route = newRoute
-                      }
-                    , cmd
-                    )
+                TicketEdit.init ticketId
+                    |> newTransitionFrom TicketEditMsg
 
             Route.TeamMemberCreate organizationKey ->
                 TeamMemberCreate.init
@@ -436,21 +418,19 @@ update msg model =
             TicketListMsg tlMsg ->
                 let
                     currentPageModel =
-                        case model.currentPage of
-                            Loaded (TicketList ticketListModel) ->
+                        case getPage model.currentPage of
+                            TicketList ticketListModel ->
                                 ticketListModel
 
                             _ ->
-                                TicketList.initModel model.organizationKey
+                                TicketList.initModel
 
-                    ( ticketListModel, ticketListCmds ) =
+                    ( newModel, cmds ) =
                         TicketList.update tlMsg
                             currentPageModel
-                            model.nodeEnv
-                            model.organizationKey
                 in
-                    ( { model | currentPage = Loaded (TicketList ticketListModel) }
-                    , Cmd.map TicketListMsg ticketListCmds
+                    ( { model | currentPage = Loaded (TicketList newModel) }
+                    , runReaderCmds TicketListMsg cmds
                     )
 
             CategoryListMsg clMsg ->
@@ -592,14 +572,12 @@ update msg model =
                             _ ->
                                 TicketEdit.initModel "0"
 
-                    ( ticketEditModel, ticketEditCmd ) =
+                    ( newModel, cmds ) =
                         TicketEdit.update teMsg
                             currentPageModel
-                            model.nodeEnv
-                            model.organizationKey
                 in
-                    ( { model | currentPage = TransitioningFrom (TicketEdit ticketEditModel) }
-                    , Cmd.map TicketEditMsg ticketEditCmd
+                    ( { model | currentPage = Loaded (TicketEdit newModel) }
+                    , runReaderCmds TicketEditMsg cmds
                     )
 
             SettingsMsg settingsMsg ->
