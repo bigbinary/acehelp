@@ -18,21 +18,21 @@ requestTeam =
         )
 
 
-createTeamMember : Reader ( NodeEnv, ApiKey, TeamMember ) (Task GQLClient.Error Team)
-createTeamMember =
+createTeamMember : TeamMember -> Reader ( NodeEnv, ApiKey ) (Task GQLClient.Error Team)
+createTeamMember createTeamMemberInput =
     Reader.Reader
-        (\( nodeEnv, apiKey, createTeamMemberInput ) ->
+        (\( nodeEnv, apiKey ) ->
             (GQLClient.customSendMutation (requestOptions nodeEnv apiKey) <|
                 GQLBuilder.request createTeamMemberInput createTeamMemberMutation
             )
         )
 
 
-removeTeamMember : Reader ( NodeEnv, ApiKey, UserEmailInput ) (Task GQLClient.Error (List Team))
-removeTeamMember =
+removeTeamMember : String -> Reader ( NodeEnv, ApiKey ) (Task GQLClient.Error (List Team))
+removeTeamMember userEmail =
     Reader.Reader
-        (\( nodeEnv, apiKey, userEmail ) ->
+        (\( nodeEnv, apiKey ) ->
             (GQLClient.customSendMutation (requestOptions nodeEnv apiKey) <|
-                GQLBuilder.request userEmail removeUserFromOrganization
+                GQLBuilder.request { email = userEmail } removeUserFromOrganization
             )
         )

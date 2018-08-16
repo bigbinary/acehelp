@@ -13,6 +13,7 @@ import Reader exposing (Reader)
 import Request.Helpers exposing (ApiKey, NodeEnv)
 import Route
 import Task exposing (Task)
+import Admin.Data.ReaderCmd exposing (..)
 
 
 -- MODEL
@@ -35,10 +36,10 @@ initModel =
     }
 
 
-init : ( Model, Cmd Msg )
+init : ( Model, List (ReaderCmd Msg) )
 init =
     ( initModel
-    , Cmd.none
+    , []
     )
 
 
@@ -54,17 +55,17 @@ type Msg
     | SaveTeamResponse (Result GQLClient.Error Team)
 
 
-update : Msg -> Model -> NodeEnv -> ApiKey -> ( Model, Cmd Msg )
-update msg model nodeEnv organizationKey =
+update : Msg -> Model -> ( Model, List (ReaderCmd Msg) )
+update msg model =
     case msg of
         FirstNameInput firstName ->
-            ( { model | firstName = firstName }, Cmd.none )
+            ( { model | firstName = firstName }, [] )
 
         LastNameInput lastName ->
-            ( { model | lastName = lastName }, Cmd.none )
+            ( { model | lastName = lastName }, [] )
 
         EmailInput email ->
-            ( { model | email = Field.update model.email email }, Cmd.none )
+            ( { model | email = Field.update model.email email }, [] )
 
         SaveTeam ->
             let
@@ -86,15 +87,15 @@ update msg model nodeEnv organizationKey =
                         |> String.join ", "
             in
                 if isAllValid fields then
-                    save model nodeEnv organizationKey
+                    save model
                 else
-                    ( { model | error = Just errors }, Cmd.none )
+                    ( { model | error = Just errors }, [] )
 
         SaveTeamResponse (Ok id) ->
-            ( model, Route.modifyUrl <| Route.TeamList organizationKey )
+            ( model, [] )
 
         SaveTeamResponse (Err error) ->
-            ( { model | error = Just (toString error) }, Cmd.none )
+            ( { model | error = Just (toString error) }, [] )
 
 
 
@@ -152,19 +153,17 @@ view model =
         ]
 
 
-save : Model -> NodeEnv -> ApiKey -> ( Model, Cmd Msg )
-save model nodeEnv apiKey =
+save : Model -> ( Model, List (ReaderCmd Msg) )
+save model =
     let
         cmd =
-            Task.attempt SaveTeamResponse
-                (Reader.run createTeamMember
-                    ( nodeEnv
-                    , apiKey
-                    , { email = Field.value model.email
-                      , firstName = model.firstName
-                      , lastName = model.lastName
-                      }
+            Strict <|
+                Reader.map (Task.attempt SaveTeamResponse)
+                    (createTeamMember
+                        { email = Field.value model.email
+                        , firstName = model.firstName
+                        , lastName = model.lastName
+                        }
                     )
-                )
     in
-        ( model, cmd )
+        ( model, [ cmd ] )

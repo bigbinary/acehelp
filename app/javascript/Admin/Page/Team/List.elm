@@ -8,11 +8,9 @@ import GraphQL.Client.Http as GQLClient
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
-import Navigation exposing (..)
 import Reader exposing (Reader)
-import Request.Helpers exposing (ApiKey, NodeEnv)
-import Route
 import Task exposing (Task)
+import Admin.Data.ReaderCmd exposing (..)
 
 
 -- MODEL
@@ -20,23 +18,21 @@ import Task exposing (Task)
 
 type alias Model =
     { teamList : List Team
-    , organizationKey : String
     , error : Maybe String
     }
 
 
-initModel : ApiKey -> Model
-initModel organizationKey =
+initModel : Model
+initModel =
     { teamList = []
-    , organizationKey = organizationKey
     , error = Nothing
     }
 
 
-init : ApiKey -> ( Model, Reader ( NodeEnv, ApiKey ) (Task GQLClient.Error (List Team)) )
-init organizationKey =
-    ( initModel organizationKey
-    , requestTeam
+init : ( Model, List (ReaderCmd Msg) )
+init =
+    ( initModel
+    , [ Strict <| Reader.map (Task.attempt TeamListLoaded) requestTeam ]
     )
 
 
@@ -46,31 +42,32 @@ init organizationKey =
 
 type Msg
     = TeamListLoaded (Result GQLClient.Error (List Team))
-    | Navigate Route.Route
     | DeleteTeamMember String
     | DeleteTeamMemberResponse (Result GQLClient.Error (List Team))
+    | OnAddTeamMemberClick
 
 
-update : Msg -> Model -> ApiKey -> NodeEnv -> ( Model, Cmd Msg )
-update msg model apiKey nodeEnv =
+update : Msg -> Model -> ( Model, List (ReaderCmd Msg) )
+update msg model =
     case msg of
         TeamListLoaded (Ok teamList) ->
-            ( { model | teamList = teamList }, Cmd.none )
+            ( { model | teamList = teamList }, [] )
 
         TeamListLoaded (Err err) ->
-            ( { model | error = Just (toString err) }, Cmd.none )
-
-        Navigate page ->
-            model ! [ Navigation.newUrl (Route.routeToString page) ]
+            ( { model | error = Just (toString err) }, [] )
 
         DeleteTeamMember teamMemberEmail ->
-            deleteRecord model nodeEnv apiKey { email = teamMemberEmail }
+            deleteRecord model teamMemberEmail
 
         DeleteTeamMemberResponse (Ok teamList) ->
-            ( { model | teamList = teamList }, Cmd.none )
+            ( { model | teamList = teamList }, [] )
 
         DeleteTeamMemberResponse (Err error) ->
-            ( { model | error = Just (toString error) }, Cmd.none )
+            ( { model | error = Just (toString error) }, [] )
+
+        OnAddTeamMemberClick ->
+            -- NOTE: Handled in Main
+            ( model, [] )
 
 
 
@@ -92,7 +89,7 @@ view model =
                     model.error
             ]
         , button
-            [ onClick (Navigate <| Route.TeamMemberCreate model.organizationKey)
+            [ onClick OnAddTeamMemberClick
             , class "btn btn-primary"
             ]
             [ text " + Add Team Member " ]
@@ -126,10 +123,10 @@ row teamMember =
         ]
 
 
-deleteRecord : Model -> NodeEnv -> ApiKey -> UserEmailInput -> ( Model, Cmd Msg )
-deleteRecord model nodeEnv apiKey userEmail =
+deleteRecord : Model -> String -> ( Model, List (ReaderCmd Msg) )
+deleteRecord model userEmail =
     let
         cmd =
-            Task.attempt TeamListLoaded (Reader.run removeTeamMember ( nodeEnv, apiKey, userEmail ))
+            Strict <| Reader.map (Task.attempt TeamListLoaded) (removeTeamMember userEmail)
     in
-        ( model, cmd )
+        ( model, [ cmd ] )

@@ -233,28 +233,8 @@ navigateTo newRoute model =
                     |> newTransitionFrom FeedbackShowMsg
 
             Route.TeamList organizationKey ->
-                let
-                    ( teamListModel, teamListRequest ) =
-                        TeamList.init organizationKey
-
-                    cmd =
-                        Cmd.map TeamListMsg <|
-                            Task.attempt
-                                TeamList.TeamListLoaded
-                                (Reader.run (teamListRequest)
-                                    ( model.nodeEnv
-                                    , model.organizationKey
-                                    )
-                                )
-                in
-                    ( { model
-                        | currentPage =
-                            TransitioningFrom
-                                (TeamList teamListModel)
-                        , route = newRoute
-                      }
-                    , cmd
-                    )
+                TeamList.init
+                    |> newTransitionFrom TeamListMsg
 
             Route.TicketEdit organizationKey ticketId ->
                 let
@@ -279,8 +259,8 @@ navigateTo newRoute model =
                     )
 
             Route.TeamMemberCreate organizationKey ->
-                (TeamMemberCreate.init)
-                    |> transitionFrom TeamMemberCreate TeamCreateMsg
+                TeamMemberCreate.init
+                    |> newTransitionFrom TeamCreateMsg
 
             Route.Settings organizationKey ->
                 Settings.init model.organizationKey
@@ -569,21 +549,19 @@ update msg model =
             TeamListMsg tlmsg ->
                 let
                     currentPageModel =
-                        case model.currentPage of
-                            Loaded (TeamList teamListModel) ->
+                        case getPage model.currentPage of
+                            TeamList teamListModel ->
                                 teamListModel
 
                             _ ->
-                                TeamList.initModel model.organizationKey
+                                TeamList.initModel
 
-                    ( teamListModel, teamListCmd ) =
+                    ( newModel, cmds ) =
                         TeamList.update tlmsg
                             currentPageModel
-                            model.organizationKey
-                            model.nodeEnv
                 in
-                    ( { model | currentPage = Loaded (TeamList teamListModel) }
-                    , Cmd.map TeamListMsg teamListCmd
+                    ( { model | currentPage = Loaded (TeamList newModel) }
+                    , runReaderCmds TeamListMsg cmds
                     )
 
             TeamCreateMsg tcmsg ->
@@ -596,14 +574,12 @@ update msg model =
                             _ ->
                                 TeamMemberCreate.initModel
 
-                    ( createTeamModel, createTeamCmds ) =
+                    ( newModel, cmds ) =
                         TeamMemberCreate.update tcmsg
                             currentPageModel
-                            model.nodeEnv
-                            model.organizationKey
                 in
-                    ( { model | currentPage = Loaded (TeamMemberCreate createTeamModel) }
-                    , Cmd.map TeamCreateMsg createTeamCmds
+                    ( { model | currentPage = Loaded (TeamMemberCreate newModel) }
+                    , runReaderCmds TeamCreateMsg cmds
                     )
 
             TicketEditMsg teMsg ->
