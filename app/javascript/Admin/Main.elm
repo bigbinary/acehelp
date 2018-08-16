@@ -249,18 +249,8 @@ navigateTo newRoute model =
                     |> transitionTo CategoryEdit CategoryEditMsg
 
             Route.SignUp ->
-                let
-                    ( signUpModel, signUpCmd ) =
-                        SignUp.init
-                in
-                    ( { model
-                        | currentPage =
-                            TransitioningFrom
-                                (SignUp signUpModel)
-                        , route = newRoute
-                      }
-                    , Cmd.map SignUpMsg signUpCmd
-                    )
+                SignUp.init
+                    |> transitionTo SignUp SignUpMsg
 
             Route.OrganizationCreate ->
                 (OrganizationCreate.init model.userId)
@@ -664,22 +654,36 @@ update msg model =
             SignUpMsg suMsg ->
                 let
                     currentPageModel =
-                        case model.currentPage of
-                            Loaded (SignUp signUpModel) ->
+                        case getPage model.currentPage of
+                            SignUp signUpModel ->
                                 signUpModel
 
                             _ ->
                                 SignUp.initModel
 
-                    ( signUpModel, signUpCmds ) =
-                        SignUp.update suMsg currentPageModel model.nodeEnv model.organizationKey
+                    ( newModel, cmds ) =
+                        SignUp.update suMsg currentPageModel
                 in
-                    ( { model | currentPage = Loaded (SignUp signUpModel) }
-                    , Cmd.map SignUpMsg signUpCmds
+                    ( { model | currentPage = Loaded (SignUp newModel) }
+                    , runReaderCmds SignUpMsg cmds
                     )
 
             LoginMsg loginMsg ->
-                ( model, Cmd.none )
+                let
+                    currentPageModel =
+                        case getPage model.currentPage of
+                            Login signUpModel ->
+                                signUpModel
+
+                            _ ->
+                                Login.initModel
+
+                    ( newModel, cmds ) =
+                        Login.update loginMsg currentPageModel
+                in
+                    ( { model | currentPage = Loaded (Login newModel) }
+                    , runReaderCmds LoginMsg cmds
+                    )
 
             OnLocationChange location ->
                 setRoute location model

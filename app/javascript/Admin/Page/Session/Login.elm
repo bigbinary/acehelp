@@ -23,12 +23,17 @@ type alias Model =
     }
 
 
+initModel : Model
+initModel =
+    { error = []
+    , username = Field (validateEmpty "Username") ""
+    , password = Field (validateEmpty "Password") ""
+    }
+
+
 init : ( Model, List (ReaderCmd Msg) )
 init =
-    ( { error = []
-      , username = Field (validateEmpty "Username") ""
-      , password = Field (validateEmpty "Password") ""
-      }
+    ( initModel
     , []
     )
 

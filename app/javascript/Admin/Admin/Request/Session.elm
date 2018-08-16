@@ -9,11 +9,19 @@ import GraphQL.Client.Http as GQLClient
 import GraphQL.Request.Builder as GQLBuilder
 
 
-signupRequest : SignupInputs -> Reader ( NodeEnv, ApiKey ) (Task GQLClient.Error User)
+signupRequest : SignupInputs -> Reader NodeEnv (Task GQLClient.Error User)
 signupRequest signupInputs =
     Reader.Reader
-        (\( nodeEnv, apiKey ) ->
-            GQLClient.customSendMutation (requestOptions nodeEnv apiKey) <|
+        (\nodeEnv ->
+            GQLClient.customSendMutation
+                ({ method = "POST"
+                 , url = graphqlUrl nodeEnv
+                 , headers = []
+                 , timeout = Nothing
+                 , withCredentials = False
+                 }
+                )
+            <|
                 (GQLBuilder.request
                     { firstName = signupInputs.firstName
                     , email = signupInputs.email
