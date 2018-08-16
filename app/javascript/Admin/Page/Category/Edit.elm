@@ -10,10 +10,8 @@ import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
 import Reader exposing (Reader)
-import Request.Helpers exposing (..)
-import Route
 import Task exposing (Task)
-import Page.Helpers exposing (..)
+import Admin.Data.ReaderCmd exposing (..)
 
 
 -- MODEL
@@ -34,10 +32,10 @@ initModel categoryId =
     }
 
 
-init : CategoryId -> ( Model, List (PageCmd Msg) )
+init : CategoryId -> ( Model, List (ReaderCmd Msg) )
 init categoryId =
     ( initModel categoryId
-    , [ Reader.map (Task.attempt CategoryLoaded) (requestCategoryById categoryId) ]
+    , [ Strict <| Reader.map (Task.attempt CategoryLoaded) (requestCategoryById categoryId) ]
     )
 
 
@@ -52,7 +50,7 @@ type Msg
     | UpdateCategoryResponse (Result GQLClient.Error Category)
 
 
-update : Msg -> Model -> ( Model, List (PageCmd Msg) )
+update : Msg -> Model -> ( Model, List (ReaderCmd Msg) )
 update msg model =
     case msg of
         CategoryLoaded (Ok category) ->
@@ -157,10 +155,10 @@ categoryUpdateInputs { id, name } =
     }
 
 
-updateCategory : Model -> ( Model, List (PageCmd Msg) )
+updateCategory : Model -> ( Model, List (ReaderCmd Msg) )
 updateCategory model =
     let
         cmd =
-            Reader.map (Task.attempt UpdateCategoryResponse) (requestUpdateCategory <| categoryUpdateInputs model)
+            Strict <| Reader.map (Task.attempt UpdateCategoryResponse) (requestUpdateCategory <| categoryUpdateInputs model)
     in
         ( model, [ cmd ] )

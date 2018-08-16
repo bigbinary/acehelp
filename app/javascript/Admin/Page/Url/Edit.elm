@@ -4,7 +4,6 @@ import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
 import Admin.Request.Url exposing (..)
-import Request.Helpers exposing (NodeEnv, ApiKey)
 import Admin.Data.Url exposing (..)
 import Reader exposing (Reader)
 import Task exposing (Task)
@@ -12,7 +11,7 @@ import Field exposing (..)
 import Helpers exposing (..)
 import Field.ValidationResult exposing (..)
 import GraphQL.Client.Http as GQLClient
-import Page.Helpers exposing (..)
+import Admin.Data.ReaderCmd exposing (..)
 
 
 -- MODEL
@@ -35,10 +34,10 @@ initModel urlId =
     }
 
 
-init : UrlId -> ( Model, List (PageCmd Msg) )
+init : UrlId -> ( Model, List (ReaderCmd Msg) )
 init urlId =
     ( initModel urlId
-    , [ Reader.map (Task.attempt UrlLoaded) (requestUrlById urlId) ]
+    , [ Strict <| Reader.map (Task.attempt UrlLoaded) (requestUrlById urlId) ]
     )
 
 
@@ -53,7 +52,7 @@ type Msg
     | UrlLoaded (Result GQLClient.Error UrlData)
 
 
-update : Msg -> Model -> ( Model, List (PageCmd Msg) )
+update : Msg -> Model -> ( Model, List (ReaderCmd Msg) )
 update msg model =
     case msg of
         UrlInput url ->
@@ -156,10 +155,10 @@ urlInputs { url, urlId } =
     }
 
 
-save : Model -> ( Model, List (PageCmd Msg) )
+save : Model -> ( Model, List (ReaderCmd Msg) )
 save model =
     let
         cmd =
-            (Reader.map (Task.attempt UpdateUrlResponse) (updateUrl <| urlInputs model))
+            (Strict <| Reader.map (Task.attempt UpdateUrlResponse) (updateUrl <| urlInputs model))
     in
         ( model, [ cmd ] )

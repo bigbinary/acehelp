@@ -29,7 +29,7 @@ import UrlParser as Url exposing (..)
 import Admin.Request.Helper exposing (NodeEnv, ApiKey, logoutRequest)
 import Route
 import Task exposing (Task)
-import Page.Helpers exposing (..)
+import Admin.Data.ReaderCmd exposing (..)
 import Page.Ticket.List as TicketList
 import Page.Ticket.Edit as TicketEdit
 import Page.Url.Create as UrlCreate
@@ -96,7 +96,7 @@ type alias Model =
 init : Flags -> Location -> ( Model, Cmd Msg )
 init flags location =
     let
-        ( pageModel, pageCmd ) =
+        ( pageModel, readerCmd ) =
             setRoute location initModel
 
         initModel =
@@ -109,7 +109,7 @@ init flags location =
             , error = Nothing
             }
     in
-        ( pageModel, pageCmd )
+        ( pageModel, readerCmd )
 
 
 
@@ -189,7 +189,7 @@ navigateTo newRoute model =
                     }
                 )
                 >> Tuple.mapSecond
-                    (pageCmdsToCmd msg model.nodeEnv model.organizationKey)
+                    (readerCmdToCmd model.nodeEnv model.organizationKey msg)
     in
         case newRoute of
             Route.ArticleList organizationKey ->
@@ -352,7 +352,7 @@ navigateTo newRoute model =
 
             Route.OrganizationCreate ->
                 (OrganizationCreate.init model.userId)
-                    |> transitionFrom OrganizationCreate OrganizationCreateMsg
+                    |> newTransitionFrom OrganizationCreateMsg
 
             Route.Login ->
                 Login.init
@@ -371,8 +371,8 @@ navigateTo newRoute model =
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     let
-        runCmds =
-            flip (flip pageCmdsToCmd model.nodeEnv) model.organizationKey
+        runReaderCmds =
+            readerCmdToCmd model.nodeEnv model.organizationKey
     in
         case msg of
             NavigateTo route ->
@@ -401,7 +401,7 @@ update msg model =
                             currentPageModel
                 in
                     ( { model | currentPage = Loaded (ArticleList newModel) }
-                    , runCmds ArticleListMsg cmds
+                    , runReaderCmds ArticleListMsg cmds
                     )
 
             ArticleCreateMsg caMsg ->
@@ -419,7 +419,7 @@ update msg model =
                             currentPageModel
                 in
                     ( { model | currentPage = Loaded (ArticleCreate newModel) }
-                    , runCmds ArticleCreateMsg cmds
+                    , runReaderCmds ArticleCreateMsg cmds
                     )
 
             ArticleEditMsg aeMsg ->
@@ -437,7 +437,7 @@ update msg model =
                             currentPageModel
                 in
                     ( { model | currentPage = Loaded (ArticleEdit newModel) }
-                    , runCmds ArticleEditMsg cmds
+                    , runReaderCmds ArticleEditMsg cmds
                     )
 
             UrlCreateMsg cuMsg ->
@@ -455,7 +455,7 @@ update msg model =
                             currentPageModel
                 in
                     ( { model | currentPage = Loaded (UrlCreate newModel) }
-                    , runCmds UrlCreateMsg cmds
+                    , runReaderCmds UrlCreateMsg cmds
                     )
 
             UrlEditMsg ueMsg ->
@@ -472,7 +472,7 @@ update msg model =
                         UrlEdit.update ueMsg currentPageModel
                 in
                     ( { model | currentPage = Loaded (UrlEdit newModel) }
-                    , runCmds UrlEditMsg cmds
+                    , runReaderCmds UrlEditMsg cmds
                     )
 
             UrlListMsg ulMsg ->
@@ -489,7 +489,7 @@ update msg model =
                         UrlList.update ulMsg currentPageModel
                 in
                     ( { model | currentPage = Loaded (UrlList newModel) }
-                    , runCmds UrlListMsg cmds
+                    , runReaderCmds UrlListMsg cmds
                     )
 
             TicketListMsg tlMsg ->
@@ -528,7 +528,7 @@ update msg model =
                             currentPageModel
                 in
                     ( { model | currentPage = Loaded (CategoryList newModel) }
-                    , runCmds CategoryListMsg cmds
+                    , runReaderCmds CategoryListMsg cmds
                     )
 
             CategoryCreateMsg ccMsg ->
@@ -548,7 +548,7 @@ update msg model =
                     ( { model
                         | currentPage = Loaded (CategoryCreate newModel)
                       }
-                    , runCmds CategoryCreateMsg cmds
+                    , runReaderCmds CategoryCreateMsg cmds
                     )
 
             FeedbackListMsg flmsg ->
@@ -606,7 +606,7 @@ update msg model =
                             currentPageModel
                 in
                     ( { model | currentPage = Loaded (CategoryEdit newModel) }
-                    , runCmds CategoryEditMsg cmds
+                    , runReaderCmds CategoryEditMsg cmds
                     )
 
             TeamListMsg tlmsg ->
@@ -691,18 +691,18 @@ update msg model =
             OrganizationCreateMsg oCMsg ->
                 let
                     currentPageModel =
-                        case model.currentPage of
-                            Loaded (OrganizationCreate orgCreateModel) ->
+                        case getPage model.currentPage of
+                            OrganizationCreate orgCreateModel ->
                                 orgCreateModel
 
                             _ ->
                                 OrganizationCreate.initModel model.userId
 
-                    ( createOrgModel, createOrgCmds ) =
-                        OrganizationCreate.update oCMsg currentPageModel model.nodeEnv
+                    ( newModel, cmds ) =
+                        OrganizationCreate.update oCMsg currentPageModel
                 in
-                    ( { model | currentPage = Loaded (OrganizationCreate createOrgModel) }
-                    , Cmd.map OrganizationCreateMsg createOrgCmds
+                    ( { model | currentPage = Loaded (OrganizationCreate newModel) }
+                    , runReaderCmds OrganizationCreateMsg cmds
                     )
 
             SignUpMsg suMsg ->

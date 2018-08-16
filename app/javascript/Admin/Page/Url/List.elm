@@ -8,7 +8,7 @@ import Html.Attributes exposing (..)
 import Html.Events exposing (..)
 import Reader exposing (Reader)
 import Task exposing (Task)
-import Page.Helpers exposing (..)
+import Admin.Data.ReaderCmd exposing (..)
 
 
 -- MODEL
@@ -29,10 +29,10 @@ initModel =
     }
 
 
-init : ( Model, List (PageCmd Msg) )
+init : ( Model, List (ReaderCmd Msg) )
 init =
     ( initModel
-    , [ Reader.map (Task.attempt UrlLoaded) requestUrls ]
+    , [ Strict <| Reader.map (Task.attempt UrlLoaded) requestUrls ]
     )
 
 
@@ -49,7 +49,7 @@ type Msg
     | OnUrlEditClick
 
 
-update : Msg -> Model -> ( Model, List (PageCmd Msg) )
+update : Msg -> Model -> ( Model, List (ReaderCmd Msg) )
 update msg model =
     case msg of
         LoadUrl urlId ->
@@ -138,10 +138,10 @@ urlRow model url =
         ]
 
 
-deleteRecord : Model -> UrlId -> ( Model, List (PageCmd Msg) )
+deleteRecord : Model -> UrlId -> ( Model, List (ReaderCmd Msg) )
 deleteRecord model urlId =
     let
         cmd =
-            Reader.map (Task.attempt DeleteUrlResponse) (deleteUrl urlId)
+            Strict <| Reader.map (Task.attempt DeleteUrlResponse) (deleteUrl urlId)
     in
         ( model, [ cmd ] )

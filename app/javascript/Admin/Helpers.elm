@@ -4,6 +4,7 @@ import Time exposing (Time)
 import Task exposing (Task)
 import Process exposing (..)
 import Field.ValidationResult exposing (..)
+import Regex exposing (Regex)
 
 
 validateEmpty : String -> String -> ValidationResult String String
@@ -14,6 +15,22 @@ validateEmpty fieldName fieldValue =
 
         _ ->
             Passed fieldValue
+
+
+validateEmail : String -> ValidationResult String String
+validateEmail s =
+    case (Regex.contains validEmail s) of
+        True ->
+            Passed s
+
+        False ->
+            Failed "Please enter a valid email"
+
+
+validEmail : Regex
+validEmail =
+    Regex.regex "^[a-zA-Z0-9.!#$%&'*+\\/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$"
+        |> Regex.caseInsensitive
 
 
 delayedTask : Time -> msg -> Task x msg

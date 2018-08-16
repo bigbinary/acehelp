@@ -8,7 +8,7 @@ import Html.Attributes exposing (..)
 import Html.Events exposing (..)
 import Reader exposing (Reader)
 import Task exposing (Task)
-import Page.Helpers exposing (..)
+import Admin.Data.ReaderCmd exposing (..)
 
 
 -- MODEL
@@ -27,10 +27,10 @@ initModel =
     }
 
 
-init : ( Model, List (PageCmd Msg) )
+init : ( Model, List (ReaderCmd Msg) )
 init =
     ( initModel
-    , [ Reader.map (Task.attempt CategoriesLoaded) requestCategories ]
+    , [ Strict <| Reader.map (Task.attempt CategoriesLoaded) requestCategories ]
     )
 
 
@@ -46,7 +46,7 @@ type Msg
     | OnEditCategoryClick CategoryId
 
 
-update : Msg -> Model -> ( Model, List (PageCmd Msg) )
+update : Msg -> Model -> ( Model, List (ReaderCmd Msg) )
 update msg model =
     case msg of
         CategoriesLoaded (Ok categories) ->
@@ -140,10 +140,10 @@ categoryRow category =
         ]
 
 
-deleteCategoryById : Model -> CategoryId -> ( Model, List (PageCmd Msg) )
+deleteCategoryById : Model -> CategoryId -> ( Model, List (ReaderCmd Msg) )
 deleteCategoryById model categoryId =
     let
         cmd =
-            (Reader.map (Task.attempt DeleteCategoryResponse) (deleteCategory categoryId))
+            (Strict <| Reader.map (Task.attempt DeleteCategoryResponse) (deleteCategory categoryId))
     in
         ( model, [ cmd ] )

@@ -7,7 +7,6 @@ import Admin.Data.Article exposing (..)
 import Admin.Request.Article exposing (..)
 import Admin.Request.Category exposing (..)
 import Admin.Request.Url exposing (..)
-import Request.Helpers exposing (NodeEnv, ApiKey)
 import Admin.Data.Category exposing (..)
 import Admin.Data.Url exposing (UrlData, UrlId)
 import Admin.Data.Common exposing (..)
@@ -20,7 +19,7 @@ import Admin.Ports exposing (..)
 import Page.Article.Common exposing (..)
 import GraphQL.Client.Http as GQLClient
 import Admin.Ports exposing (..)
-import Page.Helpers exposing (..)
+import Admin.Data.ReaderCmd exposing (..)
 
 
 -- Model
@@ -55,12 +54,12 @@ initModel articleId =
     }
 
 
-init : ArticleId -> ( Model, List (PageCmd Msg) )
+init : ArticleId -> ( Model, List (ReaderCmd Msg) )
 init articleId =
     ( initModel articleId
-    , [ Reader.map (Task.attempt ArticleLoaded) (requestArticleById articleId)
-      , Reader.map (Task.attempt CategoriesLoaded) requestCategories
-      , Reader.map (Task.attempt UrlsLoaded) requestUrls
+    , [ Strict <| Reader.map (Task.attempt ArticleLoaded) (requestArticleById articleId)
+      , Strict <| Reader.map (Task.attempt CategoriesLoaded) requestCategories
+      , Strict <| Reader.map (Task.attempt UrlsLoaded) requestUrls
       ]
     )
 
@@ -96,7 +95,7 @@ delayTime =
     Time.second * 2
 
 
-update : Msg -> Model -> ( Model, List (PageCmd Msg) )
+update : Msg -> Model -> ( Model, List (ReaderCmd Msg) )
 update msg model =
     case msg of
         TitleInput title ->
@@ -114,7 +113,7 @@ update msg model =
                 killCmd =
                     case model.updateTaskId of
                         Just oldId ->
-                            [ Reader.Reader <| always <| clearTimeout oldId ]
+                            [ Strict <| Reader.Reader <| always <| clearTimeout oldId ]
 
                         Nothing ->
                             []
@@ -160,7 +159,7 @@ update msg model =
                 , urls = itemSelection (List.map .id article.urls) model.urls
                 , originalArticle = Just article
               }
-            , [ Reader.Reader <| always <| insertArticleContent article.desc ]
+            , [ Strict <| Reader.Reader <| always <| insertArticleContent article.desc ]
             )
 
         ArticleLoaded (Err err) ->
@@ -188,7 +187,7 @@ update msg model =
             ( { model
                 | categories = itemSelection categoryIds model.categories
               }
-            , [ Reader.Reader <| always <| setTimeout delayTime ]
+            , [ Strict <| Reader.Reader <| always <| setTimeout delayTime ]
             )
 
         UrlsLoaded (Ok urls) ->
@@ -211,11 +210,11 @@ update msg model =
             ( { model
                 | urls = itemSelection selectedUrlIds model.urls
               }
-            , [ Reader.Reader <| always <| setTimeout delayTime ]
+            , [ Strict <| Reader.Reader <| always <| setTimeout delayTime ]
             )
 
         TrixInitialize _ ->
-            ( model, [ Reader.Reader <| always <| insertArticleContent <| Field.value model.desc ] )
+            ( model, [ Strict <| Reader.Reader <| always <| insertArticleContent <| Field.value model.desc ] )
 
         Killed _ ->
             ( model, [] )
@@ -235,7 +234,7 @@ update msg model =
                         , originalArticle = Just article
                         , isEditable = False
                       }
-                    , [ Reader.Reader <| always <| insertArticleContent article.desc ]
+                    , [ Strict <| Reader.Reader <| always <| insertArticleContent article.desc ]
                     )
 
                 Nothing ->
@@ -337,15 +336,16 @@ articleInputs { articleId, title, desc, categories, urls } =
     }
 
 
-save : Model -> ( Model, List (PageCmd Msg) )
+save : Model -> ( Model, List (ReaderCmd Msg) )
 save model =
     let
         fields =
             [ model.title, model.desc ]
 
         cmd =
-            Reader.map (Task.attempt SaveArticleResponse)
-                (requestUpdateArticle (articleInputs model))
+            Strict <|
+                Reader.map (Task.attempt SaveArticleResponse)
+                    (requestUpdateArticle (articleInputs model))
     in
         if Field.isAllValid fields && maybeToBool model.originalArticle then
             ( { model | error = Nothing, status = Saving }, [ cmd ] )

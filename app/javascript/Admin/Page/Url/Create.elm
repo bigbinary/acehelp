@@ -13,7 +13,7 @@ import Field exposing (..)
 import Field.ValidationResult exposing (..)
 import Helpers exposing (..)
 import Route
-import Page.Helpers exposing (..)
+import Admin.Data.ReaderCmd exposing (..)
 
 
 -- MODEL
@@ -36,7 +36,7 @@ initModel =
     }
 
 
-init : ( Model, List (PageCmd Msg) )
+init : ( Model, List (ReaderCmd Msg) )
 init =
     ( initModel
     , []
@@ -54,7 +54,7 @@ type Msg
     | SaveUrlResponse (Result GQLClient.Error UrlData)
 
 
-update : Msg -> Model -> ( Model, List (PageCmd Msg) )
+update : Msg -> Model -> ( Model, List (ReaderCmd Msg) )
 update msg model =
     case msg of
         UrlInput url ->
@@ -138,10 +138,10 @@ view model =
         ]
 
 
-save : Model -> ( Model, List (PageCmd Msg) )
+save : Model -> ( Model, List (ReaderCmd Msg) )
 save model =
     let
         cmd =
-            Reader.map (Task.attempt SaveUrlResponse) (createUrl { url = Field.value model.url })
+            Strict <| Reader.map (Task.attempt SaveUrlResponse) (createUrl { url = Field.value model.url })
     in
         ( model, [ cmd ] )

@@ -10,10 +10,8 @@ import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
 import Reader exposing (Reader)
-import Request.Helpers exposing (..)
-import Route
 import Task exposing (Task)
-import Page.Helpers exposing (..)
+import Admin.Data.ReaderCmd exposing (..)
 
 
 -- MODEL
@@ -34,7 +32,7 @@ initModel =
     }
 
 
-init : ( Model, List (PageCmd Msg) )
+init : ( Model, List (ReaderCmd Msg) )
 init =
     ( initModel
     , []
@@ -51,7 +49,7 @@ type Msg
     | SaveCategoryResponse (Result GQLClient.Error Category)
 
 
-update : Msg -> Model -> ( Model, List (PageCmd Msg) )
+update : Msg -> Model -> ( Model, List (ReaderCmd Msg) )
 update msg model =
     case msg of
         CategoryNameInput categoryName ->
@@ -143,10 +141,10 @@ categroyCeateInputs { name } =
     }
 
 
-saveCategory : Model -> ( Model, List (PageCmd Msg) )
+saveCategory : Model -> ( Model, List (ReaderCmd Msg) )
 saveCategory model =
     let
         cmd =
-            Reader.map (Task.attempt SaveCategoryResponse) (requestCreateCategory <| categroyCeateInputs model)
+            Strict <| Reader.map (Task.attempt SaveCategoryResponse) (requestCreateCategory <| categroyCeateInputs model)
     in
         ( model, [ cmd ] )

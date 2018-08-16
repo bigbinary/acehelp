@@ -8,7 +8,7 @@ import Admin.Data.Article exposing (..)
 import Task exposing (Task)
 import Reader exposing (Reader)
 import GraphQL.Client.Http as GQLClient
-import Page.Helpers exposing (..)
+import Admin.Data.ReaderCmd exposing (..)
 
 
 -- Model
@@ -27,9 +27,9 @@ initModel =
     }
 
 
-init : ( Model, List (PageCmd Msg) )
+init : ( Model, List (ReaderCmd Msg) )
 init =
-    ( initModel, [ Reader.map (Task.attempt ArticleListLoaded) <| requestAllArticles ] )
+    ( initModel, [ Strict <| Reader.map (Task.attempt ArticleListLoaded) <| requestAllArticles ] )
 
 
 
@@ -44,7 +44,7 @@ type Msg
     | DeleteArticleResponse (Result GQLClient.Error ArticleId)
 
 
-update : Msg -> Model -> ( Model, List (PageCmd Msg) )
+update : Msg -> Model -> ( Model, List (ReaderCmd Msg) )
 update msg model =
     case msg of
         ArticleListLoaded (Ok articlesList) ->
@@ -54,7 +54,7 @@ update msg model =
             ( { model | error = Just (toString err) }, [] )
 
         DeleteArticle articleId ->
-            ( model, [ Reader.map (Task.attempt DeleteArticleResponse) <| requestDeleteArticle articleId ] )
+            ( model, [ Strict <| Reader.map (Task.attempt DeleteArticleResponse) <| requestDeleteArticle articleId ] )
 
         DeleteArticleResponse (Ok id) ->
             let
