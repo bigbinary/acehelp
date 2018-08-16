@@ -95,7 +95,6 @@ update msg model =
                 , comment = Comment ticket.id ""
                 , comments = ticket.comments
                 , success = Just "Ticket Updated Successfully..."
-                , agent = ticket.agent
               }
             , []
             )
