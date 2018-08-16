@@ -58,11 +58,10 @@ class Mutations::PostCommentInTicketMutationsTest < ActiveSupport::TestCase
   end
 
   test "post comment without ticket_id" do
-    assert_raise(Graphlient::Errors::ServerError) do
-      AceHelp::Client.execute(@mutation_query, input: {
-        comment: "Comment about a ticket by agent #{@agent.name}"
-      })
-    end
+    result = AceHelp::Client.execute(@mutation_query, input: {
+      comment: "Comment about a ticket by agent #{@agent.name}"
+    })
+    assert_kind_of GraphQL::Client::Errors, result.data.errors
   end
 
   test "post comment as a user" do

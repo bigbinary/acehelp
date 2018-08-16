@@ -67,7 +67,7 @@ class Mutations::TicketMutations
     return_field :errors, types[Types::ErrorType]
 
     resolve ->(object, inputs, context) {
-      ticket = Ticket.find(inputs[:id])
+      ticket = Ticket.find_by(id: inputs[:id])
       if ticket.present?
         new_comment = Comment.add_comment(
           info: inputs[:comment],
