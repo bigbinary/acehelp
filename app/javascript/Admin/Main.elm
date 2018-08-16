@@ -16,7 +16,6 @@ import Page.Article.List as ArticleList
 import Page.Category.Create as CategoryCreate
 import Page.Category.Edit as CategoryEdit
 import Page.Category.List as CategoryList
-import Page.Errors as Errors
 import Page.Ticket.List as TicketList
 import Page.Team.List as TeamList
 import Page.Feedback.List as FeedbackList
@@ -78,6 +77,7 @@ type Page
     | TeamMemberCreate TeamMemberCreate.Model
     | SignUp SignUp.Model
     | Dashboard
+    | Blank
     | NotFound
 
 
@@ -104,7 +104,7 @@ init flags location =
             setRoute location initModel
 
         initModel =
-            { currentPage = Loaded NotFound
+            { currentPage = Loaded Blank
             , route = Route.fromLocation location
             , nodeEnv = flags.node_env
             , organizationKey = flags.organization_key
@@ -490,7 +490,13 @@ navigateTo newRoute model =
                     |> transitionTo OrganizationCreate OrganizationCreateMsg
 
             Route.NotFound ->
-                ( { model | currentPage = Loaded NotFound }, Cmd.none )
+                ( { model
+                    | currentPage =
+                        TransitioningTo NotFound
+                    , route = newRoute
+                  }
+                , Cmd.none
+                )
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -1042,6 +1048,9 @@ view model =
 
         NotFound ->
             Errors.notFound
+
+        Blank ->
+            div [] [ text "Blank" ]
 
 
 adminLayout : Model -> Html Msg -> Html Msg
