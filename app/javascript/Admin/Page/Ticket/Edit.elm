@@ -128,7 +128,7 @@ view model =
     div [ class "row ticket-block" ]
         [ div
             [ class "col-md-8" ]
-            [ Html.form [ onSubmit UpdateTicket ]
+            [ div []
                 [ div []
                     [ Maybe.withDefault (text "") <|
                         Maybe.map
@@ -191,7 +191,7 @@ view model =
                             []
                         ]
                     ]
-                , button [ type_ "submit", class "button primary" ] [ text "Submit" ]
+                , button [ type_ "submit", class "btn btn-primary", onClick UpdateTicket ] [ text "Submit" ]
                 ]
             ]
         , div [ class "col-sm" ]
@@ -234,12 +234,13 @@ deleteTicket model =
     in
         ( model, [ cmd ] )
 
+
 save : Model -> ( Model, List (ReaderCmd Msg) )
 save model =
     let
         cmd =
             Strict <|
-                 Reader.map (Task.attempt UpdateTicketResponse) (addNotesAndCommentToTicket (ticketNoteComment model))
+                Reader.map (Task.attempt UpdateTicketResponse) (addNotesAndCommentToTicket (ticketNoteComment model))
     in
         ( model, [ cmd ] )
 
