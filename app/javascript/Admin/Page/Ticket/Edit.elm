@@ -149,32 +149,53 @@ view model =
                             )
                             model.success
                     ]
-                , div []
-                    [ label [] [ text <| "Message: " ++ model.message ]
+                , div [ class "card" ]
+                    [ h5 [] [ text "Message" ]
+                    , p [ class "card-text" ] [ text model.message ]
                     ]
+                , p [] []
                 , ul [ class "nav nav-tabs" ]
-                    [ li [ class "active" ]
-                        [ a [ attribute "data-toggle" "tab", href "#notes" ]
+                    [ li [ class "nav-item active" ]
+                        [ a
+                            [ class "nav-link active"
+                            , attribute "data-toggle" "tab"
+                            , href "#notes"
+                            ]
                             [ text "Internal Note" ]
                         ]
-                    , li []
-                        [ a [ attribute "data-toggle" "tab", href "#comment" ]
+                    , li [ class "nav-item" ]
+                        [ a
+                            [ class "nav-link"
+                            , attribute "data-toggle" "tab"
+                            , href "#comment"
+                            ]
                             [ text "Reply to Customer" ]
                         ]
                     ]
                 , div [ class "tab-content" ]
-                    [ div [ class "tab-pane fade in active", id "notes" ]
+                    [ div [ class "tab-pane active form-group", id "notes" ]
                         [ h3 [] [ text "Notes: " ]
                         , input
                             [ Html.Attributes.value <| model.note
                             , type_ "text"
+                            , class "form-control"
                             , placeholder "add notes here..."
                             , onInput NoteInput
                             ]
                             []
                         ]
-                    , div [ class "tab-pane fade", id "comment" ]
+                    , div [ class "tab-pane fade form-group", id "comment" ]
                         [ h3 [] [ text "Comment: " ]
+                        , input
+                            [ Html.Attributes.value <| model.comment.info
+                            , type_ "text"
+                            , placeholder "add comments here..."
+                            , class "form-control"
+                            , onInput CommentInput
+                            ]
+                            []
+                        , p [] []
+                        , h5 [] [ text "Comment List: " ]
                         , div [ class "ticket-comments" ]
                             (List.map
                                 (\comment ->
@@ -182,15 +203,9 @@ view model =
                                 )
                                 model.comments
                             )
-                        , input
-                            [ Html.Attributes.value <| model.comment.info
-                            , type_ "text"
-                            , placeholder "add comments here..."
-                            , onInput CommentInput
-                            ]
-                            []
                         ]
                     ]
+                , p [] []
                 , button [ type_ "submit", class "btn btn-primary", onClick UpdateTicket ] [ text "Submit" ]
                 ]
             ]
@@ -251,7 +266,7 @@ ticketStatusDropDown model =
         [ div [ class "status-selection" ]
             [ div []
                 [ h2 [] [ text "Status Selector" ]
-                , select [ onInput UpdateTicketStatus ]
+                , select [ onInput UpdateTicketStatus, class "custom-select custom-select-lg mb-3" ]
                     (List.map (statusOption model) model.statuses)
                 ]
             ]
@@ -271,7 +286,7 @@ closeTicketButton model =
     div []
         [ button
             [ onClick (UpdateTicketStatus "closed")
-            , class "button primary closeTicket"
+            , class "btn btn-primary closeTicket"
             ]
             [ text "Close Ticket" ]
         ]
@@ -280,9 +295,10 @@ closeTicketButton model =
 deleteTicketButton : Model -> Html Msg
 deleteTicketButton model =
     div []
-        [ button
+        [ p [] []
+        , button
             [ onClick (DeleteTicket)
-            , class "button primary deleteTicket"
+            , class "btn btn-primary deleteTicket"
             ]
             [ text "Delete Ticket" ]
         ]
@@ -292,6 +308,6 @@ commentRows : Comment -> Html Msg
 commentRows comment =
     div
         [ class "comment-row" ]
-        [ span [ class "row-id", id comment.ticket_id ] [ text "Comment : " ]
+        [ span [ class "row-id", id comment.ticket_id ] []
         , span [ class "row-name" ] [ text comment.info ]
         ]
