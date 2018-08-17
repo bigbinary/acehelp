@@ -5,15 +5,13 @@ module Page.Ticket.List exposing (..)
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
-import Navigation exposing (..)
-import Route
 import Page.Common.View exposing (renderError)
 import Admin.Request.Ticket exposing (..)
-import Request.Helpers exposing (NodeEnv, ApiKey)
 import Admin.Data.Ticket exposing (..)
 import Task exposing (Task)
 import Reader exposing (Reader)
 import GraphQL.Client.Http as GQLClient
+import Admin.Data.ReaderCmd exposing (..)
 
 
 -- MODEL
@@ -22,21 +20,19 @@ import GraphQL.Client.Http as GQLClient
 type alias Model =
     { ticketList : List Ticket
     , error : Maybe String
-    , organizationKey : String
     }
 
 
-initModel : ApiKey -> Model
-initModel apiKey =
+initModel : Model
+initModel =
     { ticketList = []
     , error = Nothing
-    , organizationKey = apiKey
     }
 
 
-init : String -> String -> ( Model, Cmd Msg )
-init env key =
-    ( initModel key, (fetchTicketList env key) )
+init : ( Model, List (ReaderCmd Msg) )
+init =
+    ( initModel, [ Strict <| Reader.map (Task.attempt TicketLoaded) requestTickets ] )
 
 
 
@@ -45,20 +41,21 @@ init env key =
 
 type Msg
     = TicketLoaded (Result GQLClient.Error (List Ticket))
-    | Navigate Route.Route
+    | OnEditTicketClick TicketId
 
 
-update : Msg -> Model -> ApiKey -> NodeEnv -> ( Model, Cmd Msg )
-update msg model apiKey nodeEnv =
+update : Msg -> Model -> ( Model, List (ReaderCmd Msg) )
+update msg model =
     case msg of
         TicketLoaded (Ok tickets) ->
-            ( { model | ticketList = tickets }, Cmd.none )
+            ( { model | ticketList = tickets }, [] )
 
         TicketLoaded (Err err) ->
-            ( { model | error = Just (toString err) }, Cmd.none )
+            ( { model | error = Just (toString err) }, [] )
 
-        Navigate page ->
-            model ! [ Navigation.newUrl (Route.routeToString page) ]
+        OnEditTicketClick _ ->
+            -- NOTE: Handled in Main
+            ( model, [] )
 
 
 
@@ -92,10 +89,5 @@ rows model ticket =
         , span [ class "row-name" ] [ text ticket.name ]
         , span [ class "row-email" ] [ text ticket.email ]
         , span [ class "row-message" ] [ text ticket.message ]
-        , span [ onClick <| Navigate <| Route.TicketEdit model.organizationKey ticket.id ] [ text " | Edit Ticket" ]
+        , span [ onClick <| OnEditTicketClick ticket.id ] [ text " | Edit Ticket" ]
         ]
-
-
-fetchTicketList : String -> String -> Cmd Msg
-fetchTicketList nodeEnv apiKey =
-    Task.attempt TicketLoaded (Reader.run (requestTickets) ( nodeEnv, apiKey ))

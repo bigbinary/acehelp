@@ -3,6 +3,7 @@ module Page.Settings exposing (..)
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Admin.Request.Helper exposing (ApiKey)
+import Admin.Data.ReaderCmd exposing (..)
 
 
 -- Model
@@ -10,23 +11,21 @@ import Admin.Request.Helper exposing (ApiKey)
 
 type alias Model =
     { code : String
-    , organizationKey : ApiKey
     , isKeyValid : Bool
     }
 
 
-initModel : ApiKey -> Model
-initModel organizationKey =
+initModel : Model
+initModel =
     { code = ""
     , isKeyValid = True
-    , organizationKey = organizationKey
     }
 
 
-init : ApiKey -> ( Model, Cmd Msg )
-init organizationKey =
-    ( initModel organizationKey
-    , Cmd.none
+init : ( Model, List (ReaderCmd Msg) )
+init =
+    ( initModel
+    , []
     )
 
 
@@ -38,20 +37,20 @@ type Msg
     = ShowCode
 
 
-update : Msg -> Model -> ( Model, Cmd Msg )
+update : Msg -> Model -> ( Model, List (ReaderCmd Msg) )
 update msg model =
-    ( model, Cmd.none )
+    ( model, [] )
 
 
 
 -- View
 
 
-view : Model -> Html Msg
-view model =
+view : ApiKey -> Model -> Html Msg
+view organizationKey model =
     case model.isKeyValid of
         True ->
-            jsCodeView model.organizationKey
+            jsCodeView organizationKey
 
         False ->
             errorView

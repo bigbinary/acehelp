@@ -1,16 +1,14 @@
 module Page.Url.List exposing (..)
 
 import Admin.Data.Url exposing (..)
-import Admin.Request.Helper exposing (..)
 import Admin.Request.Url exposing (..)
 import GraphQL.Client.Http as GQLClient
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
-import Navigation exposing (..)
 import Reader exposing (Reader)
-import Route
 import Task exposing (Task)
+import Admin.Data.ReaderCmd exposing (..)
 
 
 -- MODEL
@@ -19,24 +17,22 @@ import Task exposing (Task)
 type alias Model =
     { urls : List UrlData
     , urlId : UrlId
-    , organizationKey : String
     , error : Maybe String
     }
 
 
-initModel : ApiKey -> Model
-initModel organizationKey =
+initModel : Model
+initModel =
     { urls = []
     , urlId = ""
-    , organizationKey = organizationKey
     , error = Nothing
     }
 
 
-init : ApiKey -> ( Model, Reader ( NodeEnv, ApiKey ) (Task GQLClient.Error (List UrlData)) )
-init organizationKey =
-    ( initModel organizationKey
-    , requestUrls
+init : ( Model, List (ReaderCmd Msg) )
+init =
+    ( initModel
+    , [ Strict <| Reader.map (Task.attempt UrlLoaded) requestUrls ]
     )
 
 
@@ -47,47 +43,40 @@ init organizationKey =
 type Msg
     = LoadUrl UrlId
     | UrlLoaded (Result GQLClient.Error (List UrlData))
-    | Navigate Route.Route
     | DeleteUrl String
     | DeleteUrlResponse (Result GQLClient.Error UrlId)
+    | OnUrlCreateClick
+    | OnUrlEditClick UrlId
 
 
-update : Msg -> Model -> NodeEnv -> ApiKey -> ( Model, Cmd Msg )
-update msg model nodeEnv organizationKey =
+update : Msg -> Model -> ( Model, List (ReaderCmd Msg) )
+update msg model =
     case msg of
         LoadUrl urlId ->
-            ( { model | urlId = urlId }, Cmd.none )
+            ( { model | urlId = urlId }, [] )
 
         UrlLoaded (Ok urls) ->
-            ( { model | urls = urls }, Cmd.none )
+            ( { model | urls = urls }, [] )
 
         UrlLoaded (Err err) ->
-            ( { model | error = Just (toString err) }, Cmd.none )
-
-        Navigate page ->
-            model ! [ Navigation.newUrl (Route.routeToString page) ]
+            ( { model | error = Just (toString err) }, [] )
 
         DeleteUrl urlId ->
-            deleteRecord model nodeEnv organizationKey { id = urlId }
+            deleteRecord model urlId
 
         DeleteUrlResponse (Ok id) ->
-            let
-                urls =
-                    List.filter (\m -> m.id /= id) model.urls
-            in
-                ( { model | urls = urls }, Cmd.none )
+            ( { model | urls = List.filter (\m -> m.id /= id) model.urls }, [] )
 
         DeleteUrlResponse (Err error) ->
-            ( { model | error = Just (toString error) }, Cmd.none )
+            ( { model | error = Just (toString error) }, [] )
 
+        OnUrlCreateClick ->
+            -- Note: Handled in Main
+            ( model, [] )
 
-
--- SUBSCRIPTIONS
-
-
-subscriptions : Model -> Sub Msg
-subscriptions model =
-    Sub.none
+        OnUrlEditClick _ ->
+            -- Note: Handled in Main
+            ( model, [] )
 
 
 
@@ -110,7 +99,7 @@ view model =
                     model.error
             ]
         , button
-            [ onClick (Navigate <| Route.UrlCreate model.organizationKey)
+            [ onClick OnUrlCreateClick
             , class "btn btn-primary"
             ]
             [ text "New Url" ]
@@ -118,15 +107,15 @@ view model =
             [ class "listingSection" ]
             (List.map
                 (\url ->
-                    urlRow model url
+                    urlRow url
                 )
                 model.urls
             )
         ]
 
 
-urlRow : Model -> UrlData -> Html Msg
-urlRow model url =
+urlRow : UrlData -> Html Msg
+urlRow url =
     div
         [ id url.id
         , class "listingRow"
@@ -136,7 +125,7 @@ urlRow model url =
             [ text url.url ]
         , div [ class "actionButtonColumn" ]
             [ button
-                [ onClick (Navigate <| Route.UrlEdit model.organizationKey url.id)
+                [ onClick (OnUrlEditClick url.id)
                 , class "actionButton btn btn-primary"
                 ]
                 [ text "Edit Url" ]
@@ -151,10 +140,10 @@ urlRow model url =
         ]
 
 
-deleteRecord : Model -> NodeEnv -> ApiKey -> UrlIdInput -> ( Model, Cmd Msg )
-deleteRecord model nodeEnv apiKey urlId =
+deleteRecord : Model -> UrlId -> ( Model, List (ReaderCmd Msg) )
+deleteRecord model urlId =
     let
         cmd =
-            Task.attempt DeleteUrlResponse (Reader.run (deleteUrl) ( nodeEnv, apiKey, urlId ))
+            Strict <| Reader.map (Task.attempt DeleteUrlResponse) (deleteUrl urlId)
     in
-        ( model, cmd )
+        ( model, [ cmd ] )

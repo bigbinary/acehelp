@@ -13,6 +13,7 @@ import Field exposing (..)
 import Field.ValidationResult exposing (..)
 import Helpers exposing (..)
 import Route
+import Admin.Data.ReaderCmd exposing (..)
 
 
 -- MODEL
@@ -35,10 +36,10 @@ initModel =
     }
 
 
-init : ( Model, Cmd Msg )
+init : ( Model, List (ReaderCmd Msg) )
 init =
     ( initModel
-    , Cmd.none
+    , []
     )
 
 
@@ -53,14 +54,14 @@ type Msg
     | SaveUrlResponse (Result GQLClient.Error UrlData)
 
 
-update : Msg -> Model -> NodeEnv -> ApiKey -> ( Model, Cmd Msg )
-update msg model nodeEnv organizationKey =
+update : Msg -> Model -> ( Model, List (ReaderCmd Msg) )
+update msg model =
     case msg of
         UrlInput url ->
-            ( { model | url = Field.update model.url url }, Cmd.none )
+            ( { model | url = Field.update model.url url }, [] )
 
         TitleInput title ->
-            ( { model | urlTitle = Field.update model.urlTitle title }, Cmd.none )
+            ( { model | urlTitle = Field.update model.urlTitle title }, [] )
 
         SaveUrl ->
             let
@@ -82,15 +83,16 @@ update msg model nodeEnv organizationKey =
                         |> String.join ", "
             in
                 if isAllValid fields then
-                    save model nodeEnv organizationKey
+                    save model
                 else
-                    ( { model | error = Just errors }, Cmd.none )
+                    ( { model | error = Just errors }, [] )
 
         SaveUrlResponse (Ok id) ->
-            ( model, Route.modifyUrl <| Route.UrlList organizationKey )
+            -- NOTE: Redirection handled in Main
+            ( model, [] )
 
         SaveUrlResponse (Err error) ->
-            ( { model | error = Just (toString error) }, Cmd.none )
+            ( { model | error = Just (toString error) }, [] )
 
 
 
@@ -132,21 +134,15 @@ view model =
                     ]
                     []
                 ]
-            , button [ type_ "submit", class "button primary" ] [ text "Save URL" ]
+            , button [ type_ "submit", class "btn btn-primary" ] [ text "Save URL" ]
             ]
         ]
 
 
-save : Model -> NodeEnv -> ApiKey -> ( Model, Cmd Msg )
-save model nodeEnv apiKey =
+save : Model -> ( Model, List (ReaderCmd Msg) )
+save model =
     let
         cmd =
-            Task.attempt SaveUrlResponse
-                (Reader.run (createUrl)
-                    ( nodeEnv
-                    , apiKey
-                    , { url = Field.value model.url }
-                    )
-                )
+            Strict <| Reader.map (Task.attempt SaveUrlResponse) (createUrl { url = Field.value model.url })
     in
-        ( model, cmd )
+        ( model, [ cmd ] )

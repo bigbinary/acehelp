@@ -10,9 +10,8 @@ import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
 import Reader exposing (Reader)
-import Request.Helpers exposing (..)
-import Route
 import Task exposing (Task)
+import Admin.Data.ReaderCmd exposing (..)
 
 
 -- MODEL
@@ -33,10 +32,10 @@ initModel =
     }
 
 
-init : ( Model, Cmd Msg )
+init : ( Model, List (ReaderCmd Msg) )
 init =
     ( initModel
-    , Cmd.none
+    , []
     )
 
 
@@ -50,11 +49,11 @@ type Msg
     | SaveCategoryResponse (Result GQLClient.Error Category)
 
 
-update : Msg -> Model -> NodeEnv -> ApiKey -> ( Model, Cmd Msg )
-update msg model nodeEnv organizationKey =
+update : Msg -> Model -> ( Model, List (ReaderCmd Msg) )
+update msg model =
     case msg of
         CategoryNameInput categoryName ->
-            ( { model | name = Field.update model.name categoryName }, Cmd.none )
+            ( { model | name = Field.update model.name categoryName }, [] )
 
         SaveCategory ->
             let
@@ -76,21 +75,22 @@ update msg model nodeEnv organizationKey =
                         |> String.join ", "
             in
                 if isAllValid fields then
-                    saveCategory model nodeEnv organizationKey
+                    saveCategory model
                 else
-                    ( { model | error = Just errors }, Cmd.none )
+                    ( { model | error = Just errors }, [] )
 
         SaveCategoryResponse (Ok id) ->
+            -- NOTE: Redirection handled in Main
             ( { model
                 | id = "0"
                 , name = Field.update model.name ""
                 , error = Nothing
               }
-            , Route.modifyUrl <| Route.CategoryList organizationKey
+            , []
             )
 
         SaveCategoryResponse (Err error) ->
-            ( { model | error = Just (toString error) }, Cmd.none )
+            ( { model | error = Just (toString error) }, [] )
 
 
 
@@ -99,8 +99,7 @@ update msg model nodeEnv organizationKey =
 
 view : Model -> Html Msg
 view model =
-    Html.form
-        [ onSubmit SaveCategory ]
+    div []
         [ div []
             [ Maybe.withDefault (text "") <|
                 Maybe.map
@@ -124,8 +123,9 @@ view model =
             ]
         , div []
             [ button
-                [ type_ "submit"
-                , class "button primary"
+                [ type_ "button"
+                , class "btn btn-primary"
+                , onClick SaveCategory
                 ]
                 [ text "Submit" ]
             ]
@@ -142,13 +142,10 @@ categroyCeateInputs { name } =
     }
 
 
-saveCategory : Model -> NodeEnv -> ApiKey -> ( Model, Cmd Msg )
-saveCategory model nodeEnv organizationKey =
+saveCategory : Model -> ( Model, List (ReaderCmd Msg) )
+saveCategory model =
     let
         cmd =
-            Task.attempt SaveCategoryResponse
-                (Reader.run requestCreateCategory
-                    ( nodeEnv, organizationKey, categroyCeateInputs model )
-                )
+            Strict <| Reader.map (Task.attempt SaveCategoryResponse) (requestCreateCategory <| categroyCeateInputs model)
     in
-        ( model, cmd )
+        ( model, [ cmd ] )

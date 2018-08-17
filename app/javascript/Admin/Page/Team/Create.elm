@@ -10,9 +10,8 @@ import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
 import Reader exposing (Reader)
-import Request.Helpers exposing (ApiKey, NodeEnv)
-import Route
 import Task exposing (Task)
+import Admin.Data.ReaderCmd exposing (..)
 
 
 -- MODEL
@@ -20,6 +19,7 @@ import Task exposing (Task)
 
 type alias Model =
     { error : Maybe String
+    , success : Maybe String
     , firstName : String
     , lastName : String
     , email : Field String String
@@ -29,16 +29,17 @@ type alias Model =
 initModel : Model
 initModel =
     { error = Nothing
+    , success = Nothing
     , firstName = ""
     , lastName = ""
     , email = Field (validateEmpty "Email") ""
     }
 
 
-init : ( Model, Cmd Msg )
+init : ( Model, List (ReaderCmd Msg) )
 init =
     ( initModel
-    , Cmd.none
+    , []
     )
 
 
@@ -54,17 +55,17 @@ type Msg
     | SaveTeamResponse (Result GQLClient.Error Team)
 
 
-update : Msg -> Model -> NodeEnv -> ApiKey -> ( Model, Cmd Msg )
-update msg model nodeEnv organizationKey =
+update : Msg -> Model -> ( Model, List (ReaderCmd Msg) )
+update msg model =
     case msg of
         FirstNameInput firstName ->
-            ( { model | firstName = firstName }, Cmd.none )
+            ( { model | firstName = firstName }, [] )
 
         LastNameInput lastName ->
-            ( { model | lastName = lastName }, Cmd.none )
+            ( { model | lastName = lastName }, [] )
 
         EmailInput email ->
-            ( { model | email = Field.update model.email email }, Cmd.none )
+            ( { model | email = Field.update model.email email }, [] )
 
         SaveTeam ->
             let
@@ -86,15 +87,15 @@ update msg model nodeEnv organizationKey =
                         |> String.join ", "
             in
                 if isAllValid fields then
-                    save model nodeEnv organizationKey
+                    save model
                 else
-                    ( { model | error = Just errors }, Cmd.none )
+                    ( { model | error = Just errors }, [] )
 
         SaveTeamResponse (Ok id) ->
-            ( model, Route.modifyUrl <| Route.TeamList organizationKey )
+            ( { model | success = Just "Team member added" }, [] )
 
         SaveTeamResponse (Err error) ->
-            ( { model | error = Just (toString error) }, Cmd.none )
+            ( { model | error = Just (toString error) }, [] )
 
 
 
@@ -104,67 +105,73 @@ update msg model nodeEnv organizationKey =
 view : Model -> Html Msg
 view model =
     div [ class "container" ]
-        [ Html.form [ onSubmit SaveTeam ]
-            [ div []
-                [ Maybe.withDefault (text "") <|
-                    Maybe.map
-                        (\err ->
-                            div
-                                [ class "alert alert-danger alert-dismissible fade show"
-                                , attribute "role" "alert"
-                                ]
-                                [ text <| "Error: " ++ err
-                                ]
-                        )
-                        model.error
-                ]
-            , div []
-                [ label [] [ text "First Name : " ]
-                , input
-                    [ type_ "text"
-                    , placeholder "First Name"
-                    , onInput FirstNameInput
-                    ]
-                    []
-                ]
-            , div []
-                [ label [] [ text "Last Name: " ]
-                , input
-                    [ type_ "text"
-                    , placeholder "Last Name"
-                    , onInput LastNameInput
-                    ]
-                    []
-                ]
-            , div []
-                [ label [] [ text "Email : " ]
-                , input
-                    [ type_ "text"
-                    , placeholder "Email"
-                    , onInput EmailInput
-                    ]
-                    []
-                ]
-            , button
-                [ type_ "submit", class "btn btn-primary" ]
-                [ text "Save Member" ]
+        [ div []
+            [ Maybe.withDefault (text "") <|
+                Maybe.map
+                    (\err ->
+                        div
+                            [ class "alert alert-danger alert-dismissible fade show"
+                            , attribute "role" "alert"
+                            ]
+                            [ text <| "Error: " ++ err
+                            ]
+                    )
+                    model.error
             ]
+        , div []
+            [ Maybe.withDefault (text "") <|
+                Maybe.map
+                    (\message ->
+                        div [ class "alert alert-success alert-dismissible fade show", attribute "role" "alert" ]
+                            [ text <| message
+                            ]
+                    )
+                    model.success
+            ]
+        , div []
+            [ label [] [ text "First Name : " ]
+            , input
+                [ type_ "text"
+                , placeholder "First Name"
+                , onInput FirstNameInput
+                ]
+                []
+            ]
+        , div []
+            [ label [] [ text "Last Name: " ]
+            , input
+                [ type_ "text"
+                , placeholder "Last Name"
+                , onInput LastNameInput
+                ]
+                []
+            ]
+        , div []
+            [ label [] [ text "Email : " ]
+            , input
+                [ type_ "text"
+                , placeholder "Email"
+                , onInput EmailInput
+                ]
+                []
+            ]
+        , button
+            [ type_ "button", class "btn btn-primary", onClick SaveTeam ]
+            [ text "Save Member" ]
         ]
 
 
-save : Model -> NodeEnv -> ApiKey -> ( Model, Cmd Msg )
-save model nodeEnv apiKey =
+save : Model -> ( Model, List (ReaderCmd Msg) )
+save model =
     let
         cmd =
-            Task.attempt SaveTeamResponse
-                (Reader.run createTeamMember
-                    ( nodeEnv
-                    , apiKey
-                    , { email = Field.value model.email
-                      , firstName = model.firstName
-                      , lastName = model.lastName
-                      }
+            Strict <|
+                Reader.map (Task.attempt SaveTeamResponse)
+                    (createTeamMember
+                        { email = Field.value model.email
+                        , firstName = model.firstName
+                        , lastName = model.lastName
+                        }
                     )
-                )
     in
-        ( model, cmd )
+        ( model, [ cmd ] )

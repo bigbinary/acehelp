@@ -8,8 +8,8 @@ import Admin.Request.Feedback exposing (..)
 import Request.Helpers exposing (NodeEnv, ApiKey)
 import Reader exposing (Reader)
 import Task exposing (Task)
-import Helpers exposing (..)
 import GraphQL.Client.Http as GQLClient
+import Admin.Data.ReaderCmd exposing (..)
 
 
 -- Model
@@ -36,10 +36,10 @@ initModel feedbackId =
     }
 
 
-init : FeedbackId -> ( Model, Reader ( NodeEnv, ApiKey ) (Task GQLClient.Error Feedback) )
+init : FeedbackId -> ( Model, List (ReaderCmd Msg) )
 init feedbackId =
     ( initModel feedbackId
-    , requestFeedbackById feedbackId
+    , [ Strict <| Reader.map (Task.attempt FeedbackLoaded) (requestFeedbackById feedbackId) ]
     )
 
 
@@ -57,8 +57,8 @@ type Msg
 -- TODO: Fetch categories to populate categories dropdown
 
 
-update : Msg -> Model -> NodeEnv -> ApiKey -> ( Model, Cmd Msg )
-update msg model nodeEnv organizationKey =
+update : Msg -> Model -> ( Model, List (ReaderCmd Msg) )
+update msg model =
     case msg of
         FeedbackLoaded (Ok feedback) ->
             ( { model
@@ -67,16 +67,16 @@ update msg model nodeEnv organizationKey =
                 , id = feedback.id
                 , status = feedback.status
               }
-            , Cmd.none
+            , []
             )
 
         FeedbackLoaded (Err err) ->
             ( { model | error = Just "There was an error loading up the feedback" }
-            , Cmd.none
+            , []
             )
 
         UpdateFeedabackStatus feedbackId status ->
-            updateFeedabackStatus model nodeEnv organizationKey feedbackId status
+            updateFeedabackStatus model feedbackId status
 
         UpdateFeedbackResponse (Ok feedback) ->
             ( { model
@@ -86,12 +86,12 @@ update msg model nodeEnv organizationKey =
                 , status = feedback.status
                 , success = Just "Feedback Updated Successfully."
               }
-            , Cmd.none
+            , []
             )
 
         UpdateFeedbackResponse (Err error) ->
             ( { model | error = Just (toString error) }
-            , Cmd.none
+            , []
             )
 
 
@@ -132,13 +132,13 @@ view model =
         ]
 
 
-updateFeedabackStatus : Model -> NodeEnv -> ApiKey -> FeedbackId -> String -> ( Model, Cmd Msg )
-updateFeedabackStatus model nodeEnv apiKey feedbackId feedbackStatus =
+updateFeedabackStatus : Model -> FeedbackId -> String -> ( Model, List (ReaderCmd Msg) )
+updateFeedabackStatus model feedbackId feedbackStatus =
     let
         cmd =
-            Task.attempt UpdateFeedbackResponse (Reader.run (requestUpdateFeedbackStatus feedbackId feedbackStatus) ( nodeEnv, apiKey ))
+            Strict <| Reader.map (Task.attempt UpdateFeedbackResponse) (requestUpdateFeedbackStatus feedbackId feedbackStatus)
     in
-        ( model, cmd )
+        ( model, [ cmd ] )
 
 
 feedbackStatusButton : Model -> String -> Html Msg
@@ -147,13 +147,13 @@ feedbackStatusButton model status =
         "closed" ->
             Html.a
                 [ onClick (UpdateFeedabackStatus model.id "open")
-                , class "button primary"
+                , class "btn btn-primary"
                 ]
                 [ text <| "Open Feedback" ]
 
         _ ->
             Html.a
                 [ onClick (UpdateFeedabackStatus model.id "closed")
-                , class "button primary"
+                , class "btn btn-primary"
                 ]
                 [ text <| "Close Feedback" ]

@@ -31,3 +31,8 @@ multiSelectMenu title values onselect =
                 )
                 values
         ]
+
+
+loadingIndicator : Html msg
+loadingIndicator =
+    div [ class "loading-indicator" ] [ text "" ]

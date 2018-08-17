@@ -10,7 +10,7 @@ import Helpers exposing (..)
 import Admin.Request.Session exposing (..)
 import Reader exposing (Reader)
 import Task exposing (Task)
-import Request.Helpers exposing (..)
+import Admin.Data.ReaderCmd exposing (..)
 
 
 -- MODEL
@@ -23,13 +23,18 @@ type alias Model =
     }
 
 
-init : ( Model, Cmd Msg )
+initModel : Model
+initModel =
+    { error = []
+    , username = Field (validateEmpty "Username") ""
+    , password = Field (validateEmpty "Password") ""
+    }
+
+
+init : ( Model, List (ReaderCmd Msg) )
 init =
-    ( { error = []
-      , username = Field (validateEmpty "Username") ""
-      , password = Field (validateEmpty "Password") ""
-      }
-    , Cmd.none
+    ( initModel
+    , []
     )
 
 
@@ -46,8 +51,8 @@ type Msg
     | LoginResponse (Result GQLClient.Error String)
 
 
-update : Msg -> Model -> NodeEnv -> ( Model, Cmd Msg )
-update msg model nodeEnv =
+update : Msg -> Model -> ( Model, List (ReaderCmd Msg) )
+update msg model =
     case msg of
         Login ->
             let
@@ -67,34 +72,34 @@ update msg model nodeEnv =
                 cmd =
                     case isAllValid [ model.username, model.password ] of
                         True ->
-                            Task.attempt LoginResponse
-                                (Reader.run
+                            [ Open <|
+                                Reader.map
+                                    (Task.attempt LoginResponse)
                                     (requestLogin { email = Field.value model.username, password = Field.value model.password })
-                                    nodeEnv
-                                )
+                            ]
 
                         False ->
-                            Cmd.none
+                            []
             in
                 ( { model | error = error }, cmd )
 
         LoginResponse (Ok authId) ->
-            ( model, Cmd.none )
+            ( model, [] )
 
         LoginResponse (Err err) ->
-            ( model, Cmd.none )
+            ( model, [] )
 
         ForgotPassword ->
-            ( model, Cmd.none )
+            ( model, [] )
 
         Signup ->
-            ( model, Cmd.none )
+            ( model, [] )
 
         SetUsername username ->
-            ( { model | username = Field.update model.username username }, Cmd.none )
+            ( { model | username = Field.update model.username username }, [] )
 
         SetPassword password ->
-            ( { model | password = Field.update model.password password }, Cmd.none )
+            ( { model | password = Field.update model.password password }, [] )
 
 
 

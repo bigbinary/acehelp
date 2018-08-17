@@ -13,6 +13,7 @@ import Admin.Data.Session exposing (..)
 import Request.Helpers exposing (NodeEnv, ApiKey)
 import Admin.Request.Session exposing (signupRequest)
 import GraphQL.Client.Http as GQLClient
+import Admin.Data.ReaderCmd exposing (..)
 
 
 -- MODEL
@@ -37,9 +38,9 @@ initModel =
     }
 
 
-init : ( Model, Cmd Msg )
+init : ( Model, List (ReaderCmd Msg) )
 init =
-    ( initModel, Cmd.none )
+    ( initModel, [] )
 
 
 
@@ -55,20 +56,20 @@ type Msg
     | SignUpResponse (Result GQLClient.Error User)
 
 
-update : Msg -> Model -> NodeEnv -> ApiKey -> ( Model, Cmd Msg )
-update msg model nodeEnv apiKey =
+update : Msg -> Model -> ( Model, List (ReaderCmd Msg) )
+update msg model =
     case msg of
         FirstNameInput firstName ->
-            ( { model | firstName = Field.update model.firstName firstName }, Cmd.none )
+            ( { model | firstName = Field.update model.firstName firstName }, [] )
 
         EmailInput email ->
-            ( { model | email = Field.update model.email email }, Cmd.none )
+            ( { model | email = Field.update model.email email }, [] )
 
         PasswordInput password ->
-            ( { model | password = Field.update model.password password }, Cmd.none )
+            ( { model | password = Field.update model.password password }, [] )
 
         ConfirmPasswordInput password ->
-            ( { model | confirmPassword = Field.update model.confirmPassword password }, Cmd.none )
+            ( { model | confirmPassword = Field.update model.confirmPassword password }, [] )
 
         SignUp ->
             let
@@ -90,9 +91,9 @@ update msg model nodeEnv apiKey =
                         |> String.join ", "
             in
                 if isAllValid fields then
-                    signUp model nodeEnv apiKey
+                    signUp model
                 else
-                    ( { model | error = Just errors }, Cmd.none )
+                    ( { model | error = Just errors }, [] )
 
         SignUpResponse (Ok user) ->
             ( { model
@@ -101,19 +102,19 @@ update msg model nodeEnv apiKey =
                 , password = Field.update model.password ""
                 , confirmPassword = Field.update model.confirmPassword ""
               }
-            , Cmd.none
+            , []
             )
 
         SignUpResponse (Err error) ->
-            ( { model | error = Just (toString error) }, Cmd.none )
+            ( { model | error = Just (toString error) }, [] )
 
 
-signUp : Model -> NodeEnv -> ApiKey -> ( Model, Cmd Msg )
-signUp model nodeEnv apiKey =
+signUp : Model -> ( Model, List (ReaderCmd Msg) )
+signUp model =
     let
         cmd =
-            Task.attempt SignUpResponse
-                (Reader.run
+            Open <|
+                Reader.map (Task.attempt SignUpResponse)
                     (signupRequest
                         ({ firstName = Field.value model.firstName
                          , email = Field.value model.email
@@ -122,10 +123,8 @@ signUp model nodeEnv apiKey =
                          }
                         )
                     )
-                    ( nodeEnv, apiKey )
-                )
     in
-        ( model, cmd )
+        ( model, [ cmd ] )
 
 
 
