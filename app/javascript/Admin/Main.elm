@@ -41,6 +41,7 @@ import Route
 type alias Flags =
     { node_env : String
     , organization_key : String
+    , organization_name : String
     , user_id : String
     , user_email : String
     }
@@ -81,6 +82,7 @@ type alias Model =
     , route : Route.Route
     , nodeEnv : NodeEnv
     , organizationKey : ApiKey
+    , organizationName : String
     , userId : String
     , userEmail : String
     , error : Maybe String
@@ -98,6 +100,7 @@ init flags location =
             , route = Route.fromLocation location
             , nodeEnv = flags.node_env
             , organizationKey = flags.organization_key
+            , organizationName = flags.organization_name
             , userId = flags.user_id
             , userEmail = flags.user_email
             , error = Nothing
@@ -860,7 +863,8 @@ adminHeader : Model -> Html Msg
 adminHeader model =
     nav [ class "header navbar navbar-dark bg-primary navbar-expand flex-column flex-md-row" ]
         [ div [ class "container" ]
-            [ ul
+            [ span [ class "org-name" ] [ text model.organizationName ]
+            , ul
                 [ class "navbar-nav mr-auto mt-2 mt-lg-0 " ]
                 [ li [ class "nav-item" ]
                     [ Html.a
