@@ -604,9 +604,6 @@ update msg model =
                     , runReaderCmds TeamCreateMsg cmds
                     )
 
-            ForgotPasswordMsg forgotPasswordMsg ->
-                ( model, Cmd.none )
-
             TicketEditMsg teMsg ->
                 let
                     currentPageModel =
@@ -694,6 +691,24 @@ update msg model =
                     ( { model | currentPage = Loaded (Login newModel) }
                     , runReaderCmds LoginMsg cmds
                     )
+
+             ForgotPasswordMsg forgotPasswordMsg ->
+                let
+                    currentPageModel =
+                        case getPage model.currentPage of
+                            ForgotPassword forgotPasswordModel ->
+                                forgotPasswordModel
+
+                            _ ->
+                                ForgotPassword.initModel
+
+                    ( forgotPasswordModel, forgotPasswordCmd ) =
+                        ForgotPassword.update forgotPasswordMsg currentPageModel
+                in
+                    ( { model | currentPage = Loaded (ForgotPassword forgotPasswordModel) }
+                    , runReaderCmds ForgotPasswordMsg forgotPasswordCmd
+                    )
+
 
             OnLocationChange location ->
                 setRoute location model
