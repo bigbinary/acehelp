@@ -14,6 +14,7 @@ import Request.Helpers exposing (NodeEnv, ApiKey)
 import Admin.Request.Session exposing (signupRequest)
 import GraphQL.Client.Http as GQLClient
 import Admin.Data.ReaderCmd exposing (..)
+import Route as Route
 
 
 -- MODEL
@@ -54,6 +55,7 @@ type Msg
     | ConfirmPasswordInput String
     | SignUp
     | SignUpResponse (Result GQLClient.Error User)
+    | ForgotPasswordRedirect
 
 
 update : Msg -> Model -> ( Model, List (ReaderCmd Msg) )
@@ -70,6 +72,9 @@ update msg model =
 
         ConfirmPasswordInput password ->
             ( { model | confirmPassword = Field.update model.confirmPassword password }, [] )
+
+        ForgotPasswordRedirect ->
+            ( model, Route.modifyUrl <| Route.ForgotPassword )
 
         SignUp ->
             let
@@ -177,5 +182,6 @@ view model =
                     []
                 ]
             , button [ type_ "submit", class "button primary" ] [ text "Sign Up" ]
+            , button [ type_ "submit", class "button primary", onClick ForgotPasswordRedirect ] [ text "Forgot Password" ]
             ]
         ]
