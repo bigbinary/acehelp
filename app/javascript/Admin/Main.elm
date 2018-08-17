@@ -647,9 +647,22 @@ update msg model =
                     ( newModel, cmds ) =
                         OrganizationCreate.update oCMsg currentPageModel
                 in
-                    ( { model | currentPage = Loaded (OrganizationCreate newModel) }
-                    , runReaderCmds OrganizationCreateMsg cmds
-                    )
+                    case oCMsg of
+                        OrganizationCreate.SaveOrgResponse (Ok org) ->
+                            let
+                                ( updatedModel, updatedCmd ) =
+                                    updateNavigation (NavigateTo (Route.ArticleList org.api_key))
+                            in
+                                ( { updatedModel
+                                    | organizationKey = org.api_key
+                                  }
+                                , updatedCmd
+                                )
+
+                        _ ->
+                            ( { model | currentPage = Loaded (OrganizationCreate newModel) }
+                            , runReaderCmds OrganizationCreateMsg cmds
+                            )
 
             SignUpMsg suMsg ->
                 let
@@ -816,6 +829,16 @@ view model =
             Loaded (SignUp signupModel) ->
                 (Html.map SignUpMsg
                     (SignUp.view signupModel)
+                )
+
+            TransitioningFrom (OrganizationCreate orgCreateModel) ->
+                (Html.map OrganizationCreateMsg
+                    (OrganizationCreate.view orgCreateModel)
+                )
+
+            Loaded (OrganizationCreate orgCreateModel) ->
+                (Html.map OrganizationCreateMsg
+                    (OrganizationCreate.view orgCreateModel)
                 )
 
             TransitioningFrom _ ->
