@@ -265,7 +265,7 @@ navigateTo newRoute model =
 
             Route.ForgotPassword ->
                 ForgotPassword.init
-                    |> loadedIn ForgotPassword ForgotPasswordMsg
+                    |> transitionTo ForgotPassword ForgotPasswordMsg
 
             Route.NotFound ->
                 ( { model
@@ -692,7 +692,7 @@ update msg model =
                     , runReaderCmds LoginMsg cmds
                     )
 
-             ForgotPasswordMsg forgotPasswordMsg ->
+            ForgotPasswordMsg forgotPasswordMsg ->
                 let
                     currentPageModel =
                         case getPage model.currentPage of
@@ -702,13 +702,12 @@ update msg model =
                             _ ->
                                 ForgotPassword.initModel
 
-                    ( forgotPasswordModel, forgotPasswordCmd ) =
+                    ( newModel, cmds ) =
                         ForgotPassword.update forgotPasswordMsg currentPageModel
                 in
-                    ( { model | currentPage = Loaded (ForgotPassword forgotPasswordModel) }
-                    , runReaderCmds ForgotPasswordMsg forgotPasswordCmd
+                    ( { model | currentPage = Loaded (ForgotPassword newModel) }
+                    , runReaderCmds ForgotPasswordMsg cmds
                     )
-
 
             OnLocationChange location ->
                 setRoute location model

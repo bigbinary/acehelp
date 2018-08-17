@@ -11,6 +11,7 @@ import Admin.Request.Session exposing (..)
 import Reader exposing (Reader)
 import Task exposing (Task)
 import Request.Helpers exposing (..)
+import Admin.Data.ReaderCmd exposing (..)
 
 
 -- MODEL
@@ -29,9 +30,9 @@ initModel =
     }
 
 
-init : ( Model, Cmd Msg )
+init : ( Model, List (ReaderCmd Msg) )
 init =
-    ( initModel, Cmd.none )
+    ( initModel, [] )
 
 
 
@@ -45,20 +46,20 @@ type Msg
     | SendResetPasswordLinkResponse (Result GQLClient.Error String)
 
 
-update : Msg -> Model -> NodeEnv -> ( Model, Cmd Msg )
-update msg model nodeEnv =
+update : Msg -> Model -> ( Model, List (ReaderCmd Msg) )
+update msg model =
     case msg of
         ForgotPassword ->
-            ( model, Cmd.none )
+            ( model, [] )
 
         SetEmail email ->
-            ( { model | email = Field.update model.email email }, Cmd.none )
+            ( { model | email = Field.update model.email email }, [] )
 
         SendResetPasswordLinkResponse (Ok response) ->
-            ( { model | email = Field.update model.email "" }, Cmd.none )
+            ( { model | email = Field.update model.email "" }, [] )
 
         SendResetPasswordLinkResponse (Err err) ->
-            ( model, Cmd.none )
+            ( model, [] )
 
         SendResetPasswordLink ->
             let
@@ -78,14 +79,16 @@ update msg model nodeEnv =
                 cmd =
                     case isAllValid [ model.email ] of
                         True ->
-                            Task.attempt SendResetPasswordLinkResponse
-                                (Reader.run
-                                    (requestResetPassword { email = Field.value model.email })
-                                    nodeEnv
-                                )
+                            [ Open <|
+                                Reader.map
+                                    (Task.attempt SendResetPasswordLinkResponse)
+                                    (requestResetPassword
+                                        { email = Field.value model.email }
+                                    )
+                            ]
 
                         False ->
-                            Cmd.none
+                            []
             in
                 ( { model | error = error }, cmd )
 

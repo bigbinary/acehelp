@@ -74,7 +74,7 @@ update msg model =
             ( { model | confirmPassword = Field.update model.confirmPassword password }, [] )
 
         ForgotPasswordRedirect ->
-            ( model, Route.modifyUrl <| Route.ForgotPassword )
+            ( model, [] )
 
         SignUp ->
             let
