@@ -4,34 +4,31 @@ require "test_helper"
 require "graphql/client_host"
 
 class Mutations::PostCommentInTicketMutationsTest < ActiveSupport::TestCase
+  include Devise::Test::IntegrationHelpers
+
   setup do
     @ticket = tickets(:payment_issue_ticket)
     @agent = agents(:illya_kuryakin)
-    @user = users(:hunt)
+    sign_in @agent
     @comment_info = "Comment about a ticket by agent #{@agent.name}"
     @mutation_query = <<-GRAPHQL
-      mutation($comment_args: PostCommentInput!) {
-        postCommentInTicket(input: $comment_args) {
-          comment {
-            id
-            info
-            commentable {
-              id
-              name
-            }
+      mutation($input: UpdateTicketInput!) {
+          updateTicket(input: $input) {
             ticket {
               id
               status
               agent {
-                first_name
+                id
+              }
+              comments {
+                info
               }
             }
+            errors {
+              message
+              path
+            }
           }
-          errors {
-            path
-            message
-          }
-        }
       }
     GRAPHQL
 
@@ -39,69 +36,44 @@ class Mutations::PostCommentInTicketMutationsTest < ActiveSupport::TestCase
   end
 
   test "post comment" do
-    result = AceHelp::Client.execute(@mutation_query, comment_args: {
-      comment:
-        { user_id: @agent.id,
-          ticket_id: @ticket.id,
-          info: @comment_info
-        }
+    result = AceHelp::Client.execute(@mutation_query, input: {
+      id: @ticket.id,
+      comment: @comment_info
     })
-    assert_equal @comment_info, result.data.post_comment_in_ticket.comment.info
-    assert_kind_of String, result.data.post_comment_in_ticket.comment.id
-    assert_equal @agent.id, result.data.post_comment_in_ticket.comment.commentable.id
-    assert_equal @agent.id, result.data.post_comment_in_ticket.comment.commentable.id
-    assert_equal @ticket.id, result.data.post_comment_in_ticket.comment.ticket.id
-    assert_equal @agent.first_name, result.data.post_comment_in_ticket.comment.ticket.agent.first_name
+    @ticket.reload
+    assert_equal @comment_info, result.data.update_ticket.ticket.comments.last.info
+    assert_kind_of String, result.data.update_ticket.ticket.id
+    assert_equal @ticket.id, result.data.update_ticket.ticket.id
+    assert_equal @agent.id, @ticket.agent.id
   end
 
   test "auto assign agent to ticket" do
-
-    assert_raise(Graphlient::Errors::GraphQLError) do
-      AceHelp::Client.execute(@mutation_query, comment_args: {
-        user_id: @agent.id,
-        info: "Comment about a ticket by agent #{@agent.name}"
+    result =
+      AceHelp::Client.execute(@mutation_query, input: {
+        id: @ticket.id,
+        comment: "Comment about a ticket by agent #{@agent.name}"
       })
-    end
-  end
-
-  test "post comment without input arg : comment" do
-    assert_raise(Graphlient::Errors::GraphQLError) do
-      AceHelp::Client.execute(@mutation_query, comment_args: {
-        user_id: @agent.id,
-        ticket_id: @ticket.id,
-        info: "Comment about a ticket by agent #{@agent.name}"
-      })
-    end
-  end
-
-  test "post comment without user_id" do
-    assert_raise(Graphlient::Errors::GraphQLError) do
-      AceHelp::Client.execute(@mutation_query, comment_args: {
-        ticket_id: @ticket.id,
-        info: "Comment about a ticket by agent #{@agent.name}"
-      })
-    end
+    @ticket.reload
+    assert_equal @agent.id, @ticket.agent.id
   end
 
   test "post comment without ticket_id" do
-    assert_raise(Graphlient::Errors::GraphQLError) do
-      AceHelp::Client.execute(@mutation_query, comment_args: {
-        user_id: @agent.id,
-        info: "Comment about a ticket by agent #{@agent.name}"
-      })
-    end
+    result = AceHelp::Client.execute(@mutation_query, input: {
+      comment: "Comment about a ticket by agent #{@agent.name}"
+    })
+    assert_kind_of GraphQL::Client::Errors, result.data.errors
   end
 
   test "post comment as a user" do
+    @user = users :brad
+    sign_out @agent
+    sign_in @user
     @ticket.update status: Ticket.statuses[:resolved]
     assert_equal Ticket.statuses[:resolved], @ticket.status
-    result = AceHelp::Client.execute(@mutation_query, comment_args: {comment: {
-      user_id: @user.id,
-      ticket_id: @ticket.id,
-      info: "Comment about a ticket by a user #{@agent.name}"
-    }})
-    assert_equal Ticket.statuses[:open], result.data.post_comment_in_ticket.comment.ticket.status
+    result = AceHelp::Client.execute(@mutation_query, input: {
+      id: @ticket.id,
+      comment: "Comment about a ticket by a user #{@agent.name}"
+    })
+    assert_equal @ticket.status, result.data.update_ticket.ticket.status
   end
-
-
 end

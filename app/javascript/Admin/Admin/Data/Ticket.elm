@@ -28,6 +28,11 @@ type alias TicketInput =
     , status : String
     }
 
+type alias TicketNoteComment =
+    { id : TicketId
+    , note : String
+    , comment : String
+    }
 
 type alias TicketId =
     String
@@ -35,7 +40,6 @@ type alias TicketId =
 
 type alias Comment =
     { ticket_id : String
-    , commentable_id : String
     , info : String
     }
 
@@ -79,7 +83,6 @@ commentObject : GQLBuilder.ValueSpec GQLBuilder.NonNull GQLBuilder.ObjectType Co
 commentObject =
     GQLBuilder.object Comment
         |> GQLBuilder.with (GQLBuilder.field "ticket_id" [] GQLBuilder.string)
-        |> GQLBuilder.with (GQLBuilder.field "commentable_id" [] GQLBuilder.string)
         |> GQLBuilder.with (GQLBuilder.field "info" [] GQLBuilder.string)
 
 
@@ -119,6 +122,36 @@ updateTicketMutation =
                     [ ( "input"
                       , Arg.object
                             [ ( "status", Arg.variable statusVar )
+                            , ( "id", Arg.variable idVar )
+                            ]
+                      )
+                    ]
+                    (GQLBuilder.extract <|
+                        GQLBuilder.field "ticket"
+                            []
+                            (ticketObject)
+                    )
+
+
+addTicketNotesAndCommentMutation : GQLBuilder.Document GQLBuilder.Mutation Ticket TicketNoteComment
+addTicketNotesAndCommentMutation =
+    let
+        idVar =
+            Var.required "id" .id Var.string
+
+        noteVar =
+            Var.required "note" .note Var.string
+
+        commentVar =
+            Var.required "comment" .comment Var.string
+    in
+        GQLBuilder.mutationDocument <|
+            GQLBuilder.extract <|
+                GQLBuilder.field "updateTicket"
+                    [ ( "input"
+                      , Arg.object
+                            [ ( "comment", Arg.variable commentVar )
+                            , ( "note", Arg.variable noteVar )
                             , ( "id", Arg.variable idVar )
                             ]
                       )

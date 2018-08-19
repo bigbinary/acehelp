@@ -37,7 +37,7 @@ initModel ticketId =
     , status = ""
     , statuses = []
     , comments = []
-    , comment = Comment ticketId "" ""
+    , comment = Comment ticketId ""
     }
 
 
@@ -54,6 +54,7 @@ init ticketId =
 
 type Msg
     = NoteInput String
+    | CommentInput String
     | UpdateTicket
     | DeleteTicket
     | UpdateTicketResponse (Result GQLClient.Error Ticket)
@@ -68,8 +69,11 @@ update msg model =
         NoteInput note ->
             ( { model | note = note }, [] )
 
+        CommentInput comment ->
+            ( { model | comment = (Comment model.ticketId comment) }, [] )
+
         UpdateTicket ->
-            ( model, [] )
+            save model
 
         DeleteTicket ->
             deleteTicket model
@@ -80,6 +84,8 @@ update msg model =
                 , status = ticket.status
                 , statuses = ticket.statuses
                 , message = ticket.message
+                , comment = Comment ticket.id ""
+                , comments = ticket.comments
                 , success = Just "Ticket Updated Successfully..."
               }
             , []
@@ -101,6 +107,7 @@ update msg model =
                 , message = ticket.message
                 , statuses = ticket.statuses
                 , status = ticket.status
+                , comments = ticket.comments
               }
             , []
             )
@@ -121,7 +128,7 @@ view model =
     div [ class "row ticket-block" ]
         [ div
             [ class "col-md-8" ]
-            [ Html.form []
+            [ div []
                 [ div []
                     [ Maybe.withDefault (text "") <|
                         Maybe.map
@@ -142,32 +149,53 @@ view model =
                             )
                             model.success
                     ]
-                , div []
-                    [ label [] [ text <| "Message: " ++ model.message ]
+                , div [ class "card" ]
+                    [ h5 [] [ text "Message" ]
+                    , p [ class "card-text" ] [ text model.message ]
                     ]
+                , p [] []
                 , ul [ class "nav nav-tabs" ]
-                    [ li [ class "active" ]
-                        [ a [ attribute "data-toggle" "tab", href "#notes" ]
+                    [ li [ class "nav-item active" ]
+                        [ a
+                            [ class "nav-link active"
+                            , attribute "data-toggle" "tab"
+                            , href "#notes"
+                            ]
                             [ text "Internal Note" ]
                         ]
-                    , li []
-                        [ a [ attribute "data-toggle" "tab", href "#comment" ]
+                    , li [ class "nav-item" ]
+                        [ a
+                            [ class "nav-link"
+                            , attribute "data-toggle" "tab"
+                            , href "#comment"
+                            ]
                             [ text "Reply to Customer" ]
                         ]
                     ]
                 , div [ class "tab-content" ]
-                    [ div [ class "tab-pane fade in active", id "notes" ]
+                    [ div [ class "tab-pane active form-group", id "notes" ]
                         [ h3 [] [ text "Notes: " ]
                         , input
                             [ Html.Attributes.value <| model.note
                             , type_ "text"
+                            , class "form-control"
                             , placeholder "add notes here..."
                             , onInput NoteInput
                             ]
                             []
                         ]
-                    , div [ class "tab-pane fade", id "comment" ]
+                    , div [ class "tab-pane fade form-group", id "comment" ]
                         [ h3 [] [ text "Comment: " ]
+                        , input
+                            [ Html.Attributes.value <| model.comment.info
+                            , type_ "text"
+                            , placeholder "add comments here..."
+                            , class "form-control"
+                            , onInput CommentInput
+                            ]
+                            []
+                        , p [] []
+                        , h5 [] [ text "Comment List: " ]
                         , div [ class "ticket-comments" ]
                             (List.map
                                 (\comment ->
@@ -175,16 +203,10 @@ view model =
                                 )
                                 model.comments
                             )
-                        , input
-                            [ Html.Attributes.value <| model.note
-                            , type_ "text"
-                            , placeholder "add comments here..."
-                            , onInput NoteInput
-                            ]
-                            []
                         ]
                     ]
-                , button [ type_ "submit", class "btn btn-primary" ] [ text "Update URL" ]
+                , p [] []
+                , button [ type_ "submit", class "btn btn-primary", onClick UpdateTicket ] [ text "Submit" ]
                 ]
             ]
         , div [ class "col-sm" ]
@@ -193,6 +215,21 @@ view model =
             , deleteTicketButton model
             ]
         ]
+
+
+ticketInputs : TicketInput -> TicketInput
+ticketInputs { id, status } =
+    { status = status
+    , id = id
+    }
+
+
+ticketNoteComment : Model -> TicketNoteComment
+ticketNoteComment model =
+    { comment = model.comment.info
+    , id = model.ticketId
+    , note = model.note
+    }
 
 
 updateTicketStatus : Model -> TicketInput -> ( Model, List (ReaderCmd Msg) )
@@ -213,13 +250,23 @@ deleteTicket model =
         ( model, [ cmd ] )
 
 
+save : Model -> ( Model, List (ReaderCmd Msg) )
+save model =
+    let
+        cmd =
+            Strict <|
+                Reader.map (Task.attempt UpdateTicketResponse) (addNotesAndCommentToTicket (ticketNoteComment model))
+    in
+        ( model, [ cmd ] )
+
+
 ticketStatusDropDown : Model -> Html Msg
 ticketStatusDropDown model =
     div []
         [ div [ class "status-selection" ]
             [ div []
                 [ h2 [] [ text "Status Selector" ]
-                , select [ onInput UpdateTicketStatus ]
+                , select [ onInput UpdateTicketStatus, class "custom-select custom-select-lg mb-3" ]
                     (List.map (statusOption model) model.statuses)
                 ]
             ]
@@ -239,7 +286,7 @@ closeTicketButton model =
     div []
         [ button
             [ onClick (UpdateTicketStatus "closed")
-            , class "button primary closeTicket"
+            , class "btn btn-primary closeTicket"
             ]
             [ text "Close Ticket" ]
         ]
@@ -248,9 +295,10 @@ closeTicketButton model =
 deleteTicketButton : Model -> Html Msg
 deleteTicketButton model =
     div []
-        [ button
+        [ p [] []
+        , button
             [ onClick (DeleteTicket)
-            , class "button primary deleteTicket"
+            , class "btn btn-primary deleteTicket"
             ]
             [ text "Delete Ticket" ]
         ]
@@ -260,6 +308,6 @@ commentRows : Comment -> Html Msg
 commentRows comment =
     div
         [ class "comment-row" ]
-        [ span [ class "row-id" ] [ text comment.ticket_id ]
+        [ span [ class "row-id", id comment.ticket_id ] []
         , span [ class "row-name" ] [ text comment.info ]
         ]
