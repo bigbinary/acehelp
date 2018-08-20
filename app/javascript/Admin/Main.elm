@@ -571,9 +571,14 @@ update msg model =
                         CategoryEdit.update ctMsg
                             currentPageModel
                 in
-                    ( { model | currentPage = Loaded (CategoryEdit newModel) }
-                    , runReaderCmds CategoryEditMsg cmds
-                    )
+                    case ctMsg of
+                        CategoryEdit.UpdateCategoryResponse (Ok id) ->
+                            updateNavigation (NavigateTo (Route.CategoryList model.organizationKey))
+
+                        _ ->
+                            ( { model | currentPage = Loaded (CategoryEdit newModel) }
+                            , runReaderCmds CategoryEditMsg cmds
+                            )
 
             TeamListMsg tlmsg ->
                 let
