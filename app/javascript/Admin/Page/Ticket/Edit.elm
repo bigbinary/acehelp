@@ -267,8 +267,6 @@ updateTicketStatus model ticketInput =
 assignTicketAgent : Model -> TicketAgentInput -> ( Model, List (ReaderCmd Msg) )
 assignTicketAgent model ticketAgentInput =
     let
-        --cmd =
-        --    Task.attempt UpdateTicketResponse (Reader.run (assignTicketToAgent) ( nodeEnv, organizationKey, { id = ticketAgentInput.id, agent_id = ticketAgentInput.agent_id } ))
         cmd =
             Strict <| Reader.map (Task.attempt UpdateTicketResponse) (assignTicketToAgent { id = ticketAgentInput.id, agent_id = ticketAgentInput.agent_id })
     in
@@ -306,13 +304,14 @@ ticketStatusDropDown model =
             ]
         ]
 
+
 agentsDropDown : Model -> Html Msg
 agentsDropDown model =
     div []
         [ div [ class "agent-selection" ]
             [ div []
                 [ h2 [] [ text "Agent Selector" ]
-                , select [ onInput AssignTicketAgent ]
+                , select [ onInput AssignTicketAgent, class "custom-select custom-select-lg mb-3" ]
                     (List.map (agentOption model) model.agents)
                 ]
             ]
