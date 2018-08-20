@@ -14,7 +14,7 @@ type alias Ticket =
     , status : String
     , statuses : List TicketStatus
     , comments : List Comment
-    , agent : Agent
+    , agent : Maybe Agent
     }
 
 
@@ -29,11 +29,13 @@ type alias TicketInput =
     , status : String
     }
 
+
 type alias TicketNoteComment =
     { id : TicketId
     , note : String
     , comment : String
     }
+
 
 type alias TicketAgentInput =
     { id : TicketId
@@ -110,6 +112,7 @@ commentObject =
     GQLBuilder.object Comment
         |> GQLBuilder.with (GQLBuilder.field "ticket_id" [] GQLBuilder.string)
         |> GQLBuilder.with (GQLBuilder.field "info" [] GQLBuilder.string)
+
 
 agentObject : GQLBuilder.ValueSpec GQLBuilder.NonNull GQLBuilder.ObjectType Agent vars
 agentObject =
@@ -247,5 +250,5 @@ ticketObject =
         |> GQLBuilder.with
             (GQLBuilder.field "agent"
                 []
-                (agentObject)
+                (GQLBuilder.nullable agentObject)
             )
