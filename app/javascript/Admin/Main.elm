@@ -7,6 +7,7 @@ import Html.Events exposing (..)
 import Http
 import Navigation exposing (..)
 import Page.Session.Login as Login
+import Page.Session.ForgotPassword as ForgotPassword
 import Page.Article.Create as ArticleCreate
 import Page.Article.Edit as ArticleEdit
 import Page.Article.List as ArticleList
@@ -68,6 +69,7 @@ type Page
     | SignUp SignUp.Model
     | Dashboard
     | Login Login.Model
+    | ForgotPassword ForgotPassword.Model
     | NotFound
     | Blank
 
@@ -133,6 +135,7 @@ type Msg
     | SettingsMsg Settings.Msg
     | OnLocationChange Navigation.Location
     | LoginMsg Login.Msg
+    | ForgotPasswordMsg ForgotPassword.Msg
     | SignOut
     | SignedOut (Result Http.Error String)
     | SignUpMsg SignUp.Msg
@@ -262,6 +265,10 @@ navigateTo newRoute model =
             Route.Login ->
                 Login.init
                     |> transitionTo Login LoginMsg
+
+            Route.ForgotPassword ->
+                ForgotPassword.init
+                    |> transitionTo ForgotPassword ForgotPasswordMsg
 
             Route.NotFound ->
                 ( { model
@@ -701,6 +708,23 @@ update msg model =
                     , runReaderCmds LoginMsg cmds
                     )
 
+            ForgotPasswordMsg forgotPasswordMsg ->
+                let
+                    currentPageModel =
+                        case getPage model.currentPage of
+                            ForgotPassword forgotPasswordModel ->
+                                forgotPasswordModel
+
+                            _ ->
+                                ForgotPassword.initModel
+
+                    ( newModel, cmds ) =
+                        ForgotPassword.update forgotPasswordMsg currentPageModel
+                in
+                    ( { model | currentPage = Loaded (ForgotPassword newModel) }
+                    , runReaderCmds ForgotPasswordMsg cmds
+                    )
+
             OnLocationChange location ->
                 setRoute location model
 
@@ -816,6 +840,10 @@ view model =
 
                 Login _ ->
                     text ""
+
+                ForgotPassword forgotPasswordModel ->
+                    Html.map ForgotPasswordMsg
+                        (ForgotPassword.view forgotPasswordModel)
     in
         case model.currentPage of
             TransitioningFrom (Login loginModel) ->

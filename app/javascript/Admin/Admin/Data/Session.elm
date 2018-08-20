@@ -73,3 +73,26 @@ loginMutation =
                             GQLBuilder.string
                     )
                 )
+
+
+forgotPasswordMutation : GQLBuilder.Document GQLBuilder.Mutation String { a | email : String }
+forgotPasswordMutation =
+    let
+        emailVar =
+            Var.required "email" .email Var.string
+    in
+        GQLBuilder.mutationDocument <|
+            GQLBuilder.extract
+                (GQLBuilder.field "forgotPassword"
+                    [ ( "input"
+                      , Arg.object
+                            [ ( "email", Arg.variable emailVar )
+                            ]
+                      )
+                    ]
+                    (GQLBuilder.extract <|
+                        GQLBuilder.field "status"
+                            []
+                            GQLBuilder.string
+                    )
+                )
