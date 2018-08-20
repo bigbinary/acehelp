@@ -92,7 +92,7 @@ view model =
             , class "btn btn-primary"
             ]
             [ text "Open Feedback" ]
-        , div []
+        , div [ id "content-wrapper" ]
             (List.map
                 (\feedback ->
                     row model feedback
@@ -104,17 +104,11 @@ view model =
 
 row : Model -> Feedback -> Html Msg
 row model feedback =
-    div [ id feedback.id ]
-        [ div
-            [ onClick <| OnFeedbackClick feedback.id ]
-            [ text feedback.name ]
-        , div
-            []
-            [ text feedback.message ]
-        , div
-            []
-            [ text feedback.status ]
-        , hr [] []
+    div
+        [ class "feedback-row" ]
+        [ span [ class "row-id", onClick <| OnFeedbackClick feedback.id ] [ text feedback.id ]
+        , span [ class "row-name" ] [ text feedback.name ]
+        , span [ class "row-message" ] [ text feedback.message ]
         ]
 
 
