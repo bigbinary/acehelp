@@ -3,7 +3,7 @@ module Request.Article exposing (..)
 import Http
 import Task exposing (Task)
 import Reader exposing (Reader)
-import Request.Helpers exposing (apiUrl, graphqlUrl, httpGet, requestOptions, ApiKey, Context, NodeEnv)
+import Request.Helpers exposing (..)
 import Data.Article exposing (..)
 import Data.ContactUs exposing (FeedbackForm)
 import Data.Common exposing (..)
@@ -11,12 +11,21 @@ import GraphQL.Client.Http as GQLClient
 import GraphQL.Request.Builder as GQLBuilder
 
 
-requestArticleList : Context -> Reader ( NodeEnv, ApiKey ) (Task GQLClient.Error (List ArticleSummary))
-requestArticleList context =
+requestArticleList : Reader ( NodeEnv, ApiKey ) (Task GQLClient.Error (List ArticleSummary))
+requestArticleList =
     Reader.Reader
         (\( env, apiKey ) ->
             GQLClient.customSendQuery (requestOptions env apiKey) <|
                 GQLBuilder.request {} articlesQuery
+        )
+
+
+requestSuggestedArticles : Context -> Reader ( NodeEnv, ApiKey ) (Task GQLClient.Error (List ArticleSummary))
+requestSuggestedArticles context =
+    Reader.Reader
+        (\( env, apiKey ) ->
+            GQLClient.customSendQuery (requestOptions env apiKey) <|
+                GQLBuilder.request { url = contextToMaybe context } suggestedArticledQuery
         )
 
 

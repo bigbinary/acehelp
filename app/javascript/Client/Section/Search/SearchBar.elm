@@ -1,4 +1,4 @@
-module Section.Search exposing (..)
+module Section.Search.SearchBar exposing (..)
 
 import Html exposing (..)
 import Html.Attributes as Attributes exposing (class, style, placeholder, type_)
@@ -10,7 +10,7 @@ import Request.Helpers exposing (NodeEnv, ApiKey)
 import FontAwesome.Solid as SolidIcon
 import Reader exposing (Reader, run)
 import Task exposing (Task)
-import Section.Helpers exposing (..)
+import Data.Common exposing (..)
 
 
 -- MODEL
@@ -47,24 +47,25 @@ view model color =
 -- UPDATE
 
 
-update : Msg -> Model -> ( Model, SectionCmd Msg )
+update : Msg -> Model -> ( Model, List (SectionCmd Msg) )
 update msg model =
     case msg of
         OnSearch ->
             ( model
-            , Just <|
-                Reader.map (Task.attempt SearchResultsReceived)
-                    (requestSearch model)
+            , [ Strict <|
+                    Reader.map (Task.attempt SearchResultsReceived)
+                        (requestSearch model)
+              ]
             )
 
         OnSearchQueryInput searchQuery ->
-            ( String.trim searchQuery, Nothing )
+            ( String.trim searchQuery, [] )
 
         SearchResultsReceived (Ok articleListResponse) ->
-            ( model, Nothing )
+            ( model, [] )
 
         SearchResultsReceived (Err articleListResponse) ->
-            ( model, Nothing )
+            ( model, [] )
 
 
 requestSearch : Model -> Reader ( NodeEnv, ApiKey ) (Task Http.Error ArticleListResponse)
