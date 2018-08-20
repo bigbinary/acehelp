@@ -1,6 +1,7 @@
 doctype html
 html
   head
+    = csrf_meta_tags
     meta content=("text/html; charset=UTF-8") http-equiv="Content-Type" /
     meta charset="UTF-8" /
     meta name="organization_key" value="#{@organization&.api_key}" /
