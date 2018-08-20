@@ -25,7 +25,6 @@ import Page.Organization.Create as OrganizationCreate
 import Page.Session.SignUp as SignUp
 import Page.Errors as Errors
 import Admin.Request.Helper exposing (NodeEnv, ApiKey, logoutRequest)
-import Route
 import Admin.Data.ReaderCmd exposing (..)
 import Page.Ticket.List as TicketList
 import Page.Ticket.Edit as TicketEdit
@@ -363,9 +362,14 @@ update msg model =
                         ArticleEdit.update aeMsg
                             currentPageModel
                 in
-                    ( { model | currentPage = Loaded (ArticleEdit newModel) }
-                    , runReaderCmds ArticleEditMsg cmds
-                    )
+                    case aeMsg of
+                        ArticleEdit.SaveArticleResponse (Ok id) ->
+                            updateNavigation (NavigateTo (Route.ArticleList model.organizationKey))
+
+                        _ ->
+                            ( { model | currentPage = Loaded (ArticleEdit newModel) }
+                            , runReaderCmds ArticleEditMsg cmds
+                            )
 
             UrlCreateMsg cuMsg ->
                 let

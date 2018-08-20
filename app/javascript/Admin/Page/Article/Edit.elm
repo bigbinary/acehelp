@@ -20,6 +20,8 @@ import Page.Article.Common exposing (..)
 import GraphQL.Client.Http as GQLClient
 import Admin.Ports exposing (..)
 import Admin.Data.ReaderCmd exposing (..)
+import Navigation exposing (..)
+import Route
 
 
 -- Model
@@ -139,13 +141,8 @@ update msg model =
             save model
 
         SaveArticleResponse (Ok article) ->
-            ( { model
-                | title = Field.update model.title article.title
-                , desc = Field.update model.desc article.desc
-                , status = None
-              }
-            , []
-            )
+            -- NOTE: Redirection handled in Main
+            ( model, [] )
 
         SaveArticleResponse (Err error) ->
             ( { model | error = Just (toString error), status = None }, [] )
