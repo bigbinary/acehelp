@@ -732,10 +732,10 @@ update msg model =
                 setRoute location model
 
             SignOut ->
-                ( model, Http.send SignedOut (logoutRequest model.nodeEnv) )
+                ( model, Http.send SignedOut (logoutRequest model.nodeEnv model.appUrl) )
 
             SignedOut _ ->
-                ( model, load (Admin.Request.Helper.baseUrl model.nodeEnv) )
+                ( model, load (Admin.Request.Helper.baseUrl model.nodeEnv model.appUrl) )
 
 
 
@@ -795,7 +795,7 @@ view model =
 
                 Settings settingsModel ->
                     Html.map SettingsMsg
-                        (Settings.view model.organizationKey settingsModel)
+                        (Settings.view model.nodeEnv model.organizationKey model.appUrl settingsModel)
 
                 TicketList ticketListModel ->
                     Html.map TicketListMsg

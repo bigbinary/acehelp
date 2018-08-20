@@ -39,11 +39,16 @@ type alias RequestData =
     }
 
 
-baseUrl : NodeEnv -> Url
-baseUrl env =
+baseUrl : NodeEnv -> AppUrl -> Url
+baseUrl env appUrl =
     case env of
         "production" ->
-            "https://staging.acehelp.com/"
+            case String.isEmpty <| appUrl of
+                True ->
+                    "https://staging.acehelp.com/"
+
+                False ->
+                    "https://" ++ appUrl ++ ".herokuapp.com"
 
         "development" ->
             "http://localhost:3000/"
@@ -133,12 +138,12 @@ httpRequest requestData decoder =
             }
 
 
-logoutRequest : NodeEnv -> Http.Request String
-logoutRequest env =
+logoutRequest : NodeEnv -> AppUrl -> Http.Request String
+logoutRequest env appUrl =
     Http.request
         { method = "DELETE"
         , headers = []
-        , url = (baseUrl env) ++ "users/sign_out"
+        , url = (baseUrl env appUrl) ++ "users/sign_out"
         , body = Http.emptyBody
         , expect = Http.expectString
         , timeout = Nothing
