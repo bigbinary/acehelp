@@ -95,6 +95,11 @@ view model =
                     )
                     model.error
             ]
+        , button
+            [ onClick OnArticleCreateClick
+            , class "btn btn-primary"
+            ]
+            [ text "New Article" ]
         , div
             [ class "listingSection" ]
             (List.map
@@ -103,11 +108,6 @@ view model =
                 )
                 model.articles
             )
-        , button
-            [ onClick OnArticleCreateClick
-            , class "btn btn-primary"
-            ]
-            [ text "New Article" ]
         ]
 
 

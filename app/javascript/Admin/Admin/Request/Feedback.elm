@@ -8,21 +8,21 @@ import GraphQL.Client.Http as GQLClient
 import GraphQL.Request.Builder as GQLBuilder
 
 
-requestFeedbacks : FeedbackStatus -> Reader ( NodeEnv, ApiKey ) (Task GQLClient.Error (List Feedback))
+requestFeedbacks : FeedbackStatus -> Reader ( NodeEnv, ApiKey, AppUrl ) (Task GQLClient.Error (List Feedback))
 requestFeedbacks status =
     Reader.Reader
-        (\( nodeEnv, apiKey ) ->
-            (GQLClient.customSendQuery (requestOptions nodeEnv apiKey) <|
+        (\( nodeEnv, apiKey, appUrl ) ->
+            (GQLClient.customSendQuery (requestOptions nodeEnv apiKey appUrl) <|
                 GQLBuilder.request { status = status } requestFeedbacksQuery
             )
         )
 
 
-requestFeedbackById : FeedbackId -> Reader ( NodeEnv, ApiKey ) (Task GQLClient.Error Feedback)
+requestFeedbackById : FeedbackId -> Reader ( NodeEnv, ApiKey, AppUrl ) (Task GQLClient.Error Feedback)
 requestFeedbackById feedbackId =
     Reader.Reader
-        (\( env, apiKey ) ->
-            GQLClient.customSendQuery (requestOptions env apiKey) <|
+        (\( nodeEnv, apiKey, appUrl ) ->
+            GQLClient.customSendQuery (requestOptions nodeEnv apiKey appUrl) <|
                 (GQLBuilder.request
                     { id = feedbackId }
                     feedbackByIdQuery
@@ -30,11 +30,11 @@ requestFeedbackById feedbackId =
         )
 
 
-requestUpdateFeedbackStatus : FeedbackId -> String -> Reader ( NodeEnv, ApiKey ) (Task GQLClient.Error Feedback)
+requestUpdateFeedbackStatus : FeedbackId -> String -> Reader ( NodeEnv, ApiKey, AppUrl ) (Task GQLClient.Error Feedback)
 requestUpdateFeedbackStatus feedbackId feedbackStatus =
     Reader.Reader
-        (\( nodeEnv, apiKey ) ->
-            (GQLClient.customSendMutation (requestOptions nodeEnv apiKey) <|
+        (\( nodeEnv, apiKey, appUrl ) ->
+            (GQLClient.customSendMutation (requestOptions nodeEnv apiKey appUrl) <|
                 GQLBuilder.request { id = feedbackId, status = feedbackStatus } updateFeedabackStatusMutation
             )
         )

@@ -42,11 +42,11 @@ requestOrganization env apiKey organizationId =
             }
 
 
-requestCreateOrganization : OrganizationData -> Reader NodeEnv (Task GQLClient.Error Organization)
+requestCreateOrganization : OrganizationData -> Reader ( NodeEnv, AppUrl ) (Task GQLClient.Error Organization)
 requestCreateOrganization orgInputs =
     Reader.Reader
-        (\env ->
-            GQLClient.sendMutation (graphqlUrl env) <|
+        (\( nodeEnv, appUrl ) ->
+            GQLClient.sendMutation (graphqlUrl nodeEnv appUrl) <|
                 (GQLBuilder.request
                     { name = orgInputs.name
                     , email = orgInputs.email

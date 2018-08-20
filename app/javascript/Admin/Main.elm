@@ -45,6 +45,7 @@ type alias Flags =
     , organization_name : String
     , user_id : String
     , user_email : String
+    , app_url : String
     }
 
 
@@ -87,6 +88,7 @@ type alias Model =
     , organizationName : String
     , userId : String
     , userEmail : String
+    , appUrl : String
     , error : Maybe String
     }
 
@@ -105,6 +107,7 @@ init flags location =
             , organizationName = flags.organization_name
             , userId = flags.user_id
             , userEmail = flags.user_email
+            , appUrl = flags.app_url
             , error = Nothing
             }
     in
@@ -183,7 +186,7 @@ navigateTo newRoute model =
                         | currentPage = TransitioningFrom (getPage model.currentPage)
                         , route = newRoute
                       }
-                    , readerCmdToCmd model.nodeEnv model.organizationKey msg pageCmds
+                    , readerCmdToCmd model.nodeEnv model.organizationKey model.appUrl msg pageCmds
                     )
     in
         case newRoute of
@@ -284,7 +287,7 @@ update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     let
         runReaderCmds =
-            readerCmdToCmd model.nodeEnv model.organizationKey
+            readerCmdToCmd model.nodeEnv model.organizationKey model.appUrl
 
         updateNavigation =
             flip update model

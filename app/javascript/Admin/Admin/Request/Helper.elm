@@ -17,6 +17,10 @@ type alias NodeEnv =
     String
 
 
+type alias AppUrl =
+    String
+
+
 type alias QueryParameters =
     List ( String, String )
 
@@ -55,15 +59,15 @@ defaultRequestHeaders =
     ]
 
 
-requestOptions : NodeEnv -> ApiKey -> RequestOptions
-requestOptions env apiKey =
+requestOptions : NodeEnv -> ApiKey -> AppUrl -> RequestOptions
+requestOptions env apiKey appUrl =
     let
         headers =
             [ Http.header "api-key" apiKey
             ]
 
         url =
-            graphqlUrl env
+            graphqlUrl env appUrl
     in
         { method = "POST"
         , url = url
@@ -91,11 +95,16 @@ constructUrl url params =
                     )
 
 
-graphqlUrl : String -> String
-graphqlUrl env =
+graphqlUrl : NodeEnv -> AppUrl -> String
+graphqlUrl env appUrl =
     case env of
         "production" ->
-            "https://staging.acehelp.com/graphql/"
+            case String.isEmpty <| appUrl of
+                True ->
+                    "https://staging.acehelp.com/graphql/"
+
+                False ->
+                    "https://" ++ appUrl ++ "/graphql"
 
         _ ->
             "/graphql/"
