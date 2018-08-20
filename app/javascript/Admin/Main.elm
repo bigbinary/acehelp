@@ -617,9 +617,14 @@ update msg model =
                         TeamMemberCreate.update tcmsg
                             currentPageModel
                 in
-                    ( { model | currentPage = Loaded (TeamMemberCreate newModel) }
-                    , runReaderCmds TeamCreateMsg cmds
-                    )
+                    case tcmsg of
+                        TeamMemberCreate.SaveTeamResponse (Ok id) ->
+                            updateNavigation (NavigateTo (Route.TeamList model.organizationKey))
+
+                        _ ->
+                            ( { model | currentPage = Loaded (TeamMemberCreate newModel) }
+                            , runReaderCmds TeamCreateMsg cmds
+                            )
 
             TicketEditMsg teMsg ->
                 let
