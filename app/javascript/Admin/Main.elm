@@ -407,9 +407,14 @@ update msg model =
                     ( newModel, cmds ) =
                         UrlEdit.update ueMsg currentPageModel
                 in
-                    ( { model | currentPage = Loaded (UrlEdit newModel) }
-                    , runReaderCmds UrlEditMsg cmds
-                    )
+                    case ueMsg of
+                        UrlEdit.UpdateUrlResponse (Ok id) ->
+                            updateNavigation (NavigateTo (Route.UrlList model.organizationKey))
+
+                        _ ->
+                            ( { model | currentPage = Loaded (UrlEdit newModel) }
+                            , runReaderCmds UrlEditMsg cmds
+                            )
 
             UrlListMsg ulMsg ->
                 let
