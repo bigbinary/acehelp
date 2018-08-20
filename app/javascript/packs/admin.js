@@ -15,14 +15,19 @@ import "../../assets/stylesheets/admin/index.scss";
 document.addEventListener("DOMContentLoaded", () => {
     var node = document.getElementById("admin-hook");
     var org_key_target = document.querySelector("meta[name=organization_key]");
+    var org_name_target = document.querySelector(
+        "meta[name=organization_name]"
+    );
     var user_id_target = document.querySelector("meta[name=user_id]");
     var user_email_target = document.querySelector("meta[name=user_email]");
+    var org_name = org_name_target.getAttribute("value");
     var org_key = org_key_target.getAttribute("value");
     var user_id = user_id_target.getAttribute("value");
     var user_email = user_email_target.getAttribute("value");
     var app = Elm.Main.embed(node, {
         node_env: process.env.NODE_ENV,
         organization_key: org_key,
+        organization_name: org_name,
         user_id: user_id,
         user_email: user_email
     });
