@@ -82,23 +82,48 @@ view model =
                     )
                     model.error
             ]
-        , button
-            [ onClick (FeedbackListReloaded "closed")
-            , class "btn btn-primary"
+        , ul [ class "nav nav-tabs" ]
+            [ li [ class "nav-item active" ]
+                [ a
+                    [ class "nav-link active"
+                    , attribute "data-toggle" "tab"
+                    , href "#open-feedbacks"
+                    , onClick (FeedbackListReloaded "open")
+                    ]
+                    [ text "Open Feedback" ]
+                ]
+            , li [ class "nav-item" ]
+                [ a
+                    [ class "nav-link"
+                    , attribute "data-toggle" "tab"
+                    , href "#closed-feedbacks"
+                    , onClick (FeedbackListReloaded "closed")
+                    ]
+                    [ text "Closed Feedback" ]
+                ]
             ]
-            [ text "Closed Feedback" ]
-        , button
-            [ onClick (FeedbackListReloaded "open")
-            , class "btn btn-primary"
+        , div [ class "tab-content" ]
+            [ div [ class "tab-pane active form-group", id "open-feedbacks" ]
+                [ h3 [] [ text "Open Feedbacks: " ]
+                , div [ id "content-wrapper" ]
+                    (List.map
+                        (\feedback ->
+                            row model feedback
+                        )
+                        model.feedbackList
+                    )
+                ]
+            , div [ class "tab-pane form-group", id "closed-feedbacks" ]
+                [ h3 [] [ text "Closed Feedbacks: " ]
+                , div [ id "content-wrapper" ]
+                    (List.map
+                        (\feedback ->
+                            row model feedback
+                        )
+                        model.feedbackList
+                    )
+                ]
             ]
-            [ text "Open Feedback" ]
-        , div [ id "content-wrapper" ]
-            (List.map
-                (\feedback ->
-                    row model feedback
-                )
-                model.feedbackList
-            )
         ]
 
 

@@ -553,9 +553,14 @@ update msg model =
                         FeedbackShow.update fsMsg
                             currentPageModel
                 in
-                    ( { model | currentPage = Loaded (FeedbackShow newModel) }
-                    , runReaderCmds FeedbackShowMsg cmds
-                    )
+                    case fsMsg of
+                        FeedbackShow.UpdateFeedbackResponse (Ok feedback) ->
+                            updateNavigation (NavigateTo (Route.FeedbackList model.organizationKey))
+
+                        _ ->
+                            ( { model | currentPage = Loaded (FeedbackShow newModel) }
+                            , runReaderCmds FeedbackShowMsg cmds
+                            )
 
             CategoryEditMsg ctMsg ->
                 let
