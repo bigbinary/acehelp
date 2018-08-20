@@ -863,10 +863,17 @@ adminHeader : Model -> Html Msg
 adminHeader model =
     nav [ class "header navbar navbar-dark bg-primary navbar-expand flex-column flex-md-row" ]
         [ div [ class "container" ]
-            [ span [ class "org-name" ] [ text model.organizationName ]
-            , ul
+            --[ span [ class "org-name" ] [ text model.organizationName ]
+            [ ul
                 [ class "navbar-nav mr-auto mt-2 mt-lg-0 " ]
                 [ li [ class "nav-item" ]
+                    [ Html.a
+                        [ classList
+                            [ ( "navbar-brand", True ) ]
+                        ]
+                        [ span [] [ text model.organizationName ] ]
+                    ]
+                , li [ class "nav-item" ]
                     [ Html.a
                         [ classList
                             [ ( "nav-link", True )
