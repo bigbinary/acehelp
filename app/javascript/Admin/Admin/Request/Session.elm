@@ -53,13 +53,13 @@ requestLogin authInputs =
         )
 
 
-requestResetPassword : { a | email : String } -> Reader NodeEnv (Task GQLClient.Error String)
+requestResetPassword : { a | email : String } -> Reader ( NodeEnv, AppUrl ) (Task GQLClient.Error String)
 requestResetPassword emailInput =
     Reader.Reader
-        (\nodeEnv ->
+        (\( nodeEnv, appUrl ) ->
             GQLClient.customSendMutation
                 ({ method = "POST"
-                 , url = graphqlUrl nodeEnv
+                 , url = graphqlUrl nodeEnv appUrl
                  , headers = []
                  , timeout = Nothing
                  , withCredentials = False
