@@ -25,7 +25,7 @@ type alias Model =
     , comments : List Comment
     , comment : Comment
     , agents : List Agent
-    , agent : Agent
+    , agent : Maybe Agent
     }
 
 
@@ -41,7 +41,7 @@ initModel ticketId =
     , comments = []
     , comment = Comment ticketId ""
     , agents = []
-    , agent = Agent "" ""
+    , agent = Nothing
     }
 
 
@@ -312,7 +312,7 @@ agentsDropDown model =
             [ div []
                 [ h2 [] [ text "Agent Selector" ]
                 , select [ onInput AssignTicketAgent, class "custom-select custom-select-lg mb-3" ]
-                    (List.map (agentOption model) model.agents)
+                    (List.map (agentOption model.agent) model.agents)
                 ]
             ]
         ]
@@ -326,11 +326,16 @@ statusOption model status =
         option [ value (status.value) ] [ text (status.key) ]
 
 
-agentOption model agent =
-    if agent == model.agent then
-        option [ value (agent.id), selected True ] [ text (agent.name) ]
-    else
-        option [ value (agent.id) ] [ text (agent.name) ]
+agentOption selectedAgent agent =
+    case selectedAgent of
+        Nothing ->
+            option [ value (agent.id) ] [ text (agent.name) ]
+
+        Just selectedAgent ->
+            if agent == selectedAgent then
+                option [ value (agent.id), selected True ] [ text (agent.name) ]
+            else
+                option [ value (agent.id) ] [ text (agent.name) ]
 
 
 defaultOption _ =
