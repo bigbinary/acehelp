@@ -104,7 +104,7 @@ graphqlUrl env appUrl =
                     "https://staging.acehelp.com/graphql/"
 
                 False ->
-                    "https://" ++ appUrl ++ "/graphql"
+                    "https://" ++ appUrl ++ ".herokuapp.com/graphql"
 
         _ ->
             "/graphql/"
