@@ -13,7 +13,9 @@ import Views.Loading exposing (sectionLoadingView)
 import Views.Tabs as Tabs
 import Section.Search.SearchBar as SearchBar
 import Data.Article exposing (ArticleId, ArticleResponse, ArticleSummary)
+import Data.Organization exposing (..)
 import Data.Common exposing (..)
+import Request.Organization exposing (..)
 import Request.Helpers exposing (ApiKey, NodeEnv, Context(..))
 import Utils exposing (getUrlPathData)
 import Animation
@@ -62,6 +64,7 @@ type alias Model =
     , searchQuery : SearchBar.Model
     , history : ModelHistory
     , userInfo : UserInfo
+    , renderHelpButton : Bool
     }
 
 
@@ -93,8 +96,10 @@ init flags location =
       , searchQuery = ""
       , history = NoHistory
       , userInfo = { name = "", email = "" }
+      , renderHelpButton = True
       }
-    , Cmd.none
+    , Task.attempt OrganizationLoaded
+        (Reader.run (requestOrganizations flags.api_key) ( flags.node_env, flags.api_key ))
     )
 
 
@@ -104,6 +109,7 @@ init flags location =
 
 type Msg
     = Animate Animation.Msg
+    | OrganizationLoaded (Result GQLClient.Error Organization)
     | SetAppState AppState
     | SuggestedArticlesMsg SuggestedList.Msg
     | ArticleMsg Article.Msg
@@ -136,6 +142,12 @@ update msg model =
                   }
                 , Cmd.none
                 )
+
+            OrganizationLoaded (Ok organization) ->
+                ( { model | renderHelpButton = True }, Cmd.none )
+
+            OrganizationLoaded (Err error) ->
+                ( { model | renderHelpButton = False }, Cmd.none )
 
             SetAppState appState ->
                 let
@@ -424,19 +436,23 @@ onTabChange tab model =
 -- VIEW
 
 
-minimizedView : Html Msg
+minimizedView :  Model -> Html Msg
 minimizedView =
-    div
-        [ id "mini-view"
-        , style
-            [ ( "background-color", "rgb(60, 170, 249)" )
-            , ( "color", "#fff" )
-            ]
-        , onClick (SetAppState Maximized)
-        ]
-        [ div [ class "question-icon" ]
-            [ SolidIcon.question ]
-        ]
+    case model.renderHelpButton of
+        True ->
+            div
+                [ id "mini-view"
+                , style
+                    [ ( "background-color", "rgb(60, 170, 249)" )
+                    , ( "color", "#fff" )
+                    ]
+                , onClick (SetAppState Maximized)
+                ]
+                [ div [ class "question-icon" ]
+                    [ SolidIcon.question ]
+                ]
+        _->
+            div [] []
 
 
 maximizedView : Model -> Html Msg
@@ -479,7 +495,7 @@ view : Model -> Html Msg
 view model =
     case model.currentAppState of
         Minimized ->
-            minimizedView
+            minimizedView model
 
         Maximized ->
             maximizedView model
