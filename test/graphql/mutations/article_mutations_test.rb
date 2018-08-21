@@ -134,4 +134,44 @@ class Mutations::ArticleMutationsTest < ActiveSupport::TestCase
 
     assert_equal result.data.delete_article.deleted_id, @article.id
   end
+
+  test "mark online mutations" do
+    mutation = <<-'GRAPHQL'
+              mutation($input: MarkOnlineInput!) {
+                markOnline(input: $input) {
+                  article {
+                    id
+                    status
+                  }
+                  errors {
+                    message
+                    path
+                  }
+                }
+              }
+    GRAPHQL
+
+    result = AceHelp::Client.execute(mutation, input: { id: @article.id })
+    assert_equal result.data.mark_online.article.status, "online"
+  end
+
+  test "mark offline mutations" do
+    mutation = <<-'GRAPHQL'
+                mutation($input: MarkOfflineInput!) {
+                  markOffline(input: $input) {
+                    article {
+                      id
+                      status
+                    }
+                    errors {
+                      message
+                      path
+                    }
+                  }
+                }
+    GRAPHQL
+
+    result = AceHelp::Client.execute(mutation, input: { id: @article.id })
+    assert_equal result.data.mark_offline.article.status, "offline"
+  end
 end
