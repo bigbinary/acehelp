@@ -24,11 +24,7 @@ organizationQuery =
         GQLBuilder.queryDocument <|
             GQLBuilder.extract
                 (GQLBuilder.field "organizations"
-                    [ ( "input"
-                      , Arg.object
-                            [ ( "api_key", Arg.variable apiKeyVar ) ]
-                      )
-                    ]
+                    [ ( "api_key", Arg.variable apiKeyVar ) ]
                     (GQLBuilder.object Organization
                         |> GQLBuilder.with (GQLBuilder.field "id" [] GQLBuilder.string)
                         |> GQLBuilder.with (GQLBuilder.field "name" [] GQLBuilder.string)

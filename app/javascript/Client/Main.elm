@@ -397,7 +397,6 @@ setAppState appState model =
             , Cmd.none
             )
 
-
 transitionTo : Model -> (b -> Section) -> (msg -> msg1) -> ( b, List (SectionCmd msg) ) -> ( Model, Cmd msg1 )
 transitionTo model sec msg ( sectionModel, sectionCmds ) =
     case sectionCmds of
