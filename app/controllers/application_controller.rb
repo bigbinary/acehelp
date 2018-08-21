@@ -1,15 +1,15 @@
 # frozen_string_literal: true
 
 class ApplicationController < ActionController::Base
-  include DeviseTokenAuth::Concerns::SetUserByToken
   include ::Concerns::ErrorHandlers
 
   before_action :configure_permitted_parameters, if: :devise_controller?
   rescue_from ActiveRecord::RecordNotFound, with: :render_not_found
   skip_before_action :verify_authenticity_token
 
-  private
+  include Concerns::DeviseTokenAuthWithGraphql
 
+  private
     def ensure_user_is_logged_in
       unless current_user
         redirect_to new_user_session_path
