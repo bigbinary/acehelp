@@ -4,12 +4,9 @@ require "test_helper"
 require "graphql/client_host"
 
 class Mutations::PostCommentInTicketMutationsTest < ActiveSupport::TestCase
-  include Devise::Test::IntegrationHelpers
-
   setup do
     @ticket = tickets(:payment_issue_ticket)
     @agent = agents(:illya_kuryakin)
-    sign_in @agent
     @comment_info = "Comment about a ticket by agent #{@agent.name}"
     @mutation_query = <<-GRAPHQL
       mutation($input: UpdateTicketInput!) {
@@ -32,11 +29,10 @@ class Mutations::PostCommentInTicketMutationsTest < ActiveSupport::TestCase
       }
     GRAPHQL
 
-
   end
 
   test "post comment" do
-    result = AceHelp::Client.execute(@mutation_query, input: {
+    result = AceHelp::ClientLoggedIn.call(@agent).execute(@mutation_query, input: {
       id: @ticket.id,
       comment: @comment_info
     })
@@ -49,7 +45,7 @@ class Mutations::PostCommentInTicketMutationsTest < ActiveSupport::TestCase
 
   test "auto assign agent to ticket" do
     result =
-      AceHelp::Client.execute(@mutation_query, input: {
+      AceHelp::ClientLoggedIn.call(@agent).execute(@mutation_query, input: {
         id: @ticket.id,
         comment: "Comment about a ticket by agent #{@agent.name}"
       })
@@ -58,7 +54,7 @@ class Mutations::PostCommentInTicketMutationsTest < ActiveSupport::TestCase
   end
 
   test "post comment without ticket_id" do
-    result = AceHelp::Client.execute(@mutation_query, input: {
+    result = AceHelp::ClientLoggedIn.call(@agent).execute(@mutation_query, input: {
       comment: "Comment about a ticket by agent #{@agent.name}"
     })
     assert_kind_of GraphQL::Client::Errors, result.data.errors
@@ -66,11 +62,9 @@ class Mutations::PostCommentInTicketMutationsTest < ActiveSupport::TestCase
 
   test "post comment as a user" do
     @user = users :brad
-    sign_out @agent
-    sign_in @user
     @ticket.update status: Ticket.statuses[:resolved]
     assert_equal Ticket.statuses[:resolved], @ticket.status
-    result = AceHelp::Client.execute(@mutation_query, input: {
+    result = AceHelp::ClientLoggedIn.call(@user).execute(@mutation_query, input: {
       id: @ticket.id,
       comment: "Comment about a ticket by a user #{@agent.name}"
     })
