@@ -205,14 +205,14 @@ deleteArticleMutation =
 
 
 articleStatusMutation : String -> GQLBuilder.Document GQLBuilder.Mutation Article { vars | id : ArticleId }
-articleStatusMutation statusType =
+articleStatusMutation mutationType =
     let
         idVar =
             Var.required "id" .id Var.string
     in
         GQLBuilder.mutationDocument <|
             GQLBuilder.extract <|
-                GQLBuilder.field statusType
+                GQLBuilder.field mutationType
                     [ ( "input"
                       , Arg.object
                             [ ( "id", Arg.variable idVar ) ]
