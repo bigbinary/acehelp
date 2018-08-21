@@ -17,6 +17,15 @@ requestTickets =
         )
 
 
+requestAgents : Reader ( NodeEnv, ApiKey, AppUrl ) (Task GQLClient.Error (List Agent))
+requestAgents =
+    Reader.Reader
+        (\( env, apiKey, appUrl ) ->
+            GQLClient.customSendQuery (requestOptions env apiKey appUrl) <|
+                GQLBuilder.request {} requestAgentsQuery
+        )
+
+
 requestTicketById : TicketId -> Reader ( NodeEnv, ApiKey, AppUrl ) (Task GQLClient.Error Ticket)
 requestTicketById ticketId =
     Reader.Reader
@@ -52,5 +61,15 @@ addNotesAndCommentToTicket ticket =
         (\( nodeEnv, apiKey, appUrl ) ->
             (GQLClient.customSendMutation (requestOptions nodeEnv apiKey appUrl) <|
                 GQLBuilder.request ticket addTicketNotesAndCommentMutation
+            )
+        )
+
+
+assignTicketToAgent : TicketAgentInput -> Reader ( NodeEnv, ApiKey, AppUrl ) (Task GQLClient.Error Ticket)
+assignTicketToAgent ticketAgentInput =
+    Reader.Reader
+        (\( nodeEnv, apiKey, appUrl ) ->
+            (GQLClient.customSendMutation (requestOptions nodeEnv apiKey appUrl) <|
+                GQLBuilder.request ticketAgentInput assignTicketToAgentMutation
             )
         )

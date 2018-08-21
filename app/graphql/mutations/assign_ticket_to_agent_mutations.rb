@@ -8,23 +8,25 @@ class Mutations::AssignTicketToAgentMutations
     input_field :agent_id, !types.String
 
     return_field :status, types.Boolean
+    return_field :ticket, Types::TicketType
     return_field :errors, types[Types::ErrorType]
 
     resolve -> (object, inputs, context) {
-
       ticket = Ticket.find_by(id: inputs[:ticket_id], organization_id: context[:organization].id)
-      agent = Agent.find_by(id: inputs[:agent_id], organization_id: context[:organization].id)
+      agent = Agent.for_organization(context[:organization]).find_by(id: inputs[:agent_id])
       if ticket.nil?
-        err_message = "Ticket not found"
+        errors = Utils::ErrorHandler.new.error("Ticket Not found", context)
       elsif agent.nil?
-        err_message = "Agent not found"
+        errors = Utils::ErrorHandler.new.error("Agent Not found", context)
       else
         status = ticket.assign_agent(agent.id)
+        updated_ticket = ticket.reload
       end
 
       {
         status: status,
-        errors: err_message ? Utils::ErrorHandler.new.error(err_message, context) : []
+        ticket: updated_ticket,
+        errors: errors
       }
     }
   end

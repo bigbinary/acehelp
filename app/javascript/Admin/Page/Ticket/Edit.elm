@@ -24,6 +24,8 @@ type alias Model =
     , statuses : List TicketStatus
     , comments : List Comment
     , comment : Comment
+    , agents : List Agent
+    , agent : Maybe Agent
     }
 
 
@@ -38,13 +40,17 @@ initModel ticketId =
     , statuses = []
     , comments = []
     , comment = Comment ticketId ""
+    , agents = []
+    , agent = Nothing
     }
 
 
 init : TicketId -> ( Model, List (ReaderCmd Msg) )
 init ticketId =
     ( initModel ticketId
-    , [ Strict <| Reader.map (Task.attempt TicketLoaded) (requestTicketById ticketId) ]
+    , [ Strict <| Reader.map (Task.attempt TicketLoaded) (requestTicketById ticketId)
+      , Strict <| Reader.map (Task.attempt AgentsLoaded) (requestAgents)
+      ]
     )
 
 
@@ -60,7 +66,9 @@ type Msg
     | UpdateTicketResponse (Result GQLClient.Error Ticket)
     | DeleteTicketResponse (Result GQLClient.Error Ticket)
     | TicketLoaded (Result GQLClient.Error Ticket)
+    | AgentsLoaded (Result GQLClient.Error (List Agent))
     | UpdateTicketStatus String
+    | AssignTicketAgent String
 
 
 update : Msg -> Model -> ( Model, List (ReaderCmd Msg) )
@@ -108,6 +116,7 @@ update msg model =
                 , statuses = ticket.statuses
                 , status = ticket.status
                 , comments = ticket.comments
+                , agent = ticket.agent
               }
             , []
             )
@@ -117,6 +126,19 @@ update msg model =
 
         UpdateTicketStatus status ->
             updateTicketStatus model { id = model.ticketId, status = status }
+
+        AssignTicketAgent agent_id ->
+            assignTicketAgent model { id = model.ticketId, agent_id = agent_id }
+
+        AgentsLoaded (Ok agents) ->
+            ( { model
+                | agents = agents
+              }
+            , []
+            )
+
+        AgentsLoaded (Err err) ->
+            ( { model | error = Just (toString err) }, [] )
 
 
 
@@ -211,6 +233,7 @@ view model =
             ]
         , div [ class "col-sm" ]
             [ ticketStatusDropDown model
+            , agentsDropDown model
             , closeTicketButton model
             , deleteTicketButton model
             ]
@@ -237,6 +260,15 @@ updateTicketStatus model ticketInput =
     let
         cmd =
             Strict <| Reader.map (Task.attempt UpdateTicketResponse) (updateTicket ticketInput)
+    in
+        ( model, [ cmd ] )
+
+
+assignTicketAgent : Model -> TicketAgentInput -> ( Model, List (ReaderCmd Msg) )
+assignTicketAgent model ticketAgentInput =
+    let
+        cmd =
+            Strict <| Reader.map (Task.attempt UpdateTicketResponse) (assignTicketToAgent { id = ticketAgentInput.id, agent_id = ticketAgentInput.agent_id })
     in
         ( model, [ cmd ] )
 
@@ -273,12 +305,41 @@ ticketStatusDropDown model =
         ]
 
 
+agentsDropDown : Model -> Html Msg
+agentsDropDown model =
+    div []
+        [ div [ class "agent-selection" ]
+            [ div []
+                [ h2 [] [ text "Agent Selector" ]
+                , select [ onInput AssignTicketAgent, class "custom-select custom-select-lg mb-3" ]
+                    (List.map (agentOption model.agent) model.agents)
+                ]
+            ]
+        ]
+
+
 statusOption : Model -> TicketStatus -> Html Msg
 statusOption model status =
     if status.value == model.status then
         option [ value (status.value), selected True ] [ text (status.key) ]
     else
         option [ value (status.value) ] [ text (status.key) ]
+
+
+agentOption selectedAgent agent =
+    case selectedAgent of
+        Nothing ->
+            option [ value (agent.id) ] [ text (agent.name) ]
+
+        Just selectedAgent ->
+            if agent == selectedAgent then
+                option [ value (agent.id), selected True ] [ text (agent.name) ]
+            else
+                option [ value (agent.id) ] [ text (agent.name) ]
+
+
+defaultOption _ =
+    option [ disabled True, selected True ] [ text "Select Agent" ]
 
 
 closeTicketButton : Model -> Html Msg

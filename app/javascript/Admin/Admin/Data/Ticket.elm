@@ -14,6 +14,7 @@ type alias Ticket =
     , status : String
     , statuses : List TicketStatus
     , comments : List Comment
+    , agent : Maybe Agent
     }
 
 
@@ -28,11 +29,19 @@ type alias TicketInput =
     , status : String
     }
 
+
 type alias TicketNoteComment =
     { id : TicketId
     , note : String
     , comment : String
     }
+
+
+type alias TicketAgentInput =
+    { id : TicketId
+    , agent_id : String
+    }
+
 
 type alias TicketId =
     String
@@ -41,6 +50,12 @@ type alias TicketId =
 type alias Comment =
     { ticket_id : String
     , info : String
+    }
+
+
+type alias Agent =
+    { id : String
+    , name : String
     }
 
 
@@ -72,6 +87,19 @@ requestTicketByIdQuery =
             )
 
 
+requestAgentsQuery : GQLBuilder.Document GQLBuilder.Query (List Agent) vars
+requestAgentsQuery =
+    GQLBuilder.queryDocument
+        (GQLBuilder.extract
+            (GQLBuilder.field "agents"
+                []
+                (GQLBuilder.list
+                    (agentObject)
+                )
+            )
+        )
+
+
 ticketStatusObject : GQLBuilder.ValueSpec GQLBuilder.NonNull GQLBuilder.ObjectType TicketStatus vars
 ticketStatusObject =
     GQLBuilder.object TicketStatus
@@ -84,6 +112,13 @@ commentObject =
     GQLBuilder.object Comment
         |> GQLBuilder.with (GQLBuilder.field "ticket_id" [] GQLBuilder.string)
         |> GQLBuilder.with (GQLBuilder.field "info" [] GQLBuilder.string)
+
+
+agentObject : GQLBuilder.ValueSpec GQLBuilder.NonNull GQLBuilder.ObjectType Agent vars
+agentObject =
+    GQLBuilder.object Agent
+        |> GQLBuilder.with (GQLBuilder.field "id" [] GQLBuilder.string)
+        |> GQLBuilder.with (GQLBuilder.field "name" [] GQLBuilder.string)
 
 
 deleteTicketMutation : GQLBuilder.Document GQLBuilder.Mutation Ticket { var | id : TicketId }
@@ -163,6 +198,32 @@ addTicketNotesAndCommentMutation =
                     )
 
 
+assignTicketToAgentMutation : GQLBuilder.Document GQLBuilder.Mutation Ticket TicketAgentInput
+assignTicketToAgentMutation =
+    let
+        idVar =
+            Var.required "id" .id Var.string
+
+        agentIdVar =
+            Var.required "agent_id" .agent_id Var.string
+    in
+        GQLBuilder.mutationDocument <|
+            GQLBuilder.extract <|
+                GQLBuilder.field "assignTicketToAgent"
+                    [ ( "input"
+                      , Arg.object
+                            [ ( "agent_id", Arg.variable agentIdVar )
+                            , ( "ticket_id", Arg.variable idVar )
+                            ]
+                      )
+                    ]
+                    (GQLBuilder.extract <|
+                        GQLBuilder.field "ticket"
+                            []
+                            (ticketObject)
+                    )
+
+
 ticketObject : GQLBuilder.ValueSpec GQLBuilder.NonNull GQLBuilder.ObjectType Ticket vars
 ticketObject =
     GQLBuilder.object Ticket
@@ -185,4 +246,9 @@ ticketObject =
                 (GQLBuilder.list
                     commentObject
                 )
+            )
+        |> GQLBuilder.with
+            (GQLBuilder.field "agent"
+                []
+                (GQLBuilder.nullable agentObject)
             )
