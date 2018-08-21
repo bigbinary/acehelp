@@ -3,7 +3,6 @@
 require "graphlient"
 
 module AceHelp
-
   FaradayConnection = Proc.new do |client|
     client.http do |h|
       h.connection do |c|
@@ -23,4 +22,14 @@ module AceHelp
                                "api-key": api_key
                              }, &FaradayConnection)
   }
+
+  ClientLoggedIn = -> (user) do
+    context_options = {
+        headers: {
+            "api-key": Rails.application.secrets[:api_key]
+        }.merge(user.create_new_auth_token)
+    }
+    ::Graphlient::Client.new(Rails.application.secrets[:graphql_host],
+                             context_options, &FaradayConnection)
+  end
 end

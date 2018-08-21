@@ -1,13 +1,14 @@
 napoleon_solo:
-  email: napoleon_solo@example.com
+  email: <%= email = "napoleon_solo@example.com" %>
   first_name: Napoleon
   last_name: Solo
   role: 'agent'
   organization: bigbinary
-
+  uid: <%= email %>
 illya_kuryakin:
-  email: illya.kuryakin@example.com
+  email: <%= email =  "illya.kuryakin@example.com" %>
   first_name: Illya
   last_name: Kuryakkin
   role: 'agent'
   organization: bigbinary
+  uid: <%= email %>
