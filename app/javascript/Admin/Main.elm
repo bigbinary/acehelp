@@ -126,6 +126,7 @@ init flags location =
 
 type Msg
     = NavigateTo Route.Route
+    | DeleteFlashElement
     | ArticleListMsg ArticleList.Msg
     | ArticleCreateMsg ArticleCreate.Msg
     | ArticleEditMsg ArticleEdit.Msg
@@ -306,7 +307,6 @@ update msg model =
     in
         case msg of
             NavigateTo route ->
-                --CreateFlashElement "yaaayyy" "danger"
                 navigateTo route model
                     |> Tuple.mapSecond
                         (\cmd ->
@@ -316,6 +316,9 @@ update msg model =
                                             Route.routeToString route
                                        ]
                         )
+
+            DeleteFlashElement ->
+                ( { model | flashElements = [] }, Cmd.none )
 
             ArticleListMsg alMsg ->
                 let
@@ -1056,7 +1059,9 @@ flashViewElements elements =
     List.map
         (\elem ->
             div
-                [ class ("alert alert-" ++ elem.messageType) ]
+                [ class ("alert alert-" ++ elem.messageType)
+                , onClick DeleteFlashElement
+                ]
                 [ text elem.text ]
         )
         elements
