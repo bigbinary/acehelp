@@ -5,4 +5,4 @@ import Navigation
 
 getUrlPathData : Navigation.Location -> String
 getUrlPathData =
-    .pathname
+    .href

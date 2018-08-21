@@ -16,6 +16,7 @@ import Reader
 import Section.Article.SuggestedList as SuggestedList
 import Section.Article.Article as Article
 import Section.Library.Library as Library
+import Section.Library.Category as Category
 import Section.Contact.ContactUs as ContactUs
 import Views.Container exposing (topBar)
 import Views.Loading exposing (sectionLoadingView)
@@ -54,6 +55,7 @@ type Section
     | SuggestedArticlesSection SuggestedList.Model
     | ArticleSection Article.Model
     | LibrarySection Library.Model
+    | CategorySection Category.Model
     | ContactUsSection ContactUs.Model
 
 
@@ -127,6 +129,7 @@ type Msg
       -- | ArticleListLoaded (Result GQLClient.Error (List ArticleSummary))
     | ArticleMsg Article.Msg
     | LibraryMsg Library.Msg
+    | CategoryMsg Category.Msg
       -- | ArticleLoaded (Result GQLClient.Error Data.Article.Article)
     | UrlChange Navigation.Location
     | GoBack
@@ -140,6 +143,9 @@ type Msg
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     let
+        transitionToSection =
+            transitionTo model
+
         runReaderCmds =
             sectionCmdToCmd model.nodeEnv model.apiKey
     in
@@ -231,9 +237,31 @@ update msg model =
                     ( newModel, cmds ) =
                         Library.update sectionMsg currentModel
                 in
-                    ( { model | sectionState = Loaded (LibrarySection newModel) }
-                    , runReaderCmds LibraryMsg cmds
-                    )
+                    case sectionMsg of
+                        Library.LoadCategory categoryId ->
+                            transitionToSection CategorySection CategoryMsg (Category.init <| Library.getCategoryWithId categoryId currentModel)
+
+                        _ ->
+                            ( { model | sectionState = Loaded (LibrarySection newModel) }
+                            , runReaderCmds LibraryMsg cmds
+                            )
+
+            CategoryMsg sectionMsg ->
+                let
+                    currentModel =
+                        case getSection model.sectionState of
+                            CategorySection model ->
+                                model
+
+                            _ ->
+                                Category.initModel
+
+                    ( newModel, cmds ) =
+                        Category.update sectionMsg currentModel
+                in
+                    case sectionMsg of
+                        Category.LoadArticle articleId ->
+                            transitionToSection ArticleSection ArticleMsg (Article.init articleId)
 
             ContactUsMsg sectionMsg ->
                 let
@@ -463,6 +491,9 @@ getSectionView section =
         LibrarySection sectionModel ->
             Html.map LibraryMsg <| Library.view sectionModel
 
+        CategorySection sectionModel ->
+            Html.map CategoryMsg <| Category.view sectionModel
+
         ContactUsSection sectionModel ->
             Html.map ContactUsMsg <| ContactUs.view sectionModel
 
@@ -552,33 +583,38 @@ setAppState appState model =
             )
 
 
+transitionTo : Model -> (b -> Section) -> (msg -> msg1) -> ( b, List (SectionCmd msg) ) -> ( Model, Cmd msg1 )
+transitionTo model sec msg ( sectionModel, sectionCmds ) =
+    case sectionCmds of
+        [] ->
+            ( { model | sectionState = Loaded (sec sectionModel) }
+            , Cmd.none
+            )
+
+        _ ->
+            ( { model | sectionState = TransitioningFrom (getSection model.sectionState) }
+            , sectionCmdToCmd model.nodeEnv model.apiKey msg sectionCmds
+            )
+
+
 onTabChange : Tabs.Tabs -> Model -> ( Model, Cmd Msg )
 onTabChange tab model =
     let
-        transitionTo sec msg ( sectionModel, sectionCmds ) =
-            case sectionCmds of
-                [] ->
-                    ( { model | sectionState = Loaded (sec sectionModel) }
-                    , Cmd.none
-                    )
-
-                _ ->
-                    ( { model | sectionState = TransitioningFrom (getSection model.sectionState) }
-                    , sectionCmdToCmd model.nodeEnv model.apiKey msg sectionCmds
-                    )
+        transitionToTab =
+            transitionTo model
     in
         case tab of
             Tabs.SuggestedArticles ->
                 SuggestedList.init model.context
-                    |> transitionTo SuggestedArticlesSection SuggestedArticlesMsg
+                    |> transitionToTab SuggestedArticlesSection SuggestedArticlesMsg
 
             Tabs.Library ->
                 Library.init
-                    |> transitionTo LibrarySection LibraryMsg
+                    |> transitionToTab LibrarySection LibraryMsg
 
             Tabs.ContactUs ->
                 ContactUs.init model.userInfo.name model.userInfo.email
-                    |> transitionTo ContactUsSection ContactUsMsg
+                    |> transitionToTab ContactUsSection ContactUsMsg
 
 
 
