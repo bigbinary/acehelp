@@ -359,18 +359,18 @@ update msg model =
 
             OpenArticleWithId articleId ->
                 let
-                    ( animation, newSectionState, cmd ) =
+                    ( animation, newSectionState, _ ) =
                         setAppState Maximized model
+
+                    ( _, cmd ) =
+                        Article.init articleId
                 in
                     ( { model
                         | currentAppState = Maximized
                         , containerAnimation = animation
                         , sectionState = newSectionState
                       }
-                      -- , Task.attempt ArticleLoaded <|
-                      --     Reader.run (ArticleSection.init articleId)
-                      --         ( model.nodeEnv, model.apiKey )
-                    , Cmd.none
+                    , sectionCmdToCmd model.nodeEnv model.apiKey ArticleMsg cmd
                     )
 
             SearchBarMsg searchBarMsg ->
