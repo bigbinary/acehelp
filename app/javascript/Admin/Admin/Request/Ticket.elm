@@ -8,48 +8,49 @@ import GraphQL.Client.Http as GQLClient
 import GraphQL.Request.Builder as GQLBuilder
 
 
-requestTickets : Reader ( NodeEnv, ApiKey ) (Task GQLClient.Error (List Ticket))
+requestTickets : Reader ( NodeEnv, ApiKey, AppUrl ) (Task GQLClient.Error (List Ticket))
 requestTickets =
     Reader.Reader
-        (\( env, apiKey ) ->
-            GQLClient.customSendQuery (requestOptions env apiKey) <|
+        (\( nodeEnv, apiKey, appUrl ) ->
+            GQLClient.customSendQuery (requestOptions nodeEnv apiKey appUrl) <|
                 GQLBuilder.request {} requestTicketQuery
         )
 
 
-requestTicketById : TicketId -> Reader ( NodeEnv, ApiKey ) (Task GQLClient.Error Ticket)
+requestTicketById : TicketId -> Reader ( NodeEnv, ApiKey, AppUrl ) (Task GQLClient.Error Ticket)
 requestTicketById ticketId =
     Reader.Reader
-        (\( env, apiKey ) ->
-            GQLClient.customSendQuery (requestOptions env apiKey) <|
+        (\( nodeEnv, apiKey, appUrl ) ->
+            GQLClient.customSendQuery (requestOptions nodeEnv apiKey appUrl) <|
                 (GQLBuilder.request { id = ticketId } requestTicketByIdQuery)
         )
 
 
-updateTicket : TicketInput -> Reader ( NodeEnv, ApiKey ) (Task GQLClient.Error Ticket)
+updateTicket : TicketInput -> Reader ( NodeEnv, ApiKey, AppUrl ) (Task GQLClient.Error Ticket)
 updateTicket ticketInput =
     Reader.Reader
-        (\( nodeEnv, apiKey ) ->
-            (GQLClient.customSendMutation (requestOptions nodeEnv apiKey) <|
+        (\( nodeEnv, apiKey, appUrl ) ->
+            (GQLClient.customSendMutation (requestOptions nodeEnv apiKey appUrl) <|
                 GQLBuilder.request ticketInput updateTicketMutation
             )
         )
 
 
-deleteTicketRequest : TicketId -> Reader ( NodeEnv, ApiKey ) (Task GQLClient.Error Ticket)
+deleteTicketRequest : TicketId -> Reader ( NodeEnv, ApiKey, AppUrl ) (Task GQLClient.Error Ticket)
 deleteTicketRequest ticketId =
     Reader.Reader
-        (\( nodeEnv, apiKey ) ->
-            (GQLClient.customSendMutation (requestOptions nodeEnv apiKey) <|
+        (\( nodeEnv, apiKey, appUrl ) ->
+            (GQLClient.customSendMutation (requestOptions nodeEnv apiKey appUrl) <|
                 GQLBuilder.request { id = ticketId } deleteTicketMutation
             )
         )
 
-addNotesAndCommentToTicket : TicketNoteComment -> Reader ( NodeEnv, ApiKey ) (Task GQLClient.Error Ticket)
+
+addNotesAndCommentToTicket : TicketNoteComment -> Reader ( NodeEnv, ApiKey, AppUrl ) (Task GQLClient.Error Ticket)
 addNotesAndCommentToTicket ticket =
     Reader.Reader
-        (\( nodeEnv, apiKey ) ->
-            (GQLClient.customSendMutation (requestOptions nodeEnv apiKey) <|
+        (\( nodeEnv, apiKey, appUrl ) ->
+            (GQLClient.customSendMutation (requestOptions nodeEnv apiKey appUrl) <|
                 GQLBuilder.request ticket addTicketNotesAndCommentMutation
             )
         )

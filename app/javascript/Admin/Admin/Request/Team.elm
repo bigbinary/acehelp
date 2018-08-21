@@ -8,31 +8,31 @@ import GraphQL.Client.Http as GQLClient
 import GraphQL.Request.Builder as GQLBuilder
 
 
-requestTeam : Reader ( NodeEnv, ApiKey ) (Task GQLClient.Error (List Team))
+requestTeam : Reader ( NodeEnv, ApiKey, AppUrl ) (Task GQLClient.Error (List Team))
 requestTeam =
     Reader.Reader
-        (\( nodeEnv, apiKey ) ->
-            (GQLClient.customSendQuery (requestOptions nodeEnv apiKey) <|
+        (\( nodeEnv, apiKey, appUrl ) ->
+            (GQLClient.customSendQuery (requestOptions nodeEnv apiKey appUrl) <|
                 GQLBuilder.request {} requestTeamQuery
             )
         )
 
 
-createTeamMember : TeamMember -> Reader ( NodeEnv, ApiKey ) (Task GQLClient.Error Team)
+createTeamMember : TeamMember -> Reader ( NodeEnv, ApiKey, AppUrl ) (Task GQLClient.Error Team)
 createTeamMember createTeamMemberInput =
     Reader.Reader
-        (\( nodeEnv, apiKey ) ->
-            (GQLClient.customSendMutation (requestOptions nodeEnv apiKey) <|
+        (\( nodeEnv, apiKey, appUrl ) ->
+            (GQLClient.customSendMutation (requestOptions nodeEnv apiKey appUrl) <|
                 GQLBuilder.request createTeamMemberInput createTeamMemberMutation
             )
         )
 
 
-removeTeamMember : String -> Reader ( NodeEnv, ApiKey ) (Task GQLClient.Error (List Team))
+removeTeamMember : String -> Reader ( NodeEnv, ApiKey, AppUrl ) (Task GQLClient.Error (List Team))
 removeTeamMember userEmail =
     Reader.Reader
-        (\( nodeEnv, apiKey ) ->
-            (GQLClient.customSendMutation (requestOptions nodeEnv apiKey) <|
+        (\( nodeEnv, apiKey, appUrl ) ->
+            (GQLClient.customSendMutation (requestOptions nodeEnv apiKey appUrl) <|
                 GQLBuilder.request { email = userEmail } removeUserFromOrganization
             )
         )

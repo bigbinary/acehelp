@@ -9,13 +9,13 @@ import GraphQL.Client.Http as GQLClient
 import GraphQL.Request.Builder as GQLBuilder
 
 
-signupRequest : SignupInputs -> Reader NodeEnv (Task GQLClient.Error User)
+signupRequest : SignupInputs -> Reader ( NodeEnv, AppUrl ) (Task GQLClient.Error User)
 signupRequest signupInputs =
     Reader.Reader
-        (\nodeEnv ->
+        (\( nodeEnv, appUrl ) ->
             GQLClient.customSendMutation
                 ({ method = "POST"
-                 , url = graphqlUrl nodeEnv
+                 , url = graphqlUrl nodeEnv appUrl
                  , headers = []
                  , timeout = Nothing
                  , withCredentials = False
@@ -33,13 +33,13 @@ signupRequest signupInputs =
         )
 
 
-requestLogin : { a | email : String, password : String } -> Reader NodeEnv (Task GQLClient.Error String)
+requestLogin : { a | email : String, password : String } -> Reader ( NodeEnv, AppUrl ) (Task GQLClient.Error String)
 requestLogin authInputs =
     Reader.Reader
-        (\nodeEnv ->
+        (\( nodeEnv, appUrl ) ->
             GQLClient.customSendMutation
                 ({ method = "POST"
-                 , url = graphqlUrl nodeEnv
+                 , url = graphqlUrl nodeEnv appUrl
                  , headers = []
                  , timeout = Nothing
                  , withCredentials = False
@@ -53,13 +53,13 @@ requestLogin authInputs =
         )
 
 
-requestResetPassword : { a | email : String } -> Reader NodeEnv (Task GQLClient.Error String)
+requestResetPassword : { a | email : String } -> Reader ( NodeEnv, AppUrl ) (Task GQLClient.Error String)
 requestResetPassword emailInput =
     Reader.Reader
-        (\nodeEnv ->
+        (\( nodeEnv, appUrl ) ->
             GQLClient.customSendMutation
                 ({ method = "POST"
-                 , url = graphqlUrl nodeEnv
+                 , url = graphqlUrl nodeEnv appUrl
                  , headers = []
                  , timeout = Nothing
                  , withCredentials = False

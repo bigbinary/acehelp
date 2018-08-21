@@ -17,6 +17,10 @@ type alias NodeEnv =
     String
 
 
+type alias AppUrl =
+    String
+
+
 type alias QueryParameters =
     List ( String, String )
 
@@ -35,11 +39,16 @@ type alias RequestData =
     }
 
 
-baseUrl : NodeEnv -> Url
-baseUrl env =
+baseUrl : NodeEnv -> AppUrl -> Url
+baseUrl env appUrl =
     case env of
         "production" ->
-            "https://staging.acehelp.com/"
+            case String.isEmpty <| appUrl of
+                True ->
+                    "https://staging.acehelp.com/"
+
+                False ->
+                    "https://" ++ appUrl ++ ".herokuapp.com"
 
         "development" ->
             "http://localhost:3000/"
@@ -55,15 +64,15 @@ defaultRequestHeaders =
     ]
 
 
-requestOptions : NodeEnv -> ApiKey -> RequestOptions
-requestOptions env apiKey =
+requestOptions : NodeEnv -> ApiKey -> AppUrl -> RequestOptions
+requestOptions env apiKey appUrl =
     let
         headers =
             [ Http.header "api-key" apiKey
             ]
 
         url =
-            graphqlUrl env
+            graphqlUrl env appUrl
     in
         { method = "POST"
         , url = url
@@ -91,11 +100,16 @@ constructUrl url params =
                     )
 
 
-graphqlUrl : String -> String
-graphqlUrl env =
+graphqlUrl : NodeEnv -> AppUrl -> String
+graphqlUrl env appUrl =
     case env of
         "production" ->
-            "https://staging.acehelp.com/graphql/"
+            case String.isEmpty <| appUrl of
+                True ->
+                    "https://staging.acehelp.com/graphql/"
+
+                False ->
+                    "https://" ++ appUrl ++ ".herokuapp.com/graphql"
 
         _ ->
             "/graphql/"
@@ -124,12 +138,12 @@ httpRequest requestData decoder =
             }
 
 
-logoutRequest : NodeEnv -> Http.Request String
-logoutRequest env =
+logoutRequest : NodeEnv -> AppUrl -> Http.Request String
+logoutRequest env appUrl =
     Http.request
         { method = "DELETE"
         , headers = []
-        , url = (baseUrl env) ++ "users/sign_out"
+        , url = (baseUrl env appUrl) ++ "users/sign_out"
         , body = Http.emptyBody
         , expect = Http.expectString
         , timeout = Nothing
