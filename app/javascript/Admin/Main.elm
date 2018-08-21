@@ -78,6 +78,12 @@ type PageState
     | TransitioningFrom Page
 
 
+type alias FlashElement =
+    { text : String
+    , messageType : String
+    }
+
+
 type alias Model =
     { currentPage : PageState
     , route : Route.Route
@@ -87,6 +93,8 @@ type alias Model =
     , userId : String
     , userEmail : String
     , error : Maybe String
+    , flashElements : List FlashElement
+    , nextId : Int
     }
 
 
@@ -105,6 +113,8 @@ init flags location =
             , userId = flags.user_id
             , userEmail = flags.user_email
             , error = Nothing
+            , flashElements = []
+            , nextId = 0
             }
     in
         ( pageModel, readerCmd )
@@ -116,6 +126,7 @@ init flags location =
 
 type Msg
     = NavigateTo Route.Route
+    | CreateFlashElement String String
     | ArticleListMsg ArticleList.Msg
     | ArticleCreateMsg ArticleCreate.Msg
     | ArticleEditMsg ArticleEdit.Msg
@@ -290,6 +301,7 @@ update msg model =
     in
         case msg of
             NavigateTo route ->
+                --CreateFlashElement "yaaayyy" "danger"
                 navigateTo route model
                     |> Tuple.mapSecond
                         (\cmd ->
@@ -299,6 +311,18 @@ update msg model =
                                             Route.routeToString route
                                        ]
                         )
+
+            CreateFlashElement text messageType ->
+                let
+                    newFlashElement =
+                        FlashElement messageType text
+
+                    newList =
+                        newFlashElement :: model.flashElements
+                in
+                    ( { model | flashElements = newList }
+                    , Cmd.none
+                    )
 
             ArticleListMsg alMsg ->
                 let
@@ -907,6 +931,9 @@ adminLayout : Model -> List (Html Msg) -> Html Msg
 adminLayout model viewContent =
     div []
         [ adminHeader model
+        , div
+            []
+            [ flashView model.flashElements ]
         , div [ class "container main-wrapper" ] viewContent
         ]
 
@@ -915,7 +942,6 @@ adminHeader : Model -> Html Msg
 adminHeader model =
     nav [ class "header navbar navbar-dark bg-primary navbar-expand flex-column flex-md-row" ]
         [ div [ class "container" ]
-            --[ span [ class "org-name" ] [ text model.organizationName ]
             [ ul
                 [ class "navbar-nav mr-auto mt-2 mt-lg-0 " ]
                 [ li [ class "nav-item" ]
@@ -1016,6 +1042,23 @@ adminHeader model =
                 ]
             ]
         ]
+
+
+flashView : List FlashElement -> Html Msg
+flashView elements =
+    div []
+        (flashViewElements elements)
+
+
+flashViewElements : List FlashElement -> List (Html Msg)
+flashViewElements elements =
+    List.map
+        (\elem ->
+            div
+                [ class ("alert alert-" ++ elem.messageType) ]
+                [ text elem.text ]
+        )
+        elements
 
 
 
