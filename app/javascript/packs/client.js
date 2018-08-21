@@ -36,6 +36,19 @@ var AceHelp = (function() {
         _app.ports.userInfo.send(user);
     }
 
+    function _openArticle(articleId) {
+        if (!_app) throw new Error("AceHelp: Widget has not been initialized");
+        if (!articleId)
+            throw new Error("AceHelp:openArticle: expecting one parameter");
+
+        if (articleId && typeof articleId !== "string")
+            throw new Error(
+                "AceHelp:openArticle: article ID is required to be of string type"
+            );
+
+        _app.ports.openArticle.send(articleId);
+    }
+
     function _onDataElementClick(e) {
         var articleId = e.target.getAttribute("data-acehelp-article");
         if (_app && articleId) _app.ports.openArticle.send(parseInt(articleId));
@@ -72,7 +85,8 @@ var AceHelp = (function() {
          * @example
          * window.AceHelp.userInfo({ name: "John Doe", email: "john@doe.com"})
          */
-        userInfo: _userInfo
+        userInfo: _userInfo,
+        openArticle: _openArticle
     };
 })();
 
