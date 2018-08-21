@@ -22,11 +22,13 @@ Rails.application.routes.draw do
     end
   end
 
+  if Rails.env.development?
+    mount GraphqlPlayground::Rails::Engine, at: "/graphql/playground", graphql_path: "/graphql"
+  end
+
   get "*path", to: "home#new", constraints: -> (request) do
     !request.xhr? && request.format.html?
   end
 
-  if Rails.env.development?
-    mount GraphqlPlayground::Rails::Engine, at: "/graphql/playground", graphql_path: "/graphql"
-  end
+
 end
