@@ -126,7 +126,6 @@ init flags location =
 
 type Msg
     = NavigateTo Route.Route
-    | CreateFlashElement String String
     | ArticleListMsg ArticleList.Msg
     | ArticleCreateMsg ArticleCreate.Msg
     | ArticleEditMsg ArticleEdit.Msg
@@ -298,6 +297,12 @@ update msg model =
 
         updateNavigation =
             flip update model
+
+        renderFlashMessages message messageType =
+            Tuple.mapFirst
+                (\model ->
+                    { model | flashElements = [ FlashElement message messageType ] }
+                )
     in
         case msg of
             NavigateTo route ->
@@ -311,18 +316,6 @@ update msg model =
                                             Route.routeToString route
                                        ]
                         )
-
-            CreateFlashElement text messageType ->
-                let
-                    newFlashElement =
-                        FlashElement messageType text
-
-                    newList =
-                        newFlashElement :: model.flashElements
-                in
-                    ( { model | flashElements = newList }
-                    , Cmd.none
-                    )
 
             ArticleListMsg alMsg ->
                 let
@@ -366,6 +359,7 @@ update msg model =
                     case caMsg of
                         ArticleCreate.SaveArticleResponse (Ok id) ->
                             updateNavigation (NavigateTo (Route.ArticleList model.organizationKey))
+                                |> renderFlashMessages "Article created successfully." "success"
 
                         _ ->
                             ( { model | currentPage = Loaded (ArticleCreate newModel) }
@@ -389,6 +383,7 @@ update msg model =
                     case aeMsg of
                         ArticleEdit.SaveArticleResponse (Ok id) ->
                             updateNavigation (NavigateTo (Route.ArticleList model.organizationKey))
+                                |> renderFlashMessages "Article updated successfully." "success"
 
                         _ ->
                             ( { model | currentPage = Loaded (ArticleEdit newModel) }
@@ -412,6 +407,7 @@ update msg model =
                     case cuMsg of
                         UrlCreate.SaveUrlResponse (Ok id) ->
                             updateNavigation (NavigateTo (Route.UrlList model.organizationKey))
+                                |> renderFlashMessages "Url created successfully." "success"
 
                         _ ->
                             ( { model | currentPage = Loaded (UrlCreate newModel) }
@@ -434,6 +430,7 @@ update msg model =
                     case ueMsg of
                         UrlEdit.UpdateUrlResponse (Ok id) ->
                             updateNavigation (NavigateTo (Route.UrlList model.organizationKey))
+                                |> renderFlashMessages "Url updated successfully." "success"
 
                         _ ->
                             ( { model | currentPage = Loaded (UrlEdit newModel) }
@@ -532,6 +529,7 @@ update msg model =
                     case ccMsg of
                         CategoryCreate.SaveCategoryResponse (Ok id) ->
                             updateNavigation (NavigateTo (Route.CategoryList model.organizationKey))
+                                |> renderFlashMessages "Category created successfully." "success"
 
                         _ ->
                             ( { model
@@ -580,6 +578,7 @@ update msg model =
                     case fsMsg of
                         FeedbackShow.UpdateFeedbackResponse (Ok feedback) ->
                             updateNavigation (NavigateTo (Route.FeedbackList model.organizationKey))
+                                |> renderFlashMessages "Feedback updated successfully." "success"
 
                         _ ->
                             ( { model | currentPage = Loaded (FeedbackShow newModel) }
@@ -603,6 +602,7 @@ update msg model =
                     case ctMsg of
                         CategoryEdit.UpdateCategoryResponse (Ok id) ->
                             updateNavigation (NavigateTo (Route.CategoryList model.organizationKey))
+                                |> renderFlashMessages "Category updated successfully." "success"
 
                         _ ->
                             ( { model | currentPage = Loaded (CategoryEdit newModel) }
@@ -649,6 +649,7 @@ update msg model =
                     case tcmsg of
                         TeamMemberCreate.SaveTeamResponse (Ok id) ->
                             updateNavigation (NavigateTo (Route.TeamList model.organizationKey))
+                                |> renderFlashMessages "Team member added successfully." "success"
 
                         _ ->
                             ( { model | currentPage = Loaded (TeamMemberCreate newModel) }
