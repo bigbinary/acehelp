@@ -29,6 +29,4 @@ Rails.application.routes.draw do
   get "*path", to: "home#new", constraints: -> (request) do
     !request.xhr? && request.format.html?
   end
-
-
 end

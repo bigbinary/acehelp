@@ -40,6 +40,7 @@ ActiveRecord::Schema.define(version: 2018_08_23_102533) do
     t.uuid "organization_id"
     t.integer "upvotes_count", default: 0
     t.integer "downvotes_count", default: 0
+    t.string "status", default: "offline", null: false
     t.index ["organization_id"], name: "index_articles_on_organization_id"
   end
 

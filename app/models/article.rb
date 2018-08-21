@@ -22,6 +22,14 @@ class Article < ApplicationRecord
     self.update(downvotes_count: self.downvotes_count + 1)
   end
 
+  def mark_online
+    self.update(status: "online")
+  end
+
+  def mark_offline
+    self.update(status: "offline")
+  end
+
   def self.search_using(article_id, url, org)
     if article_id.present? && url.present?
       Url.find_by!(url: url).articles.where(id: article_id).for_organization(org)
