@@ -1,4 +1,4 @@
-module Section.Article exposing (init, Model, view, defaultModel, Msg, update)
+module Section.Article.Article exposing (..)
 
 import Data.Common exposing (GQLError)
 import Data.Article exposing (..)
@@ -6,15 +6,15 @@ import Data.ContactUs exposing (FeedbackForm)
 import Request.Article exposing (..)
 import Request.ContactUs exposing (requestAddTicketMutation)
 import Request.Article exposing (requestAddFeedbackMutation)
-import Request.Helpers exposing (ApiKey, Context, NodeEnv, graphqlUrl)
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
 import Task
 import Reader exposing (Reader)
 import FontAwesome.Solid as SolidIcon
-import Section.Helpers exposing (..)
 import GraphQL.Client.Http as GQLClient
+import Data.Common exposing (..)
+import Views.Error as Error
 
 
 -- MODEL
@@ -29,20 +29,22 @@ type FeedBack
 
 
 type alias Model =
-    { article : Article
+    { article : Stuff Article GQLClient.Error
     , feedback : FeedBack
     , feedbackForm : Maybe FeedbackForm
     }
 
 
-init : ArticleId -> Reader ( NodeEnv, ApiKey ) (Task.Task GQLClient.Error Article)
-init =
-    requestArticle
+init : ArticleId -> ( Model, List (SectionCmd Msg) )
+init articleId =
+    ( initModel
+    , [ Strict <| Reader.map (Task.attempt ArticleLoaded) (requestArticle articleId) ]
+    )
 
 
-defaultModel : Article -> Model
-defaultModel article =
-    { article = article
+initModel : Model
+initModel =
+    { article = None
     , feedback = NoFeedback
     , feedbackForm = Nothing
     }
@@ -69,38 +71,52 @@ type Msg
     | NameInput String
     | EmailInput String
     | CommentInput String
+    | ArticleLoaded (Result GQLClient.Error Data.Article.Article)
 
 
 
 --markFeedback: Msg -> Model -> Model
 
 
-update : Msg -> Model -> ( Model, SectionCmd Msg )
+update : Msg -> Model -> ( Model, List (SectionCmd Msg) )
 update msg model =
     case msg of
-        FeedbackSelected feedback ->
-            case feedback of
-                Positive ->
-                    ( { model | feedback = feedback }
-                    , Just <|
-                        Reader.map (Task.attempt Vote) <|
-                            requestUpvoteMutation model.article.id
-                    )
+        ArticleLoaded (Ok article) ->
+            ( { model | article = IsA article }, [] )
 
-                Negative ->
-                    ( { model
-                        | feedback = feedback
-                        , feedbackForm =
-                            Just
-                                (emptyForm model.article.id)
-                      }
-                    , Just <|
-                        Reader.map (Task.attempt Vote) <|
-                            requestDownvoteMutation model.article.id
-                    )
+        ArticleLoaded (Err error) ->
+            ( { model | article = Error error }, [] )
+
+        FeedbackSelected feedback ->
+            case model.article of
+                IsA article ->
+                    case feedback of
+                        Positive ->
+                            ( { model | feedback = feedback }
+                            , [ Strict <|
+                                    Reader.map (Task.attempt Vote) <|
+                                        requestUpvoteMutation article.id
+                              ]
+                            )
+
+                        Negative ->
+                            ( { model
+                                | feedback = feedback
+                                , feedbackForm =
+                                    Just
+                                        (emptyForm article.id)
+                              }
+                            , [ Strict <|
+                                    Reader.map (Task.attempt Vote) <|
+                                        requestDownvoteMutation article.id
+                              ]
+                            )
+
+                        _ ->
+                            ( { model | feedback = feedback }, [] )
 
                 _ ->
-                    ( { model | feedback = feedback }, Nothing )
+                    ( model, [] )
 
         SendFeedback ->
             ( { model | feedback = FeedbackSent }
@@ -108,34 +124,39 @@ update msg model =
                 (\form ->
                     case form.email of
                         "" ->
-                            Reader.map (Task.attempt SentFeedbackResponse) <|
-                                requestAddFeedbackMutation form
+                            [ Strict <|
+                                Reader.map (Task.attempt SentFeedbackResponse) <|
+                                    requestAddFeedbackMutation form
+                            ]
 
                         _ ->
-                            Reader.map (Task.attempt SentFeedbackResponse) <|
-                                requestAddTicketMutation form
+                            [ Strict <|
+                                Reader.map (Task.attempt SentFeedbackResponse) <|
+                                    requestAddTicketMutation form
+                            ]
                 )
                 model.feedbackForm
+                |> Maybe.withDefault []
             )
 
         Vote _ ->
-            ( model, Nothing )
+            ( model, [] )
 
         SentFeedbackResponse (Ok response) ->
-            Maybe.withDefault ( model, Nothing ) <|
+            Maybe.withDefault ( model, [] ) <|
                 Maybe.map
                     (\errors ->
                         case errors of
                             [] ->
-                                ( model, Nothing )
+                                ( model, [] )
 
                             _ ->
-                                ( { model | feedback = ErroredFeedback }, Nothing )
+                                ( { model | feedback = ErroredFeedback }, [] )
                     )
                     response
 
         SentFeedbackResponse (Err response) ->
-            ( { model | feedback = ErroredFeedback }, Nothing )
+            ( { model | feedback = ErroredFeedback }, [] )
 
         NameInput name ->
             let
@@ -143,7 +164,7 @@ update msg model =
                     Maybe.map (\currentForm -> { currentForm | name = name })
                         model.feedbackForm
             in
-                ( { model | feedbackForm = newForm }, Nothing )
+                ( { model | feedbackForm = newForm }, [] )
 
         EmailInput email ->
             let
@@ -151,7 +172,7 @@ update msg model =
                     Maybe.map (\currentForm -> { currentForm | email = email })
                         model.feedbackForm
             in
-                ( { model | feedbackForm = newForm }, Nothing )
+                ( { model | feedbackForm = newForm }, [] )
 
         CommentInput comment ->
             let
@@ -159,7 +180,7 @@ update msg model =
                     Maybe.map (\currentForm -> { currentForm | comment = comment })
                         model.feedbackForm
             in
-                ( { model | feedbackForm = newForm }, Nothing )
+                ( { model | feedbackForm = newForm }, [] )
 
 
 
@@ -189,15 +210,23 @@ view model =
                 ErroredFeedback ->
                     erroredFeedBack
     in
-        div [ id "content-wrapper" ]
-            [ div [ class "article-wrapper" ]
-                [ h1 [] [ text article.title ]
-                , div [ class "article-content trix-content" ]
-                    [ p [] [ text article.content ]
+        case model.article of
+            IsA article ->
+                div [ id "content-wrapper" ]
+                    [ div [ class "article-wrapper" ]
+                        [ h1 [] [ text article.title ]
+                        , div [ class "article-content trix-content" ]
+                            [ p [] [ text article.content ]
+                            ]
+                        , feebackView
+                        ]
                     ]
-                , feebackView
-                ]
-            ]
+
+            Error error ->
+                Error.view error
+
+            None ->
+                text ""
 
 
 didThisHelpView : Html Msg

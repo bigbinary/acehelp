@@ -1,6 +1,7 @@
 module Data.Article exposing (..)
 
 import Data.Common exposing (..)
+import Request.Helpers exposing (..)
 import Json.Decode exposing (int, string, float, nullable, list, Decoder)
 import Json.Decode.Pipeline exposing (decode, required, optional, hardcoded)
 import GraphQL.Request.Builder as GQLBuilder
@@ -32,6 +33,8 @@ type alias ArticleSummary =
     { id : ArticleId
     , title : String
     }
+
+
 
 -- QUERIES
 
@@ -71,6 +74,24 @@ articlesQuery =
         GQLBuilder.extract articleSummaryField
 
 
+suggestedArticledQuery : GQLBuilder.Document GQLBuilder.Query (List ArticleSummary) { vars | url : Maybe String }
+suggestedArticledQuery =
+    let
+        urlVar =
+            Var.optional "url" .url Var.string ""
+    in
+        GQLBuilder.queryDocument <|
+            GQLBuilder.extract <|
+                GQLBuilder.field "articles"
+                    [ ( "url", Arg.variable urlVar ) ]
+                    (GQLBuilder.list
+                        (GQLBuilder.object ArticleSummary
+                            |> GQLBuilder.with (GQLBuilder.field "id" [] GQLBuilder.string)
+                            |> GQLBuilder.with (GQLBuilder.field "title" [] GQLBuilder.string)
+                        )
+                    )
+
+
 
 -- MUTATIONS
 
@@ -99,6 +120,7 @@ voteMutation voteType =
     in
         GQLBuilder.mutationDocument queryRoot
 
+
 addFeedbackMutation : GQLBuilder.Document GQLBuilder.Mutation (Maybe (List GQLError)) FeedbackForm
 addFeedbackMutation =
     let
@@ -116,10 +138,10 @@ addFeedbackMutation =
                 GQLBuilder.field "addFeedback"
                     [ ( "input"
                       , Arg.object
-                          [ ("name", Arg.variable guestNameVar )
-                          , ("message", Arg.variable guestMessageVar )
-                          , ("article_id", Arg.variable articleIdVar )
-                          ]
+                            [ ( "name", Arg.variable guestNameVar )
+                            , ( "message", Arg.variable guestMessageVar )
+                            , ( "article_id", Arg.variable articleIdVar )
+                            ]
                       )
                     ]
                     errorsExtractor

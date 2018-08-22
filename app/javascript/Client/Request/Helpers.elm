@@ -1,18 +1,4 @@
-module Request.Helpers
-    exposing
-        ( apiUrl
-        , graphqlUrl
-        , constructUrl
-        , httpGet
-        , httpPost
-        , requestOptions
-        , ApiKey
-        , ApiErrorMessage
-        , Url
-        , QueryParameters
-        , Context(..)
-        , NodeEnv
-        )
+module Request.Helpers exposing (..)
 
 import Http exposing (request, encodeUri, header, Header)
 import Json.Decode exposing (Decoder)
@@ -44,8 +30,14 @@ type alias ApiErrorMessage =
     { error : String }
 
 
+contextToMaybe : Context -> Maybe String
+contextToMaybe context =
+    case context of
+        Context value ->
+            Just value
 
--- Not much use right now.
+        _ ->
+            Nothing
 
 
 apiUrl : String -> String -> String

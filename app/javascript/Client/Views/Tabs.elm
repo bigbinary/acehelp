@@ -21,7 +21,7 @@ type alias Model =
 
 init : ( Model, Cmd Msg )
 init =
-    ( Zipper.singleton ContactUs, Cmd.none )
+    ( Zipper.singleton SuggestedArticles, Cmd.none )
 
 
 modelWithTabs : List Tabs -> Model

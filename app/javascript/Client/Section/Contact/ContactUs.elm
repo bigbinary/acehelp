@@ -1,4 +1,4 @@
-module Section.ContactUs exposing (..)
+module Section.Contact.ContactUs exposing (..)
 
 import Http
 import Html exposing (..)
@@ -8,7 +8,7 @@ import Data.ContactUs exposing (..)
 import Json.Decode
 import Views.Style exposing (tickShape)
 import Regex exposing (Regex)
-import Data.Common exposing (GQLError)
+import Data.Common exposing (..)
 import GraphQL.Client.Http as GQLClient
 
 
@@ -34,8 +34,13 @@ type alias Model =
     }
 
 
-init : String -> String -> Model
+init : String -> String -> ( Model, List (SectionCmd Msg) )
 init name email =
+    ( initModel name email, [] )
+
+
+initModel : String -> String -> Model
+initModel name email =
     { name = Field Nothing name
     , email = Field Nothing email
     , message = Field Nothing ""
@@ -155,7 +160,7 @@ validateModel model =
         )
 
 
-update : Msg -> Model -> ( Model, Cmd Msg )
+update : Msg -> Model -> ( Model, List (SectionCmd Msg) )
 update msg model =
     case msg of
         RequestMessageCompleted (Ok responseMessage) ->
@@ -174,7 +179,7 @@ update msg model =
                     | message = Field Nothing ""
                     , userNotification = notification
                   }
-                , Cmd.none
+                , []
                 )
 
         RequestMessageCompleted (Err error) ->
@@ -198,27 +203,27 @@ update msg model =
                 errorMessage =
                     case error of
                         GQLClient.HttpError (Http.BadPayload debugMsg response) ->
-                            resultToUserNotification <| decode <| Debug.log "badpayload" response.body
+                            resultToUserNotification <| decode response.body
 
                         GQLClient.HttpError (Http.BadStatus response) ->
-                            resultToUserNotification <| decode <| Debug.log "badstatus" response.body
+                            resultToUserNotification <| decode response.body
 
                         _ ->
                             NoNotification
             in
-                ( { model | userNotification = errorMessage }, Cmd.none )
+                ( { model | userNotification = errorMessage }, [] )
 
         SendMessage ->
-            ( validateModel model, Cmd.none )
+            ( validateModel model, [] )
 
         NameInput name ->
-            ( { model | name = Field Nothing name }, Cmd.none )
+            ( { model | name = Field Nothing name }, [] )
 
         EmailInput email ->
-            ( { model | email = Field Nothing email }, Cmd.none )
+            ( { model | email = Field Nothing email }, [] )
 
         MessageInput message ->
-            ( { model | message = Field Nothing message }, Cmd.none )
+            ( { model | message = Field Nothing message }, [] )
 
 
 
