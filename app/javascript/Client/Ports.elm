@@ -22,6 +22,9 @@ port userInfo : (Value -> msg) -> Sub msg
 port openArticle : (ArticleId -> msg) -> Sub msg
 
 
+port closeWidget : (() -> msg) -> Sub msg
+
+
 
 -- OUTGOING PORTS
 -- DECODERS
