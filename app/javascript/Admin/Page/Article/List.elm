@@ -5,6 +5,7 @@ import Html.Attributes exposing (..)
 import Html.Events exposing (..)
 import Admin.Request.Article exposing (..)
 import Admin.Data.Article exposing (..)
+import Page.Article.Common exposing (statusButtonText)
 import Task exposing (Task)
 import Reader exposing (Reader)
 import GraphQL.Client.Http as GQLClient
@@ -154,20 +155,10 @@ rows model article =
             [ onClick (UpdateArticleStatus article.id article.status)
             , class "actionButton btn btn-primary"
             ]
-            [ text (statusButtonText article) ]
+            [ text (statusButtonText article.status) ]
         , button
             [ article.id |> DeleteArticle |> onClick
             , class "actionButton btn btn-primary"
             ]
             [ text " Delete Article" ]
         ]
-
-
-statusButtonText : ArticleSummary -> String
-statusButtonText article =
-    case article.status of
-        "offline" ->
-            "Mark Online"
-
-        _ ->
-            "Mark Offline"

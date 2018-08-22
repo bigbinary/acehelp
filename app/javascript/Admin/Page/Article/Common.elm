@@ -5,6 +5,7 @@ import Html.Attributes exposing (..)
 import Admin.Data.Category exposing (..)
 import Admin.Data.Url exposing (..)
 import Admin.Data.Common exposing (..)
+import Admin.Data.Article exposing (ArticleStatus)
 import Page.Common.View exposing (..)
 import Field exposing (..)
 import Field.ValidationResult exposing (..)
@@ -120,3 +121,13 @@ errorsIn fields =
             )
         |> String.join ", "
         |> stringToMaybe
+
+
+statusButtonText : ArticleStatus -> String
+statusButtonText status =
+    case status of
+        "offline" ->
+            "Mark Online"
+
+        _ ->
+            "Mark Offline"
