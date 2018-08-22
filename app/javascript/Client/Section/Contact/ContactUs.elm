@@ -5,11 +5,14 @@ import Html exposing (..)
 import Html.Attributes exposing (class, classList, id, type_, placeholder, style, defaultValue)
 import Html.Events exposing (onClick, onInput)
 import Data.ContactUs exposing (..)
+import Request.ContactUs exposing (..)
 import Json.Decode
 import Views.Style exposing (tickShape)
 import Regex exposing (Regex)
 import Data.Common exposing (..)
 import GraphQL.Client.Http as GQLClient
+import Reader
+import Task
 
 
 -- MODEL
@@ -209,12 +212,21 @@ update msg model =
                             resultToUserNotification <| decode response.body
 
                         _ ->
-                            NoNotification
+                            ErrorNotification "Something went wrong! Please try again later"
             in
                 ( { model | userNotification = errorMessage }, [] )
 
         SendMessage ->
-            ( validateModel model, [] )
+            let
+                newModel =
+                    validateModel model
+            in
+                case isModelSubmittable newModel of
+                    True ->
+                        ( newModel, [ Strict <| Reader.map (Task.attempt RequestMessageCompleted) (requestAddTicketMutation (modelToRequestMessage newModel)) ] )
+
+                    False ->
+                        ( newModel, [] )
 
         NameInput name ->
             ( { model | name = Field Nothing name }, [] )
