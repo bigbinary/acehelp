@@ -515,6 +515,7 @@ subscriptions model =
         [ Animation.subscription Animate [ model.containerAnimation ]
         , userInfo <| decodeUserInfo >> ReceivedUserInfo
         , openArticle <| OpenArticleWithId
+        , closeWidget <| always (SetAppState Minimized)
         ]
 
 
