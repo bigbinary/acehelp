@@ -67,9 +67,9 @@ def create_data_for_ace_invoice_organization
   org = Organization.create! name: "AceInvoice", email: "aceinvoice@example.com"
   OrganizationUser.create! organization_id: org.id, user_id: User.first.id
 
-  getting_started_url = org.urls.create! url: "http://aceinvoice.com/getting-started"
-  integrations_url = org.urls.create! url: "http://aceinvoice.com/integrations"
-  pricing_url = org.urls.create! url: "http://aceinvoice.com/pricing"
+  getting_started_url = org.urls.create! url: "#{Rails.application.secrets.host}/pages/aceinvoice/getting_started"
+  integrations_url = org.urls.create! url: "#{Rails.application.secrets.host}/pages/aceinvoice/integrations"
+  pricing_url = org.urls.create! url: "#{Rails.application.secrets.host}/pages/aceinvoice/pricing"
 
 
   category = org.categories.create! name: "Getting Started"
