@@ -3,18 +3,13 @@ module Section.Library.Category exposing (..)
 import Data.Category exposing (..)
 import Data.Article exposing (..)
 import Data.Common exposing (..)
-import Request.Article exposing (..)
-import Request.Helpers exposing (..)
 import Views.Container exposing (popInInitialAnim)
 import Html exposing (..)
 import Html.Events exposing (onClick)
 import Html.Attributes exposing (id, class)
 import Animation
-import Task exposing (Task)
-import Reader exposing (Reader)
 import FontAwesome.Solid as SolidIcon
 import Views.Error exposing (errorMessageView)
-import GraphQL.Client.Http as GQLClient
 import Views.Error as Error
 
 
@@ -75,19 +70,20 @@ view model =
                         )
 
                 _ ->
-                    div [ id "content-wrapper" ]
-                        (List.map
-                            (\article ->
-                                div
-                                    [ onClick <| LoadArticle article.id
-                                    , class "selectable-row"
-                                    ]
-                                    [ span [ class "row-icon" ] [ SolidIcon.file_alt ]
-                                    , span [ class "row-title" ] [ text article.title ]
-                                    ]
-                            )
-                            category.articles
-                        )
+                    div [ id "content-wrapper" ] <|
+                        (div [ class "row-view" ] [ h1 [] [ text category.name ] ])
+                            :: (List.map
+                                    (\article ->
+                                        div
+                                            [ onClick <| LoadArticle article.id
+                                            , class "selectable-row"
+                                            ]
+                                            [ span [ class "row-icon" ] [ SolidIcon.file_alt ]
+                                            , span [ class "row-title" ] [ text article.title ]
+                                            ]
+                                    )
+                                    category.articles
+                               )
 
         Nothing ->
             text ""

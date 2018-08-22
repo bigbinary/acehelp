@@ -3,16 +3,6 @@ module Main exposing (..)
 import Html exposing (..)
 import Html.Attributes exposing (id, class, style)
 import Html.Events exposing (onClick)
-import Http
-import Task
-import Reader
-
-
--- import Section.CategoryList as CategoryListSection
--- import Section.Article as ArticleSection
--- import Section.ArticleList as ArticleListSection
--- import Section.ContactUs as ContactUsSection
-
 import Section.Article.SuggestedList as SuggestedList
 import Section.Article.Article as Article
 import Section.Library.Library as Library
@@ -23,15 +13,12 @@ import Views.Loading exposing (sectionLoadingView)
 import Views.Tabs as Tabs
 import Section.Search.SearchBar as SearchBar
 import Data.Article exposing (ArticleId, ArticleResponse, ArticleSummary)
-import Data.Category exposing (..)
 import Data.Common exposing (..)
-import Request.ContactUs exposing (..)
 import Request.Helpers exposing (ApiKey, NodeEnv, Context(..))
 import Utils exposing (getUrlPathData)
 import Animation
 import Navigation
 import FontAwesome.Solid as SolidIcon
-import GraphQL.Client.Http as GQLClient
 import Ports exposing (..)
 
 
@@ -57,11 +44,6 @@ type Section
     | LibrarySection Library.Model
     | CategorySection Category.Model
     | ContactUsSection ContactUs.Model
-
-
-
--- | CategoryListSection CategoryListSection.Model
--- | ArticleListSection ArticleListSection.Model
 
 
 type SectionState
@@ -123,14 +105,10 @@ init flags location =
 type Msg
     = Animate Animation.Msg
     | SetAppState AppState
-      -- | CategoryListMsg CategoryListSection.Msg
-      -- | ArticleListMsg ArticleListSection.Msg
     | SuggestedArticlesMsg SuggestedList.Msg
-      -- | ArticleListLoaded (Result GQLClient.Error (List ArticleSummary))
     | ArticleMsg Article.Msg
     | LibraryMsg Library.Msg
     | CategoryMsg Category.Msg
-      -- | ArticleLoaded (Result GQLClient.Error Data.Article.Article)
     | UrlChange Navigation.Location
     | GoBack
     | TabMsg Tabs.Msg
@@ -280,77 +258,6 @@ update msg model =
                     , runReaderCmds ContactUsMsg cmds
                     )
 
-            -- CategoryListMsg categoryListMsg ->
-            --     case categoryListMsg of
-            --         CategoryListSection.LoadCategory categoryId ->
-            --             let
-            --                 currentArticles =
-            --                     Maybe.map
-            --                         .articles
-            --                         currentCategory
-            --                 currentCategory =
-            --                     Maybe.andThen (CategoryListSection.getCategoryWithId categoryId)
-            --                         (getCategoryListModel <|
-            --                             getSection model.sectionState
-            --                         )
-            --                 getCategoryListModel section =
-            --                     case section of
-            --                         CategoryListSection model ->
-            --                             Just model
-            --                         _ ->
-            --                             Nothing
-            --             in
-            --                 case currentArticles of
-            --                     Just articles ->
-            --                         ( { model
-            --                             | sectionState =
-            --                                 Loaded <|
-            --                                     ArticleListSection
-            --                                         { id = Just categoryId
-            --                                         , articles = articles
-            --                                         }
-            --                             , history = ModelHistory model
-            --                           }
-            --                         , Cmd.none
-            --                         )
-            --                     Nothing ->
-            --                         -- TODO: This is an error case and needs to be handled
-            --                         ( model, Cmd.none )
-            -- ArticleListMsg articleListMsg ->
-            --     case articleListMsg of
-            --         ArticleListSection.LoadArticle articleId ->
-            --             ( { model
-            --                 | sectionState =
-            --                     transitionFromSection
-            --                         model.sectionState
-            --                 , history = ModelHistory model
-            --               }
-            --             , Task.attempt ArticleLoaded
-            --                 (Reader.run (ArticleSection.init articleId)
-            --                     ( model.nodeEnv, model.apiKey )
-            --                 )
-            --             )
-            --         ArticleListSection.OpenLibrary ->
-            --             update (TabMsg (Tabs.TabSelected Tabs.Library)) model
-            -- ArticleListLoaded (Ok articleList) ->
-            --     ( { model
-            --         | sectionState =
-            --             Loaded
-            --                 (ArticleListSection
-            --                     { id = Nothing
-            --                     , articles = articleList
-            --                     }
-            --                 )
-            --       }
-            --     , Cmd.none
-            --     )
-            -- ArticleLoaded (Ok article) ->
-            --     ( { model
-            --         | sectionState =
-            --             Loaded <| ArticleSection <| ArticleSection.defaultModel article
-            --       }
-            --     , Cmd.none
-            --     )
             GoBack ->
                 ( getPreviousValidState model, Cmd.none )
 
@@ -376,99 +283,6 @@ update msg model =
             SearchBarMsg searchBarMsg ->
                 ( model, Cmd.none )
 
-            -- let
-            --     ( searchModel, searchCmd ) =
-            --         SearchBar.update searchBarMsg model.searchQuery
-            -- in
-            --     case searchBarMsg of
-            --         SearchBar.OnSearch ->
-            --             ( { model | sectionState = transitionFromSection model.sectionState }
-            --             , Maybe.withDefault Cmd.none <|
-            --                 Maybe.map (Cmd.map SearchBarMsg) <|
-            --                     Maybe.map (flip Reader.run ( model.nodeEnv, model.apiKey ))
-            --                         searchCmd
-            --             )
-            --         SearchBar.SearchResultsReceived (Ok articleListResponse) ->
-            --             ( { model
-            --                 | sectionState =
-            --                     Loaded
-            --                         (ArticleListSection
-            --                             { id = Nothing
-            --                             , articles = articleListResponse.articles
-            --                             }
-            --                         )
-            --               }
-            --             , Cmd.none
-            --             )
-            --         SearchBar.SearchResultsReceived (Err error) ->
-            --             ( model
-            --             , Cmd.none
-            --             )
-            --         _ ->
-            --             ( { model | searchQuery = searchModel }, Cmd.none )
-            -- ContactUsMsg contactUsMsg ->
-            --     let
-            --         currentContactUsModel =
-            --             getContactUsModel <|
-            --                 getSection model.sectionState
-            --         getContactUsModel section =
-            --             case section of
-            --                 ContactUsSection model ->
-            --                     model
-            --                 _ ->
-            --                     ContactUsSection.init model.userInfo.name model.userInfo.email
-            --         ( newContactUsModel, _ ) =
-            --             ContactUsSection.update contactUsMsg currentContactUsModel
-            --     in
-            --         case contactUsMsg of
-            --             ContactUsSection.SendMessage ->
-            --                 case (ContactUsSection.isModelSubmittable newContactUsModel) of
-            --                     True ->
-            --                         ( { model
-            --                             | sectionState =
-            --                                 TransitioningFrom (ContactUsSection newContactUsModel)
-            --                           }
-            --                         , Cmd.map ContactUsMsg <|
-            --                             Task.attempt ContactUsSection.RequestMessageCompleted
-            --                                 (Reader.run
-            --                                     (requestAddTicketMutation
-            --                                         (ContactUsSection.modelToRequestMessage
-            --                                             newContactUsModel
-            --                                         )
-            --                                     )
-            --                                     ( model.nodeEnv, model.apiKey )
-            --                                 )
-            --                         )
-            --                     False ->
-            --                         ( { model
-            --                             | sectionState =
-            --                                 Loaded
-            --                                     (ContactUsSection
-            --                                         newContactUsModel
-            --                                     )
-            --                           }
-            --                         , Cmd.none
-            --                         )
-            --             ContactUsSection.RequestMessageCompleted postResponse ->
-            --                 ( { model
-            --                     | sectionState =
-            --                         Loaded
-            --                             (ContactUsSection
-            --                                 newContactUsModel
-            --                             )
-            --                   }
-            --                 , Cmd.none
-            --                 )
-            --             _ ->
-            --                 ( { model
-            --                     | sectionState =
-            --                         Loaded
-            --                             (ContactUsSection
-            --                                 newContactUsModel
-            --                             )
-            --                   }
-            --                 , Cmd.none
-            --                 )
             ReceivedUserInfo userInfo ->
                 ( { model | userInfo = userInfo }, Cmd.none )
 
@@ -496,17 +310,6 @@ getSectionView section =
 
         ContactUsSection sectionModel ->
             Html.map ContactUsMsg <| ContactUs.view sectionModel
-
-
-
--- CategoryListSection model ->
---     Html.map CategoryListMsg <| CategoryListSection.view model
--- ArticleSection model ->
---     Html.map ArticleMsg <| ArticleSection.view model
--- ArticleListSection model ->
---     Html.map ArticleListMsg <| ArticleListSection.view model
--- ContactUsSection model ->
---     Html.map ContactUsMsg <| ContactUsSection.view model
 
 
 getSection : SectionState -> Section
