@@ -4,8 +4,13 @@ require "test_helper"
 require "graphql/client_host"
 
 class Mutations::TicketMutationsTest < ActiveSupport::TestCase
-  def setup
-    @ticket = tickets :payment_issue_ticket
+  include Devise::Test::IntegrationHelpers
+
+  setup do
+    @agent = agents(:illya_kuryakin)
+    @ticket = tickets(:payment_issue_ticket)
+    @ticket.save
+    sign_in @agent
   end
 
   test "create ticket mutations" do
@@ -102,5 +107,26 @@ class Mutations::TicketMutationsTest < ActiveSupport::TestCase
     result = AceHelp::Client.execute(query, id: @ticket.id)
     @ticket.reload
     assert_not_nil @ticket.deleted_at
+  end
+
+  test "Add note to ticket" do
+    query = <<-GRAPHQL
+        mutation($input: UpdateTicketInput!) {
+            updateTicket(input: $input) {
+              ticket {
+                status
+              }
+              errors {
+                message
+                path
+              }
+            }
+        }
+    GRAPHQL
+    result = AceHelp::Client.execute(query, input: {
+      id: @ticket.id,
+      note: "First note to ticket"
+    })
+    assert result
   end
 end

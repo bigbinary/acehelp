@@ -17,15 +17,16 @@ import Admin.Data.ReaderCmd exposing (..)
 type alias Model =
     { error : Maybe String
     , success : Maybe String
-    , note : String
     , message : String
     , ticketId : TicketId
     , status : String
     , statuses : List TicketStatus
     , comments : List Comment
+    , notes : List Note
     , comment : Comment
     , agents : List Agent
     , agent : Maybe Agent
+    , note : Note
     }
 
 
@@ -33,12 +34,13 @@ initModel : TicketId -> Model
 initModel ticketId =
     { error = Nothing
     , success = Nothing
-    , note = ""
+    , note = Note ticketId ""
     , message = ""
     , ticketId = ticketId
     , status = ""
     , statuses = []
     , comments = []
+    , notes = []
     , comment = Comment ticketId ""
     , agents = []
     , agent = Nothing
@@ -75,7 +77,7 @@ update : Msg -> Model -> ( Model, List (ReaderCmd Msg) )
 update msg model =
     case msg of
         NoteInput note ->
-            ( { model | note = note }, [] )
+            ( { model | note = (Note model.ticketId note) }, [] )
 
         CommentInput comment ->
             ( { model | comment = (Comment model.ticketId comment) }, [] )
@@ -93,7 +95,9 @@ update msg model =
                 , statuses = ticket.statuses
                 , message = ticket.message
                 , comment = Comment ticket.id ""
+                , note = Note ticket.id ""
                 , comments = ticket.comments
+                , notes = ticket.notes
                 , success = Just "Ticket Updated Successfully..."
               }
             , []
@@ -110,13 +114,13 @@ update msg model =
 
         TicketLoaded (Ok ticket) ->
             ( { model
-                | note = ticket.note
-                , ticketId = ticket.id
+                | ticketId = ticket.id
                 , message = ticket.message
                 , statuses = ticket.statuses
                 , status = ticket.status
                 , comments = ticket.comments
                 , agent = ticket.agent
+                , notes = ticket.notes
               }
             , []
             )
@@ -197,8 +201,15 @@ view model =
                 , div [ class "tab-content" ]
                     [ div [ class "tab-pane active form-group", id "notes" ]
                         [ h3 [] [ text "Notes: " ]
+                        , div [ class "ticket-notes" ]
+                            (List.map
+                                (\note ->
+                                    noteRows note
+                                )
+                                model.notes
+                            )
                         , input
-                            [ Html.Attributes.value <| model.note
+                            [ Html.Attributes.value <| model.note.details
                             , type_ "text"
                             , class "form-control"
                             , placeholder "add notes here..."
@@ -251,7 +262,7 @@ ticketNoteComment : Model -> TicketNoteComment
 ticketNoteComment model =
     { comment = model.comment.info
     , id = model.ticketId
-    , note = model.note
+    , note = model.note.details
     }
 
 
@@ -280,7 +291,6 @@ deleteTicket model =
             Strict <| Reader.map (Task.attempt DeleteTicketResponse) (deleteTicketRequest model.ticketId)
     in
         ( model, [ cmd ] )
-
 
 save : Model -> ( Model, List (ReaderCmd Msg) )
 save model =
@@ -371,4 +381,13 @@ commentRows comment =
         [ class "comment-row" ]
         [ span [ class "row-id", id comment.ticket_id ] []
         , span [ class "row-name" ] [ text comment.info ]
+        ]
+
+
+noteRows : Note -> Html Msg
+noteRows note =
+    div
+        [ class "note-row" ]
+        [ span [ class "row-id", id note.ticket_id ] [ text "Note : " ]
+        , span [ class "row-name" ] [ text note.details ]
         ]

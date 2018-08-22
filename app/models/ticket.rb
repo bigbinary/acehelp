@@ -15,6 +15,7 @@ class Ticket < ApplicationRecord
 
   belongs_to :agent, required: false
   has_many :comments, dependent: :destroy
+  has_many :notes, dependent: :destroy
 
   scope :for_organization, ->(org) { where(organization: org) }
   scope :all_resolved_before_n_days, -> (day_count) { resolved.where("resolved_at < ?", day_count.days.ago) }
@@ -31,15 +32,11 @@ class Ticket < ApplicationRecord
     update_attributes(agent_id: agent_id)
   end
 
-  def add_note(note_txt)
-    update(note: note_txt)
-  end
-
   def update_status(status_key)
     return false if status == status_key.to_s
     update(status: status_key)
   end
-  
+
   private
     def parse_user_agent
       if user_agent.present?

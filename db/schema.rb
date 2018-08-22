@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2018_08_10_123547) do
+ActiveRecord::Schema.define(version: 2018_08_13_093947) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "pgcrypto"
@@ -58,6 +58,8 @@ ActiveRecord::Schema.define(version: 2018_08_10_123547) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.string "commentable_type", null: false
+    t.index ["commentable_id"], name: "index_comments_on_commentable_id"
+    t.index ["ticket_id"], name: "index_comments_on_ticket_id"
   end
 
   create_table "delayed_jobs", force: :cascade do |t|
@@ -83,6 +85,16 @@ ActiveRecord::Schema.define(version: 2018_08_10_123547) do
     t.datetime "updated_at", null: false
     t.string "status", default: "open"
     t.index ["article_id"], name: "index_feedbacks_on_article_id"
+  end
+
+  create_table "notes", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.text "details", null: false
+    t.uuid "agent_id", null: false
+    t.uuid "ticket_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["agent_id"], name: "index_notes_on_agent_id"
+    t.index ["ticket_id"], name: "index_notes_on_ticket_id"
   end
 
   create_table "organization_users", id: :serial, force: :cascade do |t|
@@ -175,6 +187,8 @@ ActiveRecord::Schema.define(version: 2018_08_10_123547) do
   add_foreign_key "comments", "tickets"
   add_foreign_key "comments", "users", column: "commentable_id"
   add_foreign_key "feedbacks", "articles"
+  add_foreign_key "notes", "tickets"
+  add_foreign_key "notes", "users", column: "agent_id"
   add_foreign_key "organization_users", "organizations"
   add_foreign_key "organization_users", "users"
   add_foreign_key "tickets", "organizations"

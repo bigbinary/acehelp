@@ -14,6 +14,7 @@ class User < ApplicationRecord
   has_many :organizations, through: :organization_users
 
   has_many :comments, as: :commentable, dependent: :destroy
+  has_many :notes, foreign_key: :agent_id
 
   scope :agents, -> { where(role: :agent) }
 
@@ -51,6 +52,5 @@ class User < ApplicationRecord
     token = set_reset_password_token
     InviteUserMailer.welcome_email(self.id, org_id, sender_id, token).deliver_now
   end
-  #handle_asynchronously :send_welcome_mail, queue: 'devise'
-
+  # handle_asynchronously :send_welcome_mail, queue: 'devise'
 end

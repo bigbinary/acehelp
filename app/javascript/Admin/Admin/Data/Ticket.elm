@@ -10,9 +10,9 @@ type alias Ticket =
     , name : String
     , email : String
     , message : String
-    , note : String
     , status : String
     , statuses : List TicketStatus
+    , notes : List Note
     , comments : List Comment
     , agent : Maybe Agent
     }
@@ -42,20 +42,22 @@ type alias TicketAgentInput =
     , agent_id : String
     }
 
-
 type alias TicketId =
     String
-
 
 type alias Comment =
     { ticket_id : String
     , info : String
     }
 
-
 type alias Agent =
     { id : String
     , name : String
+    }
+
+type alias Note =
+    { ticket_id : String
+    , details : String
     }
 
 
@@ -140,6 +142,12 @@ deleteTicketMutation =
                             []
                             (ticketObject)
                     )
+
+noteObject : GQLBuilder.ValueSpec GQLBuilder.NonNull GQLBuilder.ObjectType Note vars
+noteObject =
+    GQLBuilder.object Note
+        |> GQLBuilder.with (GQLBuilder.field "ticket_id" [] GQLBuilder.string)
+        |> GQLBuilder.with (GQLBuilder.field "details" [] GQLBuilder.string)
 
 
 updateTicketMutation : GQLBuilder.Document GQLBuilder.Mutation Ticket TicketInput
@@ -231,13 +239,19 @@ ticketObject =
         |> GQLBuilder.with (GQLBuilder.field "name" [] GQLBuilder.string)
         |> GQLBuilder.with (GQLBuilder.field "email" [] GQLBuilder.string)
         |> GQLBuilder.with (GQLBuilder.field "message" [] GQLBuilder.string)
-        |> GQLBuilder.with (GQLBuilder.field "note" [] GQLBuilder.string)
         |> GQLBuilder.with (GQLBuilder.field "status" [] GQLBuilder.string)
         |> GQLBuilder.with
             (GQLBuilder.field "statuses"
                 []
                 (GQLBuilder.list
                     ticketStatusObject
+                )
+            )
+        |> GQLBuilder.with
+            (GQLBuilder.field "notes"
+                []
+                (GQLBuilder.list
+                    noteObject
                 )
             )
         |> GQLBuilder.with

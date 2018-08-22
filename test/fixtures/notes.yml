@@ -1,0 +1,6 @@
+# Read about fixtures at http://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+ticket_note:
+  details: First Note
+  agent: hunt
+  ticket: payment_issue_ticket

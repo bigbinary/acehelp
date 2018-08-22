@@ -10,5 +10,7 @@ class CreateComments < ActiveRecord::Migration[5.2]
 
     add_foreign_key :comments, :users, column: :agent_id
     add_foreign_key :comments, :tickets
+    add_index :comments, :agent_id
+    add_index :comments, :ticket_id
   end
 end
