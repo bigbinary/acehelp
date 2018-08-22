@@ -20,8 +20,6 @@ import Page.Article.Common exposing (..)
 import GraphQL.Client.Http as GQLClient
 import Admin.Ports exposing (..)
 import Admin.Data.ReaderCmd exposing (..)
-import Navigation exposing (..)
-import Route
 
 
 -- Model

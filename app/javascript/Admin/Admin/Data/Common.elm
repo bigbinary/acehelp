@@ -15,6 +15,12 @@ type Option a
     | Unselected a
 
 
+type alias NotificationElement =
+    { text : String
+    , messageType : String
+    }
+
+
 targetSelectedOptions : Json.Decoder (List String)
 targetSelectedOptions =
     Json.at [ "target", "selectedOptions" ] <|
