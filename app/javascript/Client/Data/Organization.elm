@@ -15,18 +15,14 @@ type alias Organization =
 -- QUERIES
 
 
-organizationQuery : GQLBuilder.Document GQLBuilder.Query Organization { vars | apiKey : String }
+organizationQuery : GQLBuilder.Document GQLBuilder.Query Organization vars
 organizationQuery =
-    let
-        apiKeyVar =
-            Var.required "apiKey" .apiKey Var.string
-    in
-        GQLBuilder.queryDocument <|
-            GQLBuilder.extract
-                (GQLBuilder.field "organizations"
-                    [ ( "api_key", Arg.variable apiKeyVar ) ]
-                    (GQLBuilder.object Organization
-                        |> GQLBuilder.with (GQLBuilder.field "id" [] GQLBuilder.string)
-                        |> GQLBuilder.with (GQLBuilder.field "name" [] GQLBuilder.string)
-                    )
+    GQLBuilder.queryDocument <|
+        GQLBuilder.extract
+            (GQLBuilder.field "organizations"
+                []
+                (GQLBuilder.object Organization
+                    |> GQLBuilder.with (GQLBuilder.field "id" [] GQLBuilder.string)
+                    |> GQLBuilder.with (GQLBuilder.field "name" [] GQLBuilder.string)
                 )
+            )

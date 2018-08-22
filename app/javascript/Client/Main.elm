@@ -99,7 +99,7 @@ init flags location =
       , searchQuery = ""
       , history = NoHistory
       , userInfo = { name = "", email = "" }
-      , renderHelpButton = True
+      , renderHelpButton = False
       }
     , Task.attempt OrganizationLoaded
         (Reader.run (requestOrganizations flags.api_key) ( flags.node_env, flags.api_key ))
@@ -456,7 +456,7 @@ minimizedView model =
                 ]
 
         _ ->
-            div [] []
+            text ""
 
 
 maximizedView : Model -> Html Msg

@@ -13,5 +13,5 @@ requestOrganizations apiKey =
     Reader.Reader
         (\( env, apiKey ) ->
             GQLClient.customSendQuery (requestOptions env apiKey) <|
-                GQLBuilder.request { apiKey = apiKey } organizationQuery
+                GQLBuilder.request {} organizationQuery
         )
