@@ -102,7 +102,7 @@ view model =
             [ onClick OnUrlCreateClick
             , class "btn btn-primary"
             ]
-            [ text "New Url" ]
+            [ text "+ Url" ]
         , div
             [ class "listingSection" ]
             (List.map
