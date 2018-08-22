@@ -104,8 +104,7 @@ view model =
             ]
         , div [ class "tab-content" ]
             [ div [ class "tab-pane active form-group", id "open-feedbacks" ]
-                [ h3 [] [ text "Open Feedbacks: " ]
-                , div [ id "content-wrapper" ]
+                [ div [ id "content-wrapper" ]
                     (List.map
                         (\feedback ->
                             row model feedback
@@ -114,8 +113,7 @@ view model =
                     )
                 ]
             , div [ class "tab-pane form-group", id "closed-feedbacks" ]
-                [ h3 [] [ text "Closed Feedbacks: " ]
-                , div [ id "content-wrapper" ]
+                [ div [ id "content-wrapper" ]
                     (List.map
                         (\feedback ->
                             row model feedback

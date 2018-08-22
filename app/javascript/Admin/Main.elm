@@ -78,7 +78,7 @@ type PageState
     | TransitioningFrom Page
 
 
-type alias FlashElement =
+type alias NotificationElement =
     { text : String
     , messageType : String
     }
@@ -93,7 +93,7 @@ type alias Model =
     , userId : String
     , userEmail : String
     , error : Maybe String
-    , flashElements : List FlashElement
+    , flashElements : List NotificationElement
     , nextId : Int
     }
 
@@ -126,7 +126,7 @@ init flags location =
 
 type Msg
     = NavigateTo Route.Route
-    | DeleteFlashElement
+    | RemoveNotification
     | ArticleListMsg ArticleList.Msg
     | ArticleCreateMsg ArticleCreate.Msg
     | ArticleEditMsg ArticleEdit.Msg
@@ -302,7 +302,7 @@ update msg model =
         renderFlashMessages message messageType =
             Tuple.mapFirst
                 (\model ->
-                    { model | flashElements = [ FlashElement message messageType ] }
+                    { model | flashElements = [ NotificationElement message messageType ] }
                 )
     in
         case msg of
@@ -317,7 +317,7 @@ update msg model =
                                        ]
                         )
 
-            DeleteFlashElement ->
+            RemoveNotification ->
                 ( { model | flashElements = [] }, Cmd.none )
 
             ArticleListMsg alMsg ->
@@ -1048,19 +1048,19 @@ adminHeader model =
         ]
 
 
-flashView : List FlashElement -> Html Msg
+flashView : List NotificationElement -> Html Msg
 flashView elements =
     div []
         (flashViewElements elements)
 
 
-flashViewElements : List FlashElement -> List (Html Msg)
+flashViewElements : List NotificationElement -> List (Html Msg)
 flashViewElements elements =
     List.map
         (\elem ->
             div
                 [ class ("alert alert-" ++ elem.messageType)
-                , onClick DeleteFlashElement
+                , onClick RemoveNotification
                 ]
                 [ text elem.text ]
         )
