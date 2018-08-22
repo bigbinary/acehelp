@@ -4,7 +4,7 @@ class Article < ApplicationRecord
   searchkick
 
   belongs_to :organization
-  has_many :article_urls
+  has_many :article_urls, dependent: :destroy
   has_many :urls, through: :article_urls
 
   has_many :article_categories, dependent: :destroy

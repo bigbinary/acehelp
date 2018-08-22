@@ -92,7 +92,7 @@ update msg model =
                     ( { model | error = Just errors }, [] )
 
         SaveTeamResponse (Ok id) ->
-            ( { model | success = Just "Team member added" }, [] )
+            ( model, [] )
 
         SaveTeamResponse (Err error) ->
             ( { model | error = Just (toString error) }, [] )

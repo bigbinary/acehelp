@@ -100,7 +100,7 @@ update msg model =
                     ( { model | error = Just errors }, [] )
 
         UpdateCategoryResponse (Ok id) ->
-            ( { model | success = Just "Category has been updated" }, [] )
+            ( model, [] )
 
         UpdateCategoryResponse (Err error) ->
             ( { model | error = Just (toString error) }, [] )
@@ -149,7 +149,7 @@ view model =
             [ button
                 [ type_ "button"
                 , class "btn btn-primary"
-                , onSubmit SaveCategory
+                , onClick SaveCategory
                 ]
                 [ text "Save" ]
             ]

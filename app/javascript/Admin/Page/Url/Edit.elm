@@ -83,12 +83,7 @@ update msg model =
                     ( { model | error = Just errors }, [] )
 
         UpdateUrlResponse (Ok id) ->
-            ( { model
-                | url = Field.update model.url id.url
-                , success = Just "Url Updated Successfully."
-              }
-            , []
-            )
+            ( model, [] )
 
         UpdateUrlResponse (Err error) ->
             ( { model | error = Just (toString error) }, [] )

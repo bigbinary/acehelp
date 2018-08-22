@@ -82,39 +82,56 @@ view model =
                     )
                     model.error
             ]
-        , button
-            [ onClick (FeedbackListReloaded "closed")
-            , class "btn btn-primary"
+        , ul [ class "nav nav-tabs" ]
+            [ li [ class "nav-item active" ]
+                [ a
+                    [ class "nav-link active"
+                    , attribute "data-toggle" "tab"
+                    , href "#open-feedbacks"
+                    , onClick (FeedbackListReloaded "open")
+                    ]
+                    [ text "Open Feedback" ]
+                ]
+            , li [ class "nav-item" ]
+                [ a
+                    [ class "nav-link"
+                    , attribute "data-toggle" "tab"
+                    , href "#closed-feedbacks"
+                    , onClick (FeedbackListReloaded "closed")
+                    ]
+                    [ text "Closed Feedback" ]
+                ]
             ]
-            [ text "Closed Feedback" ]
-        , button
-            [ onClick (FeedbackListReloaded "open")
-            , class "btn btn-primary"
+        , div [ class "tab-content" ]
+            [ div [ class "tab-pane active form-group", id "open-feedbacks" ]
+                [ div [ id "content-wrapper" ]
+                    (List.map
+                        (\feedback ->
+                            row model feedback
+                        )
+                        model.feedbackList
+                    )
+                ]
+            , div [ class "tab-pane form-group", id "closed-feedbacks" ]
+                [ div [ id "content-wrapper" ]
+                    (List.map
+                        (\feedback ->
+                            row model feedback
+                        )
+                        model.feedbackList
+                    )
+                ]
             ]
-            [ text "Open Feedback" ]
-        , div []
-            (List.map
-                (\feedback ->
-                    row model feedback
-                )
-                model.feedbackList
-            )
         ]
 
 
 row : Model -> Feedback -> Html Msg
 row model feedback =
-    div [ id feedback.id ]
-        [ div
-            [ onClick <| OnFeedbackClick feedback.id ]
-            [ text feedback.name ]
-        , div
-            []
-            [ text feedback.message ]
-        , div
-            []
-            [ text feedback.status ]
-        , hr [] []
+    div
+        [ class "feedback-row" ]
+        [ span [ class "row-id", onClick <| OnFeedbackClick feedback.id ] [ text feedback.id ]
+        , span [ class "row-name" ] [ text feedback.name ]
+        , span [ class "row-message" ] [ text feedback.message ]
         ]
 
 

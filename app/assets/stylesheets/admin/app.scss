@@ -19,14 +19,14 @@ $blueThemeColor: rgb(60, 170, 249);
     background-color: #cdcdcd;
     color: #000;
   }
-  
+
   .nav-link.active{
     span{
       padding-bottom: 3px;
       border-bottom:2px solid #fff;
     }
   }
-  
+
   .hidden{
     display: none;
   }
@@ -46,7 +46,7 @@ $blueThemeColor: rgb(60, 170, 249);
   #content-wrapper {
     padding: 0 50px;
     height: 100%;
-    .ticket-row {
+    .ticket-row, .feedback-row {
       margin: 0 -50px;
       padding: 15px 20px;
       cursor: pointer;
@@ -67,5 +67,5 @@ $blueThemeColor: rgb(60, 170, 249);
       }
     }
   }
-    
+
 }

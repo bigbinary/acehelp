@@ -79,15 +79,7 @@ update msg model =
             updateFeedabackStatus model feedbackId status
 
         UpdateFeedbackResponse (Ok feedback) ->
-            ( { model
-                | name = feedback.name
-                , message = feedback.message
-                , id = feedback.id
-                , status = feedback.status
-                , success = Just "Feedback Updated Successfully."
-              }
-            , []
-            )
+            ( model, [] )
 
         UpdateFeedbackResponse (Err error) ->
             ( { model | error = Just (toString error) }

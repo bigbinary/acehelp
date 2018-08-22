@@ -25,7 +25,6 @@ import Page.Organization.Create as OrganizationCreate
 import Page.Session.SignUp as SignUp
 import Page.Errors as Errors
 import Admin.Request.Helper exposing (NodeEnv, ApiKey, logoutRequest)
-import Route
 import Admin.Data.ReaderCmd exposing (..)
 import Page.Ticket.List as TicketList
 import Page.Ticket.Edit as TicketEdit
@@ -80,6 +79,12 @@ type PageState
     | TransitioningFrom Page
 
 
+type alias NotificationElement =
+    { text : String
+    , messageType : String
+    }
+
+
 type alias Model =
     { currentPage : PageState
     , route : Route.Route
@@ -90,6 +95,8 @@ type alias Model =
     , userEmail : String
     , appUrl : String
     , error : Maybe String
+    , flashElements : List NotificationElement
+    , nextId : Int
     }
 
 
@@ -109,6 +116,8 @@ init flags location =
             , userEmail = flags.user_email
             , appUrl = flags.app_url
             , error = Nothing
+            , flashElements = []
+            , nextId = 0
             }
     in
         ( pageModel, readerCmd )
@@ -120,6 +129,7 @@ init flags location =
 
 type Msg
     = NavigateTo Route.Route
+    | RemoveNotification
     | ArticleListMsg ArticleList.Msg
     | ArticleCreateMsg ArticleCreate.Msg
     | ArticleEditMsg ArticleEdit.Msg
@@ -291,6 +301,12 @@ update msg model =
 
         updateNavigation =
             flip update model
+
+        renderFlashMessages message messageType =
+            Tuple.mapFirst
+                (\model ->
+                    { model | flashElements = [ NotificationElement message messageType ] }
+                )
     in
         case msg of
             NavigateTo route ->
@@ -303,6 +319,9 @@ update msg model =
                                             Route.routeToString route
                                        ]
                         )
+
+            RemoveNotification ->
+                ( { model | flashElements = [] }, Cmd.none )
 
             ArticleListMsg alMsg ->
                 let
@@ -346,6 +365,7 @@ update msg model =
                     case caMsg of
                         ArticleCreate.SaveArticleResponse (Ok id) ->
                             updateNavigation (NavigateTo (Route.ArticleList model.organizationKey))
+                                |> renderFlashMessages "Article created successfully." "success"
 
                         _ ->
                             ( { model | currentPage = Loaded (ArticleCreate newModel) }
@@ -366,9 +386,15 @@ update msg model =
                         ArticleEdit.update aeMsg
                             currentPageModel
                 in
-                    ( { model | currentPage = Loaded (ArticleEdit newModel) }
-                    , runReaderCmds ArticleEditMsg cmds
-                    )
+                    case aeMsg of
+                        ArticleEdit.SaveArticleResponse (Ok id) ->
+                            updateNavigation (NavigateTo (Route.ArticleList model.organizationKey))
+                                |> renderFlashMessages "Article updated successfully." "success"
+
+                        _ ->
+                            ( { model | currentPage = Loaded (ArticleEdit newModel) }
+                            , runReaderCmds ArticleEditMsg cmds
+                            )
 
             UrlCreateMsg cuMsg ->
                 let
@@ -387,6 +413,7 @@ update msg model =
                     case cuMsg of
                         UrlCreate.SaveUrlResponse (Ok id) ->
                             updateNavigation (NavigateTo (Route.UrlList model.organizationKey))
+                                |> renderFlashMessages "Url created successfully." "success"
 
                         _ ->
                             ( { model | currentPage = Loaded (UrlCreate newModel) }
@@ -406,9 +433,15 @@ update msg model =
                     ( newModel, cmds ) =
                         UrlEdit.update ueMsg currentPageModel
                 in
-                    ( { model | currentPage = Loaded (UrlEdit newModel) }
-                    , runReaderCmds UrlEditMsg cmds
-                    )
+                    case ueMsg of
+                        UrlEdit.UpdateUrlResponse (Ok id) ->
+                            updateNavigation (NavigateTo (Route.UrlList model.organizationKey))
+                                |> renderFlashMessages "Url updated successfully." "success"
+
+                        _ ->
+                            ( { model | currentPage = Loaded (UrlEdit newModel) }
+                            , runReaderCmds UrlEditMsg cmds
+                            )
 
             UrlListMsg ulMsg ->
                 let
@@ -502,6 +535,7 @@ update msg model =
                     case ccMsg of
                         CategoryCreate.SaveCategoryResponse (Ok id) ->
                             updateNavigation (NavigateTo (Route.CategoryList model.organizationKey))
+                                |> renderFlashMessages "Category created successfully." "success"
 
                         _ ->
                             ( { model
@@ -547,9 +581,15 @@ update msg model =
                         FeedbackShow.update fsMsg
                             currentPageModel
                 in
-                    ( { model | currentPage = Loaded (FeedbackShow newModel) }
-                    , runReaderCmds FeedbackShowMsg cmds
-                    )
+                    case fsMsg of
+                        FeedbackShow.UpdateFeedbackResponse (Ok feedback) ->
+                            updateNavigation (NavigateTo (Route.FeedbackList model.organizationKey))
+                                |> renderFlashMessages "Feedback updated successfully." "success"
+
+                        _ ->
+                            ( { model | currentPage = Loaded (FeedbackShow newModel) }
+                            , runReaderCmds FeedbackShowMsg cmds
+                            )
 
             CategoryEditMsg ctMsg ->
                 let
@@ -565,9 +605,15 @@ update msg model =
                         CategoryEdit.update ctMsg
                             currentPageModel
                 in
-                    ( { model | currentPage = Loaded (CategoryEdit newModel) }
-                    , runReaderCmds CategoryEditMsg cmds
-                    )
+                    case ctMsg of
+                        CategoryEdit.UpdateCategoryResponse (Ok id) ->
+                            updateNavigation (NavigateTo (Route.CategoryList model.organizationKey))
+                                |> renderFlashMessages "Category updated successfully." "success"
+
+                        _ ->
+                            ( { model | currentPage = Loaded (CategoryEdit newModel) }
+                            , runReaderCmds CategoryEditMsg cmds
+                            )
 
             TeamListMsg tlmsg ->
                 let
@@ -606,9 +652,15 @@ update msg model =
                         TeamMemberCreate.update tcmsg
                             currentPageModel
                 in
-                    ( { model | currentPage = Loaded (TeamMemberCreate newModel) }
-                    , runReaderCmds TeamCreateMsg cmds
-                    )
+                    case tcmsg of
+                        TeamMemberCreate.SaveTeamResponse (Ok id) ->
+                            updateNavigation (NavigateTo (Route.TeamList model.organizationKey))
+                                |> renderFlashMessages "Team member added successfully." "success"
+
+                        _ ->
+                            ( { model | currentPage = Loaded (TeamMemberCreate newModel) }
+                            , runReaderCmds TeamCreateMsg cmds
+                            )
 
             TicketEditMsg teMsg ->
                 let
@@ -886,6 +938,9 @@ adminLayout : Model -> List (Html Msg) -> Html Msg
 adminLayout model viewContent =
     div []
         [ adminHeader model
+        , div
+            []
+            [ flashView model.flashElements ]
         , div [ class "container main-wrapper" ] viewContent
         ]
 
@@ -894,7 +949,6 @@ adminHeader : Model -> Html Msg
 adminHeader model =
     nav [ class "header navbar navbar-dark bg-primary navbar-expand flex-column flex-md-row" ]
         [ div [ class "container" ]
-            --[ span [ class "org-name" ] [ text model.organizationName ]
             [ ul
                 [ class "navbar-nav mr-auto mt-2 mt-lg-0 " ]
                 [ li [ class "nav-item" ]
@@ -995,6 +1049,25 @@ adminHeader model =
                 ]
             ]
         ]
+
+
+flashView : List NotificationElement -> Html Msg
+flashView elements =
+    div []
+        (flashViewElements elements)
+
+
+flashViewElements : List NotificationElement -> List (Html Msg)
+flashViewElements elements =
+    List.map
+        (\elem ->
+            div
+                [ class ("alert alert-" ++ elem.messageType)
+                , onClick RemoveNotification
+                ]
+                [ text elem.text ]
+        )
+        elements
 
 
 
