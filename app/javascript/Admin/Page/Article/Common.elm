@@ -131,3 +131,13 @@ statusButtonText status =
 
         _ ->
             "Mark Offline"
+
+
+statusClass : ArticleStatus -> String
+statusClass status =
+    case status of
+        "online" ->
+            "online-status"
+
+        _ ->
+            "offline-status"

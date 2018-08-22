@@ -306,8 +306,17 @@ view model =
                 [ multiSelectCategoryList "Categories:" model.categories CategorySelected
                 , multiSelectUrlList "Urls:" model.urls UrlSelected
                 , div
-                    []
-                    [ button
+                    [ class "article-block article-status-block" ]
+                    [ div
+                        []
+                        [ span
+                            []
+                            [ text ("Status: ") ]
+                        , span
+                            [ class (statusClass model.articleStatus) ]
+                            [ text model.articleStatus ]
+                        ]
+                    , button
                         [ onClick (UpdateStatus model.articleId model.articleStatus)
                         , class "btn btn-primary"
                         ]
