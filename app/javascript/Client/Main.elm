@@ -20,6 +20,9 @@ import Request.Helpers exposing (ApiKey, NodeEnv, Context(..))
 import Utils exposing (getUrlPathData)
 import Animation
 import Navigation
+import Task exposing (Task)
+import Reader exposing (Reader)
+import GraphQL.Client.Http as GQLClient
 import FontAwesome.Solid as SolidIcon
 import Ports exposing (..)
 
@@ -397,6 +400,7 @@ setAppState appState model =
             , Cmd.none
             )
 
+
 transitionTo : Model -> (b -> Section) -> (msg -> msg1) -> ( b, List (SectionCmd msg) ) -> ( Model, Cmd msg1 )
 transitionTo model sec msg ( sectionModel, sectionCmds ) =
     case sectionCmds of
@@ -435,8 +439,8 @@ onTabChange tab model =
 -- VIEW
 
 
-minimizedView :  Model -> Html Msg
-minimizedView =
+minimizedView : Model -> Html Msg
+minimizedView model =
     case model.renderHelpButton of
         True ->
             div
@@ -450,7 +454,8 @@ minimizedView =
                 [ div [ class "question-icon" ]
                     [ SolidIcon.question ]
                 ]
-        _->
+
+        _ ->
             div [] []
 
 
