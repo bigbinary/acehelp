@@ -102,7 +102,7 @@ view model =
             [ onClick OnCreateCategoryClick
             , class "btn btn-primary"
             ]
-            [ text "New Category" ]
+            [ text "+ Category" ]
         , div
             [ class "listingSection" ]
             (List.map

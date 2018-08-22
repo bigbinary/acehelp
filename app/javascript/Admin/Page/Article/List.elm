@@ -99,7 +99,7 @@ view model =
             [ onClick OnArticleCreateClick
             , class "btn btn-primary"
             ]
-            [ text "New Article" ]
+            [ text "+ Article" ]
         , div
             [ class "listingSection" ]
             (List.map
