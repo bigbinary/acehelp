@@ -27,6 +27,7 @@ import Page.Session.SignUp as SignUp
 import Page.Errors as Errors
 import Admin.Request.Helper exposing (NodeEnv, ApiKey, logoutRequest)
 import Admin.Data.ReaderCmd exposing (..)
+import Admin.Ports exposing (..)
 import Page.Ticket.List as TicketList
 import Page.Ticket.Edit as TicketEdit
 import Page.Url.Create as UrlCreate
@@ -34,6 +35,7 @@ import Page.Url.Edit as UrlEdit
 import Page.Url.List as UrlList
 import Page.Common.View exposing (..)
 import Route
+import Reader exposing (Reader)
 
 
 -- MODEL
@@ -337,17 +339,17 @@ update msg model =
                         )
 
             DeleteFlashElement duration ->
-                let
-                    deleteElement =
-                        model.currentTime >= model.expiryTime
-                in
-                    case deleteElement of
-                        True ->
-                            ( { model | flashElements = [] }, Cmd.none )
+                ( model, setTimeout 10 )
 
-                        _ ->
-                            ( model, Cmd.none )
-
+            --let
+            --    deleteElement =
+            --        model.currentTime >= model.expiryTime
+            --in
+            --    case deleteElement of
+            --        True ->
+            --            ( { model | flashElements = [] }, Cmd.none )
+            --        _ ->
+            --            ( model, Cmd.none )
             ArticleListMsg alMsg ->
                 let
                     currentPageModel =
@@ -389,8 +391,14 @@ update msg model =
                 in
                     case caMsg of
                         ArticleCreate.SaveArticleResponse (Ok id) ->
-                            updateNavigation (NavigateTo (Route.ArticleList model.organizationKey))
-                                |> renderFlashMessages "Article created successfully." "success"
+                            let
+                                ( updatedModel, updatedCmd ) =
+                                    updateNavigation (NavigateTo (Route.ArticleList model.organizationKey))
+                                        |> renderFlashMessages "Article created successfully." "success"
+                            in
+                                ( updatedModel
+                                , Cmd.batch [ updatedCmd ]
+                                )
 
                         _ ->
                             ( { model | currentPage = Loaded (ArticleCreate newModel) }
@@ -828,7 +836,6 @@ subscriptions model =
         _ ->
             Sub.batch
                 [ Time.every Time.second UpdateCurrentTime
-                , Time.every (10 * Time.second) (DeleteFlashElement)
                 ]
 
 
