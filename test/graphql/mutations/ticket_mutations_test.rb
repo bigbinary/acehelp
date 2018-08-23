@@ -123,7 +123,7 @@ class Mutations::TicketMutationsTest < ActiveSupport::TestCase
             }
         }
     GRAPHQL
-    result = AceHelp::Client.execute(query, input: {
+    result = AceHelp::ClientLoggedIn.call(@agent).execute(query, input: {
       id: @ticket.id,
       note: "First note to ticket"
     })
