@@ -5,6 +5,7 @@ import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
 import Http
+import Time
 import Navigation exposing (..)
 import Page.Session.Login as Login
 import Page.Session.ForgotPassword as ForgotPassword
@@ -96,7 +97,8 @@ type alias Model =
     , appUrl : String
     , error : Maybe String
     , flashElements : List NotificationElement
-    , nextId : Int
+    , currentTime : Time.Time
+    , expiryTime : Float
     }
 
 
@@ -117,7 +119,8 @@ init flags location =
             , appUrl = flags.app_url
             , error = Nothing
             , flashElements = []
-            , nextId = 0
+            , currentTime = 0
+            , expiryTime = 0
             }
     in
         ( pageModel, readerCmd )
@@ -129,7 +132,8 @@ init flags location =
 
 type Msg
     = NavigateTo Route.Route
-    | RemoveNotification
+    | UpdateCurrentTime Time.Time
+    | DeleteFlashElement Time.Time
     | ArticleListMsg ArticleList.Msg
     | ArticleCreateMsg ArticleCreate.Msg
     | ArticleEditMsg ArticleEdit.Msg
@@ -305,12 +309,24 @@ update msg model =
         renderFlashMessages message messageType =
             Tuple.mapFirst
                 (\model ->
-                    { model | flashElements = [ NotificationElement message messageType ] }
+                    { model
+                        | flashElements = [ NotificationElement message messageType ]
+                        , expiryTime = model.currentTime + 10
+                    }
                 )
     in
         case msg of
+            UpdateCurrentTime time ->
+                ( { model | currentTime = time }, Cmd.none )
+
             NavigateTo route ->
                 navigateTo route model
+                    |> Tuple.mapFirst
+                        (\model ->
+                            { model
+                                | flashElements = []
+                            }
+                        )
                     |> Tuple.mapSecond
                         (\cmd ->
                             Cmd.batch <|
@@ -320,8 +336,17 @@ update msg model =
                                        ]
                         )
 
-            RemoveNotification ->
-                ( { model | flashElements = [] }, Cmd.none )
+            DeleteFlashElement duration ->
+                let
+                    deleteElement =
+                        model.currentTime >= model.expiryTime
+                in
+                    case deleteElement of
+                        True ->
+                            ( { model | flashElements = [] }, Cmd.none )
+
+                        _ ->
+                            ( model, Cmd.none )
 
             ArticleListMsg alMsg ->
                 let
@@ -801,7 +826,10 @@ subscriptions model =
             Sub.map ArticleEditMsg <| ArticleEdit.subscriptions articleEditModel
 
         _ ->
-            Sub.none
+            Sub.batch
+                [ Time.every Time.second UpdateCurrentTime
+                , Time.every (10 * Time.second) (DeleteFlashElement)
+                ]
 
 
 
@@ -1063,7 +1091,6 @@ flashViewElements elements =
         (\elem ->
             div
                 [ class ("alert alert-" ++ elem.messageType)
-                , onClick RemoveNotification
                 ]
                 [ text elem.text ]
         )
