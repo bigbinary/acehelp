@@ -1,6 +1,5 @@
 module Request.Article exposing (..)
 
-import Http
 import Task exposing (Task)
 import Reader exposing (Reader)
 import Request.Helpers exposing (..)
@@ -38,13 +37,12 @@ requestArticle articleId =
         )
 
 
-requestSearchArticles :
-    String
-    -> Reader ( NodeEnv, ApiKey ) (Task Http.Error ArticleListResponse)
-requestSearchArticles searchTerm =
+requestSearchArticles : String -> Reader ( NodeEnv, ApiKey ) (Task GQLClient.Error (List ArticleSummary))
+requestSearchArticles searchString =
     Reader.Reader
         (\( env, apiKey ) ->
-            Http.toTask (httpGet apiKey Request.Helpers.NoContext (apiUrl env "articles/search") [ ( "query", searchTerm ) ] decodeArticles)
+            GQLClient.customSendQuery (requestOptions env apiKey) <|
+                GQLBuilder.request { searchString = searchString } searchArticlesQuery
         )
 
 

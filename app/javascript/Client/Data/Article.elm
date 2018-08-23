@@ -56,6 +56,24 @@ articleQuery =
                     )
 
 
+searchArticlesQuery : GQLBuilder.Document GQLBuilder.Query (List ArticleSummary) { vars | searchString : String }
+searchArticlesQuery =
+    let
+        searchStringVar =
+            Var.required "searchString" .searchString Var.string
+    in
+        GQLBuilder.queryDocument <|
+            GQLBuilder.extract <|
+                GQLBuilder.field "searchArticles"
+                    [ ( "search_string", Arg.variable searchStringVar ) ]
+                    (GQLBuilder.list
+                        (GQLBuilder.object ArticleSummary
+                            |> GQLBuilder.with (GQLBuilder.field "id" [] GQLBuilder.string)
+                            |> GQLBuilder.with (GQLBuilder.field "title" [] GQLBuilder.string)
+                        )
+                    )
+
+
 articleSummaryField : GQLBuilder.SelectionSpec GQLBuilder.Field (List ArticleSummary) vars
 articleSummaryField =
     GQLBuilder.field "articles"

@@ -33,4 +33,13 @@ class Article < ApplicationRecord
       Article.for_organization(org)
     end
   end
+
+  def self.search_by(search_string, org)
+    if search_string.present?
+      articles = Article.search search_string, where: { organization_id: org.id }
+      articles.each_with_object([]) { |article, arr| arr.push(article) }
+    else
+      Article.for_organization(org)
+    end
+  end
 end
