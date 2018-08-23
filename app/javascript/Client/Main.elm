@@ -312,7 +312,11 @@ update msg model =
                             ( model, runReaderCmds SearchBarMsg cmds )
 
                         SearchBar.SearchResultsReceived (Ok articleList) ->
-                            ( model, Cmd.none )
+                            ( { model
+                                | sectionState = Loaded (SuggestedArticlesSection (Ok articleList))
+                              }
+                            , Cmd.none
+                            )
 
                         _ ->
                             ( model, Cmd.none )
