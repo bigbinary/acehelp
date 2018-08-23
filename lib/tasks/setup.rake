@@ -44,6 +44,9 @@ task setup_sample_data: [:environment] do
   delete_all_records_from_all_tables
   system "rake db:seed"
 
+  # reindex all elastic search tables
+  system "rake searchkick:reindex:all"
+
   create_user
 
   puts "sample data was added successfully"
