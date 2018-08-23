@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2018_08_13_093947) do
+ActiveRecord::Schema.define(version: 2018_08_23_102533) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "pgcrypto"
@@ -48,6 +48,7 @@ ActiveRecord::Schema.define(version: 2018_08_13_093947) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.uuid "organization_id"
+    t.string "status", default: "online", null: false
     t.index ["organization_id"], name: "index_categories_on_organization_id"
   end
 
@@ -58,8 +59,6 @@ ActiveRecord::Schema.define(version: 2018_08_13_093947) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.string "commentable_type", null: false
-    t.index ["commentable_id"], name: "index_comments_on_commentable_id"
-    t.index ["ticket_id"], name: "index_comments_on_ticket_id"
   end
 
   create_table "delayed_jobs", force: :cascade do |t|
