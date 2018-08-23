@@ -46,6 +46,6 @@ Types::MutationType = GraphQL::ObjectType.define do
   field :changeTicketStatus, field: Mutations::ChangeTicketStatusMutation::Perform.field
   field :assignTicketToAgent, field: Mutations::AssignTicketToAgentMutations::Perform.field
   field :updateTicket, field: Mutations::TicketMutations::Update.field
-
+  field :changeCategoryStatus, field: Mutations::ChangeCategoryStatusMutation::Perform.field
   field :changeTriggerStatus, field: Mutations::ChangeTriggerStatusMutation::Perform.field
 end
