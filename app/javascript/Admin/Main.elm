@@ -720,6 +720,7 @@ update msg model =
                             in
                                 ( { updatedModel
                                     | organizationKey = org.api_key
+                                    , organizationName = org.name
                                   }
                                 , updatedCmd
                                 )

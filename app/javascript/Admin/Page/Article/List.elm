@@ -48,7 +48,12 @@ update : Msg -> Model -> ( Model, List (ReaderCmd Msg) )
 update msg model =
     case msg of
         ArticleListLoaded (Ok articlesList) ->
-            ( { model | articles = articlesList, error = Nothing }, [] )
+            ( { model
+                | articles = articlesList
+                , error = Nothing
+              }
+            , []
+            )
 
         ArticleListLoaded (Err err) ->
             ( { model | error = Just (toString err) }, [] )
