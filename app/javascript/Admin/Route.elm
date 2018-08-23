@@ -134,7 +134,7 @@ routeToString page =
                     [ "users", "sign_up" ]
 
                 Login ->
-                    [ "login" ]
+                    [ "users", "sign_in" ]
 
                 ForgotPassword ->
                     [ "users", "forgot_password" ]

@@ -742,9 +742,14 @@ update msg model =
                     ( newModel, cmds ) =
                         SignUp.update suMsg currentPageModel
                 in
-                    ( { model | currentPage = Loaded (SignUp newModel) }
-                    , runReaderCmds SignUpMsg cmds
-                    )
+                    case suMsg of
+                        SignUp.SignUpResponse (Ok id) ->
+                            updateNavigation (NavigateTo Route.Login)
+
+                        _ ->
+                            ( { model | currentPage = Loaded (SignUp newModel) }
+                            , runReaderCmds SignUpMsg cmds
+                            )
 
             LoginMsg loginMsg ->
                 let
