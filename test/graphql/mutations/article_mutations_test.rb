@@ -135,10 +135,10 @@ class Mutations::ArticleMutationsTest < ActiveSupport::TestCase
     assert_equal result.data.delete_article.deleted_id, @article.id
   end
 
-  test "mark online mutations" do
+  test "update article status mutations" do
     mutation = <<-'GRAPHQL'
-              mutation($input: MarkOnlineInput!) {
-                markOnline(input: $input) {
+              mutation($input: UpdateStatusInput!) {
+                updateArticleStatus(input: $input) {
                   article {
                     id
                     status
@@ -151,27 +151,27 @@ class Mutations::ArticleMutationsTest < ActiveSupport::TestCase
               }
     GRAPHQL
 
-    result = AceHelp::Client.execute(mutation, input: { id: @article.id })
-    assert_equal result.data.mark_online.article.status, "online"
+    result = AceHelp::Client.execute(mutation, input: { id: @article.id, status: "online" })
+    assert_equal result.data.update_article_status.article.status, "online"
   end
 
-  test "mark offline mutations" do
+  test "update article status mutation failure" do
     mutation = <<-'GRAPHQL'
-                mutation($input: MarkOfflineInput!) {
-                  markOffline(input: $input) {
-                    article {
-                      id
-                      status
-                    }
-                    errors {
-                      message
-                      path
-                    }
+              mutation($input: UpdateStatusInput!) {
+                updateArticleStatus(input: $input) {
+                  article {
+                    id
+                    status
+                  }
+                  errors {
+                    message
+                    path
                   }
                 }
+              }
     GRAPHQL
 
-    result = AceHelp::Client.execute(mutation, input: { id: @article.id })
-    assert_equal result.data.mark_offline.article.status, "offline"
+    result = AceHelp::Client.execute(mutation, input: { id: @article.id, status: "invalid" })
+    assert_not_empty result.data.update_article_status.errors.flat_map(&:path) & ["updateArticleStatus", "attribute", "status"]
   end
 end
