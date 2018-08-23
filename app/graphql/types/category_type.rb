@@ -4,6 +4,7 @@ Types::CategoryType = GraphQL::ObjectType.define do
   name "Category"
   field :id, !types.String
   field :name, !types.String
+  field :status, !types.String
 
   field :articles, -> { !types[Types::ArticleType] }  do
     preload :articles

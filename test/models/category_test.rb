@@ -11,4 +11,12 @@ class CategoryTest < ActiveSupport::TestCase
     assert_not category.valid?
     assert category.errors.added?(:name, :blank)
   end
+
+  def test_category_status
+    category = categories :novel
+    assert category.online?
+
+    category.offline!
+    assert category.offline?
+  end
 end
