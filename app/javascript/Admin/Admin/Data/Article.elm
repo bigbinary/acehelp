@@ -13,8 +13,9 @@ type alias ArticleId =
     String
 
 
-type alias ArticleStatus =
-    String
+type ArticleStatus
+    = Online
+    | Offline
 
 
 type alias Article =
@@ -204,18 +205,23 @@ deleteArticleMutation =
                     )
 
 
-articleStatusMutation : String -> GQLBuilder.Document GQLBuilder.Mutation Article { vars | id : ArticleId }
-articleStatusMutation mutationType =
+articleStatusMutation : GQLBuilder.Document GQLBuilder.Mutation Article { vars | id : ArticleId, status : String }
+articleStatusMutation =
     let
         idVar =
             Var.required "id" .id Var.string
+
+        statusVar =
+            Var.required "status" .status Var.string
     in
         GQLBuilder.mutationDocument <|
             GQLBuilder.extract <|
-                GQLBuilder.field mutationType
+                GQLBuilder.field "updateArticleStatus"
                     [ ( "input"
                       , Arg.object
-                            [ ( "id", Arg.variable idVar ) ]
+                            [ ( "id", Arg.variable idVar )
+                            , ( "status", Arg.variable statusVar )
+                            ]
                       )
                     ]
                     (GQLBuilder.extract <|
@@ -223,16 +229,6 @@ articleStatusMutation mutationType =
                             []
                             articleObject
                     )
-
-
-markArticleOnlineMutation : GQLBuilder.Document GQLBuilder.Mutation Article { vars | id : ArticleId }
-markArticleOnlineMutation =
-    articleStatusMutation "markOnline"
-
-
-markArticleOfflineMutation : GQLBuilder.Document GQLBuilder.Mutation Article { vars | id : ArticleId }
-markArticleOfflineMutation =
-    articleStatusMutation "markOffline"
 
 
 articleObject : GQLBuilder.ValueSpec GQLBuilder.NonNull GQLBuilder.ObjectType Article vars

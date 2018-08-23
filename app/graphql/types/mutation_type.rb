@@ -11,8 +11,7 @@ Types::MutationType = GraphQL::ObjectType.define do
   field :deleteArticle, field: Mutations::ArticleMutations::Destroy.field
   field :upvoteArticle, field: Mutations::ArticleMutations::Upvote.field
   field :downvoteArticle, field: Mutations::ArticleMutations::Downvote.field
-  field :markOnline, field: Mutations::ArticleMutations::MarkOnline.field
-  field :markOffline, field: Mutations::ArticleMutations::MarkOffline.field
+  field :updateArticleStatus, field: Mutations::ArticleMutations::UpdateStatus.field
 
   field :addCategory, field: Mutations::CategoryMutations::Create.field
   field :updateCategory, field: Mutations::CategoryMutations::Update.field

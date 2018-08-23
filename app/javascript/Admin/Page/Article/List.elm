@@ -5,7 +5,7 @@ import Html.Attributes exposing (..)
 import Html.Events exposing (..)
 import Admin.Request.Article exposing (..)
 import Admin.Data.Article exposing (..)
-import Page.Article.Common exposing (statusButtonText)
+import Page.Article.Common exposing (statusIso, statusToButtonText)
 import Task exposing (Task)
 import Reader exposing (Reader)
 import GraphQL.Client.Http as GQLClient
@@ -152,10 +152,10 @@ rows model article =
             ]
             [ text "Edit Article" ]
         , button
-            [ onClick (UpdateArticleStatus article.id article.status)
+            [ onClick (UpdateArticleStatus article.id (statusIso.reverseGet article.status))
             , class "actionButton btn btn-primary"
             ]
-            [ text (statusButtonText article.status) ]
+            [ text ("Mark " ++ (statusToButtonText <| statusIso.reverseGet article.status)) ]
         , button
             [ article.id |> DeleteArticle |> onClick
             , class "actionButton btn btn-primary"

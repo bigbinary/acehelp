@@ -10,6 +10,7 @@ import Page.Common.View exposing (..)
 import Field exposing (..)
 import Field.ValidationResult exposing (..)
 import Helpers exposing (..)
+import Monocle.Iso exposing (..)
 
 
 type Status
@@ -123,21 +124,46 @@ errorsIn fields =
         |> stringToMaybe
 
 
-statusButtonText : ArticleStatus -> String
-statusButtonText status =
+statusToString : ArticleStatus -> String
+statusToString status =
     case status of
-        "offline" ->
-            "Mark Online"
+        Admin.Data.Article.Offline ->
+            "Offline"
+
+        Admin.Data.Article.Online ->
+            "Online"
+
+
+stringToStatus : String -> ArticleStatus
+stringToStatus status =
+    case status of
+        "online" ->
+            Admin.Data.Article.Online
 
         _ ->
-            "Mark Offline"
+            Admin.Data.Article.Offline
 
 
 statusClass : ArticleStatus -> String
 statusClass status =
     case status of
-        "online" ->
+        Admin.Data.Article.Online ->
             "online-status"
 
-        _ ->
+        Admin.Data.Article.Offline ->
             "offline-status"
+
+
+statusIso : Iso ArticleStatus String
+statusIso =
+    Iso statusToString stringToStatus
+
+
+statusToButtonText : ArticleStatus -> String
+statusToButtonText status =
+    case status of
+        Admin.Data.Article.Offline ->
+            "Online"
+
+        Admin.Data.Article.Online ->
+            "Offline"

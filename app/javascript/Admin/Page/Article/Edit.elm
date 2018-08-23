@@ -50,7 +50,7 @@ initModel articleId =
     , error = Nothing
     , updateTaskId = Nothing
     , status = None
-    , articleStatus = ""
+    , articleStatus = Offline
     , originalArticle = Nothing
     , isEditable = False
     }
@@ -154,7 +154,7 @@ update msg model =
                 | articleId = article.id
                 , title = Field.update model.title article.title
                 , desc = Field.update model.desc article.desc
-                , articleStatus = article.status
+                , articleStatus = (stringToStatus article.status)
                 , categories = itemSelection (List.map .id article.categories) model.categories
                 , urls = itemSelection (List.map .id article.urls) model.urls
                 , originalArticle = Just article
@@ -250,7 +250,7 @@ update msg model =
         UpdateStatusResponse (Ok newArticle) ->
             ( { model
                 | originalArticle = Just newArticle
-                , articleStatus = newArticle.status
+                , articleStatus = (stringToStatus newArticle.status)
                 , status = None
               }
             , []
@@ -314,13 +314,13 @@ view model =
                             [ text ("Status: ") ]
                         , span
                             [ class (statusClass model.articleStatus) ]
-                            [ text model.articleStatus ]
+                            [ text (statusIso.get model.articleStatus) ]
                         ]
                     , button
                         [ onClick (UpdateStatus model.articleId model.articleStatus)
                         , class "btn btn-primary"
                         ]
-                        [ text (statusButtonText model.articleStatus) ]
+                        [ text ("Mark " ++ (statusToButtonText model.articleStatus)) ]
                     ]
                 ]
             ]

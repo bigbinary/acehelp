@@ -166,10 +166,11 @@ class Mutations::ArticleMutations
     }
   end
 
-  MarkOnline = GraphQL::Relay::Mutation.define do
-    name "MarkOnline"
+  UpdateStatus = GraphQL::Relay::Mutation.define do
+    name "UpdateStatus"
 
     input_field :id, !types.String
+    input_field :status, !types.String
 
     return_field :article, Types::ArticleType
     return_field :errors, types[Types::ErrorType]
@@ -178,35 +179,7 @@ class Mutations::ArticleMutations
       article = Article.find_by(id: inputs[:id], organization_id: context[:organization].id)
 
       if article
-        if article.mark_online
-          new_article = article
-        else
-          errors = Utils::ErrorHandler.new.detailed_error(article, context)
-        end
-      else
-        errors = Utils::ErrorHandler.new.error("Article not found", context)
-      end
-
-      {
-        article: new_article,
-        errors: errors
-      }
-    }
-  end
-
-  MarkOffline = GraphQL::Relay::Mutation.define do
-    name "MarkOffline"
-
-    input_field :id, !types.String
-
-    return_field :article, Types::ArticleType
-    return_field :errors, types[Types::ErrorType]
-
-    resolve ->(object, inputs, context) {
-      article = Article.find_by(id: inputs[:id], organization: context[:organization].id)
-
-      if article
-        if article.mark_offline
+        if article.update_attributes(status: inputs[:status])
           new_article = article
         else
           errors = Utils::ErrorHandler.new.detailed_error(article, context)

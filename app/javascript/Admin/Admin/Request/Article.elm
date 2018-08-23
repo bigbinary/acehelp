@@ -83,17 +83,17 @@ requestDeleteArticle articleId =
 requestUpdateArticleStatus : ArticleId -> ArticleStatus -> Reader ( NodeEnv, ApiKey, AppUrl ) (Task GQLClient.Error Article)
 requestUpdateArticleStatus articleId articleStatus =
     let
-        mutation =
+        newStatus =
             case articleStatus of
-                "offline" ->
-                    markArticleOnlineMutation
+                Offline ->
+                    "online"
 
-                _ ->
-                    markArticleOfflineMutation
+                Online ->
+                    "offline"
     in
         Reader.Reader
             (\( nodeEnv, apiKey, appUrl ) ->
                 (GQLClient.customSendMutation (requestOptions nodeEnv apiKey appUrl) <|
-                    GQLBuilder.request { id = articleId } mutation
+                    GQLBuilder.request { id = articleId, status = newStatus } articleStatusMutation
                 )
             )

@@ -10,6 +10,7 @@ class Article < ApplicationRecord
   has_many :article_categories, dependent: :destroy
   has_many :categories, through: :article_categories
 
+  validates :status, inclusion: { in: %w[online offline] }
   validates :title, uniqueness: { scope: [:organization_id] }, presence: true
 
   scope :for_organization, ->(org) { where(organization: org) }
@@ -20,14 +21,6 @@ class Article < ApplicationRecord
 
   def increment_downvote
     self.update(downvotes_count: self.downvotes_count + 1)
-  end
-
-  def mark_online
-    self.update(status: "online")
-  end
-
-  def mark_offline
-    self.update(status: "offline")
   end
 
   def self.search_using(article_id, url, org)
