@@ -9,7 +9,7 @@ class Mutations::ChangeCategoryStatusMutationsTest < ActiveSupport::TestCase
     @query = <<-GRAPHQL
         mutation($input: ChangeCategoryStatusInput!) {
           changeCategoryStatus(input: $input) {
-            category {
+            categories {
               id
               status
             }
@@ -24,12 +24,14 @@ class Mutations::ChangeCategoryStatusMutationsTest < ActiveSupport::TestCase
 
   test "update category status with ONLINE" do
     result = AceHelp::Client.execute(@query, input: { id: @category.id, status: "online" })
-    assert_equal Category.statuses[:online], result.data.change_category_status.category.status
+    @category.reload
+    assert_equal Category.statuses[:online], @category.status
   end
 
   test "update category status with OFFLINE" do
     result = AceHelp::Client.execute(@query, input: { id: @category.id, status: "offline" })
-    assert_equal Category.statuses[:offline], result.data.change_category_status.category.status
+    @category.reload
+    assert_equal Category.statuses[:offline], @category.status
   end
 
   test "update category with invalid status" do

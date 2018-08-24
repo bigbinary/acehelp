@@ -171,7 +171,9 @@ class Mutations::ArticleMutationsTest < ActiveSupport::TestCase
               }
     GRAPHQL
 
-    result = AceHelp::Client.execute(mutation, input: { id: @article.id, status: "invalid" })
-    assert_not_empty result.data.update_article_status.errors.flat_map(&:path) & ["updateArticleStatus", "attribute", "status"]
+    assert_raises (ArgumentError) do
+      AceHelp::Client.execute(mutation, input: { id: @article.id, status: "invalid" })
+    end
+    # assert_not_empty result.data.update_article_status.errors.flat_map(&:path) & ["updateArticleStatus", "attribute", "status"]
   end
 end
