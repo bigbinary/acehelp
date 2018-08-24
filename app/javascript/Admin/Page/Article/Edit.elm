@@ -10,6 +10,7 @@ import Admin.Request.Url exposing (..)
 import Admin.Data.Category exposing (..)
 import Admin.Data.Url exposing (UrlData, UrlId)
 import Admin.Data.Common exposing (..)
+import Admin.Data.Status exposing (..)
 import Reader exposing (Reader)
 import Task exposing (Task)
 import Time
@@ -33,8 +34,8 @@ type alias Model =
     , urls : List (Option UrlData)
     , error : Maybe String
     , updateTaskId : Maybe Int
-    , status : Status
-    , articleStatus : ArticleStatus
+    , status : SaveSatus
+    , articleStatus : AvailabilitySatus
     , originalArticle : Maybe Article
     , isEditable : Bool
     }
@@ -79,7 +80,7 @@ type Msg
     | CategoriesLoaded (Result GQLClient.Error (List Category))
     | CategorySelected (List CategoryId)
     | UrlsLoaded (Result GQLClient.Error (List UrlData))
-    | UpdateStatus ArticleId ArticleStatus
+    | UpdateStatus ArticleId AvailabilitySatus
     | UpdateStatusResponse (Result GQLClient.Error Article)
     | UrlSelected (List UrlId)
     | TrixInitialize ()
@@ -154,7 +155,7 @@ update msg model =
                 | articleId = article.id
                 , title = Field.update model.title article.title
                 , desc = Field.update model.desc article.desc
-                , articleStatus = (stringToStatus article.status)
+                , articleStatus = availablityStatusIso.reverseGet article.status
                 , categories = itemSelection (List.map .id article.categories) model.categories
                 , urls = itemSelection (List.map .id article.urls) model.urls
                 , originalArticle = Just article
@@ -250,7 +251,7 @@ update msg model =
         UpdateStatusResponse (Ok newArticle) ->
             ( { model
                 | originalArticle = Just newArticle
-                , articleStatus = (stringToStatus newArticle.status)
+                , articleStatus = availablityStatusIso.reverseGet newArticle.status
                 , status = None
               }
             , []
@@ -311,10 +312,10 @@ view model =
                         []
                         [ span
                             []
-                            [ text ("Status: ") ]
+                            [ text ("SaveSatus: ") ]
                         , span
                             [ class (statusClass model.articleStatus) ]
-                            [ text (statusIso.get model.articleStatus) ]
+                            [ text (availablityStatusIso.get model.articleStatus) ]
                         ]
                     , button
                         [ onClick (UpdateStatus model.articleId model.articleStatus)

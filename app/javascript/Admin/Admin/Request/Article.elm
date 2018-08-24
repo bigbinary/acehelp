@@ -6,6 +6,7 @@ import Task exposing (Task)
 import Admin.Data.Article exposing (..)
 import GraphQL.Client.Http as GQLClient
 import GraphQL.Request.Builder as GQLBuilder
+import Admin.Data.Status exposing (..)
 
 
 requestArticlesByUrl : String -> Reader ( NodeEnv, ApiKey, AppUrl ) (Task GQLClient.Error (List ArticleSummary))
@@ -80,20 +81,11 @@ requestDeleteArticle articleId =
         )
 
 
-requestUpdateArticleStatus : ArticleId -> ArticleStatus -> Reader ( NodeEnv, ApiKey, AppUrl ) (Task GQLClient.Error Article)
+requestUpdateArticleStatus : ArticleId -> AvailabilitySatus -> Reader ( NodeEnv, ApiKey, AppUrl ) (Task GQLClient.Error Article)
 requestUpdateArticleStatus articleId articleStatus =
-    let
-        newStatus =
-            case articleStatus of
-                Offline ->
-                    "online"
-
-                Online ->
-                    "offline"
-    in
-        Reader.Reader
-            (\( nodeEnv, apiKey, appUrl ) ->
-                (GQLClient.customSendMutation (requestOptions nodeEnv apiKey appUrl) <|
-                    GQLBuilder.request { id = articleId, status = newStatus } articleStatusMutation
-                )
+    Reader.Reader
+        (\( nodeEnv, apiKey, appUrl ) ->
+            (GQLClient.customSendMutation (requestOptions nodeEnv apiKey appUrl) <|
+                GQLBuilder.request { id = articleId, status = availablityStatusIso.get articleStatus } articleStatusMutation
             )
+        )

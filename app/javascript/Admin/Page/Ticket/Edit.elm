@@ -292,6 +292,7 @@ deleteTicket model =
     in
         ( model, [ cmd ] )
 
+
 save : Model -> ( Model, List (ReaderCmd Msg) )
 save model =
     let
@@ -307,7 +308,7 @@ ticketStatusDropDown model =
     div []
         [ div [ class "status-selection" ]
             [ div []
-                [ h2 [] [ text "Status Selector" ]
+                [ h2 [] [ text "SaveSatus Selector" ]
                 , select [ onInput UpdateTicketStatus, class "custom-select custom-select-lg mb-3" ]
                     (List.map (statusOption model) model.statuses)
                 ]
