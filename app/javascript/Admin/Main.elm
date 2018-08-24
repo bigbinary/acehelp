@@ -295,7 +295,7 @@ navigateTo newRoute model =
 
 removeNotificationDelayTime : number
 removeNotificationDelayTime =
-    10
+    3000
 
 
 combineCmds : Cmd msg -> Cmd msg -> Cmd msg
@@ -378,14 +378,8 @@ update msg model =
                 in
                     case caMsg of
                         ArticleCreate.SaveArticleResponse (Ok id) ->
-                            let
-                                ( updatedModel, updatedCmd ) =
-                                    updateNavigation (NavigateTo (Route.ArticleList model.organizationKey))
-                                        |> renderFlashMessages "Article created successfully." "success"
-                            in
-                                ( updatedModel
-                                , Cmd.batch [ updatedCmd ]
-                                )
+                            updateNavigation (NavigateTo (Route.ArticleList model.organizationKey))
+                                |> renderFlashMessages "Article created successfully." "success"
 
                         _ ->
                             ( { model | currentPage = Loaded (ArticleCreate newModel) }
