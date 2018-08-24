@@ -15,7 +15,10 @@ class Mutations::ChangeCategoryStatusMutation
       category = Category.find_by(id: inputs[:id])
 
       if category
-        updated_category = category if category.update(status: inputs[:status])
+        if category.update(status: inputs[:status])
+          updated_category = category
+          category.articles.update_all(status: inputs[:status])
+        end
       else
         errors = Utils::ErrorHandler.new.error("Category Not found", context)
       end
