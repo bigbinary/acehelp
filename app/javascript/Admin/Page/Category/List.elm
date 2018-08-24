@@ -44,6 +44,7 @@ type Msg
     | DeleteCategoryResponse (Result GQLClient.Error CategoryId)
     | OnCreateCategoryClick
     | OnEditCategoryClick CategoryId
+    | UpdateCategoryStatus CategoryId String
 
 
 update : Msg -> Model -> ( Model, List (ReaderCmd Msg) )
@@ -75,6 +76,9 @@ update msg model =
         OnEditCategoryClick _ ->
             -- NOTE: Handled in Main
             ( model, [] )
+
+        UpdateCategoryStatus categoryId status ->
+            updateCategoryStatus model categoryId status
 
 
 
@@ -131,6 +135,9 @@ categoryRow category =
             ]
         , div
             [ class "actionButtonColumn" ]
+            [ categoryStatusButton category ]
+        , div
+            [ class "actionButtonColumn" ]
             [ button
                 [ class "actionButton btn btn-primary"
                 , onClick (DeleteCategory category.id)
@@ -147,3 +154,30 @@ deleteCategoryById model categoryId =
             (Strict <| Reader.map (Task.attempt DeleteCategoryResponse) (deleteCategory categoryId))
     in
         ( model, [ cmd ] )
+
+
+updateCategoryStatus : Model -> CategoryId -> String -> ( Model, List (ReaderCmd Msg) )
+updateCategoryStatus model categoryId categoryStatus =
+    let
+        cmd =
+            Strict <| Reader.map (Task.attempt CategoriesLoaded) (requestUpdateCategoryStatus categoryId categoryStatus)
+    in
+        ( model, [ cmd ] )
+
+
+categoryStatusButton : Category -> Html Msg
+categoryStatusButton category =
+    case category.status of
+        "online" ->
+            button
+                [ onClick (UpdateCategoryStatus category.id "offline")
+                , class "actionButton btn btn-primary"
+                ]
+                [ text <| "Make Category Offline" ]
+
+        _ ->
+            button
+                [ onClick (UpdateCategoryStatus category.id "online")
+                , class "actionButton btn btn-primary"
+                ]
+                [ text <| "Make Category Online" ]
