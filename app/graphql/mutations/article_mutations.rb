@@ -181,6 +181,7 @@ class Mutations::ArticleMutations
       if article
         if article.update_attributes(status: inputs[:status])
           new_article = article
+          article.categories.online! if article.online?
         else
           errors = Utils::ErrorHandler.new.detailed_error(article, context)
         end
