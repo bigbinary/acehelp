@@ -59,6 +59,8 @@ ActiveRecord::Schema.define(version: 2018_08_23_102533) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.string "commentable_type", null: false
+    t.index ["commentable_id"], name: "index_comments_on_commentable_id"
+    t.index ["ticket_id"], name: "index_comments_on_ticket_id"
   end
 
   create_table "delayed_jobs", force: :cascade do |t|
