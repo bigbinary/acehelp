@@ -714,14 +714,11 @@ update msg model =
                 in
                     case oCMsg of
                         OrganizationCreate.SaveOrgResponse (Ok org) ->
-                            let
-                                ( updatedModel, updatedCmd ) =
-                                    updateNavigation (NavigateTo (Route.ArticleList org.api_key))
-                            in
-                                ( { updatedModel
+                            update (NavigateTo (Route.ArticleList org.api_key))
+                                ({ model
                                     | organizationKey = org.api_key
-                                  }
-                                , updatedCmd
+                                    , organizationName = org.name
+                                 }
                                 )
 
                         _ ->

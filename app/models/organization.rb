@@ -1,9 +1,10 @@
 # frozen_string_literal: true
 
 class Organization < ApplicationRecord
-  has_many :urls
-  has_many :articles
-  has_many :categories
+  has_many :urls, dependent: :destroy
+  has_many :articles, dependent: :destroy
+  has_many :categories, dependent: :destroy
+  has_many :tickets, dependent: :destroy
 
   has_many :organization_users, dependent: :destroy
   has_many :users, through: :organization_users
