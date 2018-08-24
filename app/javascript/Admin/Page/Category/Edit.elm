@@ -22,6 +22,7 @@ type alias Model =
     , name : Field String String
     , error : Maybe String
     , success : Maybe String
+    , status : String
     }
 
 
@@ -31,6 +32,7 @@ initModel categoryId =
     , id = categoryId
     , error = Nothing
     , success = Nothing
+    , status = ""
     }
 
 
@@ -50,6 +52,7 @@ type Msg
     | CategoryLoaded (Result GQLClient.Error Category)
     | SaveCategory
     | UpdateCategoryResponse (Result GQLClient.Error Category)
+    | UpdateCategoryStatus String
 
 
 update : Msg -> Model -> ( Model, List (ReaderCmd Msg) )
@@ -58,6 +61,7 @@ update msg model =
         CategoryLoaded (Ok category) ->
             ( { model
                 | name = Field.update model.name category.name
+                , status = category.status
                 , id = category.id
               }
             , []
@@ -105,6 +109,9 @@ update msg model =
         UpdateCategoryResponse (Err error) ->
             ( { model | error = Just (toString error) }, [] )
 
+        UpdateCategoryStatus status ->
+            updateCategoryStatus model status
+
 
 
 -- VIEW
@@ -145,13 +152,18 @@ view model =
                 ]
                 []
             ]
-        , div []
-            [ button
-                [ type_ "button"
-                , class "btn btn-primary"
-                , onClick SaveCategory
+        , div [ class "row" ]
+            [ div
+                [ class "col-sm-2" ]
+                [ categoryStatusButton model model.status ]
+            , div [ class "col-sm-2" ]
+                [ button
+                    [ type_ "button"
+                    , class "btn btn-primary"
+                    , onClick SaveCategory
+                    ]
+                    [ text "Save" ]
                 ]
-                [ text "Save" ]
             ]
         ]
 
@@ -174,3 +186,30 @@ updateCategory model =
             Strict <| Reader.map (Task.attempt UpdateCategoryResponse) (requestUpdateCategory <| categoryUpdateInputs model)
     in
         ( model, [ cmd ] )
+
+
+updateCategoryStatus : Model -> String -> ( Model, List (ReaderCmd Msg) )
+updateCategoryStatus model categoryStatus =
+    let
+        cmd =
+            Strict <| Reader.map (Task.attempt UpdateCategoryResponse) (requestUpdateCategoryStatus model.id categoryStatus)
+    in
+        ( model, [ cmd ] )
+
+
+categoryStatusButton : Model -> String -> Html Msg
+categoryStatusButton model status =
+    case status of
+        "online" ->
+            Html.a
+                [ onClick (UpdateCategoryStatus "offline")
+                , class "btn btn-primary"
+                ]
+                [ text <| "Make Category Offline" ]
+
+        _ ->
+            Html.a
+                [ onClick (UpdateCategoryStatus "online")
+                , class "btn btn-primary"
+                ]
+                [ text <| "Make Category Online" ]
