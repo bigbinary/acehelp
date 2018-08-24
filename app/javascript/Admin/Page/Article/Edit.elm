@@ -34,6 +34,7 @@ type alias Model =
     , error : Maybe String
     , updateTaskId : Maybe Int
     , status : Status
+    , articleStatus : ArticleStatus
     , originalArticle : Maybe Article
     , isEditable : Bool
     }
@@ -49,6 +50,7 @@ initModel articleId =
     , error = Nothing
     , updateTaskId = Nothing
     , status = None
+    , articleStatus = Offline
     , originalArticle = Nothing
     , isEditable = False
     }
@@ -77,6 +79,8 @@ type Msg
     | CategoriesLoaded (Result GQLClient.Error (List Category))
     | CategorySelected (List CategoryId)
     | UrlsLoaded (Result GQLClient.Error (List UrlData))
+    | UpdateStatus ArticleId ArticleStatus
+    | UpdateStatusResponse (Result GQLClient.Error Article)
     | UrlSelected (List UrlId)
     | TrixInitialize ()
     | ReceivedTimeoutId Int
@@ -150,6 +154,7 @@ update msg model =
                 | articleId = article.id
                 , title = Field.update model.title article.title
                 , desc = Field.update model.desc article.desc
+                , articleStatus = (stringToStatus article.status)
                 , categories = itemSelection (List.map .id article.categories) model.categories
                 , urls = itemSelection (List.map .id article.urls) model.urls
                 , originalArticle = Just article
@@ -235,6 +240,30 @@ update msg model =
                 Nothing ->
                     ( { model | isEditable = False }, [] )
 
+        UpdateStatus articleId articleStatus ->
+            ( { model
+                | status = Saving
+              }
+            , [ Strict <| Reader.map (Task.attempt UpdateStatusResponse) <| requestUpdateArticleStatus articleId articleStatus ]
+            )
+
+        UpdateStatusResponse (Ok newArticle) ->
+            ( { model
+                | originalArticle = Just newArticle
+                , articleStatus = (stringToStatus newArticle.status)
+                , status = None
+              }
+            , []
+            )
+
+        UpdateStatusResponse (Err error) ->
+            ( { model
+                | error = Just (toString error)
+                , status = None
+              }
+            , []
+            )
+
 
 
 -- View
@@ -276,6 +305,23 @@ view model =
             , div [ class "col-sm article-meta-data-block" ]
                 [ multiSelectCategoryList "Categories:" model.categories CategorySelected
                 , multiSelectUrlList "Urls:" model.urls UrlSelected
+                , div
+                    [ class "article-block article-status-block" ]
+                    [ div
+                        []
+                        [ span
+                            []
+                            [ text ("Status: ") ]
+                        , span
+                            [ class (statusClass model.articleStatus) ]
+                            [ text (statusIso.get model.articleStatus) ]
+                        ]
+                    , button
+                        [ onClick (UpdateStatus model.articleId model.articleStatus)
+                        , class "btn btn-primary"
+                        ]
+                        [ text ("Mark " ++ (statusToButtonText model.articleStatus)) ]
+                    ]
                 ]
             ]
         , if model.status == Saving then

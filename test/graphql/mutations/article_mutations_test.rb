@@ -134,4 +134,44 @@ class Mutations::ArticleMutationsTest < ActiveSupport::TestCase
 
     assert_equal result.data.delete_article.deleted_id, @article.id
   end
+
+  test "update article status mutations" do
+    mutation = <<-'GRAPHQL'
+              mutation($input: UpdateStatusInput!) {
+                updateArticleStatus(input: $input) {
+                  article {
+                    id
+                    status
+                  }
+                  errors {
+                    message
+                    path
+                  }
+                }
+              }
+    GRAPHQL
+
+    result = AceHelp::Client.execute(mutation, input: { id: @article.id, status: "online" })
+    assert_equal result.data.update_article_status.article.status, "online"
+  end
+
+  test "update article status mutation failure" do
+    mutation = <<-'GRAPHQL'
+              mutation($input: UpdateStatusInput!) {
+                updateArticleStatus(input: $input) {
+                  article {
+                    id
+                    status
+                  }
+                  errors {
+                    message
+                    path
+                  }
+                }
+              }
+    GRAPHQL
+
+    result = AceHelp::Client.execute(mutation, input: { id: @article.id, status: "invalid" })
+    assert_not_empty result.data.update_article_status.errors.flat_map(&:path) & ["updateArticleStatus", "attribute", "status"]
+  end
 end

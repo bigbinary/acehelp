@@ -10,6 +10,7 @@ class Article < ApplicationRecord
   has_many :article_categories, dependent: :destroy
   has_many :categories, through: :article_categories
 
+  validates :status, inclusion: { in: %w[online offline] }
   validates :title, uniqueness: { scope: [:organization_id] }, presence: true
 
   scope :for_organization, ->(org) { where(organization: org) }

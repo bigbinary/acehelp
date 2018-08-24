@@ -13,10 +13,16 @@ type alias ArticleId =
     String
 
 
+type ArticleStatus
+    = Online
+    | Offline
+
+
 type alias Article =
     { id : ArticleId
     , title : String
     , desc : String
+    , status : String
     , categories : List Category
     , urls : List UrlData
     }
@@ -41,6 +47,7 @@ type alias UpdateArticleInputs =
 type alias ArticleSummary =
     { id : ArticleId
     , title : String
+    , status : String
     }
 
 
@@ -54,6 +61,7 @@ decodeArticleSummary =
     decode ArticleSummary
         |> required "id" string
         |> required "title" string
+        |> required "status" string
 
 
 articlesByUrlQuery :
@@ -197,12 +205,39 @@ deleteArticleMutation =
                     )
 
 
+articleStatusMutation : GQLBuilder.Document GQLBuilder.Mutation Article { vars | id : ArticleId, status : String }
+articleStatusMutation =
+    let
+        idVar =
+            Var.required "id" .id Var.string
+
+        statusVar =
+            Var.required "status" .status Var.string
+    in
+        GQLBuilder.mutationDocument <|
+            GQLBuilder.extract <|
+                GQLBuilder.field "updateArticleStatus"
+                    [ ( "input"
+                      , Arg.object
+                            [ ( "id", Arg.variable idVar )
+                            , ( "status", Arg.variable statusVar )
+                            ]
+                      )
+                    ]
+                    (GQLBuilder.extract <|
+                        GQLBuilder.field "article"
+                            []
+                            articleObject
+                    )
+
+
 articleObject : GQLBuilder.ValueSpec GQLBuilder.NonNull GQLBuilder.ObjectType Article vars
 articleObject =
     GQLBuilder.object Article
         |> GQLBuilder.with (GQLBuilder.field "id" [] GQLBuilder.string)
         |> GQLBuilder.with (GQLBuilder.field "title" [] GQLBuilder.string)
         |> GQLBuilder.with (GQLBuilder.field "desc" [] GQLBuilder.string)
+        |> GQLBuilder.with (GQLBuilder.field "status" [] GQLBuilder.string)
         |> GQLBuilder.with
             (GQLBuilder.field "categories"
                 []
@@ -224,4 +259,5 @@ articleSummaryObject =
     (GQLBuilder.object ArticleSummary
         |> GQLBuilder.with (GQLBuilder.field "id" [] GQLBuilder.string)
         |> GQLBuilder.with (GQLBuilder.field "title" [] GQLBuilder.string)
+        |> GQLBuilder.with (GQLBuilder.field "status" [] GQLBuilder.string)
     )

@@ -5,6 +5,7 @@ import Html.Attributes exposing (..)
 import Html.Events exposing (..)
 import Admin.Request.Article exposing (..)
 import Admin.Data.Article exposing (..)
+import Page.Article.Common exposing (statusIso, statusToButtonText)
 import Task exposing (Task)
 import Reader exposing (Reader)
 import GraphQL.Client.Http as GQLClient
@@ -40,6 +41,8 @@ type Msg
     = ArticleListLoaded (Result GQLClient.Error (List ArticleSummary))
     | OnArticleEditClick ArticleId
     | OnArticleCreateClick
+    | UpdateArticleStatus ArticleId ArticleStatus
+    | UpdateArticleStatusResponse (Result GQLClient.Error Article)
     | DeleteArticle ArticleId
     | DeleteArticleResponse (Result GQLClient.Error ArticleId)
 
@@ -69,6 +72,26 @@ update msg model =
                 ( { model | articles = articles }, [] )
 
         DeleteArticleResponse (Err error) ->
+            ( { model | error = Just (toString error) }, [] )
+
+        UpdateArticleStatus articleId articleStatus ->
+            ( model, [ Strict <| Reader.map (Task.attempt UpdateArticleStatusResponse) <| requestUpdateArticleStatus articleId articleStatus ] )
+
+        UpdateArticleStatusResponse (Ok newArticle) ->
+            let
+                articles =
+                    List.map
+                        (\article ->
+                            if article.id == newArticle.id then
+                                { article | status = newArticle.status }
+                            else
+                                article
+                        )
+                        model.articles
+            in
+                ( { model | articles = articles }, [] )
+
+        UpdateArticleStatusResponse (Err error) ->
             ( { model | error = Just (toString error) }, [] )
 
         OnArticleCreateClick ->
@@ -128,6 +151,11 @@ rows model article =
             , class "actionButton btn btn-primary"
             ]
             [ text "Edit Article" ]
+        , button
+            [ onClick (UpdateArticleStatus article.id (statusIso.reverseGet article.status))
+            , class "actionButton btn btn-primary"
+            ]
+            [ text ("Mark " ++ (statusToButtonText <| statusIso.reverseGet article.status)) ]
         , button
             [ article.id |> DeleteArticle |> onClick
             , class "actionButton btn btn-primary"
