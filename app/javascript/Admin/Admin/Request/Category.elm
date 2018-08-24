@@ -59,3 +59,13 @@ requestCreateCategory categoryInputs =
                     categoryInputs
                     createCategoryMutation
         )
+
+
+requestUpdateCategoryStatus : CategoryId -> String -> Reader ( NodeEnv, ApiKey, AppUrl ) (Task GQLClient.Error Category)
+requestUpdateCategoryStatus categoryId categoryStatus =
+    Reader.Reader
+        (\( nodeEnv, apiKey, appUrl ) ->
+            (GQLClient.customSendMutation (requestOptions nodeEnv apiKey appUrl) <|
+                GQLBuilder.request { id = categoryId, status = categoryStatus } updateCategoryStatusMutation
+            )
+        )
