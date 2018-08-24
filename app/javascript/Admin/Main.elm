@@ -26,12 +26,14 @@ import Page.Session.SignUp as SignUp
 import Page.Errors as Errors
 import Admin.Request.Helper exposing (NodeEnv, ApiKey, logoutRequest)
 import Admin.Data.ReaderCmd exposing (..)
+import Admin.Ports exposing (..)
 import Page.Ticket.List as TicketList
 import Page.Ticket.Edit as TicketEdit
 import Page.Url.Create as UrlCreate
 import Page.Url.Edit as UrlEdit
 import Page.Url.List as UrlList
 import Page.Common.View exposing (..)
+import Admin.Ports exposing (..)
 import Route
 
 
@@ -96,7 +98,6 @@ type alias Model =
     , appUrl : String
     , error : Maybe String
     , flashElements : List NotificationElement
-    , nextId : Int
     }
 
 
@@ -117,7 +118,6 @@ init flags location =
             , appUrl = flags.app_url
             , error = Nothing
             , flashElements = []
-            , nextId = 0
             }
     in
         ( pageModel, readerCmd )
@@ -129,7 +129,6 @@ init flags location =
 
 type Msg
     = NavigateTo Route.Route
-    | RemoveNotification
     | ArticleListMsg ArticleList.Msg
     | ArticleCreateMsg ArticleCreate.Msg
     | ArticleEditMsg ArticleEdit.Msg
@@ -153,6 +152,7 @@ type Msg
     | SignedOut (Result Http.Error String)
     | SignUpMsg SignUp.Msg
     | OrganizationCreateMsg OrganizationCreate.Msg
+    | TimedOut Int
 
 
 
@@ -293,6 +293,16 @@ navigateTo newRoute model =
                 )
 
 
+removeNotificationDelayTime : number
+removeNotificationDelayTime =
+    3000
+
+
+combineCmds : Cmd msg -> Cmd msg -> Cmd msg
+combineCmds cmd1 cmd2 =
+    Cmd.batch <| [ cmd1, cmd2 ]
+
+
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     let
@@ -305,23 +315,27 @@ update msg model =
         renderFlashMessages message messageType =
             Tuple.mapFirst
                 (\model ->
-                    { model | flashElements = [ NotificationElement message messageType ] }
+                    { model
+                        | flashElements = [ NotificationElement message messageType ]
+                    }
                 )
+                >> Tuple.mapSecond
+                    (combineCmds <| setTimeout removeNotificationDelayTime)
     in
         case msg of
             NavigateTo route ->
                 navigateTo route model
-                    |> Tuple.mapSecond
-                        (\cmd ->
-                            Cmd.batch <|
-                                cmd
-                                    :: [ modifyUrl <|
-                                            Route.routeToString route
-                                       ]
+                    |> Tuple.mapFirst
+                        (\model ->
+                            { model
+                                | flashElements = []
+                            }
                         )
-
-            RemoveNotification ->
-                ( { model | flashElements = [] }, Cmd.none )
+                    |> Tuple.mapSecond
+                        (combineCmds <|
+                            modifyUrl <|
+                                Route.routeToString route
+                        )
 
             ArticleListMsg alMsg ->
                 let
@@ -791,6 +805,9 @@ update msg model =
             SignedOut _ ->
                 ( model, load (Admin.Request.Helper.baseUrl model.nodeEnv model.appUrl) )
 
+            TimedOut id ->
+                ( { model | flashElements = [] }, Cmd.none )
+
 
 
 -- SUBSCRIPTIONS
@@ -803,7 +820,8 @@ subscriptions model =
             Sub.map ArticleEditMsg <| ArticleEdit.subscriptions articleEditModel
 
         _ ->
-            Sub.none
+            Sub.batch
+                [ timedOut <| TimedOut ]
 
 
 
@@ -1065,7 +1083,6 @@ flashViewElements elements =
         (\elem ->
             div
                 [ class ("alert alert-" ++ elem.messageType)
-                , onClick RemoveNotification
                 ]
                 [ text elem.text ]
         )
