@@ -7,7 +7,7 @@ class Mutations::ChangeCategoryStatusMutation
     input_field :status, !types.String
     input_field :id, !types.String
 
-    return_field :category, Types::CategoryType
+    return_field :categories, types[Types::CategoryType]
     return_field :errors, types[Types::ErrorType]
 
     resolve ->(object, inputs, context) {
@@ -16,7 +16,7 @@ class Mutations::ChangeCategoryStatusMutation
 
       if category
         if category.update(status: inputs[:status])
-          updated_category = category
+          categories = Category.for_organization(context[:organization])
           category.articles.update_all(status: inputs[:status])
         end
       else
@@ -24,7 +24,7 @@ class Mutations::ChangeCategoryStatusMutation
       end
 
       {
-        category: updated_category,
+        categories: categories,
         errors: errors
       }
     }
