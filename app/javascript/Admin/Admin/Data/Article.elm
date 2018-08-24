@@ -13,11 +13,6 @@ type alias ArticleId =
     String
 
 
-type ArticleStatus
-    = Online
-    | Offline
-
-
 type alias Article =
     { id : ArticleId
     , title : String
@@ -237,7 +232,7 @@ articleObject =
         |> GQLBuilder.with (GQLBuilder.field "id" [] GQLBuilder.string)
         |> GQLBuilder.with (GQLBuilder.field "title" [] GQLBuilder.string)
         |> GQLBuilder.with (GQLBuilder.field "desc" [] GQLBuilder.string)
-        |> GQLBuilder.with (GQLBuilder.field "status" [] GQLBuilder.string)
+        |> (GQLBuilder.with (GQLBuilder.field "status" [] GQLBuilder.string))
         |> GQLBuilder.with
             (GQLBuilder.field "categories"
                 []

@@ -5,15 +5,14 @@ import Html.Attributes exposing (..)
 import Admin.Data.Category exposing (..)
 import Admin.Data.Url exposing (..)
 import Admin.Data.Common exposing (..)
-import Admin.Data.Article exposing (ArticleStatus)
+import Admin.Data.Status exposing (..)
 import Page.Common.View exposing (..)
 import Field exposing (..)
 import Field.ValidationResult exposing (..)
 import Helpers exposing (..)
-import Monocle.Iso exposing (..)
 
 
-type Status
+type SaveSatus
     = Saving
     | None
 
@@ -124,46 +123,21 @@ errorsIn fields =
         |> stringToMaybe
 
 
-statusToString : ArticleStatus -> String
-statusToString status =
-    case status of
-        Admin.Data.Article.Offline ->
-            "Offline"
-
-        Admin.Data.Article.Online ->
-            "Online"
-
-
-stringToStatus : String -> ArticleStatus
-stringToStatus status =
-    case status of
-        "online" ->
-            Admin.Data.Article.Online
-
-        _ ->
-            Admin.Data.Article.Offline
-
-
-statusClass : ArticleStatus -> String
+statusClass : AvailabilitySatus -> String
 statusClass status =
     case status of
-        Admin.Data.Article.Online ->
+        Online ->
             "online-status"
 
-        Admin.Data.Article.Offline ->
+        Offline ->
             "offline-status"
 
 
-statusIso : Iso ArticleStatus String
-statusIso =
-    Iso statusToString stringToStatus
-
-
-statusToButtonText : ArticleStatus -> String
+statusToButtonText : AvailabilitySatus -> String
 statusToButtonText status =
     case status of
-        Admin.Data.Article.Offline ->
+        Offline ->
             "Online"
 
-        Admin.Data.Article.Online ->
+        Online ->
             "Offline"

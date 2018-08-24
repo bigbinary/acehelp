@@ -28,7 +28,7 @@ type alias Model =
     , articleId : Maybe ArticleId
     , categories : List (Option Category)
     , urls : List (Option UrlData)
-    , status : Status
+    , status : SaveSatus
     , error : Maybe String
     }
 
