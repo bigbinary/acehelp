@@ -36,8 +36,7 @@ class Article < ApplicationRecord
     articles = opts[:status].present? ? Article.send(opts[:status]) : Article.all
     if opts[:article_id].present? && opts[:url].present?
       articles.joins(:urls).where(
-        "articles.id = ? AND
-        urls.url = ?",
+        "articles.id = ? AND urls.url = ?",
         opts[:article_id], opts[:url]
       ).for_organization(org)
     elsif opts[:article_id].present?
