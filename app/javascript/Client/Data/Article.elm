@@ -64,7 +64,7 @@ searchArticlesQuery =
     in
         GQLBuilder.queryDocument <|
             GQLBuilder.extract <|
-                GQLBuilder.field "searchArticles"
+                GQLBuilder.field "articles"
                     [ ( "search_string", Arg.variable searchStringVar ) ]
                     (GQLBuilder.list
                         (GQLBuilder.object ArticleSummary

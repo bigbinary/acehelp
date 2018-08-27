@@ -20,15 +20,16 @@ class Resolvers::ArticlesSearchTest < ActiveSupport::TestCase
     Resolvers::ArticlesSearch.new.call(nil, args, organization: @organization)
   end
 
+  test "show article failure" do
+    assert_equal find(id: -1).size, 0
+  end
+
   test "show article success" do
     assert_equal find(id: @article.id), [@article]
     assert_equal find(id: @article.id, url: @url.url), []
     assert_equal find(url: @url.url), @url.articles.for_organization(@organization)
   end
 
-  test "show article failure" do
-    assert_equal find(id: -1).size, 0
-  end
 
   test "search articles success" do
     query = <<-'GRAPHQL'

@@ -4,7 +4,6 @@ Types::QueryType = GraphQL::ObjectType.define do
   name "Query"
 
   field :articles,        function: Resolvers::ArticlesSearch.new
-  field :searchArticles,  function: Resolvers::SearchArticles.new
   field :categories,      function: Resolvers::CategoriesSearch.new
   field :urls,            function: Resolvers::UrlsSearch.new
   field :tickets,         function: Resolvers::TicketsSearch.new
