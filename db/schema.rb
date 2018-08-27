@@ -174,7 +174,7 @@ ActiveRecord::Schema.define(version: 2018_08_23_102533) do
     t.datetime "updated_at", null: false
     t.uuid "organization_id"
     t.string "provider", default: "email", null: false
-    t.string "uid", default: " ", null: false
+    t.string "uid", default: "", null: false
     t.text "tokens"
     t.index ["email"], name: "index_users_on_email", unique: true
     t.index ["organization_id"], name: "index_users_on_organization_id"
