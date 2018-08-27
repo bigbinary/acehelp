@@ -179,7 +179,7 @@ class Mutations::ArticleMutations
       article = Article.find_by(id: inputs[:id], organization_id: context[:organization].id)
 
       if article
-        if article.update_attributes(status: inputs[:status])
+        if article.update_attributes(status: inputs[:status].downcase)
           new_article = article
           article.categories.update_all(status: :online) if article.online?
         else

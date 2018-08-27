@@ -12,10 +12,10 @@ availablityStatusToString : AvailabilitySatus -> String
 availablityStatusToString status =
     case status of
         Offline ->
-            "Offline"
+            "Online"
 
         Online ->
-            "Online"
+            "Offline"
 
 
 stringToAvailablityStatus : String -> AvailabilitySatus

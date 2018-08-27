@@ -35,9 +35,10 @@ class ArticleTest < ActiveSupport::TestCase
     @article = articles :life
     @url = urls :bigbinary
     @organization = organizations :bigbinary
+    Article.reindex
     @article.urls << @url
     @article.update(organization_id: @organization.id)
-
+    Article.reindex
     assert_equal [@article], Article.search_using(@organization, article_id: @article.id, status: "offline", url: @url.url)
     assert_equal [@article], Article.search_using(@organization, article_id: @article.id, status: "offline", url: "")
     @article.online!
