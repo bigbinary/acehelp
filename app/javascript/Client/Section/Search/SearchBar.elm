@@ -4,13 +4,14 @@ import Html exposing (..)
 import Html.Attributes as Attributes exposing (class, style, placeholder, type_)
 import Html.Events exposing (onClick, onInput)
 import Http
-import Data.Article exposing (ArticleListResponse)
+import Data.Article exposing (ArticleSummary)
 import Request.Article exposing (requestSearchArticles)
 import Request.Helpers exposing (NodeEnv, ApiKey)
 import FontAwesome.Solid as SolidIcon
 import Reader exposing (Reader, run)
 import Task exposing (Task)
 import Data.Common exposing (..)
+import GraphQL.Client.Http as GQLClient
 
 
 -- MODEL
@@ -20,6 +21,16 @@ type alias Model =
     String
 
 
+initModel : Model
+initModel =
+    ""
+
+
+init : ( Model, List (SectionCmd Msg) )
+init =
+    ( initModel, [] )
+
+
 
 -- VIEW
 
@@ -27,7 +38,7 @@ type alias Model =
 type Msg
     = OnSearch
     | OnSearchQueryInput String
-    | SearchResultsReceived (Result Http.Error ArticleListResponse)
+    | SearchResultsReceived (Result GQLClient.Error (List ArticleSummary))
 
 
 view : Model -> String -> Html Msg
@@ -68,6 +79,6 @@ update msg model =
             ( model, [] )
 
 
-requestSearch : Model -> Reader ( NodeEnv, ApiKey ) (Task Http.Error ArticleListResponse)
+requestSearch : Model -> Reader ( NodeEnv, ApiKey ) (Task GQLClient.Error (List ArticleSummary))
 requestSearch =
     requestSearchArticles

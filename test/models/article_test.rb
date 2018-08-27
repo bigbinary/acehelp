@@ -38,11 +38,13 @@ class ArticleTest < ActiveSupport::TestCase
     @article.urls << @url
     @article.update(organization_id: @organization.id)
 
-    assert_equal [@article], Article.search_using(@article.id, @url.url, @organization)
-    assert_equal [@article], Article.search_using(@article.id, "", @organization)
-    assert_equal [@article], Article.search_using("", @url.url, @organization)
-    assert_equal [@article], Article.search_using("", "", @organization)
+    assert_equal [@article], Article.search_using(@organization, article_id: @article.id, url: @url.url)
+    assert_equal [@article], Article.search_using(@organization, article_id: @article.id, url: "")
+    assert_equal [@article], Article.search_using(@organization, article_id: "", url: @url.url)
+    assert_equal [@article], Article.search_using(@organization, article_id: "", url: "")
 
-    assert_equal [], Article.search_using("fake_id", @url.url, @organization)
+    assert_equal [], Article.search_using(@organization, article_id: "fake_id", url: @url.url)
+    assert_equal [@article], Article.search_using(@organization, search_string: "day")
+    assert_equal [], Article.search_using(@organization, search_string: "fake_string")
   end
 end

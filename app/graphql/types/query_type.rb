@@ -3,15 +3,15 @@
 Types::QueryType = GraphQL::ObjectType.define do
   name "Query"
 
-  field :articles,    function: Resolvers::ArticlesSearch.new
-  field :categories,  function: Resolvers::CategoriesSearch.new
-  field :urls,        function: Resolvers::UrlsSearch.new
-  field :tickets,     function: Resolvers::TicketsSearch.new
-  field :feedbacks,   function: Resolvers::FeedbacksSearch.new
-  field :users,   function: Resolvers::UsersSearch.new
-  field :triggers,    function: Resolvers::TriggersSearch.new
-  field :agents,   function: Resolvers::AgentsSearch.new
-  field :organizations, function: Resolvers::OrganizationsSearch.new
+  field :articles,        function: Resolvers::ArticlesSearch.new
+  field :categories,      function: Resolvers::CategoriesSearch.new
+  field :urls,            function: Resolvers::UrlsSearch.new
+  field :tickets,         function: Resolvers::TicketsSearch.new
+  field :feedbacks,       function: Resolvers::FeedbacksSearch.new
+  field :users,           function: Resolvers::UsersSearch.new
+  field :triggers,        function: Resolvers::TriggersSearch.new
+  field :agents,          function: Resolvers::AgentsSearch.new
+  field :organizations,   function: Resolvers::OrganizationsSearch.new
 
   hash = { type: Types::ArticleType, model: Article }
   field :article, Types::ArticleType,

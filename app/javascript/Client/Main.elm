@@ -296,7 +296,30 @@ update msg model =
                     )
 
             SearchBarMsg searchBarMsg ->
-                ( model, Cmd.none )
+                let
+                    ( newModel, cmds ) =
+                        SearchBar.update searchBarMsg model.searchQuery
+                in
+                    case searchBarMsg of
+                        SearchBar.OnSearchQueryInput searchQuery ->
+                            ( { model
+                                | searchQuery = searchQuery
+                              }
+                            , Cmd.none
+                            )
+
+                        SearchBar.OnSearch ->
+                            ( model, runReaderCmds SearchBarMsg cmds )
+
+                        SearchBar.SearchResultsReceived (Ok articleList) ->
+                            ( { model
+                                | sectionState = Loaded (SuggestedArticlesSection (Ok articleList))
+                              }
+                            , Cmd.none
+                            )
+
+                        _ ->
+                            ( model, Cmd.none )
 
             ReceivedUserInfo userInfo ->
                 ( { model | userInfo = userInfo }, Cmd.none )

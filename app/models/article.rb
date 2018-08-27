@@ -23,13 +23,16 @@ class Article < ApplicationRecord
     self.update(downvotes_count: self.downvotes_count + 1)
   end
 
-  def self.search_using(article_id, url, org)
-    if article_id.present? && url.present?
-      Url.find_by!(url: url).articles.where(id: article_id).for_organization(org)
-    elsif article_id.present?
-      Article.where(id: article_id).for_organization(org)
-    elsif url.present?
-      Url.find_by!(url: url).articles.for_organization(org)
+  def self.search_using(org, opts = {})
+    if opts[:article_id].present? && opts[:url].present?
+      Url.find_by!(url: opts[:url]).articles.where(id: opts[:article_id]).for_organization(org)
+    elsif opts[:article_id].present?
+      Article.where(id: opts[:article_id]).for_organization(org)
+    elsif opts[:url].present?
+      Url.find_by!(url: opts[:url]).articles.for_organization(org)
+    elsif opts[:search_string].present?
+      articles = Article.search opts[:search_string], where: { organization_id: org.id }
+      articles.each_with_object([]) { |article, arr| arr.push(article) }
     else
       Article.for_organization(org)
     end
