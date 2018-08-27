@@ -24,7 +24,7 @@ requestSuggestedArticles context =
     Reader.Reader
         (\( env, apiKey ) ->
             GQLClient.customSendQuery (requestOptions env apiKey) <|
-                GQLBuilder.request { url = contextToMaybe context } suggestedArticledQuery
+                GQLBuilder.request { url = contextToMaybe context, status = Just "online" } suggestedArticledQuery
         )
 
 

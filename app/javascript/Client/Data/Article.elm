@@ -92,16 +92,21 @@ articlesQuery =
         GQLBuilder.extract articleSummaryField
 
 
-suggestedArticledQuery : GQLBuilder.Document GQLBuilder.Query (List ArticleSummary) { vars | url : Maybe String }
+suggestedArticledQuery : GQLBuilder.Document GQLBuilder.Query (List ArticleSummary) { vars | url : Maybe String, status : Maybe String }
 suggestedArticledQuery =
     let
         urlVar =
             Var.optional "url" .url Var.string ""
+
+        statusVar =
+            Var.optional "status" .status Var.string ""
     in
         GQLBuilder.queryDocument <|
             GQLBuilder.extract <|
                 GQLBuilder.field "articles"
-                    [ ( "url", Arg.variable urlVar ) ]
+                    [ ( "url", Arg.variable urlVar )
+                    , ( "status", Arg.variable statusVar )
+                    ]
                     (GQLBuilder.list
                         (GQLBuilder.object ArticleSummary
                             |> GQLBuilder.with (GQLBuilder.field "id" [] GQLBuilder.string)
