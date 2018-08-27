@@ -25,19 +25,21 @@ type alias UrlsListResponse =
     }
 
 
-requestUrlsQuery : GQLBuilder.Document GQLBuilder.Query (List UrlData) vars
+requestUrlsQuery : GQLBuilder.Document GQLBuilder.Query (Maybe (List UrlData)) vars
 requestUrlsQuery =
     GQLBuilder.queryDocument <|
         GQLBuilder.extract
             (GQLBuilder.field "urls"
                 []
-                (GQLBuilder.list
-                    urlExtractor
+                (GQLBuilder.nullable
+                    (GQLBuilder.list
+                        urlObject
+                    )
                 )
             )
 
 
-urlByIdQuery : GQLBuilder.Document GQLBuilder.Query UrlData { vars | id : String }
+urlByIdQuery : GQLBuilder.Document GQLBuilder.Query (Maybe UrlData) { vars | id : String }
 urlByIdQuery =
     let
         idVar =
@@ -47,12 +49,12 @@ urlByIdQuery =
             (GQLBuilder.extract
                 (GQLBuilder.field "url"
                     [ ( "id", Arg.variable idVar ) ]
-                    urlExtractor
+                    nullableUrlObject
                 )
             )
 
 
-createUrlMutation : GQLBuilder.Document GQLBuilder.Mutation UrlData CreateUrlInput
+createUrlMutation : GQLBuilder.Document GQLBuilder.Mutation (Maybe UrlData) CreateUrlInput
 createUrlMutation =
     let
         urlVar =
@@ -69,7 +71,7 @@ createUrlMutation =
                     (GQLBuilder.extract <|
                         GQLBuilder.field "url"
                             []
-                            urlExtractor
+                            nullableUrlObject
                     )
 
 
@@ -94,15 +96,19 @@ deleteUrlMutation =
                     )
 
 
-urlExtractor : GQLBuilder.ValueSpec GQLBuilder.NonNull GQLBuilder.ObjectType UrlData vars
-urlExtractor =
-    (GQLBuilder.object UrlData
+urlObject : GQLBuilder.ValueSpec GQLBuilder.NonNull GQLBuilder.ObjectType UrlData vars
+urlObject =
+    GQLBuilder.object UrlData
         |> GQLBuilder.with (GQLBuilder.field "id" [] GQLBuilder.string)
         |> GQLBuilder.with (GQLBuilder.field "url" [] GQLBuilder.string)
-    )
 
 
-updateUrlMutation : GQLBuilder.Document GQLBuilder.Mutation UrlData UrlData
+nullableUrlObject : GQLBuilder.ValueSpec GQLBuilder.Nullable GQLBuilder.ObjectType (Maybe UrlData) vars
+nullableUrlObject =
+    GQLBuilder.nullable urlObject
+
+
+updateUrlMutation : GQLBuilder.Document GQLBuilder.Mutation (Maybe UrlData) UrlData
 updateUrlMutation =
     let
         idVar =
@@ -122,5 +128,5 @@ updateUrlMutation =
                     (GQLBuilder.extract <|
                         GQLBuilder.field "url"
                             []
-                            urlExtractor
+                            nullableUrlObject
                     )

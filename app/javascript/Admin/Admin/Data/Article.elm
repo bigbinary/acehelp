@@ -6,7 +6,7 @@ import GraphQL.Request.Builder.Arg as Arg
 import GraphQL.Request.Builder.Variable as Var
 import GraphQL.Request.Builder as GQLBuilder
 import Admin.Data.Category exposing (CategoryId, categoryObject, Category)
-import Admin.Data.Url exposing (UrlId, UrlData, urlExtractor)
+import Admin.Data.Url exposing (UrlId, UrlData, urlObject)
 
 
 type alias ArticleId =
@@ -244,7 +244,7 @@ articleObject =
             (GQLBuilder.field "urls"
                 []
                 (GQLBuilder.list
-                    urlExtractor
+                    urlObject
                 )
             )
 

@@ -42,7 +42,7 @@ init =
 
 type Msg
     = LoadUrl UrlId
-    | UrlLoaded (Result GQLClient.Error (List UrlData))
+    | UrlLoaded (Result GQLClient.Error (Maybe (List UrlData)))
     | DeleteUrl String
     | DeleteUrlResponse (Result GQLClient.Error UrlId)
     | OnUrlCreateClick
@@ -56,7 +56,12 @@ update msg model =
             ( { model | urlId = urlId }, [] )
 
         UrlLoaded (Ok urls) ->
-            ( { model | urls = urls }, [] )
+            case urls of
+                Just newUrls ->
+                    ( { model | urls = newUrls }, [] )
+
+                Nothing ->
+                    ( { model | urls = [], error = Just "There was an error loading up the Urls" }, [] )
 
         UrlLoaded (Err err) ->
             ( { model | error = Just (toString err) }, [] )

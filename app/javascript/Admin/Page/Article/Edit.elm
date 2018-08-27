@@ -79,7 +79,7 @@ type Msg
     | ArticleLoaded (Result GQLClient.Error Article)
     | CategoriesLoaded (Result GQLClient.Error (List Category))
     | CategorySelected (List CategoryId)
-    | UrlsLoaded (Result GQLClient.Error (List UrlData))
+    | UrlsLoaded (Result GQLClient.Error (Maybe (List UrlData)))
     | UpdateStatus ArticleId AvailabilitySatus
     | UpdateStatusResponse (Result GQLClient.Error Article)
     | UrlSelected (List UrlId)
@@ -191,18 +191,23 @@ update msg model =
             , [ Strict <| Reader.Reader <| always <| setTimeout delayTime ]
             )
 
-        UrlsLoaded (Ok urls) ->
-            ( { model
-                | urls =
-                    case model.originalArticle of
-                        Just article ->
-                            itemSelection (List.map .id article.urls) model.urls
+        UrlsLoaded (Ok loadedUrls) ->
+            case loadedUrls of
+                Just urls ->
+                    ( { model
+                        | urls =
+                            case model.originalArticle of
+                                Just article ->
+                                    itemSelection (List.map .id article.urls) model.urls
 
-                        Nothing ->
-                            List.map Unselected urls
-              }
-            , []
-            )
+                                Nothing ->
+                                    List.map Unselected urls
+                      }
+                    , []
+                    )
+
+                Nothing ->
+                    ( { model | error = Just "There was an error loading up Urls" }, [] )
 
         UrlsLoaded (Err err) ->
             ( { model | error = Just (toString err) }, [] )
