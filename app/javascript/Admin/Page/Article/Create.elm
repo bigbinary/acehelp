@@ -62,7 +62,7 @@ type Msg
     = TitleInput String
     | DescInput String
     | SaveArticle
-    | SaveArticleResponse (Result GQLClient.Error Article)
+    | SaveArticleResponse (Result GQLClient.Error (Maybe Article))
     | CategoriesLoaded (Result GQLClient.Error (List Category))
     | CategorySelected (List CategoryId)
     | UrlsLoaded (Result GQLClient.Error (Maybe (List UrlData)))

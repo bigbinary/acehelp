@@ -9,7 +9,7 @@ import GraphQL.Request.Builder as GQLBuilder
 import Admin.Data.Status exposing (..)
 
 
-requestArticlesByUrl : String -> Reader ( NodeEnv, ApiKey, AppUrl ) (Task GQLClient.Error (List ArticleSummary))
+requestArticlesByUrl : String -> Reader ( NodeEnv, ApiKey, AppUrl ) (Task GQLClient.Error (Maybe (List ArticleSummary)))
 requestArticlesByUrl url =
     Reader.Reader
         (\( nodeEnv, apiKey, appUrl ) ->
@@ -18,7 +18,7 @@ requestArticlesByUrl url =
         )
 
 
-requestCreateArticle : CreateArticleInputs -> Reader ( NodeEnv, ApiKey, AppUrl ) (Task GQLClient.Error Article)
+requestCreateArticle : CreateArticleInputs -> Reader ( NodeEnv, ApiKey, AppUrl ) (Task GQLClient.Error (Maybe Article))
 requestCreateArticle articleInputs =
     Reader.Reader
         (\( nodeEnv, apiKey, appUrl ) ->
@@ -33,7 +33,7 @@ requestCreateArticle articleInputs =
         )
 
 
-requestUpdateArticle : UpdateArticleInputs -> Reader ( NodeEnv, ApiKey, AppUrl ) (Task GQLClient.Error Article)
+requestUpdateArticle : UpdateArticleInputs -> Reader ( NodeEnv, ApiKey, AppUrl ) (Task GQLClient.Error (Maybe Article))
 requestUpdateArticle articleInputs =
     Reader.Reader
         (\( nodeEnv, apiKey, appUrl ) ->
@@ -50,7 +50,7 @@ requestUpdateArticle articleInputs =
         )
 
 
-requestArticleById : ArticleId -> Reader ( NodeEnv, ApiKey, AppUrl ) (Task GQLClient.Error Article)
+requestArticleById : ArticleId -> Reader ( NodeEnv, ApiKey, AppUrl ) (Task GQLClient.Error (Maybe Article))
 requestArticleById articleId =
     Reader.Reader
         (\( nodeEnv, apiKey, appUrl ) ->
@@ -62,7 +62,7 @@ requestArticleById articleId =
         )
 
 
-requestAllArticles : Reader ( NodeEnv, ApiKey, AppUrl ) (Task GQLClient.Error (List ArticleSummary))
+requestAllArticles : Reader ( NodeEnv, ApiKey, AppUrl ) (Task GQLClient.Error (Maybe (List ArticleSummary)))
 requestAllArticles =
     Reader.Reader
         (\( nodeEnv, apiKey, appUrl ) ->

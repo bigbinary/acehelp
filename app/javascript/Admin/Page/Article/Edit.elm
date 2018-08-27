@@ -75,8 +75,8 @@ type Msg
     = TitleInput String
     | DescInput String
     | SaveArticle
-    | SaveArticleResponse (Result GQLClient.Error Article)
-    | ArticleLoaded (Result GQLClient.Error Article)
+    | SaveArticleResponse (Result GQLClient.Error (Maybe Article))
+    | ArticleLoaded (Result GQLClient.Error (Maybe Article))
     | CategoriesLoaded (Result GQLClient.Error (List Category))
     | CategorySelected (List CategoryId)
     | UrlsLoaded (Result GQLClient.Error (Maybe (List UrlData)))
@@ -150,18 +150,25 @@ update msg model =
         SaveArticleResponse (Err error) ->
             ( { model | error = Just (toString error), status = None }, [] )
 
-        ArticleLoaded (Ok article) ->
-            ( { model
-                | articleId = article.id
-                , title = Field.update model.title article.title
-                , desc = Field.update model.desc article.desc
-                , articleStatus = availablityStatusIso.reverseGet article.status
-                , categories = itemSelection (List.map .id article.categories) model.categories
-                , urls = itemSelection (List.map .id article.urls) model.urls
-                , originalArticle = Just article
-              }
-            , [ Strict <| Reader.Reader <| always <| insertArticleContent article.desc ]
-            )
+        ArticleLoaded (Ok articleResp) ->
+            case articleResp of
+                Just article ->
+                    ( { model
+                        | articleId = article.id
+                        , title = Field.update model.title article.title
+                        , desc = Field.update model.desc article.desc
+                        , articleStatus = availablityStatusIso.reverseGet article.status
+                        , categories = itemSelection (List.map .id article.categories) model.categories
+                        , urls = itemSelection (List.map .id article.urls) model.urls
+                        , originalArticle = Just article
+                      }
+                    , [ Strict <| Reader.Reader <| always <| insertArticleContent article.desc ]
+                    )
+
+                Nothing ->
+                    ( { model | error = Just "There was an error loading up the article", originalArticle = Nothing }
+                    , []
+                    )
 
         ArticleLoaded (Err err) ->
             ( { model | error = Just "There was an error loading up the article", originalArticle = Nothing }

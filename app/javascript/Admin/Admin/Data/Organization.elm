@@ -2,7 +2,7 @@ module Admin.Data.Organization exposing (..)
 
 import Json.Decode exposing (..)
 import Json.Decode.Pipeline as Pipeline exposing (decode, hardcoded, optional, required)
-import Admin.Data.Article exposing (ArticleSummary, decodeArticleSummary)
+import Admin.Data.Article exposing (ArticleSummary)
 import GraphQL.Request.Builder as GQLBuilder
 import GraphQL.Request.Builder.Arg as Arg
 import GraphQL.Request.Builder.Variable as Var
@@ -73,18 +73,3 @@ organizationObject =
         |> GQLBuilder.with (GQLBuilder.field "id" [] GQLBuilder.string)
         |> GQLBuilder.with (GQLBuilder.field "name" [] GQLBuilder.string)
         |> GQLBuilder.with (GQLBuilder.field "api_key" [] GQLBuilder.string)
-
-
-organization : Decoder OrganizationResponse
-organization =
-    decode OrganizationResponse
-        |> required "organization" (organizationDecoder)
-        |> required "articles" (list decodeArticleSummary)
-
-
-organizationDecoder : Decoder Organization
-organizationDecoder =
-    decode Organization
-        |> required "id" string
-        |> required "name" string
-        |> required "api_key" string

@@ -39,7 +39,7 @@ init =
 
 
 type Msg
-    = ArticleListLoaded (Result GQLClient.Error (List ArticleSummary))
+    = ArticleListLoaded (Result GQLClient.Error (Maybe (List ArticleSummary)))
     | OnArticleEditClick ArticleId
     | OnArticleCreateClick
     | UpdateArticleStatus ArticleId AvailabilitySatus
@@ -51,13 +51,23 @@ type Msg
 update : Msg -> Model -> ( Model, List (ReaderCmd Msg) )
 update msg model =
     case msg of
-        ArticleListLoaded (Ok articlesList) ->
-            ( { model
-                | articles = articlesList
-                , error = Nothing
-              }
-            , []
-            )
+        ArticleListLoaded (Ok articleList) ->
+            case articleList of
+                Just articles ->
+                    ( { model
+                        | articles = articles
+                        , error = Nothing
+                      }
+                    , []
+                    )
+
+                Nothing ->
+                    ( { model
+                        | articles = []
+                        , error = Just "There was an error loading articles"
+                      }
+                    , []
+                    )
 
         ArticleListLoaded (Err err) ->
             ( { model | error = Just (toString err) }, [] )

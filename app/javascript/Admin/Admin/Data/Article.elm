@@ -1,7 +1,5 @@
 module Admin.Data.Article exposing (..)
 
-import Json.Decode exposing (..)
-import Json.Decode.Pipeline as Pipeline exposing (decode, required)
 import GraphQL.Request.Builder.Arg as Arg
 import GraphQL.Request.Builder.Variable as Var
 import GraphQL.Request.Builder as GQLBuilder
@@ -51,20 +49,7 @@ type alias ArticleListResponse =
     }
 
 
-decodeArticleSummary : Decoder ArticleSummary
-decodeArticleSummary =
-    decode ArticleSummary
-        |> required "id" string
-        |> required "title" string
-        |> required "status" string
-
-
-articlesByUrlQuery :
-    GQLBuilder.Document GQLBuilder.Query
-        (List ArticleSummary)
-        { vars
-            | url : String
-        }
+articlesByUrlQuery : GQLBuilder.Document GQLBuilder.Query (Maybe (List ArticleSummary)) { vars | url : String }
 articlesByUrlQuery =
     let
         urlVar =
@@ -74,27 +59,31 @@ articlesByUrlQuery =
             (GQLBuilder.extract
                 (GQLBuilder.field "articles"
                     [ ( "url", Arg.variable urlVar ) ]
-                    (GQLBuilder.list
-                        articleSummaryObject
+                    (GQLBuilder.nullable
+                        (GQLBuilder.list
+                            articleSummaryObject
+                        )
                     )
                 )
             )
 
 
-allArticlesQuery : GQLBuilder.Document GQLBuilder.Query (List ArticleSummary) {}
+allArticlesQuery : GQLBuilder.Document GQLBuilder.Query (Maybe (List ArticleSummary)) {}
 allArticlesQuery =
     GQLBuilder.queryDocument
         (GQLBuilder.extract
             (GQLBuilder.field "articles"
                 []
-                (GQLBuilder.list
-                    articleSummaryObject
+                (GQLBuilder.nullable
+                    (GQLBuilder.list
+                        articleSummaryObject
+                    )
                 )
             )
         )
 
 
-articleByIdQuery : GQLBuilder.Document GQLBuilder.Query Article { vars | id : ArticleId }
+articleByIdQuery : GQLBuilder.Document GQLBuilder.Query (Maybe Article) { vars | id : ArticleId }
 articleByIdQuery =
     let
         idVar =
@@ -104,12 +93,12 @@ articleByIdQuery =
             (GQLBuilder.extract
                 (GQLBuilder.field "article"
                     [ ( "id", Arg.variable idVar ) ]
-                    articleObject
+                    (GQLBuilder.nullable articleObject)
                 )
             )
 
 
-createArticleMutation : GQLBuilder.Document GQLBuilder.Mutation Article CreateArticleInputs
+createArticleMutation : GQLBuilder.Document GQLBuilder.Mutation (Maybe Article) CreateArticleInputs
 createArticleMutation =
     let
         titleVar =
@@ -135,12 +124,12 @@ createArticleMutation =
                     (GQLBuilder.extract <|
                         GQLBuilder.field "article"
                             []
-                            articleObject
+                            (GQLBuilder.nullable articleObject)
                     )
                 )
 
 
-updateArticleMutation : GQLBuilder.Document GQLBuilder.Mutation Article UpdateArticleInputs
+updateArticleMutation : GQLBuilder.Document GQLBuilder.Mutation (Maybe Article) UpdateArticleInputs
 updateArticleMutation =
     let
         idVar =
@@ -174,7 +163,7 @@ updateArticleMutation =
                     (GQLBuilder.extract <|
                         GQLBuilder.field "article"
                             []
-                            articleObject
+                            (GQLBuilder.nullable articleObject)
                     )
                 )
 
@@ -251,8 +240,12 @@ articleObject =
 
 articleSummaryObject : GQLBuilder.ValueSpec GQLBuilder.NonNull GQLBuilder.ObjectType ArticleSummary vars
 articleSummaryObject =
-    (GQLBuilder.object ArticleSummary
+    GQLBuilder.object ArticleSummary
         |> GQLBuilder.with (GQLBuilder.field "id" [] GQLBuilder.string)
         |> GQLBuilder.with (GQLBuilder.field "title" [] GQLBuilder.string)
         |> GQLBuilder.with (GQLBuilder.field "status" [] GQLBuilder.string)
-    )
+
+
+nullableArticleSummaryObject : GQLBuilder.ValueSpec GQLBuilder.Nullable GQLBuilder.ObjectType (Maybe ArticleSummary) vars
+nullableArticleSummaryObject =
+    GQLBuilder.nullable articleSummaryObject
