@@ -33,6 +33,7 @@ type alias Model =
     , categories : List (Option Category)
     , urls : List (Option UrlData)
     , error : Maybe String
+    , success : Maybe String
     , updateTaskId : Maybe Int
     , status : SaveSatus
     , articleStatus : AvailabilitySatus
@@ -49,6 +50,7 @@ initModel articleId =
     , categories = []
     , urls = []
     , error = Nothing
+    , success = Nothing
     , updateTaskId = Nothing
     , status = None
     , articleStatus = Inactive
@@ -144,8 +146,20 @@ update msg model =
             save model
 
         SaveArticleResponse (Ok article) ->
-            -- NOTE: Redirection handled in Main
-            ( model, [] )
+            ( { model
+                | articleId = article.id
+                , title = Field.update model.title article.title
+                , desc = Field.update model.desc article.desc
+                , articleStatus = availablityStatusIso.reverseGet article.status
+                , categories = itemSelection (List.map .id article.categories) model.categories
+                , urls = itemSelection (List.map .id article.urls) model.urls
+                , originalArticle = Just article
+                , status = None
+                , isEditable = False
+                , success = Just ("Article updated successfully.")
+              }
+            , [ Strict <| Reader.Reader <| always <| insertArticleContent article.desc ]
+            )
 
         SaveArticleResponse (Err error) ->
             ( { model | error = Just "There was an error saving the article", status = None }, [] )
@@ -296,6 +310,7 @@ view : Model -> Html Msg
 view model =
     div []
         [ errorView model.error
+        , successView model.success
         , div [ class "row article-block" ]
             [ div [ class "col-md-8 article-title-content-block" ]
                 [ editAndSaveView model.isEditable

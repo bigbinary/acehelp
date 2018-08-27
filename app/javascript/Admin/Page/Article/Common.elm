@@ -29,6 +29,18 @@ errorView error =
             error
 
 
+successView : Maybe String -> Html msg
+successView success =
+    Maybe.withDefault (text "") <|
+        Maybe.map
+            (\message ->
+                div [ class "alert alert-success alert-dismissible fade show", attribute "role" "alert" ]
+                    [ text <| message
+                    ]
+            )
+            success
+
+
 articleUrls : List UrlData -> Html msg
 articleUrls urls =
     div []
