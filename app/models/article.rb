@@ -15,11 +15,6 @@ class Article < ApplicationRecord
   has_many :article_categories, dependent: :destroy
   has_many :categories, through: :article_categories
 
-  enum status: {
-    online: "online",
-    offline: "offline"
-  }
-
   validates :title, uniqueness: { scope: [:organization_id] }, presence: true
 
   scope :for_organization, ->(org) { where(organization: org) }
@@ -34,22 +29,17 @@ class Article < ApplicationRecord
 
   def self.search_using(org, opts = {})
     articles = opts[:status].present? ? Article.send(opts[:status]) : Article.all
-    if opts[:article_id].present? && opts[:url].present?
-      articles.joins(:urls).where(
-        "articles.id = ? AND urls.url = ?",
-        opts[:article_id], opts[:url]
-      ).for_organization(org)
-    elsif opts[:article_id].present?
-      articles.where(id: opts[:article_id]).for_organization(org)
-    elsif opts[:url].present?
-      articles.joins(:urls).where(
+    articles = articles.for_organization(org)
+    articles = articles.where(id: opts[:article_id]) if opts[:article_id].present?
+    if opts[:url].present?
+      articles = articles.joins(:urls).where(
         "urls.url = ?", opts[:url]
-      ).for_organization(org)
-    elsif opts[:search_string].present?
-      articles = Article.search opts[:search_string], where: { organization_id: org.id }
-      articles.each_with_object([]) { |article, arr| arr.push(article) }
-    else
-      articles.for_organization(org)
+      )
     end
+    if opts[:search_string].present?
+      articles = articles.search opts[:search_string]
+      articles = articles.each_with_object([]) { |article, arr| arr.push(article) }
+    end
+    articles
   end
 end
