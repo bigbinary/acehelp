@@ -61,7 +61,7 @@ requestCreateCategory categoryInputs =
         )
 
 
-requestUpdateCategoryStatus : CategoryId -> String -> Reader ( NodeEnv, ApiKey, AppUrl ) (Task GQLClient.Error Category)
+requestUpdateCategoryStatus : CategoryId -> String -> Reader ( NodeEnv, ApiKey, AppUrl ) (Task GQLClient.Error (List Category))
 requestUpdateCategoryStatus categoryId categoryStatus =
     Reader.Reader
         (\( nodeEnv, apiKey, appUrl ) ->

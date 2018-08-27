@@ -154,7 +154,7 @@ deleteCategoryMutation =
                     )
 
 
-updateCategoryStatusMutation : GQLBuilder.Document GQLBuilder.Mutation Category CategoryStatusInput
+updateCategoryStatusMutation : GQLBuilder.Document GQLBuilder.Mutation (List Category) CategoryStatusInput
 updateCategoryStatusMutation =
     let
         idVar =
@@ -174,7 +174,10 @@ updateCategoryStatusMutation =
                       )
                     ]
                     (GQLBuilder.extract <|
-                        GQLBuilder.field "category"
+                        (GQLBuilder.field "categories"
                             []
-                            categoryObject
+                            (GQLBuilder.list
+                                categoryObject
+                            )
+                        )
                     )
