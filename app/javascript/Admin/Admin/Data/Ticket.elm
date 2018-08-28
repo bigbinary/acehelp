@@ -65,20 +65,22 @@ type alias Note =
     }
 
 
-requestTicketQuery : GQLBuilder.Document GQLBuilder.Query (List Ticket) vars
+requestTicketQuery : GQLBuilder.Document GQLBuilder.Query (Maybe (List Ticket)) vars
 requestTicketQuery =
     GQLBuilder.queryDocument
         (GQLBuilder.extract
             (GQLBuilder.field "tickets"
                 []
-                (GQLBuilder.list
-                    (ticketObject)
+                (GQLBuilder.nullable
+                    (GQLBuilder.list
+                        (ticketObject)
+                    )
                 )
             )
         )
 
 
-requestTicketByIdQuery : GQLBuilder.Document GQLBuilder.Query Ticket { vars | id : String }
+requestTicketByIdQuery : GQLBuilder.Document GQLBuilder.Query (Maybe Ticket) { vars | id : String }
 requestTicketByIdQuery =
     let
         idVar =
@@ -88,19 +90,21 @@ requestTicketByIdQuery =
             (GQLBuilder.extract
                 (GQLBuilder.field "ticket"
                     [ ( "id", Arg.variable idVar ) ]
-                    (ticketObject)
+                    (GQLBuilder.nullable ticketObject)
                 )
             )
 
 
-requestAgentsQuery : GQLBuilder.Document GQLBuilder.Query (List Agent) vars
+requestAgentsQuery : GQLBuilder.Document GQLBuilder.Query (Maybe (List Agent)) vars
 requestAgentsQuery =
     GQLBuilder.queryDocument
         (GQLBuilder.extract
             (GQLBuilder.field "agents"
                 []
-                (GQLBuilder.list
-                    (agentObject)
+                (GQLBuilder.nullable
+                    (GQLBuilder.list
+                        (agentObject)
+                    )
                 )
             )
         )
@@ -127,7 +131,7 @@ agentObject =
         |> GQLBuilder.with (GQLBuilder.field "name" [] GQLBuilder.string)
 
 
-deleteTicketMutation : GQLBuilder.Document GQLBuilder.Mutation Ticket { var | id : TicketId }
+deleteTicketMutation : GQLBuilder.Document GQLBuilder.Mutation (Maybe Ticket) { var | id : TicketId }
 deleteTicketMutation =
     let
         idVar =
@@ -144,7 +148,7 @@ deleteTicketMutation =
                     (GQLBuilder.extract <|
                         GQLBuilder.field "ticket"
                             []
-                            (ticketObject)
+                            (GQLBuilder.nullable ticketObject)
                     )
 
 
@@ -155,7 +159,7 @@ noteObject =
         |> GQLBuilder.with (GQLBuilder.field "details" [] GQLBuilder.string)
 
 
-updateTicketMutation : GQLBuilder.Document GQLBuilder.Mutation Ticket TicketInput
+updateTicketMutation : GQLBuilder.Document GQLBuilder.Mutation (Maybe Ticket) TicketInput
 updateTicketMutation =
     let
         idVar =
@@ -177,11 +181,11 @@ updateTicketMutation =
                     (GQLBuilder.extract <|
                         GQLBuilder.field "ticket"
                             []
-                            (ticketObject)
+                            (GQLBuilder.nullable ticketObject)
                     )
 
 
-addTicketNotesAndCommentMutation : GQLBuilder.Document GQLBuilder.Mutation Ticket TicketNoteComment
+addTicketNotesAndCommentMutation : GQLBuilder.Document GQLBuilder.Mutation (Maybe Ticket) TicketNoteComment
 addTicketNotesAndCommentMutation =
     let
         idVar =
@@ -207,11 +211,11 @@ addTicketNotesAndCommentMutation =
                     (GQLBuilder.extract <|
                         GQLBuilder.field "ticket"
                             []
-                            (ticketObject)
+                            (GQLBuilder.nullable ticketObject)
                     )
 
 
-assignTicketToAgentMutation : GQLBuilder.Document GQLBuilder.Mutation Ticket TicketAgentInput
+assignTicketToAgentMutation : GQLBuilder.Document GQLBuilder.Mutation (Maybe Ticket) TicketAgentInput
 assignTicketToAgentMutation =
     let
         idVar =
@@ -233,7 +237,7 @@ assignTicketToAgentMutation =
                     (GQLBuilder.extract <|
                         GQLBuilder.field "ticket"
                             []
-                            (ticketObject)
+                            (GQLBuilder.nullable ticketObject)
                     )
 
 

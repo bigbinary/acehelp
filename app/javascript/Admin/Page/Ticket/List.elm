@@ -40,15 +40,20 @@ init =
 
 
 type Msg
-    = TicketLoaded (Result GQLClient.Error (List Ticket))
+    = TicketLoaded (Result GQLClient.Error (Maybe (List Ticket)))
     | OnEditTicketClick TicketId
 
 
 update : Msg -> Model -> ( Model, List (ReaderCmd Msg) )
 update msg model =
     case msg of
-        TicketLoaded (Ok tickets) ->
-            ( { model | ticketList = tickets }, [] )
+        TicketLoaded (Ok ticketList) ->
+            case ticketList of
+                Just tickets ->
+                    ( { model | ticketList = tickets }, [] )
+
+                Nothing ->
+                    ( model, [] )
 
         TicketLoaded (Err err) ->
             ( { model | error = Just (toString err) }, [] )
@@ -84,7 +89,7 @@ view model =
 rows : Model -> Ticket -> Html Msg
 rows model ticket =
     div
-        [ class "ticket-row" ]
+        [ class "listingRow" ]
         [ span [ class "row-id" ] [ text ticket.id ]
         , span [ class "row-name" ] [ text ticket.name ]
         , span [ class "row-email" ] [ text ticket.email ]

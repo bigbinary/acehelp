@@ -8,7 +8,7 @@ import GraphQL.Client.Http as GQLClient
 import GraphQL.Request.Builder as GQLBuilder
 
 
-requestTickets : Reader ( NodeEnv, ApiKey, AppUrl ) (Task GQLClient.Error (List Ticket))
+requestTickets : Reader ( NodeEnv, ApiKey, AppUrl ) (Task GQLClient.Error (Maybe (List Ticket)))
 requestTickets =
     Reader.Reader
         (\( nodeEnv, apiKey, appUrl ) ->
@@ -17,7 +17,7 @@ requestTickets =
         )
 
 
-requestAgents : Reader ( NodeEnv, ApiKey, AppUrl ) (Task GQLClient.Error (List Agent))
+requestAgents : Reader ( NodeEnv, ApiKey, AppUrl ) (Task GQLClient.Error (Maybe (List Agent)))
 requestAgents =
     Reader.Reader
         (\( env, apiKey, appUrl ) ->
@@ -26,7 +26,7 @@ requestAgents =
         )
 
 
-requestTicketById : TicketId -> Reader ( NodeEnv, ApiKey, AppUrl ) (Task GQLClient.Error Ticket)
+requestTicketById : TicketId -> Reader ( NodeEnv, ApiKey, AppUrl ) (Task GQLClient.Error (Maybe Ticket))
 requestTicketById ticketId =
     Reader.Reader
         (\( nodeEnv, apiKey, appUrl ) ->
@@ -35,7 +35,7 @@ requestTicketById ticketId =
         )
 
 
-updateTicket : TicketInput -> Reader ( NodeEnv, ApiKey, AppUrl ) (Task GQLClient.Error Ticket)
+updateTicket : TicketInput -> Reader ( NodeEnv, ApiKey, AppUrl ) (Task GQLClient.Error (Maybe Ticket))
 updateTicket ticketInput =
     Reader.Reader
         (\( nodeEnv, apiKey, appUrl ) ->
@@ -45,7 +45,7 @@ updateTicket ticketInput =
         )
 
 
-deleteTicketRequest : TicketId -> Reader ( NodeEnv, ApiKey, AppUrl ) (Task GQLClient.Error Ticket)
+deleteTicketRequest : TicketId -> Reader ( NodeEnv, ApiKey, AppUrl ) (Task GQLClient.Error (Maybe Ticket))
 deleteTicketRequest ticketId =
     Reader.Reader
         (\( nodeEnv, apiKey, appUrl ) ->
@@ -55,7 +55,7 @@ deleteTicketRequest ticketId =
         )
 
 
-addNotesAndCommentToTicket : TicketNoteComment -> Reader ( NodeEnv, ApiKey, AppUrl ) (Task GQLClient.Error Ticket)
+addNotesAndCommentToTicket : TicketNoteComment -> Reader ( NodeEnv, ApiKey, AppUrl ) (Task GQLClient.Error (Maybe Ticket))
 addNotesAndCommentToTicket ticket =
     Reader.Reader
         (\( nodeEnv, apiKey, appUrl ) ->
@@ -65,7 +65,7 @@ addNotesAndCommentToTicket ticket =
         )
 
 
-assignTicketToAgent : TicketAgentInput -> Reader ( NodeEnv, ApiKey, AppUrl ) (Task GQLClient.Error Ticket)
+assignTicketToAgent : TicketAgentInput -> Reader ( NodeEnv, ApiKey, AppUrl ) (Task GQLClient.Error (Maybe Ticket))
 assignTicketToAgent ticketAgentInput =
     Reader.Reader
         (\( nodeEnv, apiKey, appUrl ) ->
