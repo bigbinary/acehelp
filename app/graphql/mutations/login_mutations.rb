@@ -8,7 +8,8 @@ class Mutations::LoginMutations
     input_field :password, !types.String
 
 
-    return_field :token, Types::TokenType
+    return_field :user, Types::UserType
+    return_field :authentication_token, types.String
 
     return_field :errors, types[Types::ErrorType]
 
@@ -16,7 +17,6 @@ class Mutations::LoginMutations
       user = User.find_by_email(inputs[:email])
       if user
         if user.valid_password?(inputs[:password])
-
           token_hash = user.create_new_auth_token
           user.save
         else
@@ -27,7 +27,8 @@ class Mutations::LoginMutations
       end
 
       {
-        token: token_hash,
+        authentication_token: token_hash,
+        user: user,
         errors: errors
       }
     }

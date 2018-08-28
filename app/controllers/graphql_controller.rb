@@ -29,7 +29,7 @@ class GraphqlController < ApplicationController
     def context
       context = {}
       context[:organization] = @organization if @organization.present?
-      context[:current_user] = current_user if current_user
+      # context[:current_user] = current_user if current_user
       context[:request] = request
       context
     end
