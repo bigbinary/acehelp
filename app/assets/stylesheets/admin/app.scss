@@ -68,4 +68,36 @@ $blueThemeColor: rgb(60, 170, 249);
     }
   }
 
+
+  .pageWrap {
+    background-color: #3399ff;
+    height: 100vh;
+
+    .pageContent {
+      padding: 50px 0px;
+
+      .formHeader {
+        text-align: center;
+        color: #ffffffe8;
+      }
+
+      .centerForm {
+        margin: 30px auto 10px auto;
+        border-radius: 5px;
+        text-align: center;
+        border: 0;
+        color: #fff;
+        padding: 40px;
+        max-width: 420px;
+        background: #fff;
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.19),
+          0 6px 6px rgba(0, 0, 0, 0.23);
+
+        .formSection {
+          margin-top: 25px;
+        }
+      }
+    }
+  }
+
 }

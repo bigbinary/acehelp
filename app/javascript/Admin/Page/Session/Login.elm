@@ -1,16 +1,16 @@
 module Page.Session.Login exposing (..)
 
-import Html exposing (..)
-import Html.Attributes exposing (..)
-import Html.Events exposing (..)
+import Admin.Data.ReaderCmd exposing (..)
+import Admin.Request.Session exposing (..)
 import Field exposing (..)
 import Field.ValidationResult exposing (..)
 import GraphQL.Client.Http as GQLClient
 import Helpers exposing (..)
-import Admin.Request.Session exposing (..)
+import Html exposing (..)
+import Html.Attributes exposing (..)
+import Html.Events exposing (..)
 import Reader exposing (Reader)
 import Task exposing (Task)
-import Admin.Data.ReaderCmd exposing (..)
 
 
 -- MODEL
@@ -108,16 +108,60 @@ update msg model =
 
 view : Model -> Html Msg
 view model =
-    div [ class "container login-container" ]
-        [ Html.form []
-            [ div [ class "form-group" ]
-                [ label [ for "username" ] [ text "Username" ]
-                , input [ Html.Attributes.value <| Field.value model.username, type_ "text", class "form-control", id "username", placeholder "Enter email", onInput SetUsername ] []
+    div [ class "pageWrap" ]
+        [ div [ class "container login-container" ]
+            [ div [ class "pageContent row" ]
+                [ div [ class "col-md-12" ]
+                    [ h2 [ class "formHeader" ] [ text "Sign-In to AceHelp" ]
+                    ]
+                , div [ class "centerForm col-md-12" ]
+                    [ Html.form []
+                        [ div [ class "form-group" ]
+                            [ input
+                                [ Html.Attributes.value <|
+                                    Field.value model.username
+                                , type_ "text"
+                                , class "form-control"
+                                , id "username"
+                                , placeholder "Email address"
+                                , onInput SetUsername
+                                ]
+                                []
+                            ]
+                        , div [ class "form-group" ]
+                            [ input
+                                [ Html.Attributes.value <|
+                                    Field.value model.password
+                                , type_ "password"
+                                , class "form-control"
+                                , id "password"
+                                , placeholder "Password"
+                                , onInput SetPassword
+                                ]
+                                []
+                            ]
+                        , div [ class "formSection" ]
+                            [ button
+                                [ type_ "submit"
+                                , class "btn btn-primary"
+                                , onClick Login
+                                ]
+                                [ text "Login" ]
+                            ]
+                        , div [ class "formSection row" ]
+                            [ span [ class "btn col-md-6" ]
+                                [ Html.a
+                                    [ href "/users/sign_up" ]
+                                    [ span [] [ text "Sign Up" ] ]
+                                ]
+                            , span [ class "btn" ]
+                                [ Html.a
+                                    [ href "/users/forgot_password" ]
+                                    [ span [] [ text "Forgot password" ] ]
+                                ]
+                            ]
+                        ]
+                    ]
                 ]
-            , div [ class "form-group" ]
-                [ label [ for "password" ] [ text "Password" ]
-                , input [ Html.Attributes.value <| Field.value model.password, type_ "password", class "form-control", id "password", placeholder "Password", onInput SetPassword ] []
-                ]
-            , button [ type_ "submit", class "btn btn-primary", onClick Login ] [ text "Login" ]
             ]
         ]
