@@ -89,7 +89,7 @@ update msg model =
             ( model, [] )
 
         SaveOrgResponse (Err error) ->
-            ( { model | error = Just "An error occured while saving the Organization information" }, [] )
+            ( { model | error = Just "An error occured while saving the Organization information. Please try again" }, [] )
 
 
 view : Model -> Html Msg
