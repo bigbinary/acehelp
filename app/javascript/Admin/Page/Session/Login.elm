@@ -10,6 +10,7 @@ import Helpers exposing (..)
 import Admin.Request.Session exposing (..)
 import Reader exposing (Reader)
 import Task exposing (Task)
+import Admin.Data.User exposing (..)
 import Admin.Data.ReaderCmd exposing (..)
 
 
@@ -48,7 +49,7 @@ type Msg
     | Signup
     | SetUsername String
     | SetPassword String
-    | LoginResponse (Result GQLClient.Error String)
+    | LoginResponse (Result GQLClient.Error UserWithOrganization)
 
 
 update : Msg -> Model -> ( Model, List (ReaderCmd Msg) )
@@ -109,7 +110,7 @@ update msg model =
 view : Model -> Html Msg
 view model =
     div [ class "container login-container" ]
-        [ Html.form []
+        [ div []
             [ div [ class "form-group" ]
                 [ label [ for "username" ] [ text "Username" ]
                 , input [ Html.Attributes.value <| Field.value model.username, type_ "text", class "form-control", id "username", placeholder "Enter email", onInput SetUsername ] []
@@ -118,6 +119,6 @@ view model =
                 [ label [ for "password" ] [ text "Password" ]
                 , input [ Html.Attributes.value <| Field.value model.password, type_ "password", class "form-control", id "password", placeholder "Password", onInput SetPassword ] []
                 ]
-            , button [ type_ "submit", class "btn btn-primary", onClick Login ] [ text "Login" ]
+            , button [ class "btn btn-primary", onClick Login ] [ text "Login" ]
             ]
         ]
