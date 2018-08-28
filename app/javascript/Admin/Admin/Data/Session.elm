@@ -6,6 +6,12 @@ import GraphQL.Request.Builder.Arg as Arg
 import GraphQL.Request.Builder.Variable as Var
 
 
+type alias LoginData =
+    { authentication_token : String
+    , user : User
+    }
+
+
 type alias SignupInputs =
     { firstName : String
     , email : String
@@ -44,7 +50,19 @@ signupMutation =
                     userWithErrorObject
 
 
-loginMutation : GQLBuilder.Document GQLBuilder.Mutation String { a | email : String, password : String }
+loginDataExtractor : GQLBuilder.ValueSpec GQLBuilder.NonNull GQLBuilder.ObjectType LoginData vars
+loginDataExtractor =
+    (GQLBuilder.object LoginData
+        |> GQLBuilder.with (GQLBuilder.field "token" [] GQLBuilder.string)
+        |> GQLBuilder.with
+            (GQLBuilder.field "user"
+                []
+                (userObject)
+            )
+    )
+
+
+loginMutation : GQLBuilder.Document GQLBuilder.Mutation UserWithOrganization { a | email : String, password : String }
 loginMutation =
     let
         emailVar =
@@ -64,9 +82,9 @@ loginMutation =
                       )
                     ]
                     (GQLBuilder.extract <|
-                        GQLBuilder.field "authentication_token"
+                        GQLBuilder.field "user"
                             []
-                            GQLBuilder.string
+                            (userWithOrganizationObject)
                     )
                 )
 

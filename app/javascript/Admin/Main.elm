@@ -95,6 +95,7 @@ type alias Model =
     , organizationKey : ApiKey
     , organizationName : String
     , userId : String
+    , token : String
     , userEmail : String
     , appUrl : String
     , notifications : List UserNotification
@@ -117,6 +118,7 @@ init flags location =
             , userEmail = flags.user_email
             , appUrl = flags.app_url
             , notifications = []
+            , token = ""
             }
     in
         ( pageModel, readerCmd )
@@ -786,8 +788,8 @@ update msg model =
                 let
                     currentPageModel =
                         case getPage model.currentPage of
-                            Login signUpModel ->
-                                signUpModel
+                            Login loginModel ->
+                                loginModel
 
                             _ ->
                                 Login.initModel
@@ -801,6 +803,30 @@ update msg model =
 
                         Login.ForgotPasswordRedirect ->
                             updateNavigation (NavigateTo Route.ForgotPassword)
+                        Login.LoginResponse (Ok user) ->
+                            let
+                                ( updatedModel, updatedCmd ) =
+                                    case String.isEmpty (user.organization.api_key) of
+                                        True ->
+                                            updateNavigation (NavigateTo Route.OrganizationCreate)
+
+                                        _ ->
+                                            let
+                                                org =
+                                                    user.organization
+                                            in
+                                                update (NavigateTo (Route.ArticleList org.api_key))
+                                                    ({ model
+                                                        | organizationKey = org.api_key
+                                                        , organizationName = org.name
+                                                     }
+                                                    )
+                            in
+                                ( { updatedModel
+                                    | userId = user.id
+                                  }
+                                , updatedCmd
+                                )
 
                         _ ->
                             ( { model | currentPage = Loaded (Login newModel) }

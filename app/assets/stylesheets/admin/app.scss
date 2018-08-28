@@ -76,6 +76,9 @@ $blueThemeColor: rgb(60, 170, 249);
     margin: 0px 10px;
   }
 
+  .btn-login {
+    width:100%;
+  }
   .page-wrap {
     background-color: #3399ff;
     height: 100vh;
@@ -102,6 +105,16 @@ $blueThemeColor: rgb(60, 170, 249);
 
         .form-section {
           margin-top: 25px;
+        }
+      }
+      .links-section {
+        text-align: center;
+        .btn {
+          a {
+            color: #fff;
+            font-size: 14px;
+          }
+          
         }
       }
     }
