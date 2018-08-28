@@ -803,6 +803,7 @@ update msg model =
 
                         Login.ForgotPasswordRedirect ->
                             updateNavigation (NavigateTo Route.ForgotPassword)
+
                         Login.LoginResponse (Ok user) ->
                             let
                                 ( updatedModel, updatedCmd ) =
