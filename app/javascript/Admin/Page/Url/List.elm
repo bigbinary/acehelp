@@ -73,7 +73,7 @@ update msg model =
             ( { model | urls = List.filter (\m -> m.id /= id) model.urls }, [] )
 
         DeleteUrlResponse (Err error) ->
-            ( { model | error = Just (toString error) }, [] )
+            ( { model | error = Just "An error occured while deleting the Url" }, [] )
 
         OnUrlCreateClick ->
             -- Note: Handled in Main

@@ -95,7 +95,7 @@ update msg model =
             ( model, [] )
 
         SaveTeamResponse (Err error) ->
-            ( { model | error = Just (toString error) }, [] )
+            ( { model | error = Just "An error occured while saving the Team" }, [] )
 
 
 

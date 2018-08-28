@@ -43,9 +43,9 @@ type Msg
     | OnArticleEditClick ArticleId
     | OnArticleCreateClick
     | UpdateArticleStatus ArticleId AvailabilitySatus
-    | UpdateArticleStatusResponse (Result GQLClient.Error Article)
+    | UpdateArticleStatusResponse (Result GQLClient.Error (Maybe Article))
     | DeleteArticle ArticleId
-    | DeleteArticleResponse (Result GQLClient.Error ArticleId)
+    | DeleteArticleResponse (Result GQLClient.Error (Maybe ArticleId))
 
 
 update : Msg -> Model -> ( Model, List (ReaderCmd Msg) )
@@ -70,7 +70,7 @@ update msg model =
                     )
 
         ArticleListLoaded (Err err) ->
-            ( { model | error = Just (toString err) }, [] )
+            ( { model | error = Just "There was an error loading articles" }, [] )
 
         DeleteArticle articleId ->
             ( model, [ Strict <| Reader.map (Task.attempt DeleteArticleResponse) <| requestDeleteArticle articleId ] )
@@ -78,12 +78,17 @@ update msg model =
         DeleteArticleResponse (Ok id) ->
             let
                 articles =
-                    List.filter (\m -> m.id /= id) model.articles
+                    case id of
+                        Just deletedId ->
+                            List.filter (\m -> m.id /= deletedId) model.articles
+
+                        Nothing ->
+                            model.articles
             in
                 ( { model | articles = articles }, [] )
 
         DeleteArticleResponse (Err error) ->
-            ( { model | error = Just (toString error) }, [] )
+            ( { model | error = Just "There was an error deleting the article" }, [] )
 
         UpdateArticleStatus articleId articleStatus ->
             ( model, [ Strict <| Reader.map (Task.attempt UpdateArticleStatusResponse) <| requestUpdateArticleStatus articleId articleStatus ] )
@@ -91,19 +96,24 @@ update msg model =
         UpdateArticleStatusResponse (Ok newArticle) ->
             let
                 articles =
-                    List.map
-                        (\article ->
-                            if article.id == newArticle.id then
-                                { article | status = newArticle.status }
-                            else
-                                article
-                        )
-                        model.articles
+                    case newArticle of
+                        Just article ->
+                            List.map
+                                (\article ->
+                                    if article.id == article.id then
+                                        { article | status = article.status }
+                                    else
+                                        article
+                                )
+                                model.articles
+
+                        Nothing ->
+                            model.articles
             in
                 ( { model | articles = articles }, [] )
 
         UpdateArticleStatusResponse (Err error) ->
-            ( { model | error = Just (toString error) }, [] )
+            ( { model | error = Just "There was an error wile updating the Status" }, [] )
 
         OnArticleCreateClick ->
             -- NOTE: Handled in Main

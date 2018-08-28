@@ -90,7 +90,7 @@ update msg model =
             )
 
         SaveCategoryResponse (Err error) ->
-            ( { model | error = Just (toString error) }, [] )
+            ( { model | error = Just "There was an error while saving the Category" }, [] )
 
 
 

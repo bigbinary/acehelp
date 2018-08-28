@@ -91,7 +91,7 @@ update msg model =
             )
 
         SaveArticleResponse (Err error) ->
-            ( { model | error = Just (toString error), status = None }, [] )
+            ( { model | error = Just "There was an error while saving the Article", status = None }, [] )
 
         CategoriesLoaded (Ok categories) ->
             ( { model | categories = List.map Unselected categories, status = None }, [] )

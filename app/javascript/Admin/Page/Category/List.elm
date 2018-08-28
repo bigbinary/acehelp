@@ -58,7 +58,7 @@ update msg model =
             )
 
         CategoriesLoaded (Err error) ->
-            ( { model | error = Just (toString error) }, [] )
+            ( { model | error = Just "There was an error while loading the Categories" }, [] )
 
         DeleteCategory categoryId ->
             deleteCategoryById model categoryId
@@ -67,7 +67,7 @@ update msg model =
             ( { model | categories = List.filter (\m -> m.id /= id) model.categories, error = Nothing }, [] )
 
         DeleteCategoryResponse (Err error) ->
-            ( { model | error = Just (toString error) }, [] )
+            ( { model | error = Just "An error occured when deleting the Category" }, [] )
 
         OnCreateCategoryClick ->
             -- NOTE: Handled in Main

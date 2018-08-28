@@ -81,7 +81,7 @@ type Msg
     | CategorySelected (List CategoryId)
     | UrlsLoaded (Result GQLClient.Error (Maybe (List UrlData)))
     | UpdateStatus ArticleId AvailabilitySatus
-    | UpdateStatusResponse (Result GQLClient.Error Article)
+    | UpdateStatusResponse (Result GQLClient.Error (Maybe Article))
     | UrlSelected (List UrlId)
     | TrixInitialize ()
     | ReceivedTimeoutId Int
@@ -148,7 +148,7 @@ update msg model =
             ( model, [] )
 
         SaveArticleResponse (Err error) ->
-            ( { model | error = Just (toString error), status = None }, [] )
+            ( { model | error = Just "There was an error saving the article", status = None }, [] )
 
         ArticleLoaded (Ok articleResp) ->
             case articleResp of
@@ -261,17 +261,22 @@ update msg model =
             )
 
         UpdateStatusResponse (Ok newArticle) ->
-            ( { model
-                | originalArticle = Just newArticle
-                , articleStatus = availablityStatusIso.reverseGet newArticle.status
-                , status = None
-              }
-            , []
-            )
+            case newArticle of
+                Just article ->
+                    ( { model
+                        | originalArticle = Just article
+                        , articleStatus = availablityStatusIso.reverseGet article.status
+                        , status = None
+                      }
+                    , []
+                    )
+
+                Nothing ->
+                    ( model, [] )
 
         UpdateStatusResponse (Err error) ->
             ( { model
-                | error = Just (toString error)
+                | error = Just "There was an error updating the article"
                 , status = None
               }
             , []

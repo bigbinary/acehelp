@@ -71,7 +71,7 @@ update msg model =
             )
 
         FeedbackLoaded (Err err) ->
-            ( { model | error = Just "There was an error loading up the feedback" }
+            ( { model | error = Just "There was an error loading up the Feedback" }
             , []
             )
 
@@ -82,7 +82,7 @@ update msg model =
             ( model, [] )
 
         UpdateFeedbackResponse (Err error) ->
-            ( { model | error = Just (toString error) }
+            ( { model | error = Just "There was an error when updating the Feedback" }
             , []
             )
 

@@ -86,7 +86,7 @@ update msg model =
             ( model, [] )
 
         UpdateUrlResponse (Err error) ->
-            ( { model | error = Just (toString error) }, [] )
+            ( { model | error = Just "An error occured while updating the Url information" }, [] )
 
         UrlLoaded (Ok url) ->
             case url of

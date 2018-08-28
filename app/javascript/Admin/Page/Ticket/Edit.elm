@@ -104,13 +104,13 @@ update msg model =
             )
 
         UpdateTicketResponse (Err error) ->
-            ( { model | error = Just (toString error) }, [] )
+            ( { model | error = Just "An error occured while updating the Ticket" }, [] )
 
         DeleteTicketResponse (Ok id) ->
             ( model, [] )
 
         DeleteTicketResponse (Err error) ->
-            ( { model | error = Just (toString error) }, [] )
+            ( { model | error = Just "An error occured while deleting the Ticket" }, [] )
 
         TicketLoaded (Ok ticket) ->
             ( { model

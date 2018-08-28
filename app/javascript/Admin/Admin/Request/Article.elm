@@ -71,7 +71,7 @@ requestAllArticles =
         )
 
 
-requestDeleteArticle : ArticleId -> Reader ( NodeEnv, ApiKey, AppUrl ) (Task GQLClient.Error ArticleId)
+requestDeleteArticle : ArticleId -> Reader ( NodeEnv, ApiKey, AppUrl ) (Task GQLClient.Error (Maybe ArticleId))
 requestDeleteArticle articleId =
     Reader.Reader
         (\( nodeEnv, apiKey, appUrl ) ->
@@ -81,7 +81,7 @@ requestDeleteArticle articleId =
         )
 
 
-requestUpdateArticleStatus : ArticleId -> AvailabilitySatus -> Reader ( NodeEnv, ApiKey, AppUrl ) (Task GQLClient.Error Article)
+requestUpdateArticleStatus : ArticleId -> AvailabilitySatus -> Reader ( NodeEnv, ApiKey, AppUrl ) (Task GQLClient.Error (Maybe Article))
 requestUpdateArticleStatus articleId articleStatus =
     Reader.Reader
         (\( nodeEnv, apiKey, appUrl ) ->

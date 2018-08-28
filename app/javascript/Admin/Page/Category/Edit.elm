@@ -106,7 +106,7 @@ update msg model =
             ( model, [] )
 
         UpdateCategoryResponse (Err error) ->
-            ( { model | error = Just (toString error) }, [] )
+            ( { model | error = Just "There was an error while updating the Category" }, [] )
 
 
 

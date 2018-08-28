@@ -54,7 +54,7 @@ update msg model =
             ( { model | teamList = teamList }, [] )
 
         TeamListLoaded (Err err) ->
-            ( { model | error = Just (toString err) }, [] )
+            ( { model | error = Just "An error while fetching the Team list" }, [] )
 
         DeleteTeamMember teamMemberEmail ->
             deleteRecord model teamMemberEmail
@@ -63,7 +63,7 @@ update msg model =
             ( { model | teamList = teamList }, [] )
 
         DeleteTeamMemberResponse (Err error) ->
-            ( { model | error = Just (toString error) }, [] )
+            ( { model | error = Just "An error occured while deleting the Team Member" }, [] )
 
         OnAddTeamMemberClick ->
             -- NOTE: Handled in Main

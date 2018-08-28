@@ -168,7 +168,7 @@ updateArticleMutation =
                 )
 
 
-deleteArticleMutation : GQLBuilder.Document GQLBuilder.Mutation UrlId { a | id : ArticleId }
+deleteArticleMutation : GQLBuilder.Document GQLBuilder.Mutation (Maybe ArticleId) { a | id : ArticleId }
 deleteArticleMutation =
     let
         idVar =
@@ -185,11 +185,11 @@ deleteArticleMutation =
                     (GQLBuilder.extract <|
                         GQLBuilder.field "deletedId"
                             []
-                            GQLBuilder.string
+                            (GQLBuilder.nullable GQLBuilder.string)
                     )
 
 
-articleStatusMutation : GQLBuilder.Document GQLBuilder.Mutation Article { vars | id : ArticleId, status : String }
+articleStatusMutation : GQLBuilder.Document GQLBuilder.Mutation (Maybe Article) { vars | id : ArticleId, status : String }
 articleStatusMutation =
     let
         idVar =
@@ -211,7 +211,7 @@ articleStatusMutation =
                     (GQLBuilder.extract <|
                         GQLBuilder.field "article"
                             []
-                            articleObject
+                            (GQLBuilder.nullable articleObject)
                     )
 
 
