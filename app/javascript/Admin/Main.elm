@@ -81,7 +81,7 @@ type PageState
     | TransitioningFrom Page
 
 
-type alias NotificationElement =
+type alias UserNotification =
     { text : String
     , messageType : String
     }
@@ -96,8 +96,7 @@ type alias Model =
     , userId : String
     , userEmail : String
     , appUrl : String
-    , error : Maybe String
-    , flashElements : List NotificationElement
+    , notifications : List UserNotification
     }
 
 
@@ -116,8 +115,7 @@ init flags location =
             , userId = flags.user_id
             , userEmail = flags.user_email
             , appUrl = flags.app_url
-            , error = Nothing
-            , flashElements = []
+            , notifications = []
             }
     in
         ( pageModel, readerCmd )
@@ -316,7 +314,7 @@ update msg model =
             Tuple.mapFirst
                 (\model ->
                     { model
-                        | flashElements = [ NotificationElement message messageType ]
+                        | notifications = [ UserNotification message messageType ]
                     }
                 )
                 >> Tuple.mapSecond
@@ -328,7 +326,7 @@ update msg model =
                     |> Tuple.mapFirst
                         (\model ->
                             { model
-                                | flashElements = []
+                                | notifications = []
                             }
                         )
                     |> Tuple.mapSecond
@@ -806,7 +804,7 @@ update msg model =
                 ( model, load (Admin.Request.Helper.baseUrl model.nodeEnv model.appUrl) )
 
             TimedOut id ->
-                ( { model | flashElements = [] }, Cmd.none )
+                ( { model | notifications = [] }, Cmd.none )
 
 
 
@@ -960,7 +958,7 @@ adminLayout model viewContent =
         [ adminHeader model
         , div
             []
-            [ flashView model.flashElements ]
+            [ flashView model.notifications ]
         , div [ class "container main-wrapper" ] viewContent
         ]
 
@@ -1071,13 +1069,13 @@ adminHeader model =
         ]
 
 
-flashView : List NotificationElement -> Html Msg
+flashView : List UserNotification -> Html Msg
 flashView elements =
     div []
         (flashViewElements elements)
 
 
-flashViewElements : List NotificationElement -> List (Html Msg)
+flashViewElements : List UserNotification -> List (Html Msg)
 flashViewElements elements =
     List.map
         (\elem ->
