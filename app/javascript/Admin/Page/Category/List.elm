@@ -39,9 +39,9 @@ init =
 
 
 type Msg
-    = CategoriesLoaded (Result GQLClient.Error (List Category))
+    = CategoriesLoaded (Result GQLClient.Error (Maybe (List Category)))
     | DeleteCategory CategoryId
-    | DeleteCategoryResponse (Result GQLClient.Error CategoryId)
+    | DeleteCategoryResponse (Result GQLClient.Error (Maybe CategoryId))
     | OnCreateCategoryClick
     | OnEditCategoryClick CategoryId
     | UpdateCategoryStatus CategoryId String
@@ -50,12 +50,17 @@ type Msg
 update : Msg -> Model -> ( Model, List (ReaderCmd Msg) )
 update msg model =
     case msg of
-        CategoriesLoaded (Ok categories) ->
-            ( { model
-                | categories = categories
-              }
-            , []
-            )
+        CategoriesLoaded (Ok receivedCategories) ->
+            case receivedCategories of
+                Just categories ->
+                    ( { model
+                        | categories = categories
+                      }
+                    , []
+                    )
+
+                Nothing ->
+                    ( model, [] )
 
         CategoriesLoaded (Err error) ->
             ( { model | error = Just "There was an error while loading the Categories" }, [] )
@@ -63,8 +68,13 @@ update msg model =
         DeleteCategory categoryId ->
             deleteCategoryById model categoryId
 
-        DeleteCategoryResponse (Ok id) ->
-            ( { model | categories = List.filter (\m -> m.id /= id) model.categories, error = Nothing }, [] )
+        DeleteCategoryResponse (Ok catId) ->
+            case catId of
+                Just id ->
+                    ( { model | categories = List.filter (\m -> m.id /= id) model.categories, error = Nothing }, [] )
+
+                Nothing ->
+                    ( model, [] )
 
         DeleteCategoryResponse (Err error) ->
             ( { model | error = Just "An error occured when deleting the Category" }, [] )

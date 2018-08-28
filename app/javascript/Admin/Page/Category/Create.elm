@@ -46,7 +46,7 @@ init =
 type Msg
     = CategoryNameInput CategoryName
     | SaveCategory
-    | SaveCategoryResponse (Result GQLClient.Error Category)
+    | SaveCategoryResponse (Result GQLClient.Error (Maybe Category))
 
 
 update : Msg -> Model -> ( Model, List (ReaderCmd Msg) )

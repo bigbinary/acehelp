@@ -77,7 +77,7 @@ type Msg
     | SaveArticle
     | SaveArticleResponse (Result GQLClient.Error (Maybe Article))
     | ArticleLoaded (Result GQLClient.Error (Maybe Article))
-    | CategoriesLoaded (Result GQLClient.Error (List Category))
+    | CategoriesLoaded (Result GQLClient.Error (Maybe (List Category)))
     | CategorySelected (List CategoryId)
     | UrlsLoaded (Result GQLClient.Error (Maybe (List UrlData)))
     | UpdateStatus ArticleId AvailabilitySatus
@@ -175,21 +175,26 @@ update msg model =
             , []
             )
 
-        CategoriesLoaded (Ok categories) ->
-            ( { model
-                | categories =
-                    case model.originalArticle of
-                        Just article ->
-                            itemSelection (List.map .id article.categories) model.categories
+        CategoriesLoaded (Ok receivedCategories) ->
+            case receivedCategories of
+                Just categories ->
+                    ( { model
+                        | categories =
+                            case model.originalArticle of
+                                Just article ->
+                                    itemSelection (List.map .id article.categories) model.categories
 
-                        Nothing ->
-                            List.map Unselected categories
-              }
-            , []
-            )
+                                Nothing ->
+                                    List.map Unselected categories
+                      }
+                    , []
+                    )
+
+                Nothing ->
+                    ( { model | error = Just "There was an error loading up the Categories" }, [] )
 
         CategoriesLoaded (Err err) ->
-            ( { model | error = Just (toString err) }, [] )
+            ( { model | error = Just "There was an error loading up the Categories" }, [] )
 
         CategorySelected categoryIds ->
             ( { model
@@ -217,7 +222,7 @@ update msg model =
                     ( { model | error = Just "There was an error loading up Urls" }, [] )
 
         UrlsLoaded (Err err) ->
-            ( { model | error = Just (toString err) }, [] )
+            ( { model | error = Just "There was an error loading up Urls" }, [] )
 
         UrlSelected selectedUrlIds ->
             ( { model

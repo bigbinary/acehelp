@@ -63,7 +63,7 @@ type Msg
     | DescInput String
     | SaveArticle
     | SaveArticleResponse (Result GQLClient.Error (Maybe Article))
-    | CategoriesLoaded (Result GQLClient.Error (List Category))
+    | CategoriesLoaded (Result GQLClient.Error (Maybe (List Category)))
     | CategorySelected (List CategoryId)
     | UrlsLoaded (Result GQLClient.Error (Maybe (List UrlData)))
     | UrlSelected (List UrlId)
@@ -93,8 +93,13 @@ update msg model =
         SaveArticleResponse (Err error) ->
             ( { model | error = Just "There was an error while saving the Article", status = None }, [] )
 
-        CategoriesLoaded (Ok categories) ->
-            ( { model | categories = List.map Unselected categories, status = None }, [] )
+        CategoriesLoaded (Ok receivedCategories) ->
+            case receivedCategories of
+                Just categories ->
+                    ( { model | categories = List.map Unselected categories, status = None }, [] )
+
+                Nothing ->
+                    ( model, [] )
 
         CategoriesLoaded (Err err) ->
             ( { model | error = Just (toString err) }, [] )
