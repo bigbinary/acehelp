@@ -52,7 +52,7 @@ type Msg
     | LastNameInput String
     | EmailInput String
     | SaveTeam
-    | SaveTeamResponse (Result GQLClient.Error Team)
+    | SaveTeamResponse (Result GQLClient.Error (Maybe Team))
 
 
 update : Msg -> Model -> ( Model, List (ReaderCmd Msg) )

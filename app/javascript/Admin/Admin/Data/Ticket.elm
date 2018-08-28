@@ -42,18 +42,22 @@ type alias TicketAgentInput =
     , agent_id : String
     }
 
+
 type alias TicketId =
     String
+
 
 type alias Comment =
     { ticket_id : String
     , info : String
     }
 
+
 type alias Agent =
     { id : String
     , name : String
     }
+
 
 type alias Note =
     { ticket_id : String
@@ -142,6 +146,7 @@ deleteTicketMutation =
                             []
                             (ticketObject)
                     )
+
 
 noteObject : GQLBuilder.ValueSpec GQLBuilder.NonNull GQLBuilder.ObjectType Note vars
 noteObject =

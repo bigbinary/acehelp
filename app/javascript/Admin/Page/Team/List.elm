@@ -41,9 +41,9 @@ init =
 
 
 type Msg
-    = TeamListLoaded (Result GQLClient.Error (List Team))
+    = TeamListLoaded (Result GQLClient.Error (Maybe (List Team)))
     | DeleteTeamMember String
-    | DeleteTeamMemberResponse (Result GQLClient.Error (List Team))
+    | DeleteTeamMemberResponse (Result GQLClient.Error (Maybe (List Team)))
     | OnAddTeamMemberClick
 
 
@@ -51,7 +51,12 @@ update : Msg -> Model -> ( Model, List (ReaderCmd Msg) )
 update msg model =
     case msg of
         TeamListLoaded (Ok teamList) ->
-            ( { model | teamList = teamList }, [] )
+            case teamList of
+                Just teams ->
+                    ( { model | teamList = teams }, [] )
+
+                Nothing ->
+                    ( model, [] )
 
         TeamListLoaded (Err err) ->
             ( { model | error = Just "An error while fetching the Team list" }, [] )
@@ -60,7 +65,12 @@ update msg model =
             deleteRecord model teamMemberEmail
 
         DeleteTeamMemberResponse (Ok teamList) ->
-            ( { model | teamList = teamList }, [] )
+            case teamList of
+                Just teams ->
+                    ( { model | teamList = teams }, [] )
+
+                Nothing ->
+                    ( model, [] )
 
         DeleteTeamMemberResponse (Err error) ->
             ( { model | error = Just "An error occured while deleting the Team Member" }, [] )
