@@ -46,7 +46,7 @@ init =
 type Msg
     = CategoryNameInput CategoryName
     | SaveCategory
-    | SaveCategoryResponse (Result GQLClient.Error Category)
+    | SaveCategoryResponse (Result GQLClient.Error (Maybe Category))
 
 
 update : Msg -> Model -> ( Model, List (ReaderCmd Msg) )
@@ -90,7 +90,7 @@ update msg model =
             )
 
         SaveCategoryResponse (Err error) ->
-            ( { model | error = Just (toString error) }, [] )
+            ( { model | error = Just "There was an error while saving the Category" }, [] )
 
 
 

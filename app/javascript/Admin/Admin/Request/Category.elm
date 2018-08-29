@@ -8,7 +8,7 @@ import Reader exposing (Reader)
 import Task exposing (Task)
 
 
-requestCategories : Reader ( NodeEnv, ApiKey, AppUrl ) (Task GQLClient.Error (List Category))
+requestCategories : Reader ( NodeEnv, ApiKey, AppUrl ) (Task GQLClient.Error (Maybe (List Category)))
 requestCategories =
     Reader.Reader
         (\( nodeEnv, apiKey, appUrl ) ->
@@ -17,7 +17,7 @@ requestCategories =
         )
 
 
-requestCategoryById : CategoryId -> Reader ( NodeEnv, ApiKey, AppUrl ) (Task GQLClient.Error Category)
+requestCategoryById : CategoryId -> Reader ( NodeEnv, ApiKey, AppUrl ) (Task GQLClient.Error (Maybe Category))
 requestCategoryById categoryId =
     Reader.Reader
         (\( nodeEnv, apiKey, appUrl ) ->
@@ -28,7 +28,7 @@ requestCategoryById categoryId =
         )
 
 
-requestUpdateCategory : UpdateCategoryInputs -> Reader ( NodeEnv, ApiKey, AppUrl ) (Task GQLClient.Error Category)
+requestUpdateCategory : UpdateCategoryInputs -> Reader ( NodeEnv, ApiKey, AppUrl ) (Task GQLClient.Error (Maybe Category))
 requestUpdateCategory categoryInputs =
     Reader.Reader
         (\( nodeEnv, apiKey, appUrl ) ->
@@ -39,7 +39,7 @@ requestUpdateCategory categoryInputs =
         )
 
 
-deleteCategory : CategoryId -> Reader ( NodeEnv, ApiKey, AppUrl ) (Task GQLClient.Error CategoryId)
+deleteCategory : CategoryId -> Reader ( NodeEnv, ApiKey, AppUrl ) (Task GQLClient.Error (Maybe CategoryId))
 deleteCategory categoryId =
     Reader.Reader
         (\( nodeEnv, apiKey, appUrl ) ->
@@ -50,7 +50,7 @@ deleteCategory categoryId =
         )
 
 
-requestCreateCategory : CreateCategoryInputs -> Reader ( NodeEnv, ApiKey, AppUrl ) (Task GQLClient.Error Category)
+requestCreateCategory : CreateCategoryInputs -> Reader ( NodeEnv, ApiKey, AppUrl ) (Task GQLClient.Error (Maybe Category))
 requestCreateCategory categoryInputs =
     Reader.Reader
         (\( nodeEnv, apiKey, appUrl ) ->
@@ -61,7 +61,7 @@ requestCreateCategory categoryInputs =
         )
 
 
-requestUpdateCategoryStatus : CategoryId -> String -> Reader ( NodeEnv, ApiKey, AppUrl ) (Task GQLClient.Error (List Category))
+requestUpdateCategoryStatus : CategoryId -> String -> Reader ( NodeEnv, ApiKey, AppUrl ) (Task GQLClient.Error (Maybe (List Category)))
 requestUpdateCategoryStatus categoryId categoryStatus =
     Reader.Reader
         (\( nodeEnv, apiKey, appUrl ) ->

@@ -48,9 +48,9 @@ init feedbackId =
 
 
 type Msg
-    = FeedbackLoaded (Result GQLClient.Error Feedback)
+    = FeedbackLoaded (Result GQLClient.Error (Maybe Feedback))
     | UpdateFeedabackStatus FeedbackId String
-    | UpdateFeedbackResponse (Result GQLClient.Error Feedback)
+    | UpdateFeedbackResponse (Result GQLClient.Error (Maybe Feedback))
 
 
 
@@ -60,18 +60,23 @@ type Msg
 update : Msg -> Model -> ( Model, List (ReaderCmd Msg) )
 update msg model =
     case msg of
-        FeedbackLoaded (Ok feedback) ->
-            ( { model
-                | name = feedback.name
-                , message = feedback.message
-                , id = feedback.id
-                , status = feedback.status
-              }
-            , []
-            )
+        FeedbackLoaded (Ok receivedFeedback) ->
+            case receivedFeedback of
+                Just feedback ->
+                    ( { model
+                        | name = feedback.name
+                        , message = feedback.message
+                        , id = feedback.id
+                        , status = feedback.status
+                      }
+                    , []
+                    )
+
+                Nothing ->
+                    ( model, [] )
 
         FeedbackLoaded (Err err) ->
-            ( { model | error = Just "There was an error loading up the feedback" }
+            ( { model | error = Just "There was an error loading up the Feedback" }
             , []
             )
 
@@ -82,7 +87,7 @@ update msg model =
             ( model, [] )
 
         UpdateFeedbackResponse (Err error) ->
-            ( { model | error = Just (toString error) }
+            ( { model | error = Just "There was an error when updating the Feedback" }
             , []
             )
 

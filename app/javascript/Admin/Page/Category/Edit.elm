@@ -49,22 +49,27 @@ init categoryId =
 
 type Msg
     = CategoryNameInput CategoryName
-    | CategoryLoaded (Result GQLClient.Error Category)
+    | CategoryLoaded (Result GQLClient.Error (Maybe Category))
     | SaveCategory
-    | UpdateCategoryResponse (Result GQLClient.Error Category)
+    | UpdateCategoryResponse (Result GQLClient.Error (Maybe Category))
 
 
 update : Msg -> Model -> ( Model, List (ReaderCmd Msg) )
 update msg model =
     case msg of
-        CategoryLoaded (Ok category) ->
-            ( { model
-                | name = Field.update model.name category.name
-                , status = category.status
-                , id = category.id
-              }
-            , []
-            )
+        CategoryLoaded (Ok receivedCategory) ->
+            case receivedCategory of
+                Just category ->
+                    ( { model
+                        | name = Field.update model.name category.name
+                        , status = category.status
+                        , id = category.id
+                      }
+                    , []
+                    )
+
+                Nothing ->
+                    ( model, [] )
 
         CategoryLoaded (Err err) ->
             ( { model | error = Just "There was an error loading up the article" }
@@ -106,7 +111,7 @@ update msg model =
             ( model, [] )
 
         UpdateCategoryResponse (Err error) ->
-            ( { model | error = Just (toString error) }, [] )
+            ( { model | error = Just "There was an error while updating the Category" }, [] )
 
 
 

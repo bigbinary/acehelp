@@ -75,13 +75,13 @@ type Msg
     = TitleInput String
     | DescInput String
     | SaveArticle
-    | SaveArticleResponse (Result GQLClient.Error Article)
-    | ArticleLoaded (Result GQLClient.Error Article)
-    | CategoriesLoaded (Result GQLClient.Error (List Category))
+    | SaveArticleResponse (Result GQLClient.Error (Maybe Article))
+    | ArticleLoaded (Result GQLClient.Error (Maybe Article))
+    | CategoriesLoaded (Result GQLClient.Error (Maybe (List Category)))
     | CategorySelected (List CategoryId)
-    | UrlsLoaded (Result GQLClient.Error (List UrlData))
+    | UrlsLoaded (Result GQLClient.Error (Maybe (List UrlData)))
     | UpdateStatus ArticleId AvailabilitySatus
-    | UpdateStatusResponse (Result GQLClient.Error Article)
+    | UpdateStatusResponse (Result GQLClient.Error (Maybe Article))
     | UrlSelected (List UrlId)
     | TrixInitialize ()
     | ReceivedTimeoutId Int
@@ -148,41 +148,53 @@ update msg model =
             ( model, [] )
 
         SaveArticleResponse (Err error) ->
-            ( { model | error = Just (toString error), status = None }, [] )
+            ( { model | error = Just "There was an error saving the article", status = None }, [] )
 
-        ArticleLoaded (Ok article) ->
-            ( { model
-                | articleId = article.id
-                , title = Field.update model.title article.title
-                , desc = Field.update model.desc article.desc
-                , articleStatus = availablityStatusIso.reverseGet article.status
-                , categories = itemSelection (List.map .id article.categories) model.categories
-                , urls = itemSelection (List.map .id article.urls) model.urls
-                , originalArticle = Just article
-              }
-            , [ Strict <| Reader.Reader <| always <| insertArticleContent article.desc ]
-            )
+        ArticleLoaded (Ok articleResp) ->
+            case articleResp of
+                Just article ->
+                    ( { model
+                        | articleId = article.id
+                        , title = Field.update model.title article.title
+                        , desc = Field.update model.desc article.desc
+                        , articleStatus = availablityStatusIso.reverseGet article.status
+                        , categories = itemSelection (List.map .id article.categories) model.categories
+                        , urls = itemSelection (List.map .id article.urls) model.urls
+                        , originalArticle = Just article
+                      }
+                    , [ Strict <| Reader.Reader <| always <| insertArticleContent article.desc ]
+                    )
+
+                Nothing ->
+                    ( { model | error = Just "There was an error loading up the article", originalArticle = Nothing }
+                    , []
+                    )
 
         ArticleLoaded (Err err) ->
             ( { model | error = Just "There was an error loading up the article", originalArticle = Nothing }
             , []
             )
 
-        CategoriesLoaded (Ok categories) ->
-            ( { model
-                | categories =
-                    case model.originalArticle of
-                        Just article ->
-                            itemSelection (List.map .id article.categories) model.categories
+        CategoriesLoaded (Ok receivedCategories) ->
+            case receivedCategories of
+                Just categories ->
+                    ( { model
+                        | categories =
+                            case model.originalArticle of
+                                Just article ->
+                                    itemSelection (List.map .id article.categories) model.categories
 
-                        Nothing ->
-                            List.map Unselected categories
-              }
-            , []
-            )
+                                Nothing ->
+                                    List.map Unselected categories
+                      }
+                    , []
+                    )
+
+                Nothing ->
+                    ( { model | error = Just "There was an error loading up the Categories" }, [] )
 
         CategoriesLoaded (Err err) ->
-            ( { model | error = Just (toString err) }, [] )
+            ( { model | error = Just "There was an error loading up the Categories" }, [] )
 
         CategorySelected categoryIds ->
             ( { model
@@ -191,21 +203,26 @@ update msg model =
             , [ Strict <| Reader.Reader <| always <| setTimeout delayTime ]
             )
 
-        UrlsLoaded (Ok urls) ->
-            ( { model
-                | urls =
-                    case model.originalArticle of
-                        Just article ->
-                            itemSelection (List.map .id article.urls) model.urls
+        UrlsLoaded (Ok loadedUrls) ->
+            case loadedUrls of
+                Just urls ->
+                    ( { model
+                        | urls =
+                            case model.originalArticle of
+                                Just article ->
+                                    itemSelection (List.map .id article.urls) model.urls
 
-                        Nothing ->
-                            List.map Unselected urls
-              }
-            , []
-            )
+                                Nothing ->
+                                    List.map Unselected urls
+                      }
+                    , []
+                    )
+
+                Nothing ->
+                    ( { model | error = Just "There was an error loading up Urls" }, [] )
 
         UrlsLoaded (Err err) ->
-            ( { model | error = Just (toString err) }, [] )
+            ( { model | error = Just "There was an error loading up Urls" }, [] )
 
         UrlSelected selectedUrlIds ->
             ( { model
@@ -249,17 +266,22 @@ update msg model =
             )
 
         UpdateStatusResponse (Ok newArticle) ->
-            ( { model
-                | originalArticle = Just newArticle
-                , articleStatus = availablityStatusIso.reverseGet newArticle.status
-                , status = None
-              }
-            , []
-            )
+            case newArticle of
+                Just article ->
+                    ( { model
+                        | originalArticle = Just article
+                        , articleStatus = availablityStatusIso.reverseGet article.status
+                        , status = None
+                      }
+                    , []
+                    )
+
+                Nothing ->
+                    ( model, [] )
 
         UpdateStatusResponse (Err error) ->
             ( { model
-                | error = Just (toString error)
+                | error = Just "There was an error updating the article"
                 , status = None
               }
             , []

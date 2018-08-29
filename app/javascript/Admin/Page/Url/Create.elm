@@ -51,7 +51,7 @@ type Msg
     = UrlInput String
     | TitleInput String
     | SaveUrl
-    | SaveUrlResponse (Result GQLClient.Error UrlData)
+    | SaveUrlResponse (Result GQLClient.Error (Maybe UrlData))
 
 
 update : Msg -> Model -> ( Model, List (ReaderCmd Msg) )
@@ -92,7 +92,7 @@ update msg model =
             ( model, [] )
 
         SaveUrlResponse (Err error) ->
-            ( { model | error = Just (toString error) }, [] )
+            ( { model | error = Just "An error occured while saving the Url" }, [] )
 
 
 

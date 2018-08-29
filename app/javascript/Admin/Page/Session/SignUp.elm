@@ -111,7 +111,12 @@ update msg model =
             )
 
         SignUpResponse (Err error) ->
-            ( { model | error = Just (toString error) }, [] )
+            case error of
+                GQLClient.HttpError err ->
+                    ( { model | error = Just "Something went wrong. Please try again" }, [] )
+
+                GQLClient.GraphQLError err ->
+                    ( { model | error = Just <| String.join ". " <| List.map .message err }, [] )
 
 
 signUp : Model -> ( Model, List (ReaderCmd Msg) )

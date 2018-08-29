@@ -8,7 +8,7 @@ import GraphQL.Client.Http as GQLClient
 import GraphQL.Request.Builder as GQLBuilder
 
 
-requestUrls : Reader ( NodeEnv, ApiKey, AppUrl ) (Task GQLClient.Error (List UrlData))
+requestUrls : Reader ( NodeEnv, ApiKey, AppUrl ) (Task GQLClient.Error (Maybe (List UrlData)))
 requestUrls =
     Reader.Reader
         (\( nodeEnv, apiKey, appUrl ) ->
@@ -18,7 +18,7 @@ requestUrls =
         )
 
 
-createUrl : CreateUrlInput -> Reader ( NodeEnv, ApiKey, AppUrl ) (Task GQLClient.Error UrlData)
+createUrl : CreateUrlInput -> Reader ( NodeEnv, ApiKey, AppUrl ) (Task GQLClient.Error (Maybe UrlData))
 createUrl createUrlInput =
     Reader.Reader
         (\( nodeEnv, apiKey, appUrl ) ->
@@ -38,7 +38,7 @@ deleteUrl urlId =
         )
 
 
-updateUrl : UrlData -> Reader ( NodeEnv, ApiKey, AppUrl ) (Task GQLClient.Error UrlData)
+updateUrl : UrlData -> Reader ( NodeEnv, ApiKey, AppUrl ) (Task GQLClient.Error (Maybe UrlData))
 updateUrl urlData =
     Reader.Reader
         (\( nodeEnv, apiKey, appUrl ) ->
@@ -48,7 +48,7 @@ updateUrl urlData =
         )
 
 
-requestUrlById : UrlId -> Reader ( NodeEnv, ApiKey, AppUrl ) (Task GQLClient.Error UrlData)
+requestUrlById : UrlId -> Reader ( NodeEnv, ApiKey, AppUrl ) (Task GQLClient.Error (Maybe UrlData))
 requestUrlById urlId =
     Reader.Reader
         (\( nodeEnv, apiKey, appUrl ) ->

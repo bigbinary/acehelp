@@ -47,20 +47,22 @@ type alias CategoryStatusInput =
     }
 
 
-categoriesQuery : GQLBuilder.Document GQLBuilder.Query (List Category) vars
+categoriesQuery : GQLBuilder.Document GQLBuilder.Query (Maybe (List Category)) vars
 categoriesQuery =
     GQLBuilder.queryDocument
         (GQLBuilder.extract
             (GQLBuilder.field "categories"
                 []
-                (GQLBuilder.list
-                    categoryObject
+                (GQLBuilder.nullable
+                    (GQLBuilder.list
+                        categoryObject
+                    )
                 )
             )
         )
 
 
-categoryByIdQuery : GQLBuilder.Document GQLBuilder.Query Category { vars | id : String }
+categoryByIdQuery : GQLBuilder.Document GQLBuilder.Query (Maybe Category) { vars | id : String }
 categoryByIdQuery =
     let
         idVar =
@@ -70,12 +72,14 @@ categoryByIdQuery =
             (GQLBuilder.extract
                 (GQLBuilder.field "category"
                     [ ( "id", Arg.variable idVar ) ]
-                    categoryObject
+                    (GQLBuilder.nullable
+                        categoryObject
+                    )
                 )
             )
 
 
-createCategoryMutation : GQLBuilder.Document GQLBuilder.Mutation Category CreateCategoryInputs
+createCategoryMutation : GQLBuilder.Document GQLBuilder.Mutation (Maybe Category) CreateCategoryInputs
 createCategoryMutation =
     let
         nameVar =
@@ -91,11 +95,13 @@ createCategoryMutation =
                     (GQLBuilder.extract <|
                         GQLBuilder.field "category"
                             []
-                            categoryObject
+                            (GQLBuilder.nullable
+                                categoryObject
+                            )
                     )
 
 
-udpateCategoryMutation : GQLBuilder.Document GQLBuilder.Mutation Category UpdateCategoryInputs
+udpateCategoryMutation : GQLBuilder.Document GQLBuilder.Mutation (Maybe Category) UpdateCategoryInputs
 udpateCategoryMutation =
     let
         idVar =
@@ -121,7 +127,9 @@ udpateCategoryMutation =
                     (GQLBuilder.extract <|
                         GQLBuilder.field "category"
                             []
-                            categoryObject
+                            (GQLBuilder.nullable
+                                categoryObject
+                            )
                     )
 
 
@@ -133,7 +141,7 @@ categoryObject =
         |> GQLBuilder.with (GQLBuilder.field "status" [] GQLBuilder.string)
 
 
-deleteCategoryMutation : GQLBuilder.Document GQLBuilder.Mutation CategoryId DeleteCategoryInput
+deleteCategoryMutation : GQLBuilder.Document GQLBuilder.Mutation (Maybe CategoryId) DeleteCategoryInput
 deleteCategoryMutation =
     let
         idVar =
@@ -150,11 +158,11 @@ deleteCategoryMutation =
                     (GQLBuilder.extract <|
                         GQLBuilder.field "deletedId"
                             []
-                            GQLBuilder.string
+                            (GQLBuilder.nullable GQLBuilder.string)
                     )
 
 
-updateCategoryStatusMutation : GQLBuilder.Document GQLBuilder.Mutation (List Category) CategoryStatusInput
+updateCategoryStatusMutation : GQLBuilder.Document GQLBuilder.Mutation (Maybe (List Category)) CategoryStatusInput
 updateCategoryStatusMutation =
     let
         idVar =
@@ -176,8 +184,10 @@ updateCategoryStatusMutation =
                     (GQLBuilder.extract <|
                         (GQLBuilder.field "categories"
                             []
-                            (GQLBuilder.list
-                                categoryObject
+                            (GQLBuilder.nullable
+                                (GQLBuilder.list
+                                    categoryObject
+                                )
                             )
                         )
                     )

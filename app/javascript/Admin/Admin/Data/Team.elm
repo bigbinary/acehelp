@@ -23,19 +23,21 @@ type alias TeamMember =
     }
 
 
-requestTeamQuery : GQLBuilder.Document GQLBuilder.Query (List Team) vars
+requestTeamQuery : GQLBuilder.Document GQLBuilder.Query (Maybe (List Team)) vars
 requestTeamQuery =
     GQLBuilder.queryDocument <|
         GQLBuilder.extract
             (GQLBuilder.field "users"
                 []
-                (GQLBuilder.list
-                    teamMemberExtractor
+                (GQLBuilder.nullable
+                    (GQLBuilder.list
+                        teamMemberExtractor
+                    )
                 )
             )
 
 
-createTeamMemberMutation : GQLBuilder.Document GQLBuilder.Mutation Team TeamMember
+createTeamMemberMutation : GQLBuilder.Document GQLBuilder.Mutation (Maybe Team) TeamMember
 createTeamMemberMutation =
     let
         emailVar =
@@ -61,7 +63,7 @@ createTeamMemberMutation =
                     (GQLBuilder.extract <|
                         GQLBuilder.field "user"
                             []
-                            teamMemberExtractor
+                            (GQLBuilder.nullable teamMemberExtractor)
                     )
 
 
@@ -74,7 +76,7 @@ teamMemberExtractor =
     )
 
 
-removeUserFromOrganization : GQLBuilder.Document GQLBuilder.Mutation (List Team) { a | email : String }
+removeUserFromOrganization : GQLBuilder.Document GQLBuilder.Mutation (Maybe (List Team)) { a | email : String }
 removeUserFromOrganization =
     let
         emailVar =
@@ -91,8 +93,10 @@ removeUserFromOrganization =
                     (GQLBuilder.extract
                         (GQLBuilder.field "team"
                             []
-                            (GQLBuilder.list
-                                teamMemberExtractor
+                            (GQLBuilder.nullable
+                                (GQLBuilder.list
+                                    teamMemberExtractor
+                                )
                             )
                         )
                     )

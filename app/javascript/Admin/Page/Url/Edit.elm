@@ -48,8 +48,8 @@ init urlId =
 type Msg
     = UrlInput String
     | UpdateUrl
-    | UpdateUrlResponse (Result GQLClient.Error UrlData)
-    | UrlLoaded (Result GQLClient.Error UrlData)
+    | UpdateUrlResponse (Result GQLClient.Error (Maybe UrlData))
+    | UrlLoaded (Result GQLClient.Error (Maybe UrlData))
 
 
 update : Msg -> Model -> ( Model, List (ReaderCmd Msg) )
@@ -86,15 +86,20 @@ update msg model =
             ( model, [] )
 
         UpdateUrlResponse (Err error) ->
-            ( { model | error = Just (toString error) }, [] )
+            ( { model | error = Just "An error occured while updating the Url information" }, [] )
 
         UrlLoaded (Ok url) ->
-            ( { model
-                | url = Field.update model.url url.url
-                , urlId = url.id
-              }
-            , []
-            )
+            case url of
+                Just newUrl ->
+                    ( { model
+                        | url = Field.update model.url newUrl.url
+                        , urlId = newUrl.id
+                      }
+                    , []
+                    )
+
+                Nothing ->
+                    ( { model | error = Just "There was an error loading up the url" }, [] )
 
         UrlLoaded (Err err) ->
             ( { model | error = Just "There was an error loading up the url" }, [] )

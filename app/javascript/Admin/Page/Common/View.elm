@@ -12,7 +12,7 @@ renderError error =
     if (error == Nothing) then
         ""
     else
-        "Error : " ++ (toString error)
+        Maybe.withDefault "" <| Maybe.map ((++) "Error : ") error
 
 
 multiSelectMenu : String -> List (Option Value) -> (List String -> msg) -> Html msg

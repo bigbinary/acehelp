@@ -8,13 +8,16 @@ import GraphQL.Request.Builder as GQLBuilder
 type alias FeedbackId =
     String
 
+
 type alias FeedbackStatus =
     String
+
 
 type alias FeedbackStatusInput =
     { id : String
     , status : String
     }
+
 
 type alias Feedback =
     { id : FeedbackId
@@ -24,7 +27,7 @@ type alias Feedback =
     }
 
 
-requestFeedbacksQuery : GQLBuilder.Document GQLBuilder.Query (List Feedback) { vars | status : FeedbackStatus }
+requestFeedbacksQuery : GQLBuilder.Document GQLBuilder.Query (Maybe (List Feedback)) { vars | status : FeedbackStatus }
 requestFeedbacksQuery =
     let
         statusVar =
@@ -34,13 +37,15 @@ requestFeedbacksQuery =
             GQLBuilder.extract
                 (GQLBuilder.field "feedbacks"
                     [ ( "status", Arg.variable statusVar ) ]
-                    (GQLBuilder.list
-                        feedbackExtractor
+                    (GQLBuilder.nullable
+                        (GQLBuilder.list
+                            feedbackExtractor
+                        )
                     )
                 )
 
 
-feedbackByIdQuery : GQLBuilder.Document GQLBuilder.Query Feedback { vars | id : String }
+feedbackByIdQuery : GQLBuilder.Document GQLBuilder.Query (Maybe Feedback) { vars | id : String }
 feedbackByIdQuery =
     let
         idVar =
@@ -50,12 +55,14 @@ feedbackByIdQuery =
             (GQLBuilder.extract
                 (GQLBuilder.field "feedback"
                     [ ( "id", Arg.variable idVar ) ]
-                    feedbackExtractor
+                    (GQLBuilder.nullable
+                        feedbackExtractor
+                    )
                 )
             )
 
 
-updateFeedabackStatusMutation : GQLBuilder.Document GQLBuilder.Mutation Feedback FeedbackStatusInput
+updateFeedabackStatusMutation : GQLBuilder.Document GQLBuilder.Mutation (Maybe Feedback) FeedbackStatusInput
 updateFeedabackStatusMutation =
     let
         idVar =
@@ -77,7 +84,9 @@ updateFeedabackStatusMutation =
                     (GQLBuilder.extract <|
                         GQLBuilder.field "feedback"
                             []
-                            feedbackExtractor
+                            (GQLBuilder.nullable
+                                feedbackExtractor
+                            )
                     )
 
 

@@ -42,7 +42,7 @@ init =
 
 
 type Msg
-    = FeedbackListLoaded (Result GQLClient.Error (List Feedback))
+    = FeedbackListLoaded (Result GQLClient.Error (Maybe (List Feedback)))
     | FeedbackListReloaded FeedbackStatus
     | OnFeedbackClick FeedbackId
 
@@ -50,8 +50,13 @@ type Msg
 update : Msg -> Model -> ( Model, List (ReaderCmd Msg) )
 update msg model =
     case msg of
-        FeedbackListLoaded (Ok feedbacks) ->
-            ( { model | feedbackList = feedbacks }, [] )
+        FeedbackListLoaded (Ok recvFeedbacks) ->
+            case recvFeedbacks of
+                Just feedbacks ->
+                    ( { model | feedbackList = feedbacks }, [] )
+
+                Nothing ->
+                    ( model, [] )
 
         FeedbackListLoaded (Err err) ->
             ( { model | error = Just (toString err) }, [] )

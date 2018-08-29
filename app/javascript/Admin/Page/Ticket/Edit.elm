@@ -65,10 +65,10 @@ type Msg
     | CommentInput String
     | UpdateTicket
     | DeleteTicket
-    | UpdateTicketResponse (Result GQLClient.Error Ticket)
-    | DeleteTicketResponse (Result GQLClient.Error Ticket)
-    | TicketLoaded (Result GQLClient.Error Ticket)
-    | AgentsLoaded (Result GQLClient.Error (List Agent))
+    | UpdateTicketResponse (Result GQLClient.Error (Maybe Ticket))
+    | DeleteTicketResponse (Result GQLClient.Error (Maybe Ticket))
+    | TicketLoaded (Result GQLClient.Error (Maybe Ticket))
+    | AgentsLoaded (Result GQLClient.Error (Maybe (List Agent)))
     | UpdateTicketStatus String
     | AssignTicketAgent String
 
@@ -88,45 +88,57 @@ update msg model =
         DeleteTicket ->
             deleteTicket model
 
-        UpdateTicketResponse (Ok ticket) ->
-            ( { model
-                | ticketId = ticket.id
-                , status = ticket.status
-                , statuses = ticket.statuses
-                , message = ticket.message
-                , comment = Comment ticket.id ""
-                , note = Note ticket.id ""
-                , comments = ticket.comments
-                , notes = ticket.notes
-                , success = Just "Ticket Updated Successfully..."
-              }
-            , []
-            )
+        UpdateTicketResponse (Ok tkt) ->
+            case tkt of
+                Just ticket ->
+                    ( { model
+                        | ticketId = ticket.id
+                        , status = ticket.status
+                        , statuses = ticket.statuses
+                        , message = ticket.message
+                        , comment = Comment ticket.id ""
+                        , note = Note ticket.id ""
+                        , comments = ticket.comments
+                        , notes = ticket.notes
+                        , success = Just "Ticket Updated Successfully..."
+                      }
+                    , []
+                    )
+
+                Nothing ->
+                    ( model, [] )
 
         UpdateTicketResponse (Err error) ->
-            ( { model | error = Just (toString error) }, [] )
+            ( { model | error = Just "An error occured while updating the Ticket" }, [] )
 
         DeleteTicketResponse (Ok id) ->
             ( model, [] )
 
         DeleteTicketResponse (Err error) ->
-            ( { model | error = Just (toString error) }, [] )
+            ( { model | error = Just "An error occured while deletin(Maybe g the )Ticket" }, [] )
 
-        TicketLoaded (Ok ticket) ->
-            ( { model
-                | ticketId = ticket.id
-                , message = ticket.message
-                , statuses = ticket.statuses
-                , status = ticket.status
-                , comments = ticket.comments
-                , agent = ticket.agent
-                , notes = ticket.notes
-              }
-            , []
-            )
+        TicketLoaded (Ok tkt) ->
+            case tkt of
+                Just ticket ->
+                    ( { model
+                        | ticketId = ticket.id
+                        , status = ticket.status
+                        , statuses = ticket.statuses
+                        , message = ticket.message
+                        , comment = Comment ticket.id ""
+                        , note = Note ticket.id ""
+                        , comments = ticket.comments
+                        , notes = ticket.notes
+                        , success = Just "Ticket Updated Successfully..."
+                      }
+                    , []
+                    )
+
+                Nothing ->
+                    ( model, [] )
 
         TicketLoaded (Err err) ->
-            ( { model | error = Just (toString err) }, [] )
+            ( { model | error = Just "There was an error loading the Ticket" }, [] )
 
         UpdateTicketStatus status ->
             updateTicketStatus model { id = model.ticketId, status = status }
@@ -134,12 +146,17 @@ update msg model =
         AssignTicketAgent agent_id ->
             assignTicketAgent model { id = model.ticketId, agent_id = agent_id }
 
-        AgentsLoaded (Ok agents) ->
-            ( { model
-                | agents = agents
-              }
-            , []
-            )
+        AgentsLoaded (Ok agentList) ->
+            case agentList of
+                Just agents ->
+                    ( { model
+                        | agents = agents
+                      }
+                    , []
+                    )
+
+                Nothing ->
+                    ( model, [] )
 
         AgentsLoaded (Err err) ->
             ( { model | error = Just (toString err) }, [] )
