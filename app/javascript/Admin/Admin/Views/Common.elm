@@ -33,6 +33,17 @@ multiSelectMenu title values onselect =
         ]
 
 
-loadingIndicator : Html msg
-loadingIndicator =
-    div [ class "loading-indicator" ] [ text "" ]
+loadingIndicator : String -> Html msg
+loadingIndicator msg =
+    div [ class "loading-indicator" ] [ text msg, spinner ]
+
+
+spinner : Html msg
+spinner =
+    div [ Attributes.class "spinner" ]
+        [ div [ Attributes.class "rect rect1" ] []
+        , div [ Attributes.class "rect rect2" ] []
+        , div [ Attributes.class "rect rect3" ] []
+        , div [ Attributes.class "rect rect4" ] []
+        , div [ Attributes.class "rect rect5" ] []
+        ]
