@@ -1,20 +1,17 @@
 module Page.Session.SignUp exposing (..)
 
+import Admin.Data.ReaderCmd exposing (..)
+import Admin.Data.User exposing (..)
+import Admin.Request.Session exposing (signupRequest)
+import Field exposing (..)
+import Field.ValidationResult exposing (..)
+import GraphQL.Client.Http as GQLClient
+import Helpers exposing (..)
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
-import Task exposing (Task)
 import Reader exposing (Reader)
-import Field exposing (..)
-import Field.ValidationResult exposing (..)
-import Helpers exposing (..)
-import Admin.Data.User exposing (..)
-import Admin.Data.Session exposing (..)
-import Request.Helpers exposing (NodeEnv, ApiKey)
-import Admin.Request.Session exposing (signupRequest)
-import GraphQL.Client.Http as GQLClient
-import Admin.Data.ReaderCmd exposing (..)
-import Route as Route
+import Task exposing (Task)
 
 
 -- MODEL
@@ -121,12 +118,11 @@ signUp model =
             Open <|
                 Reader.map (Task.attempt SignUpResponse)
                     (signupRequest
-                        ({ firstName = Field.value model.firstName
-                         , email = Field.value model.email
-                         , password = Field.value model.password
-                         , confirmPassword = Field.value model.confirmPassword
-                         }
-                        )
+                        { firstName = Field.value model.firstName
+                        , email = Field.value model.email
+                        , password = Field.value model.password
+                        , confirmPassword = Field.value model.confirmPassword
+                        }
                     )
     in
         ( model, [ cmd ] )
@@ -138,50 +134,80 @@ signUp model =
 
 view : Model -> Html Msg
 view model =
-    div [ class "container" ]
-        [ div [] [ h2 [] [ text "Sign Up" ] ]
-        , Html.form [ onSubmit SignUp ]
-            [ div []
-                [ label [] [ text "First Name: " ]
-                , input
-                    [ Html.Attributes.value <| Field.value model.firstName
-                    , type_ "text"
-                    , placeholder "First Name"
-                    , onInput FirstNameInput
+    div [ class "pageWrap" ]
+        [ div [ class "container" ]
+            [ div [ class "pageContent row" ]
+                [ div [ class "col-md-12" ]
+                    [ h2 [ class "formHeader" ]
+                        [ text "Sign-Up to AceHelp" ]
                     ]
-                    []
-                ]
-            , div []
-                [ label [] [ text "Email: " ]
-                , input
-                    [ Html.Attributes.value <| Field.value model.email
-                    , type_ "text"
-                    , placeholder "Email"
-                    , onInput EmailInput
+                , div [ class "centerForm col-md-12" ]
+                    [ Html.form [ onSubmit SignUp ]
+                        [ div [ class "form-group" ]
+                            [ input
+                                [ Html.Attributes.value <|
+                                    Field.value model.firstName
+                                , type_ "text"
+                                , placeholder "First Name"
+                                , onInput FirstNameInput
+                                , class "form-control"
+                                ]
+                                []
+                            ]
+                        , div [ class "form-group" ]
+                            [ input
+                                [ Html.Attributes.value <|
+                                    Field.value model.email
+                                , type_ "text"
+                                , placeholder "Email"
+                                , onInput EmailInput
+                                , class "form-control"
+                                ]
+                                []
+                            ]
+                        , div [ class "form-group" ]
+                            [ input
+                                [ Html.Attributes.value <|
+                                    Field.value model.password
+                                , type_ "password"
+                                , placeholder "Password"
+                                , onInput PasswordInput
+                                , class "form-control"
+                                ]
+                                []
+                            ]
+                        , div [ class "form-group" ]
+                            [ input
+                                [ Html.Attributes.value <|
+                                    Field.value model.confirmPassword
+                                , type_ "password"
+                                , placeholder "Confirm Password"
+                                , onInput ConfirmPasswordInput
+                                , class "form-control"
+                                ]
+                                []
+                            ]
+                        , div [ class "formSection" ]
+                            [ button
+                                [ type_ "submit"
+                                , class "btn btn-primary"
+                                ]
+                                [ text "Sign Up" ]
+                            ]
+                        , div [ class "formSection row" ]
+                            [ span [ class "btn col-md-6" ]
+                                [ Html.a
+                                    [ href "/users/sign_in" ]
+                                    [ span [] [ text "Sign In" ] ]
+                                ]
+                            , span [ class "btn" ]
+                                [ Html.a
+                                    [ href "/users/forgot_password" ]
+                                    [ span [] [ text "Forgot password" ] ]
+                                ]
+                            ]
+                        ]
                     ]
-                    []
                 ]
-            , div []
-                [ label [] [ text "Password: " ]
-                , input
-                    [ Html.Attributes.value <| Field.value model.password
-                    , type_ "password"
-                    , placeholder "Password"
-                    , onInput PasswordInput
-                    ]
-                    []
-                ]
-            , div []
-                [ label [] [ text "Confirm Password: " ]
-                , input
-                    [ Html.Attributes.value <| Field.value model.confirmPassword
-                    , type_ "password"
-                    , placeholder "Confirm Password"
-                    , onInput ConfirmPasswordInput
-                    ]
-                    []
-                ]
-            , button [ type_ "submit", class "button primary" ] [ text "Sign Up" ]
-            , button [ type_ "submit", class "button primary", onClick ForgotPasswordRedirect ] [ text "Forgot Password" ]
             ]
         ]
