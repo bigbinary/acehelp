@@ -69,19 +69,19 @@ $blueThemeColor: rgb(60, 170, 249);
   }
 
 
-  .pageWrap {
+  .page-wrap {
     background-color: #3399ff;
     height: 100vh;
 
-    .pageContent {
+    .page-content {
       padding: 50px 0px;
 
-      .formHeader {
+      .form-header {
         text-align: center;
         color: #ffffffe8;
       }
 
-      .centerForm {
+      .center-form {
         margin: 30px auto 10px auto;
         border-radius: 5px;
         text-align: center;
@@ -93,7 +93,7 @@ $blueThemeColor: rgb(60, 170, 249);
         box-shadow: 0 10px 20px rgba(0, 0, 0, 0.19),
           0 6px 6px rgba(0, 0, 0, 0.23);
 
-        .formSection {
+        .form-section {
           margin-top: 25px;
         }
       }

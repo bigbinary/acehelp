@@ -757,6 +757,12 @@ update msg model =
                         SignUp.SignUpResponse (Ok id) ->
                             updateNavigation (NavigateTo Route.Login)
 
+                        SignUp.LoginRedirect ->
+                            updateNavigation (NavigateTo Route.Login)
+
+                        SignUp.ForgotPasswordRedirect ->
+                            updateNavigation (NavigateTo Route.ForgotPassword)
+
                         _ ->
                             ( { model | currentPage = Loaded (SignUp newModel) }
                             , runReaderCmds SignUpMsg cmds
@@ -775,9 +781,17 @@ update msg model =
                     ( newModel, cmds ) =
                         Login.update loginMsg currentPageModel
                 in
-                    ( { model | currentPage = Loaded (Login newModel) }
-                    , runReaderCmds LoginMsg cmds
-                    )
+                    case loginMsg of
+                        Login.SignupRedirect ->
+                            updateNavigation (NavigateTo Route.SignUp)
+
+                        Login.ForgotPasswordRedirect ->
+                            updateNavigation (NavigateTo Route.ForgotPassword)
+
+                        _ ->
+                            ( { model | currentPage = Loaded (Login newModel) }
+                            , runReaderCmds LoginMsg cmds
+                            )
 
             ForgotPasswordMsg forgotPasswordMsg ->
                 let

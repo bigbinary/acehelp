@@ -53,6 +53,7 @@ type Msg
     | SignUp
     | SignUpResponse (Result GQLClient.Error User)
     | ForgotPasswordRedirect
+    | LoginRedirect
 
 
 update : Msg -> Model -> ( Model, List (ReaderCmd Msg) )
@@ -71,6 +72,9 @@ update msg model =
             ( { model | confirmPassword = Field.update model.confirmPassword password }, [] )
 
         ForgotPasswordRedirect ->
+            ( model, [] )
+
+        LoginRedirect ->
             ( model, [] )
 
         SignUp ->
@@ -134,15 +138,15 @@ signUp model =
 
 view : Model -> Html Msg
 view model =
-    div [ class "pageWrap" ]
+    div [ class "page-wrap" ]
         [ div [ class "container" ]
-            [ div [ class "pageContent row" ]
+            [ div [ class "page-content row" ]
                 [ div [ class "col-md-12" ]
-                    [ h2 [ class "formHeader" ]
+                    [ h2 [ class "form-header" ]
                         [ text "Sign-Up to AceHelp" ]
                     ]
-                , div [ class "centerForm col-md-12" ]
-                    [ Html.form [ onSubmit SignUp ]
+                , div [ class "center-form col-md-12" ]
+                    [ div []
                         [ div [ class "form-group" ]
                             [ input
                                 [ Html.Attributes.value <|
@@ -187,24 +191,25 @@ view model =
                                 ]
                                 []
                             ]
-                        , div [ class "formSection" ]
+                        , div [ class "form-section" ]
                             [ button
                                 [ type_ "submit"
                                 , class "btn btn-primary"
+                                , onClick SignUp
                                 ]
                                 [ text "Sign Up" ]
                             ]
-                        , div [ class "formSection row" ]
-                            [ span [ class "btn col-md-6" ]
-                                [ Html.a
-                                    [ href "/users/sign_in" ]
-                                    [ span [] [ text "Sign In" ] ]
+                        , div [ class "form-section row" ]
+                            [ span
+                                [ class "col-md-6 btn btn-link"
+                                , onClick LoginRedirect
                                 ]
-                            , span [ class "btn" ]
-                                [ Html.a
-                                    [ href "/users/forgot_password" ]
-                                    [ span [] [ text "Forgot password" ] ]
+                                [ text "Sign In" ]
+                            , span
+                                [ class "btn btn-link"
+                                , onClick ForgotPasswordRedirect
                                 ]
+                                [ text "Forgot password" ]
                             ]
                         ]
                     ]
