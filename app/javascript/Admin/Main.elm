@@ -33,7 +33,7 @@ import Page.Ticket.Edit as TicketEdit
 import Page.Url.Create as UrlCreate
 import Page.Url.Edit as UrlEdit
 import Page.Url.List as UrlList
-import Page.Common.View exposing (..)
+import Admin.Views.Common exposing (..)
 import Admin.Ports exposing (..)
 import Route
 
@@ -978,6 +978,12 @@ view model =
                         (ForgotPassword.view forgotPasswordModel)
     in
         case model.currentPage of
+            TransitioningFrom NotFound ->
+                Errors.notFound
+
+            Loaded NotFound ->
+                Errors.notFound
+
             TransitioningFrom (Login loginModel) ->
                 Html.map LoginMsg (Login.view loginModel)
 
@@ -1005,7 +1011,7 @@ view model =
                 )
 
             TransitioningFrom _ ->
-                adminLayout model [ viewContent, loadingIndicator ]
+                adminLayout model [ viewContent, loadingIndicator "Loading.." ]
 
             Loaded _ ->
                 adminLayout model [ viewContent ]

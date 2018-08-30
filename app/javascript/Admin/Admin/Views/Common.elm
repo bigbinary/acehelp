@@ -1,4 +1,4 @@
-module Page.Common.View exposing (..)
+module Admin.Views.Common exposing (..)
 
 import Html exposing (..)
 import Html.Events exposing (..)
@@ -40,10 +40,10 @@ loadingIndicator msg =
 
 spinner : Html msg
 spinner =
-    div [ Attributes.class "spinner" ]
-        [ div [ Attributes.class "rect rect1" ] []
-        , div [ Attributes.class "rect rect2" ] []
-        , div [ Attributes.class "rect rect3" ] []
-        , div [ Attributes.class "rect rect4" ] []
-        , div [ Attributes.class "rect rect5" ] []
+    div [ class "spinner" ]
+        [ div [ class "rect rect1" ] []
+        , div [ class "rect rect2" ] []
+        , div [ class "rect rect3" ] []
+        , div [ class "rect rect4" ] []
+        , div [ class "rect rect5" ] []
         ]
