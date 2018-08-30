@@ -8,6 +8,8 @@ import GraphQL.Client.Http as GQLClient
 import GraphQL.Request.Builder as GQLBuilder
 import Admin.Data.Status exposing (..)
 import Admin.Data.Session exposing (..)
+import Json.Decode
+import Http
 
 
 requestArticlesByUrl : String -> Reader ( Token, NodeEnv, ApiKey, AppUrl ) (Task GQLClient.Error (Maybe (List ArticleSummary)))
@@ -67,8 +69,22 @@ requestAllArticles : Reader ( Token, NodeEnv, ApiKey, AppUrl ) (Task GQLClient.E
 requestAllArticles =
     Reader.Reader
         (\( tokens, nodeEnv, apiKey, appUrl ) ->
-            GQLClient.customSendQuery (requestOptionsWithToken (Just tokens) nodeEnv apiKey appUrl) <|
-                GQLBuilder.request {} allArticlesQuery
+            GQLBuilder.request {} allArticlesQuery
+                |> GQLClient.customSendQueryRaw (requestOptionsWithToken (Just tokens) nodeEnv apiKey appUrl)
+                |> Task.andThen
+                    (\response ->
+                        let
+                            decoder =
+                                GQLBuilder.responseDataDecoder (GQLBuilder.request {} allArticlesQuery)
+                                    |> Json.Decode.field "data"
+                        in
+                            case Json.Decode.decodeString decoder response.body of
+                                Err err ->
+                                    Task.fail <| GQLClient.HttpError <| Http.BadPayload err response
+
+                                Ok decodedValue ->
+                                    Task.succeed decodedValue
+                    )
         )
 
 

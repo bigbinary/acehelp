@@ -3,7 +3,11 @@ module Admin.Request.Helper exposing (..)
 import Http
 import Json.Decode exposing (Decoder)
 import Admin.Data.Session exposing (Token)
-import GraphQL.Client.Http exposing (RequestOptions)
+import GraphQL.Client.Http as GQLClient exposing (RequestOptions)
+import GraphQL.Request.Builder as GQLBuilder
+import Dict
+import Reader exposing (Reader)
+import Task exposing (Task)
 
 
 type alias ApiKey =
@@ -167,3 +171,29 @@ logoutRequest env appUrl =
         , timeout = Nothing
         , withCredentials = False
         }
+
+
+strictContextBuilder gqlRequest =
+    (\( tokens, nodeEnv, apiKey, appUrl ) ->
+        gqlRequest
+            |> GQLClient.customSendQueryRaw (requestOptionsWithToken (Just tokens) nodeEnv apiKey appUrl)
+            |> Task.andThen
+                (\response ->
+                    let
+                        decoder =
+                            GQLBuilder.responseDataDecoder gqlRequest
+                                |> Json.Decode.field "data"
+                    in
+                        case Json.Decode.decodeString decoder response.body of
+                            Err err ->
+                                Task.fail <| GQLClient.HttpError <| Http.BadPayload err response
+
+                            Ok decodedValue ->
+                                Task.succeed
+                                    ( { access_token = Dict.get "access_token" response.headers
+                                      , uid = Dict.get "uid" response.headers
+                                      }
+                                    , decodedValue
+                                    )
+                )
+    )
