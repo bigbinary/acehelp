@@ -6,6 +6,7 @@ import GraphQL.Client.Http as GQLClient
 import GraphQL.Request.Builder as GQLBuilder
 import Reader exposing (Reader)
 import Task exposing (Task)
+import Admin.Data.Status exposing (..)
 
 
 requestCategories : Reader ( NodeEnv, ApiKey, AppUrl ) (Task GQLClient.Error (Maybe (List Category)))
@@ -61,11 +62,11 @@ requestCreateCategory categoryInputs =
         )
 
 
-requestUpdateCategoryStatus : CategoryId -> String -> Reader ( NodeEnv, ApiKey, AppUrl ) (Task GQLClient.Error (Maybe (List Category)))
+requestUpdateCategoryStatus : CategoryId -> AvailabilitySatus -> Reader ( NodeEnv, ApiKey, AppUrl ) (Task GQLClient.Error (Maybe (List Category)))
 requestUpdateCategoryStatus categoryId categoryStatus =
     Reader.Reader
         (\( nodeEnv, apiKey, appUrl ) ->
             (GQLClient.customSendMutation (requestOptions nodeEnv apiKey appUrl) <|
-                GQLBuilder.request { id = categoryId, status = categoryStatus } updateCategoryStatusMutation
+                GQLBuilder.request { id = categoryId, status = reverseCurrentAvailabilityStatus (availablityStatusIso.get categoryStatus) } updateCategoryStatusMutation
             )
         )

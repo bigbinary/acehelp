@@ -40,13 +40,6 @@ type alias DeleteCategoryInput =
     { id : CategoryId
     }
 
-
-type alias CategoryStatusInput =
-    { id : String
-    , status : String
-    }
-
-
 categoriesQuery : GQLBuilder.Document GQLBuilder.Query (Maybe (List Category)) vars
 categoriesQuery =
     GQLBuilder.queryDocument
@@ -161,8 +154,7 @@ deleteCategoryMutation =
                             (GQLBuilder.nullable GQLBuilder.string)
                     )
 
-
-updateCategoryStatusMutation : GQLBuilder.Document GQLBuilder.Mutation (Maybe (List Category)) CategoryStatusInput
+updateCategoryStatusMutation : GQLBuilder.Document GQLBuilder.Mutation (Maybe (List Category)) { vars | id : String, status : String }
 updateCategoryStatusMutation =
     let
         idVar =

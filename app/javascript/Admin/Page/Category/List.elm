@@ -3,12 +3,14 @@ module Page.Category.List exposing (..)
 import Admin.Data.Category exposing (..)
 import Admin.Request.Category exposing (..)
 import GraphQL.Client.Http as GQLClient
+import Page.Article.Common exposing (statusToButtonText)
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
 import Reader exposing (Reader)
 import Task exposing (Task)
 import Admin.Data.ReaderCmd exposing (..)
+import Admin.Data.Status exposing (..)
 
 
 -- MODEL
@@ -44,7 +46,7 @@ type Msg
     | DeleteCategoryResponse (Result GQLClient.Error (Maybe CategoryId))
     | OnCreateCategoryClick
     | OnEditCategoryClick CategoryId
-    | UpdateCategoryStatus CategoryId String
+    | UpdateCategoryStatus CategoryId AvailabilitySatus
 
 
 update : Msg -> Model -> ( Model, List (ReaderCmd Msg) )
@@ -166,7 +168,7 @@ deleteCategoryById model categoryId =
         ( model, [ cmd ] )
 
 
-updateCategoryStatus : Model -> CategoryId -> String -> ( Model, List (ReaderCmd Msg) )
+updateCategoryStatus : Model -> CategoryId -> AvailabilitySatus -> ( Model, List (ReaderCmd Msg) )
 updateCategoryStatus model categoryId categoryStatus =
     let
         cmd =
@@ -177,17 +179,8 @@ updateCategoryStatus model categoryId categoryStatus =
 
 categoryStatusButton : Category -> Html Msg
 categoryStatusButton category =
-    case category.status of
-        "active" ->
-            button
-                [ onClick (UpdateCategoryStatus category.id "inactive")
-                , class "actionButton btn btn-primary"
-                ]
-                [ text <| "Make Category Inactive" ]
-
-        _ ->
-            button
-                [ onClick (UpdateCategoryStatus category.id "active")
-                , class "actionButton btn btn-primary"
-                ]
-                [ text <| "Make Category Active" ]
+    button
+        [ onClick (UpdateCategoryStatus category.id <| availablityStatusIso.reverseGet category.status)
+        , class "actionButton btn btn-primary"
+        ]
+        [ text ("Mark " ++ (statusToButtonText <| availablityStatusIso.reverseGet category.status)) ]
