@@ -1,6 +1,6 @@
 var req = new XMLHttpRequest();
 var baseUrl = "";
-var apiKey = "6aa94783daeccbea5c63";
+var apiKey = "YOURAPIKEY";
 
 var script = document.createElement("script");
 script.type = "text/javascript";
