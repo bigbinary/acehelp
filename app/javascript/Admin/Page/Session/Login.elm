@@ -25,9 +25,9 @@ type alias Model =
 
 initModel : Model
 initModel =
-    { error = []
-    , username = Field (validateEmpty "Username") ""
+    { username = Field (validateEmpty "Username") ""
     , password = Field (validateEmpty "Password") ""
+    , error = []
     }
 
 

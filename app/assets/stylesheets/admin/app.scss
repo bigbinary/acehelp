@@ -69,6 +69,13 @@ $blueThemeColor: rgb(60, 170, 249);
   }
 
 
+
+  .close-error-icon::after {
+    content: "\2716";
+    cursor: pointer;
+    margin: 0px 10px;
+  }
+
   .page-wrap {
     background-color: #3399ff;
     height: 100vh;
@@ -99,5 +106,4 @@ $blueThemeColor: rgb(60, 170, 249);
       }
     }
   }
-
 }
