@@ -160,6 +160,8 @@ type Msg
     | SignUpMsg SignUp.Msg
     | OrganizationCreateMsg OrganizationCreate.Msg
     | TimedOut Int
+    | ReceivedUidHeader String
+    | ReceivedAccessTokenHeader String
 
 
 
@@ -871,6 +873,12 @@ update msg model =
             TimedOut id ->
                 ( { model | notifications = [] }, Cmd.none )
 
+            ReceivedUidHeader uid ->
+                ( { model | currentToken = { uid = uid, access_token = model.currentToken.access_token } }, Cmd.none )
+
+            ReceivedAccessTokenHeader accessToken ->
+                ( { model | currentToken = { uid = model.currentToken.uid, access_token = accessToken } }, Cmd.none )
+
 
 
 -- SUBSCRIPTIONS
@@ -878,13 +886,17 @@ update msg model =
 
 subscriptions : Model -> Sub Msg
 subscriptions model =
-    case getPage model.currentPage of
-        ArticleEdit articleEditModel ->
-            Sub.map ArticleEditMsg <| ArticleEdit.subscriptions articleEditModel
+    let
+        subs =
+            case getPage model.currentPage of
+                ArticleEdit articleEditModel ->
+                    Sub.map ArticleEditMsg <| ArticleEdit.subscriptions articleEditModel
 
-        _ ->
-            Sub.batch
-                [ timedOut <| TimedOut ]
+                _ ->
+                    Sub.batch
+                        [ timedOut <| TimedOut ]
+    in
+        subs
 
 
 

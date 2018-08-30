@@ -90,4 +90,42 @@ document.addEventListener("DOMContentLoaded", () => {
     document.addEventListener("trix-change", function(event) {
         app.ports.trixChange.send(event.target.innerHTML);
     });
+
+    (function(xhr) {
+        // Patch XMLHttpRequest
+        var originalOpen = xhr.open;
+
+        xhr.open = function(method, url) {
+            var originalResult = originalOpen.apply(this, arguments);
+            this.addEventListener("load", function() {
+                // Get the raw header string
+                var headers = this.getAllResponseHeaders();
+
+                // Convert the header string into an array
+                // of individual headers
+                var arr = headers.trim().split(/[\r\n]+/);
+
+                // Create a map of header names to values
+                var headerMap = {};
+                arr.forEach(function(line) {
+                    var parts = line.split(": ");
+                    var header = parts.shift();
+                    var value = parts.join(": ");
+                    headerMap[header] = value;
+                });
+
+                if (headerMap.uid) {
+                    app.ports.receivedUidHeader.send(headerMap.uid);
+                }
+
+                if (headerMap.access_token) {
+                    app.ports.receivedAccessTokenHeader.send(
+                        headerMap.access_token
+                    );
+                }
+            });
+
+            return originalResult;
+        };
+    })(XMLHttpRequest.prototype);
 });

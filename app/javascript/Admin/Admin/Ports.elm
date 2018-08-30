@@ -18,6 +18,12 @@ port timeoutInitialized : (Int -> msg) -> Sub msg
 port timedOut : (Int -> msg) -> Sub msg
 
 
+port receivedUidHeader : (String -> msg) -> Sub msg
+
+
+port receivedAccessTokenHeader : (String -> msg) -> Sub msg
+
+
 
 -- port openArticle : (ArticleId -> msg) -> Sub msg
 -- OUTGOING PORTS

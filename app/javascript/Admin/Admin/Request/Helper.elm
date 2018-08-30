@@ -173,6 +173,7 @@ logoutRequest env appUrl =
         }
 
 
+strictContextBuilder : GQLBuilder.Request GQLBuilder.Query a -> ( Token, NodeEnv, ApiKey, AppUrl ) -> Task GQLClient.Error ( Token, a )
 strictContextBuilder gqlRequest =
     (\( tokens, nodeEnv, apiKey, appUrl ) ->
         gqlRequest
@@ -190,10 +191,60 @@ strictContextBuilder gqlRequest =
 
                             Ok decodedValue ->
                                 Task.succeed
-                                    ( { access_token = Dict.get "access_token" response.headers
-                                      , uid = Dict.get "uid" response.headers
+                                    ( { access_token = Maybe.withDefault "" <| Dict.get "access_token" response.headers
+                                      , uid = Maybe.withDefault "" <| Dict.get "uid" response.headers
                                       }
                                     , decodedValue
                                     )
+                )
+    )
+
+
+semiStrictContextBuilder : GQLBuilder.Request GQLBuilder.Query a -> ( Token, NodeEnv, AppUrl ) -> Task GQLClient.Error ( Token, a )
+semiStrictContextBuilder gqlRequest =
+    (\( tokens, nodeEnv, appUrl ) ->
+        gqlRequest
+            |> GQLClient.customSendQueryRaw (requestOptionsWithToken (Just tokens) nodeEnv "" appUrl)
+            |> Task.andThen
+                (\response ->
+                    let
+                        decoder =
+                            GQLBuilder.responseDataDecoder gqlRequest
+                                |> Json.Decode.field "data"
+                    in
+                        case Json.Decode.decodeString decoder response.body of
+                            Err err ->
+                                Task.fail <| GQLClient.HttpError <| Http.BadPayload err response
+
+                            Ok decodedValue ->
+                                Task.succeed
+                                    ( { access_token = Maybe.withDefault "" <| Dict.get "access_token" response.headers
+                                      , uid = Maybe.withDefault "" <| Dict.get "uid" response.headers
+                                      }
+                                    , decodedValue
+                                    )
+                )
+    )
+
+
+openContextBuilder : GQLBuilder.Request GQLBuilder.Query a -> ( NodeEnv, AppUrl ) -> Task GQLClient.Error a
+openContextBuilder gqlRequest =
+    (\( nodeEnv, appUrl ) ->
+        gqlRequest
+            |> GQLClient.customSendQueryRaw (requestOptionsWithToken Nothing nodeEnv "" appUrl)
+            |> Task.andThen
+                (\response ->
+                    let
+                        decoder =
+                            GQLBuilder.responseDataDecoder gqlRequest
+                                |> Json.Decode.field "data"
+                    in
+                        case Json.Decode.decodeString decoder response.body of
+                            Err err ->
+                                Task.fail <| GQLClient.HttpError <| Http.BadPayload err response
+
+                            Ok decodedValue ->
+                                Task.succeed
+                                    decodedValue
                 )
     )
