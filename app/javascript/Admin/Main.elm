@@ -34,6 +34,7 @@ import Page.Url.Create as UrlCreate
 import Page.Url.Edit as UrlEdit
 import Page.Url.List as UrlList
 import Page.Common.View exposing (..)
+import Admin.Data.Session exposing (Token)
 import Admin.Ports exposing (..)
 import Route
 
@@ -99,6 +100,7 @@ type alias Model =
     , userEmail : String
     , appUrl : String
     , notifications : List UserNotification
+    , currentToken : Token
     }
 
 
@@ -119,6 +121,10 @@ init flags location =
             , appUrl = flags.app_url
             , notifications = []
             , token = ""
+            , currentToken =
+                { uid = ""
+                , access_token = ""
+                }
             }
     in
         ( pageModel, readerCmd )
@@ -197,7 +203,7 @@ navigateTo newRoute model =
                         | currentPage = TransitioningFrom (getPage model.currentPage)
                         , route = newRoute
                       }
-                    , readerCmdToCmd model.nodeEnv model.organizationKey model.appUrl msg pageCmds
+                    , readerCmdToCmd model.currentToken model.nodeEnv model.organizationKey model.appUrl msg pageCmds
                     )
     in
         case newRoute of
@@ -308,7 +314,7 @@ update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     let
         runReaderCmds =
-            readerCmdToCmd model.nodeEnv model.organizationKey model.appUrl
+            readerCmdToCmd model.currentToken model.nodeEnv model.organizationKey model.appUrl
 
         updateNavigation =
             flip update model
@@ -820,11 +826,13 @@ update msg model =
                                                     ({ model
                                                         | organizationKey = org.api_key
                                                         , organizationName = org.name
+                                                        , currentToken = userWithToken.authentication_token
                                                      }
                                                     )
                             in
                                 ( { updatedModel
                                     | userId = userWithToken.user.id
+                                    , currentToken = userWithToken.authentication_token
                                   }
                                 , updatedCmd
                                 )

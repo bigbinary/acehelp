@@ -2,6 +2,7 @@ module Admin.Request.Helper exposing (..)
 
 import Http
 import Json.Decode exposing (Decoder)
+import Admin.Data.Session exposing (Token)
 import GraphQL.Client.Http exposing (RequestOptions)
 
 
@@ -64,22 +65,39 @@ defaultRequestHeaders =
     ]
 
 
-requestOptions : NodeEnv -> ApiKey -> AppUrl -> RequestOptions
-requestOptions env apiKey appUrl =
+requestOptionsWithToken : Maybe Token -> NodeEnv -> ApiKey -> AppUrl -> RequestOptions
+requestOptionsWithToken reqTokens env apiKey appUrl =
     let
         headers =
             [ Http.header "api-key" apiKey
             ]
+
+        finalHeaders =
+            Maybe.map
+                (\tokens ->
+                    List.append
+                        [ Http.header "uid" tokens.uid
+                        , Http.header "access_token" tokens.access_token
+                        ]
+                        headers
+                )
+                reqTokens
+                |> Maybe.withDefault headers
 
         url =
             graphqlUrl env appUrl
     in
         { method = "POST"
         , url = url
-        , headers = headers
+        , headers = finalHeaders
         , timeout = Nothing
         , withCredentials = False
         }
+
+
+requestOptions : NodeEnv -> ApiKey -> AppUrl -> RequestOptions
+requestOptions =
+    requestOptionsWithToken Nothing
 
 
 constructUrl : String -> List ( String, String ) -> String

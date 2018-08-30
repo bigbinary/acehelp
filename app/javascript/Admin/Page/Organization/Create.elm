@@ -139,6 +139,6 @@ save : Model -> ( Model, List (ReaderCmd Msg) )
 save model =
     let
         cmd =
-            Open <| Reader.map (Task.attempt SaveOrgResponse) (requestCreateOrganization (orgInputs model))
+            SemiStrict <| Reader.map (Task.attempt SaveOrgResponse) (requestCreateOrganization (orgInputs model))
     in
         ( model, [ cmd ] )

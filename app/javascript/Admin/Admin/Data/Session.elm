@@ -58,12 +58,12 @@ signupMutation =
 tokenObject : GQLBuilder.ValueSpec GQLBuilder.NonNull GQLBuilder.ObjectType Token vars
 tokenObject =
     GQLBuilder.object Token
-        |> GQLBuilder.with (GQLBuilder.field "access_token" [] GQLBuilder.string)
         |> GQLBuilder.with (GQLBuilder.field "uid" [] GQLBuilder.string)
+        |> GQLBuilder.with (GQLBuilder.field "access_token" [] GQLBuilder.string)
 
 
-loginDataExtractor : GQLBuilder.ValueSpec GQLBuilder.NonNull GQLBuilder.ObjectType LoginData vars
-loginDataExtractor =
+loginDataObject : GQLBuilder.ValueSpec GQLBuilder.NonNull GQLBuilder.ObjectType LoginData vars
+loginDataObject =
     (GQLBuilder.object LoginData
         |> GQLBuilder.with
             (GQLBuilder.field
@@ -101,7 +101,7 @@ loginMutation =
                     (GQLBuilder.extract <|
                         GQLBuilder.field "user_with_token"
                             []
-                            (loginDataExtractor)
+                            (loginDataObject)
                     )
                 )
 
