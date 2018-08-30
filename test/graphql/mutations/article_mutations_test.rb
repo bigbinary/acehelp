@@ -151,8 +151,8 @@ class Mutations::ArticleMutationsTest < ActiveSupport::TestCase
               }
     GRAPHQL
 
-    result = AceHelp::Client.execute(mutation, input: { id: @article.id, status: "online" })
-    assert_equal result.data.update_article_status.article.status, "online"
+    result = AceHelp::Client.execute(mutation, input: { id: @article.id, status: "active" })
+    assert_equal result.data.update_article_status.article.status, "active"
   end
 
   test "update article status mutation failure" do

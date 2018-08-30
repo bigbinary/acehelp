@@ -168,16 +168,16 @@ updateCategoryStatus model categoryId categoryStatus =
 categoryStatusButton : Category -> Html Msg
 categoryStatusButton category =
     case category.status of
-        "online" ->
+        "active" ->
             button
-                [ onClick (UpdateCategoryStatus category.id "offline")
+                [ onClick (UpdateCategoryStatus category.id "inactive")
                 , class "actionButton btn btn-primary"
                 ]
-                [ text <| "Make Category Offline" ]
+                [ text <| "Make Category Inactive" ]
 
         _ ->
             button
-                [ onClick (UpdateCategoryStatus category.id "online")
+                [ onClick (UpdateCategoryStatus category.id "active")
                 , class "actionButton btn btn-primary"
                 ]
-                [ text <| "Make Category Online" ]
+                [ text <| "Make Category Active" ]

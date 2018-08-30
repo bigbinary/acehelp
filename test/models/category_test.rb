@@ -14,9 +14,9 @@ class CategoryTest < ActiveSupport::TestCase
 
   def test_category_status
     category = categories :novel
-    assert category.online?
+    assert category.active?
 
-    category.offline!
-    assert category.offline?
+    category.inactive!
+    assert category.inactive?
   end
 end

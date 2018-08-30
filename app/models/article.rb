@@ -4,8 +4,8 @@ class Article < ApplicationRecord
   searchkick
 
   enum status: {
-    online: "online",
-    offline: "offline"
+    active: "active",
+    inactive: "inactive"
   }
 
   belongs_to :organization

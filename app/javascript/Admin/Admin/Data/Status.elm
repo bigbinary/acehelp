@@ -4,30 +4,30 @@ import Monocle.Iso exposing (..)
 
 
 type AvailabilitySatus
-    = Online
-    | Offline
+    = Active
+    | Inactive
 
 
-availablityStatusToString : AvailabilitySatus -> String
-availablityStatusToString status =
+reverseAvailablityStatusToString : AvailabilitySatus -> String
+reverseAvailablityStatusToString status =
     case status of
-        Offline ->
-            "Online"
+        Inactive ->
+            "Active"
 
-        Online ->
-            "Offline"
+        Active ->
+            "Inactive"
 
 
 stringToAvailablityStatus : String -> AvailabilitySatus
 stringToAvailablityStatus status =
     case status of
-        "online" ->
-            Online
+        "active" ->
+            Active
 
         _ ->
-            Offline
+            Inactive
 
 
 availablityStatusIso : Iso AvailabilitySatus String
 availablityStatusIso =
-    Iso availablityStatusToString stringToAvailablityStatus
+    Iso reverseAvailablityStatusToString stringToAvailablityStatus

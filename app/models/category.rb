@@ -2,8 +2,8 @@
 
 class Category < ApplicationRecord
   enum status: {
-    online: "online",
-    offline: "offline"
+    active: "active",
+    inactive: "inactive"
   }
 
   has_many :article_categories, dependent: :destroy
