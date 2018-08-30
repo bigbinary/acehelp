@@ -1,41 +1,39 @@
-module Main exposing (..)
+module Main exposing (Flags, Model, Msg(..), Page(..), PageState(..), adminHeader, adminLayout, combineCmds, getPage, init, main, navigateTo, setRoute, subscriptions, update, view)
 
+import Admin.Data.ReaderCmd exposing (..)
+import Admin.Ports exposing (..)
 import Admin.Request.Helper exposing (ApiKey, NodeEnv, logoutRequest)
+import Admin.Views.Common exposing (..)
 import Field exposing (..)
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
 import Http
 import Navigation exposing (..)
-import Page.Session.Login as Login
-import Page.Session.ForgotPassword as ForgotPassword
 import Page.Article.Create as ArticleCreate
 import Page.Article.Edit as ArticleEdit
 import Page.Article.List as ArticleList
 import Page.Category.Create as CategoryCreate
 import Page.Category.Edit as CategoryEdit
 import Page.Category.List as CategoryList
-import Page.Ticket.List as TicketList
-import Page.Team.List as TeamList
+import Page.Errors as Errors
 import Page.Feedback.List as FeedbackList
 import Page.Feedback.Show as FeedbackShow
-import Page.Category.Create as CategoryCreate
-import Page.Team.Create as TeamMemberCreate
-import Page.Settings as Settings
 import Page.Organization.Create as OrganizationCreate
+import Page.Session.ForgotPassword as ForgotPassword
+import Page.Session.Login as Login
 import Page.Session.SignUp as SignUp
-import Page.Errors as Errors
-import Admin.Request.Helper exposing (NodeEnv, ApiKey, logoutRequest)
-import Admin.Data.ReaderCmd exposing (..)
-import Admin.Ports exposing (..)
-import Page.Ticket.List as TicketList
+import Page.Settings as Settings
+import Page.Team.Create as TeamMemberCreate
+import Page.Team.List as TeamList
 import Page.Ticket.Edit as TicketEdit
+import Page.Ticket.List as TicketList
 import Page.Url.Create as UrlCreate
 import Page.Url.Edit as UrlEdit
 import Page.Url.List as UrlList
-import Admin.Views.Common exposing (..)
-import Admin.Ports exposing (..)
+import Page.UserNotification as UserNotification
 import Route
+
 
 
 -- MODEL
@@ -82,12 +80,6 @@ type PageState
     | TransitioningFrom Page
 
 
-type alias UserNotification =
-    { text : String
-    , messageType : String
-    }
-
-
 type alias Model =
     { currentPage : PageState
     , route : Route.Route
@@ -97,7 +89,7 @@ type alias Model =
     , userId : String
     , userEmail : String
     , appUrl : String
-    , notifications : List UserNotification
+    , notifications : UserNotification.Model
     }
 
 
@@ -116,10 +108,10 @@ init flags location =
             , userId = flags.user_id
             , userEmail = flags.user_email
             , appUrl = flags.app_url
-            , notifications = []
+            , notifications = UserNotification.initModel
             }
     in
-        ( pageModel, readerCmd )
+    ( pageModel, readerCmd )
 
 
 
@@ -128,6 +120,7 @@ init flags location =
 
 type Msg
     = NavigateTo Route.Route
+    | UserNotificationMsg UserNotification.Msg
     | ArticleListMsg ArticleList.Msg
     | ArticleCreateMsg ArticleCreate.Msg
     | ArticleEditMsg ArticleEdit.Msg
@@ -151,7 +144,6 @@ type Msg
     | SignedOut (Result Http.Error String)
     | SignUpMsg SignUp.Msg
     | OrganizationCreateMsg OrganizationCreate.Msg
-    | TimedOut Int
 
 
 
@@ -174,7 +166,7 @@ setRoute location model =
         newRoute =
             Route.fromLocation location
     in
-        navigateTo newRoute model
+    navigateTo newRoute model
 
 
 navigateTo : Route.Route -> Model -> ( Model, Cmd Msg )
@@ -198,103 +190,104 @@ navigateTo newRoute model =
                     , readerCmdToCmd model.nodeEnv model.organizationKey model.appUrl msg pageCmds
                     )
     in
-        case newRoute of
-            Route.ArticleList organizationKey ->
-                ArticleList.init
-                    |> transitionTo ArticleList ArticleListMsg
+    case newRoute of
+        Route.ArticleList organizationKey ->
+            ArticleList.init
+                |> transitionTo ArticleList ArticleListMsg
 
-            Route.ArticleCreate organizationKey ->
-                ArticleCreate.init
-                    |> transitionTo ArticleCreate ArticleCreateMsg
+        Route.ArticleCreate organizationKey ->
+            ArticleCreate.init
+                |> transitionTo ArticleCreate ArticleCreateMsg
 
-            Route.CategoryList organizationKey ->
-                CategoryList.init
-                    |> transitionTo CategoryList CategoryListMsg
+        Route.CategoryList organizationKey ->
+            CategoryList.init
+                |> transitionTo CategoryList CategoryListMsg
 
-            Route.CategoryCreate organizationKey ->
-                CategoryCreate.init
-                    |> transitionTo CategoryCreate CategoryCreateMsg
+        Route.CategoryCreate organizationKey ->
+            CategoryCreate.init
+                |> transitionTo CategoryCreate CategoryCreateMsg
 
-            Route.UrlList organizationKey ->
-                UrlList.init
-                    |> transitionTo UrlList UrlListMsg
+        Route.UrlList organizationKey ->
+            UrlList.init
+                |> transitionTo UrlList UrlListMsg
 
-            Route.UrlCreate organizationKey ->
-                UrlCreate.init
-                    |> transitionTo UrlCreate UrlCreateMsg
+        Route.UrlCreate organizationKey ->
+            UrlCreate.init
+                |> transitionTo UrlCreate UrlCreateMsg
 
-            Route.TicketList organizationKey ->
-                TicketList.init
-                    |> transitionTo TicketList TicketListMsg
+        Route.TicketList organizationKey ->
+            TicketList.init
+                |> transitionTo TicketList TicketListMsg
 
-            Route.UrlEdit organizationKey urlId ->
-                UrlEdit.init urlId
-                    |> transitionTo UrlEdit UrlEditMsg
+        Route.UrlEdit organizationKey urlId ->
+            UrlEdit.init urlId
+                |> transitionTo UrlEdit UrlEditMsg
 
-            Route.FeedbackList organizationKey ->
-                FeedbackList.init
-                    |> transitionTo FeedbackList FeedbackListMsg
+        Route.FeedbackList organizationKey ->
+            FeedbackList.init
+                |> transitionTo FeedbackList FeedbackListMsg
 
-            Route.FeedbackShow organizationKey feedbackId ->
-                FeedbackShow.init feedbackId
-                    |> transitionTo FeedbackShow FeedbackShowMsg
+        Route.FeedbackShow organizationKey feedbackId ->
+            FeedbackShow.init feedbackId
+                |> transitionTo FeedbackShow FeedbackShowMsg
 
-            Route.TeamList organizationKey ->
-                TeamList.init
-                    |> transitionTo TeamList TeamListMsg
+        Route.TeamList organizationKey ->
+            TeamList.init
+                |> transitionTo TeamList TeamListMsg
 
-            Route.TicketEdit organizationKey ticketId ->
-                TicketEdit.init ticketId
-                    |> transitionTo TicketEdit TicketEditMsg
+        Route.TicketEdit organizationKey ticketId ->
+            TicketEdit.init ticketId
+                |> transitionTo TicketEdit TicketEditMsg
 
-            Route.TeamMemberCreate organizationKey ->
-                TeamMemberCreate.init
-                    |> transitionTo TeamMemberCreate TeamCreateMsg
+        Route.TeamMemberCreate organizationKey ->
+            TeamMemberCreate.init
+                |> transitionTo TeamMemberCreate TeamCreateMsg
 
-            Route.Settings organizationKey ->
-                Settings.init
-                    |> transitionTo Settings SettingsMsg
+        Route.Settings organizationKey ->
+            Settings.init
+                |> transitionTo Settings SettingsMsg
 
-            Route.Dashboard ->
-                ( { model | currentPage = Loaded Dashboard }, Cmd.none )
+        Route.Dashboard ->
+            ( { model | currentPage = Loaded Dashboard }, Cmd.none )
 
-            Route.ArticleEdit organizationKey articleId ->
-                ArticleEdit.init articleId
-                    |> transitionTo ArticleEdit ArticleEditMsg
+        Route.ArticleEdit organizationKey articleId ->
+            ArticleEdit.init articleId
+                |> transitionTo ArticleEdit ArticleEditMsg
 
-            Route.CategoryEdit organizationKey categoryId ->
-                CategoryEdit.init categoryId
-                    |> transitionTo CategoryEdit CategoryEditMsg
+        Route.CategoryEdit organizationKey categoryId ->
+            CategoryEdit.init categoryId
+                |> transitionTo CategoryEdit CategoryEditMsg
 
-            Route.SignUp ->
-                SignUp.init
-                    |> transitionTo SignUp SignUpMsg
+        Route.SignUp ->
+            SignUp.init
+                |> transitionTo SignUp SignUpMsg
 
-            Route.OrganizationCreate ->
-                (OrganizationCreate.init model.userId)
-                    |> transitionTo OrganizationCreate OrganizationCreateMsg
+        Route.OrganizationCreate ->
+            OrganizationCreate.init model.userId
+                |> transitionTo OrganizationCreate OrganizationCreateMsg
 
-            Route.Login ->
-                Login.init
-                    |> transitionTo Login LoginMsg
+        Route.Login ->
+            Login.init
+                |> transitionTo Login LoginMsg
 
-            Route.ForgotPassword ->
-                ForgotPassword.init
-                    |> transitionTo ForgotPassword ForgotPasswordMsg
+        Route.ForgotPassword ->
+            ForgotPassword.init
+                |> transitionTo ForgotPassword ForgotPasswordMsg
 
-            Route.NotFound ->
-                ( { model
-                    | currentPage =
-                        TransitioningFrom NotFound
-                    , route = newRoute
-                  }
-                , Cmd.none
-                )
+        Route.NotFound ->
+            ( { model
+                | currentPage =
+                    TransitioningFrom NotFound
+                , route = newRoute
+              }
+            , Cmd.none
+            )
 
 
-removeNotificationDelayTime : number
-removeNotificationDelayTime =
-    3000
+
+-- removeNotificationDelayTime : number
+-- removeNotificationDelayTime =
+--     3000
 
 
 combineCmds : Cmd msg -> Cmd msg -> Cmd msg
@@ -311,555 +304,554 @@ update msg model =
         updateNavigation =
             flip update model
 
-        renderFlashMessages message messageType =
-            Tuple.mapFirst
-                (\model ->
-                    { model
-                        | notifications = [ UserNotification message messageType ]
-                    }
-                )
-                >> Tuple.mapSecond
-                    (combineCmds <| setTimeout removeNotificationDelayTime)
+        renderFlashMessages message ( newModel, newCmds ) =
+            update (UserNotificationMsg (UserNotification.InsertNotification message)) newModel
+                |> Tuple.mapSecond
+                    (combineCmds <| newCmds)
     in
-        case msg of
-            NavigateTo route ->
-                navigateTo route model
-                    |> Tuple.mapFirst
-                        (\model ->
-                            { model
-                                | notifications = []
-                            }
-                        )
-                    |> Tuple.mapSecond
-                        (combineCmds <|
-                            modifyUrl <|
-                                Route.routeToString route
-                        )
-
-            ArticleListMsg alMsg ->
-                let
-                    currentPageModel =
-                        case getPage model.currentPage of
-                            ArticleList articleListModel ->
-                                articleListModel
-
-                            _ ->
-                                ArticleList.initModel
-
-                    ( newModel, cmds ) =
-                        ArticleList.update alMsg currentPageModel
-                in
-                    case alMsg of
-                        ArticleList.OnArticleCreateClick ->
-                            updateNavigation (NavigateTo (Route.ArticleCreate model.organizationKey))
-
-                        ArticleList.OnArticleEditClick articleId ->
-                            updateNavigation (NavigateTo (Route.ArticleEdit model.organizationKey articleId))
-
-                        _ ->
-                            ( { model | currentPage = Loaded (ArticleList newModel) }
-                            , runReaderCmds ArticleListMsg cmds
-                            )
-
-            ArticleCreateMsg caMsg ->
-                let
-                    currentPageModel =
-                        case getPage model.currentPage of
-                            ArticleCreate articleCreateModel ->
-                                articleCreateModel
-
-                            _ ->
-                                ArticleCreate.initModel
-
-                    ( newModel, cmds ) =
-                        ArticleCreate.update caMsg
-                            currentPageModel
-                in
-                    case caMsg of
-                        ArticleCreate.SaveArticleResponse (Ok id) ->
-                            updateNavigation (NavigateTo (Route.ArticleList model.organizationKey))
-                                |> renderFlashMessages "Article created successfully." "success"
-
-                        _ ->
-                            ( { model | currentPage = Loaded (ArticleCreate newModel) }
-                            , runReaderCmds ArticleCreateMsg cmds
-                            )
-
-            ArticleEditMsg aeMsg ->
-                let
-                    currentPageModel =
-                        case getPage model.currentPage of
-                            ArticleEdit articleEditModel ->
-                                articleEditModel
-
-                            _ ->
-                                ArticleEdit.initModel "0"
-
-                    ( newModel, cmds ) =
-                        ArticleEdit.update aeMsg
-                            currentPageModel
-                in
-                    ( { model | currentPage = Loaded (ArticleEdit newModel) }
-                    , runReaderCmds ArticleEditMsg cmds
+    case msg of
+        NavigateTo route ->
+            navigateTo route model
+                |> Tuple.mapFirst
+                    (\model ->
+                        { model
+                            | notifications = UserNotification.initModel
+                        }
+                    )
+                |> Tuple.mapSecond
+                    (combineCmds <|
+                        modifyUrl <|
+                            Route.routeToString route
                     )
 
-            UrlCreateMsg cuMsg ->
-                let
-                    currentPageModel =
-                        case getPage model.currentPage of
-                            UrlCreate urlCreateModel ->
-                                urlCreateModel
+        UserNotificationMsg unMsg ->
+            UserNotification.update unMsg model.notifications
+                |> Tuple.mapFirst (\unModel -> { model | notifications = unModel })
+                |> Tuple.mapSecond (runReaderCmds UserNotificationMsg)
 
-                            _ ->
-                                UrlCreate.initModel
-
-                    ( newModel, cmds ) =
-                        UrlCreate.update cuMsg
-                            currentPageModel
-                in
-                    case cuMsg of
-                        UrlCreate.SaveUrlResponse (Ok id) ->
-                            updateNavigation (NavigateTo (Route.UrlList model.organizationKey))
-                                |> renderFlashMessages "Url created successfully." "success"
+        ArticleListMsg alMsg ->
+            let
+                currentPageModel =
+                    case getPage model.currentPage of
+                        ArticleList articleListModel ->
+                            articleListModel
 
                         _ ->
-                            ( { model | currentPage = Loaded (UrlCreate newModel) }
-                            , runReaderCmds UrlCreateMsg cmds
-                            )
+                            ArticleList.initModel
 
-            UrlEditMsg ueMsg ->
-                let
-                    currentPageModel =
-                        case getPage model.currentPage of
-                            UrlEdit urlEditModel ->
-                                urlEditModel
+                ( newModel, cmds ) =
+                    ArticleList.update alMsg currentPageModel
+            in
+            case alMsg of
+                ArticleList.OnArticleCreateClick ->
+                    updateNavigation (NavigateTo (Route.ArticleCreate model.organizationKey))
 
-                            _ ->
-                                UrlEdit.initModel "0"
+                ArticleList.OnArticleEditClick articleId ->
+                    updateNavigation (NavigateTo (Route.ArticleEdit model.organizationKey articleId))
 
-                    ( newModel, cmds ) =
-                        UrlEdit.update ueMsg currentPageModel
-                in
-                    case ueMsg of
-                        UrlEdit.UpdateUrlResponse (Ok id) ->
-                            updateNavigation (NavigateTo (Route.UrlList model.organizationKey))
-                                |> renderFlashMessages "Url updated successfully." "success"
-
-                        _ ->
-                            ( { model | currentPage = Loaded (UrlEdit newModel) }
-                            , runReaderCmds UrlEditMsg cmds
-                            )
-
-            UrlListMsg ulMsg ->
-                let
-                    currentPageModel =
-                        case getPage model.currentPage of
-                            UrlList urlListModel ->
-                                urlListModel
-
-                            _ ->
-                                UrlList.initModel
-
-                    ( newModel, cmds ) =
-                        UrlList.update ulMsg currentPageModel
-                in
-                    case ulMsg of
-                        UrlList.OnUrlCreateClick ->
-                            updateNavigation (NavigateTo (Route.UrlCreate model.organizationKey))
-
-                        UrlList.OnUrlEditClick urlId ->
-                            updateNavigation (NavigateTo (Route.UrlEdit model.organizationKey urlId))
-
-                        _ ->
-                            ( { model | currentPage = Loaded (UrlList newModel) }
-                            , runReaderCmds UrlListMsg cmds
-                            )
-
-            TicketListMsg tlMsg ->
-                let
-                    currentPageModel =
-                        case getPage model.currentPage of
-                            TicketList ticketListModel ->
-                                ticketListModel
-
-                            _ ->
-                                TicketList.initModel
-
-                    ( newModel, cmds ) =
-                        TicketList.update tlMsg
-                            currentPageModel
-                in
-                    case tlMsg of
-                        TicketList.OnEditTicketClick ticketId ->
-                            updateNavigation (NavigateTo (Route.TicketEdit model.organizationKey ticketId))
-
-                        _ ->
-                            ( { model | currentPage = Loaded (TicketList newModel) }
-                            , runReaderCmds TicketListMsg cmds
-                            )
-
-            CategoryListMsg clMsg ->
-                let
-                    currentPageModel =
-                        case getPage model.currentPage of
-                            CategoryList categoryListModel ->
-                                categoryListModel
-
-                            _ ->
-                                CategoryList.initModel
-
-                    ( newModel, cmds ) =
-                        CategoryList.update
-                            clMsg
-                            currentPageModel
-                in
-                    case clMsg of
-                        CategoryList.OnCreateCategoryClick ->
-                            updateNavigation (NavigateTo (Route.CategoryCreate model.organizationKey))
-
-                        CategoryList.OnEditCategoryClick categoryId ->
-                            updateNavigation (NavigateTo (Route.CategoryEdit model.organizationKey categoryId))
-
-                        _ ->
-                            ( { model | currentPage = Loaded (CategoryList newModel) }
-                            , runReaderCmds CategoryListMsg cmds
-                            )
-
-            CategoryCreateMsg ccMsg ->
-                let
-                    currentPageModel =
-                        case getPage model.currentPage of
-                            CategoryCreate categoryCreateModel ->
-                                categoryCreateModel
-
-                            _ ->
-                                CategoryCreate.initModel
-
-                    ( newModel, cmds ) =
-                        CategoryCreate.update ccMsg
-                            currentPageModel
-                in
-                    case ccMsg of
-                        CategoryCreate.SaveCategoryResponse (Ok id) ->
-                            updateNavigation (NavigateTo (Route.CategoryList model.organizationKey))
-                                |> renderFlashMessages "Category created successfully." "success"
-
-                        _ ->
-                            ( { model
-                                | currentPage = Loaded (CategoryCreate newModel)
-                              }
-                            , runReaderCmds CategoryCreateMsg cmds
-                            )
-
-            FeedbackListMsg flMsg ->
-                let
-                    currentPageModel =
-                        case getPage model.currentPage of
-                            FeedbackList feedbackListModel ->
-                                feedbackListModel
-
-                            _ ->
-                                FeedbackList.initModel
-
-                    ( newModel, cmds ) =
-                        FeedbackList.update flMsg
-                            currentPageModel
-                in
-                    case flMsg of
-                        FeedbackList.OnFeedbackClick feedbackId ->
-                            updateNavigation (NavigateTo (Route.FeedbackShow model.organizationKey feedbackId))
-
-                        _ ->
-                            ( { model | currentPage = Loaded (FeedbackList newModel) }
-                            , runReaderCmds FeedbackListMsg cmds
-                            )
-
-            FeedbackShowMsg fsMsg ->
-                let
-                    currentPageModel =
-                        case getPage model.currentPage of
-                            FeedbackShow feedbackShowModel ->
-                                feedbackShowModel
-
-                            _ ->
-                                FeedbackShow.initModel "0"
-
-                    ( newModel, cmds ) =
-                        FeedbackShow.update fsMsg
-                            currentPageModel
-                in
-                    case fsMsg of
-                        FeedbackShow.UpdateFeedbackResponse (Ok feedback) ->
-                            updateNavigation (NavigateTo (Route.FeedbackList model.organizationKey))
-                                |> renderFlashMessages "Feedback updated successfully." "success"
-
-                        _ ->
-                            ( { model | currentPage = Loaded (FeedbackShow newModel) }
-                            , runReaderCmds FeedbackShowMsg cmds
-                            )
-
-            CategoryEditMsg ctMsg ->
-                let
-                    currentPageModel =
-                        case getPage model.currentPage of
-                            CategoryEdit categoryEditModel ->
-                                categoryEditModel
-
-                            _ ->
-                                CategoryEdit.initModel "0"
-
-                    ( newModel, cmds ) =
-                        CategoryEdit.update ctMsg
-                            currentPageModel
-                in
-                    case ctMsg of
-                        CategoryEdit.UpdateCategoryResponse (Ok id) ->
-                            updateNavigation (NavigateTo (Route.CategoryList model.organizationKey))
-                                |> renderFlashMessages "Category updated successfully." "success"
-
-                        _ ->
-                            ( { model | currentPage = Loaded (CategoryEdit newModel) }
-                            , runReaderCmds CategoryEditMsg cmds
-                            )
-
-            TeamListMsg tlmsg ->
-                let
-                    currentPageModel =
-                        case getPage model.currentPage of
-                            TeamList teamListModel ->
-                                teamListModel
-
-                            _ ->
-                                TeamList.initModel
-
-                    ( newModel, cmds ) =
-                        TeamList.update tlmsg
-                            currentPageModel
-                in
-                    case tlmsg of
-                        TeamList.OnAddTeamMemberClick ->
-                            updateNavigation (NavigateTo (Route.TeamMemberCreate model.organizationKey))
-
-                        _ ->
-                            ( { model | currentPage = Loaded (TeamList newModel) }
-                            , runReaderCmds TeamListMsg cmds
-                            )
-
-            TeamCreateMsg tcmsg ->
-                let
-                    currentPageModel =
-                        case getPage model.currentPage of
-                            TeamMemberCreate teamCreateModel ->
-                                teamCreateModel
-
-                            _ ->
-                                TeamMemberCreate.initModel
-
-                    ( newModel, cmds ) =
-                        TeamMemberCreate.update tcmsg
-                            currentPageModel
-                in
-                    case tcmsg of
-                        TeamMemberCreate.SaveTeamResponse (Ok id) ->
-                            updateNavigation (NavigateTo (Route.TeamList model.organizationKey))
-                                |> renderFlashMessages "Team member added successfully." "success"
-
-                        _ ->
-                            ( { model | currentPage = Loaded (TeamMemberCreate newModel) }
-                            , runReaderCmds TeamCreateMsg cmds
-                            )
-
-            TicketEditMsg teMsg ->
-                let
-                    currentPageModel =
-                        case getPage model.currentPage of
-                            TicketEdit ticketEditModel ->
-                                ticketEditModel
-
-                            _ ->
-                                TicketEdit.initModel "0"
-
-                    ( newModel, cmds ) =
-                        TicketEdit.update teMsg
-                            currentPageModel
-                in
-                    ( { model | currentPage = Loaded (TicketEdit newModel) }
-                    , runReaderCmds TicketEditMsg cmds
+                _ ->
+                    ( { model | currentPage = Loaded (ArticleList newModel) }
+                    , runReaderCmds ArticleListMsg cmds
                     )
 
-            SettingsMsg settingsMsg ->
-                let
-                    currentPageModel =
-                        case getPage model.currentPage of
-                            Settings settingsPageModel ->
-                                settingsPageModel
+        ArticleCreateMsg caMsg ->
+            let
+                currentPageModel =
+                    case getPage model.currentPage of
+                        ArticleCreate articleCreateModel ->
+                            articleCreateModel
 
-                            _ ->
-                                Settings.initModel
+                        _ ->
+                            ArticleCreate.initModel
 
-                    ( newModel, cmds ) =
-                        Settings.update settingsMsg currentPageModel
-                in
+                ( newModel, cmds ) =
+                    ArticleCreate.update caMsg
+                        currentPageModel
+            in
+            case caMsg of
+                ArticleCreate.SaveArticleResponse (Ok id) ->
+                    updateNavigation (NavigateTo (Route.ArticleList model.organizationKey))
+                        |> renderFlashMessages (UserNotification.SuccessNotification "Article created successfully.")
+
+                _ ->
+                    ( { model | currentPage = Loaded (ArticleCreate newModel) }
+                    , runReaderCmds ArticleCreateMsg cmds
+                    )
+
+        ArticleEditMsg aeMsg ->
+            let
+                currentPageModel =
+                    case getPage model.currentPage of
+                        ArticleEdit articleEditModel ->
+                            articleEditModel
+
+                        _ ->
+                            ArticleEdit.initModel "0"
+
+                ( newModel, cmds ) =
+                    ArticleEdit.update aeMsg
+                        currentPageModel
+            in
+            ( { model | currentPage = Loaded (ArticleEdit newModel) }
+            , runReaderCmds ArticleEditMsg cmds
+            )
+
+        UrlCreateMsg cuMsg ->
+            let
+                currentPageModel =
+                    case getPage model.currentPage of
+                        UrlCreate urlCreateModel ->
+                            urlCreateModel
+
+                        _ ->
+                            UrlCreate.initModel
+
+                ( newModel, cmds ) =
+                    UrlCreate.update cuMsg
+                        currentPageModel
+            in
+            case cuMsg of
+                UrlCreate.SaveUrlResponse (Ok id) ->
+                    updateNavigation (NavigateTo (Route.UrlList model.organizationKey))
+                        |> renderFlashMessages (UserNotification.SuccessNotification "Url created successfully.")
+
+                _ ->
+                    ( { model | currentPage = Loaded (UrlCreate newModel) }
+                    , runReaderCmds UrlCreateMsg cmds
+                    )
+
+        UrlEditMsg ueMsg ->
+            let
+                currentPageModel =
+                    case getPage model.currentPage of
+                        UrlEdit urlEditModel ->
+                            urlEditModel
+
+                        _ ->
+                            UrlEdit.initModel "0"
+
+                ( newModel, cmds ) =
+                    UrlEdit.update ueMsg currentPageModel
+            in
+            case ueMsg of
+                UrlEdit.UpdateUrlResponse (Ok id) ->
+                    updateNavigation (NavigateTo (Route.UrlList model.organizationKey))
+                        |> renderFlashMessages (UserNotification.SuccessNotification "Url updated successfully.")
+
+                _ ->
+                    ( { model | currentPage = Loaded (UrlEdit newModel) }
+                    , runReaderCmds UrlEditMsg cmds
+                    )
+
+        UrlListMsg ulMsg ->
+            let
+                currentPageModel =
+                    case getPage model.currentPage of
+                        UrlList urlListModel ->
+                            urlListModel
+
+                        _ ->
+                            UrlList.initModel
+
+                ( newModel, cmds ) =
+                    UrlList.update ulMsg currentPageModel
+            in
+            case ulMsg of
+                UrlList.OnUrlCreateClick ->
+                    updateNavigation (NavigateTo (Route.UrlCreate model.organizationKey))
+
+                UrlList.OnUrlEditClick urlId ->
+                    updateNavigation (NavigateTo (Route.UrlEdit model.organizationKey urlId))
+
+                _ ->
+                    ( { model | currentPage = Loaded (UrlList newModel) }
+                    , runReaderCmds UrlListMsg cmds
+                    )
+
+        TicketListMsg tlMsg ->
+            let
+                currentPageModel =
+                    case getPage model.currentPage of
+                        TicketList ticketListModel ->
+                            ticketListModel
+
+                        _ ->
+                            TicketList.initModel
+
+                ( newModel, cmds ) =
+                    TicketList.update tlMsg
+                        currentPageModel
+            in
+            case tlMsg of
+                TicketList.OnEditTicketClick ticketId ->
+                    updateNavigation (NavigateTo (Route.TicketEdit model.organizationKey ticketId))
+
+                _ ->
+                    ( { model | currentPage = Loaded (TicketList newModel) }
+                    , runReaderCmds TicketListMsg cmds
+                    )
+
+        CategoryListMsg clMsg ->
+            let
+                currentPageModel =
+                    case getPage model.currentPage of
+                        CategoryList categoryListModel ->
+                            categoryListModel
+
+                        _ ->
+                            CategoryList.initModel
+
+                ( newModel, cmds ) =
+                    CategoryList.update
+                        clMsg
+                        currentPageModel
+            in
+            case clMsg of
+                CategoryList.OnCreateCategoryClick ->
+                    updateNavigation (NavigateTo (Route.CategoryCreate model.organizationKey))
+
+                CategoryList.OnEditCategoryClick categoryId ->
+                    updateNavigation (NavigateTo (Route.CategoryEdit model.organizationKey categoryId))
+
+                _ ->
+                    ( { model | currentPage = Loaded (CategoryList newModel) }
+                    , runReaderCmds CategoryListMsg cmds
+                    )
+
+        CategoryCreateMsg ccMsg ->
+            let
+                currentPageModel =
+                    case getPage model.currentPage of
+                        CategoryCreate categoryCreateModel ->
+                            categoryCreateModel
+
+                        _ ->
+                            CategoryCreate.initModel
+
+                ( newModel, cmds ) =
+                    CategoryCreate.update ccMsg
+                        currentPageModel
+            in
+            case ccMsg of
+                CategoryCreate.SaveCategoryResponse (Ok id) ->
+                    updateNavigation (NavigateTo (Route.CategoryList model.organizationKey))
+                        |> renderFlashMessages (UserNotification.SuccessNotification "Category created successfully.")
+
+                CategoryCreate.NotifyError error ->
+                    renderFlashMessages (UserNotification.ErrorNotification error) ( model, Cmd.none )
+
+                _ ->
                     ( { model
-                        | currentPage = Loaded (Settings newModel)
+                        | currentPage = Loaded (CategoryCreate newModel)
                       }
-                    , runReaderCmds SettingsMsg cmds
+                    , runReaderCmds CategoryCreateMsg cmds
                     )
 
-            OrganizationCreateMsg oCMsg ->
-                let
-                    currentPageModel =
-                        case getPage model.currentPage of
-                            OrganizationCreate orgCreateModel ->
-                                orgCreateModel
-
-                            _ ->
-                                OrganizationCreate.initModel model.userId
-
-                    ( newModel, cmds ) =
-                        OrganizationCreate.update oCMsg currentPageModel
-                in
-                    case oCMsg of
-                        OrganizationCreate.SaveOrgResponse (Ok org) ->
-                            update (NavigateTo (Route.ArticleList org.api_key))
-                                ({ model
-                                    | organizationKey = org.api_key
-                                    , organizationName = org.name
-                                 }
-                                )
+        FeedbackListMsg flMsg ->
+            let
+                currentPageModel =
+                    case getPage model.currentPage of
+                        FeedbackList feedbackListModel ->
+                            feedbackListModel
 
                         _ ->
-                            ( { model | currentPage = Loaded (OrganizationCreate newModel) }
-                            , runReaderCmds OrganizationCreateMsg cmds
-                            )
+                            FeedbackList.initModel
 
-            SignUpMsg suMsg ->
-                let
-                    currentPageModel =
-                        case getPage model.currentPage of
-                            SignUp signUpModel ->
-                                signUpModel
+                ( newModel, cmds ) =
+                    FeedbackList.update flMsg
+                        currentPageModel
+            in
+            case flMsg of
+                FeedbackList.OnFeedbackClick feedbackId ->
+                    updateNavigation (NavigateTo (Route.FeedbackShow model.organizationKey feedbackId))
 
-                            _ ->
-                                SignUp.initModel
-
-                    ( newModel, cmds ) =
-                        SignUp.update suMsg currentPageModel
-                in
-                    case suMsg of
-                        SignUp.SignUpResponse (Ok userWithErrors) ->
-                            let
-                                errors =
-                                    case userWithErrors.errors of
-                                        Just errors ->
-                                            List.map .message errors |> String.join ", "
-
-                                        Nothing ->
-                                            ""
-
-                                updatedModel =
-                                    { currentPageModel
-                                        | error = Just errors
-                                        , password = Field.update currentPageModel.password ""
-                                        , confirmPassword = Field.update currentPageModel.confirmPassword ""
-                                    }
-                            in
-                                if (String.length errors) > 0 then
-                                    ( { model | currentPage = Loaded (SignUp updatedModel) }
-                                    , runReaderCmds SignUpMsg cmds
-                                    )
-                                else
-                                    updateNavigation (NavigateTo Route.Login)
-
-                        SignUp.LoginRedirect ->
-                            updateNavigation (NavigateTo Route.Login)
-
-                        SignUp.ForgotPasswordRedirect ->
-                            updateNavigation (NavigateTo Route.ForgotPassword)
-
-                        _ ->
-                            ( { model | currentPage = Loaded (SignUp newModel) }
-                            , runReaderCmds SignUpMsg cmds
-                            )
-
-            LoginMsg loginMsg ->
-                let
-                    currentPageModel =
-                        case getPage model.currentPage of
-                            Login loginModel ->
-                                loginModel
-
-                            _ ->
-                                Login.initModel
-
-                    ( newModel, cmds ) =
-                        Login.update loginMsg currentPageModel
-                in
-                    case loginMsg of
-                        Login.SignupRedirect ->
-                            updateNavigation (NavigateTo Route.SignUp)
-
-                        Login.ForgotPasswordRedirect ->
-                            updateNavigation (NavigateTo Route.ForgotPassword)
-
-                        Login.LoginResponse (Ok user_with_token) ->
-                            let
-                                ( updatedModel, updatedCmd ) =
-                                    case (user_with_token.user.organization) of
-                                        Nothing ->
-                                            updateNavigation (NavigateTo Route.OrganizationCreate)
-
-                                        Just organization ->
-                                            let
-                                                org =
-                                                    organization
-                                            in
-                                                update (NavigateTo (Route.ArticleList org.api_key))
-                                                    ({ model
-                                                        | organizationKey = org.api_key
-                                                        , organizationName = org.name
-                                                     }
-                                                    )
-                            in
-                                ( { updatedModel
-                                    | userId = user_with_token.user.id
-                                  }
-                                , updatedCmd
-                                )
-
-                        _ ->
-                            ( { model | currentPage = Loaded (Login newModel) }
-                            , runReaderCmds LoginMsg cmds
-                            )
-
-            ForgotPasswordMsg forgotPasswordMsg ->
-                let
-                    currentPageModel =
-                        case getPage model.currentPage of
-                            ForgotPassword forgotPasswordModel ->
-                                forgotPasswordModel
-
-                            _ ->
-                                ForgotPassword.initModel
-
-                    ( newModel, cmds ) =
-                        ForgotPassword.update forgotPasswordMsg currentPageModel
-                in
-                    ( { model | currentPage = Loaded (ForgotPassword newModel) }
-                    , runReaderCmds ForgotPasswordMsg cmds
+                _ ->
+                    ( { model | currentPage = Loaded (FeedbackList newModel) }
+                    , runReaderCmds FeedbackListMsg cmds
                     )
 
-            OnLocationChange location ->
-                setRoute location model
+        FeedbackShowMsg fsMsg ->
+            let
+                currentPageModel =
+                    case getPage model.currentPage of
+                        FeedbackShow feedbackShowModel ->
+                            feedbackShowModel
 
-            SignOut ->
-                ( model, Http.send SignedOut (logoutRequest model.nodeEnv model.appUrl) )
+                        _ ->
+                            FeedbackShow.initModel "0"
 
-            SignedOut _ ->
-                ( model, load (Admin.Request.Helper.baseUrl model.nodeEnv model.appUrl) )
+                ( newModel, cmds ) =
+                    FeedbackShow.update fsMsg
+                        currentPageModel
+            in
+            case fsMsg of
+                FeedbackShow.UpdateFeedbackResponse (Ok feedback) ->
+                    updateNavigation (NavigateTo (Route.FeedbackList model.organizationKey))
+                        |> renderFlashMessages (UserNotification.SuccessNotification "Feedback updated successfully.")
 
-            TimedOut id ->
-                ( { model | notifications = [] }, Cmd.none )
+                _ ->
+                    ( { model | currentPage = Loaded (FeedbackShow newModel) }
+                    , runReaderCmds FeedbackShowMsg cmds
+                    )
+
+        CategoryEditMsg ctMsg ->
+            let
+                currentPageModel =
+                    case getPage model.currentPage of
+                        CategoryEdit categoryEditModel ->
+                            categoryEditModel
+
+                        _ ->
+                            CategoryEdit.initModel "0"
+
+                ( newModel, cmds ) =
+                    CategoryEdit.update ctMsg
+                        currentPageModel
+            in
+            case ctMsg of
+                CategoryEdit.UpdateCategoryResponse (Ok id) ->
+                    updateNavigation (NavigateTo (Route.CategoryList model.organizationKey))
+                        |> renderFlashMessages (UserNotification.SuccessNotification "Category updated successfully.")
+
+                _ ->
+                    ( { model | currentPage = Loaded (CategoryEdit newModel) }
+                    , runReaderCmds CategoryEditMsg cmds
+                    )
+
+        TeamListMsg tlmsg ->
+            let
+                currentPageModel =
+                    case getPage model.currentPage of
+                        TeamList teamListModel ->
+                            teamListModel
+
+                        _ ->
+                            TeamList.initModel
+
+                ( newModel, cmds ) =
+                    TeamList.update tlmsg
+                        currentPageModel
+            in
+            case tlmsg of
+                TeamList.OnAddTeamMemberClick ->
+                    updateNavigation (NavigateTo (Route.TeamMemberCreate model.organizationKey))
+
+                _ ->
+                    ( { model | currentPage = Loaded (TeamList newModel) }
+                    , runReaderCmds TeamListMsg cmds
+                    )
+
+        TeamCreateMsg tcmsg ->
+            let
+                currentPageModel =
+                    case getPage model.currentPage of
+                        TeamMemberCreate teamCreateModel ->
+                            teamCreateModel
+
+                        _ ->
+                            TeamMemberCreate.initModel
+
+                ( newModel, cmds ) =
+                    TeamMemberCreate.update tcmsg
+                        currentPageModel
+            in
+            case tcmsg of
+                TeamMemberCreate.SaveTeamResponse (Ok id) ->
+                    updateNavigation (NavigateTo (Route.TeamList model.organizationKey))
+                        |> renderFlashMessages (UserNotification.SuccessNotification "Team member added successfully.")
+
+                _ ->
+                    ( { model | currentPage = Loaded (TeamMemberCreate newModel) }
+                    , runReaderCmds TeamCreateMsg cmds
+                    )
+
+        TicketEditMsg teMsg ->
+            let
+                currentPageModel =
+                    case getPage model.currentPage of
+                        TicketEdit ticketEditModel ->
+                            ticketEditModel
+
+                        _ ->
+                            TicketEdit.initModel "0"
+
+                ( newModel, cmds ) =
+                    TicketEdit.update teMsg
+                        currentPageModel
+            in
+            ( { model | currentPage = Loaded (TicketEdit newModel) }
+            , runReaderCmds TicketEditMsg cmds
+            )
+
+        SettingsMsg settingsMsg ->
+            let
+                currentPageModel =
+                    case getPage model.currentPage of
+                        Settings settingsPageModel ->
+                            settingsPageModel
+
+                        _ ->
+                            Settings.initModel
+
+                ( newModel, cmds ) =
+                    Settings.update settingsMsg currentPageModel
+            in
+            ( { model
+                | currentPage = Loaded (Settings newModel)
+              }
+            , runReaderCmds SettingsMsg cmds
+            )
+
+        OrganizationCreateMsg oCMsg ->
+            let
+                currentPageModel =
+                    case getPage model.currentPage of
+                        OrganizationCreate orgCreateModel ->
+                            orgCreateModel
+
+                        _ ->
+                            OrganizationCreate.initModel model.userId
+
+                ( newModel, cmds ) =
+                    OrganizationCreate.update oCMsg currentPageModel
+            in
+            case oCMsg of
+                OrganizationCreate.SaveOrgResponse (Ok org) ->
+                    update (NavigateTo (Route.ArticleList org.api_key))
+                        { model
+                            | organizationKey = org.api_key
+                            , organizationName = org.name
+                        }
+
+                _ ->
+                    ( { model | currentPage = Loaded (OrganizationCreate newModel) }
+                    , runReaderCmds OrganizationCreateMsg cmds
+                    )
+
+        SignUpMsg suMsg ->
+            let
+                currentPageModel =
+                    case getPage model.currentPage of
+                        SignUp signUpModel ->
+                            signUpModel
+
+                        _ ->
+                            SignUp.initModel
+
+                ( newModel, cmds ) =
+                    SignUp.update suMsg currentPageModel
+            in
+            case suMsg of
+                SignUp.SignUpResponse (Ok userWithErrors) ->
+                    let
+                        errors =
+                            case userWithErrors.errors of
+                                Just errors ->
+                                    List.map .message errors |> String.join ", "
+
+                                Nothing ->
+                                    ""
+
+                        updatedModel =
+                            { currentPageModel
+                                | error = Just errors
+                                , password = Field.update currentPageModel.password ""
+                                , confirmPassword = Field.update currentPageModel.confirmPassword ""
+                            }
+                    in
+                    if String.length errors > 0 then
+                        ( { model | currentPage = Loaded (SignUp updatedModel) }
+                        , runReaderCmds SignUpMsg cmds
+                        )
+
+                    else
+                        updateNavigation (NavigateTo Route.Login)
+
+                SignUp.LoginRedirect ->
+                    updateNavigation (NavigateTo Route.Login)
+
+                SignUp.ForgotPasswordRedirect ->
+                    updateNavigation (NavigateTo Route.ForgotPassword)
+
+                _ ->
+                    ( { model | currentPage = Loaded (SignUp newModel) }
+                    , runReaderCmds SignUpMsg cmds
+                    )
+
+        LoginMsg loginMsg ->
+            let
+                currentPageModel =
+                    case getPage model.currentPage of
+                        Login loginModel ->
+                            loginModel
+
+                        _ ->
+                            Login.initModel
+
+                ( newModel, cmds ) =
+                    Login.update loginMsg currentPageModel
+            in
+            case loginMsg of
+                Login.SignupRedirect ->
+                    updateNavigation (NavigateTo Route.SignUp)
+
+                Login.ForgotPasswordRedirect ->
+                    updateNavigation (NavigateTo Route.ForgotPassword)
+
+                Login.LoginResponse (Ok user_with_token) ->
+                    let
+                        ( updatedModel, updatedCmd ) =
+                            case user_with_token.user.organization of
+                                Nothing ->
+                                    updateNavigation (NavigateTo Route.OrganizationCreate)
+
+                                Just organization ->
+                                    let
+                                        org =
+                                            organization
+                                    in
+                                    update (NavigateTo (Route.ArticleList org.api_key))
+                                        { model
+                                            | organizationKey = org.api_key
+                                            , organizationName = org.name
+                                        }
+                    in
+                    ( { updatedModel
+                        | userId = user_with_token.user.id
+                      }
+                    , updatedCmd
+                    )
+
+                _ ->
+                    ( { model | currentPage = Loaded (Login newModel) }
+                    , runReaderCmds LoginMsg cmds
+                    )
+
+        ForgotPasswordMsg forgotPasswordMsg ->
+            let
+                currentPageModel =
+                    case getPage model.currentPage of
+                        ForgotPassword forgotPasswordModel ->
+                            forgotPasswordModel
+
+                        _ ->
+                            ForgotPassword.initModel
+
+                ( newModel, cmds ) =
+                    ForgotPassword.update forgotPasswordMsg currentPageModel
+            in
+            ( { model | currentPage = Loaded (ForgotPassword newModel) }
+            , runReaderCmds ForgotPasswordMsg cmds
+            )
+
+        OnLocationChange location ->
+            setRoute location model
+
+        SignOut ->
+            ( model, Http.send SignedOut (logoutRequest model.nodeEnv model.appUrl) )
+
+        SignedOut _ ->
+            ( model, load (Admin.Request.Helper.baseUrl model.nodeEnv model.appUrl) )
 
 
 
@@ -868,17 +860,12 @@ update msg model =
 
 subscriptions : Model -> Sub Msg
 subscriptions model =
-    let
-        subs =
-            case getPage model.currentPage of
-                ArticleEdit articleEditModel ->
-                    Sub.map ArticleEditMsg <| ArticleEdit.subscriptions articleEditModel
+    case getPage model.currentPage of
+        ArticleEdit articleEditModel ->
+            Sub.map ArticleEditMsg <| ArticleEdit.subscriptions articleEditModel
 
-                _ ->
-                    Sub.batch
-                        [ timedOut <| TimedOut ]
-    in
-        subs
+        _ ->
+            Sub.none
 
 
 
@@ -967,54 +954,43 @@ view model =
                 Blank ->
                     text ""
 
-                SignUp _ ->
-                    text ""
+                SignUp signupModel ->
+                    Html.map SignUpMsg
+                        (SignUp.view signupModel)
 
-                Login _ ->
-                    text ""
+                Login loginModel ->
+                    Html.map LoginMsg (Login.view loginModel)
 
                 ForgotPassword forgotPasswordModel ->
                     Html.map ForgotPasswordMsg
                         (ForgotPassword.view forgotPasswordModel)
+
+        viewWithTopMenu =
+            case model.currentPage of
+                TransitioningFrom _ ->
+                    adminLayout model [ viewContent, loadingIndicator "Loading.." ]
+
+                Loaded _ ->
+                    adminLayout model [ viewContent ]
     in
-        case model.currentPage of
-            TransitioningFrom NotFound ->
-                Errors.notFound
+    case getPage model.currentPage of
+        Login _ ->
+            viewContent
 
-            Loaded NotFound ->
-                Errors.notFound
+        SignUp _ ->
+            viewContent
 
-            TransitioningFrom (Login loginModel) ->
-                Html.map LoginMsg (Login.view loginModel)
+        ForgotPassword _ ->
+            viewContent
 
-            Loaded (Login loginModel) ->
-                Html.map LoginMsg (Login.view loginModel)
+        NotFound ->
+            viewContent
 
-            TransitioningFrom (SignUp signupModel) ->
-                (Html.map SignUpMsg
-                    (SignUp.view signupModel)
-                )
+        OrganizationCreate _ ->
+            viewContent
 
-            Loaded (SignUp signupModel) ->
-                (Html.map SignUpMsg
-                    (SignUp.view signupModel)
-                )
-
-            TransitioningFrom (OrganizationCreate orgCreateModel) ->
-                (Html.map OrganizationCreateMsg
-                    (OrganizationCreate.view orgCreateModel)
-                )
-
-            Loaded (OrganizationCreate orgCreateModel) ->
-                (Html.map OrganizationCreateMsg
-                    (OrganizationCreate.view orgCreateModel)
-                )
-
-            TransitioningFrom _ ->
-                adminLayout model [ viewContent, loadingIndicator "Loading.." ]
-
-            Loaded _ ->
-                adminLayout model [ viewContent ]
+        _ ->
+            viewWithTopMenu
 
 
 adminLayout : Model -> List (Html Msg) -> Html Msg
@@ -1023,7 +999,7 @@ adminLayout model viewContent =
         [ adminHeader model
         , div
             []
-            [ flashView model.notifications ]
+            [ Html.map UserNotificationMsg <| UserNotification.view model.notifications ]
         , div [ class "container main-wrapper" ] viewContent
         ]
 
@@ -1107,7 +1083,7 @@ adminHeader model =
                     [ Html.a
                         [ classList
                             [ ( "nav-link", True )
-                            , ( "active", (model.route == (Route.TeamList model.organizationKey)) )
+                            , ( "active", model.route == Route.TeamList model.organizationKey )
                             ]
                         , onClick <| NavigateTo (Route.TeamList model.organizationKey)
                         ]
@@ -1117,7 +1093,7 @@ adminHeader model =
                     [ Html.a
                         [ classList
                             [ ( "nav-link", True )
-                            , ( "active", (model.route == (Route.Settings model.organizationKey)) )
+                            , ( "active", model.route == Route.Settings model.organizationKey )
                             ]
                         , onClick <| NavigateTo (Route.Settings model.organizationKey)
                         ]
@@ -1134,25 +1110,21 @@ adminHeader model =
         ]
 
 
-flashView : List UserNotification -> Html Msg
-flashView elements =
-    div []
-        (flashViewElements elements)
 
-
-flashViewElements : List UserNotification -> List (Html Msg)
-flashViewElements elements =
-    List.map
-        (\elem ->
-            div
-                [ class ("alert alert-" ++ elem.messageType)
-                ]
-                [ text elem.text ]
-        )
-        elements
-
-
-
+-- flashView : List UserNotification -> Html Msg
+-- flashView elements =
+--     div []
+--         (flashViewElements elements)
+-- flashViewElements : List UserNotification -> List (Html Msg)
+-- flashViewElements elements =
+--     List.map
+--         (\elem ->
+--             div
+--                 [ class ("alert alert-" ++ elem.messageType)
+--                 ]
+--                 [ text elem.text ]
+--         )
+--         elements
 -- MAIN
 
 

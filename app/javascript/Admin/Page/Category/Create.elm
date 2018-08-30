@@ -12,6 +12,7 @@ import Html.Events exposing (..)
 import Reader exposing (Reader)
 import Task exposing (Task)
 import Admin.Data.ReaderCmd exposing (..)
+import Page.UserNotification exposing (..)
 
 
 -- MODEL
@@ -20,7 +21,6 @@ import Admin.Data.ReaderCmd exposing (..)
 type alias Model =
     { id : String
     , name : Field String String
-    , error : Maybe String
     }
 
 
@@ -28,7 +28,6 @@ initModel : Model
 initModel =
     { id = "0"
     , name = Field (validateEmpty "Name") ""
-    , error = Nothing
     }
 
 
@@ -47,6 +46,7 @@ type Msg
     = CategoryNameInput CategoryName
     | SaveCategory
     | SaveCategoryResponse (Result GQLClient.Error (Maybe Category))
+    | NotifyError String
 
 
 update : Msg -> Model -> ( Model, List (ReaderCmd Msg) )
@@ -77,20 +77,23 @@ update msg model =
                 if isAllValid fields then
                     saveCategory model
                 else
-                    ( { model | error = Just errors }, [] )
+                    update (NotifyError errors) model
 
         SaveCategoryResponse (Ok id) ->
             -- NOTE: Redirection handled in Main
             ( { model
                 | id = "0"
                 , name = Field.update model.name ""
-                , error = Nothing
               }
             , []
             )
 
         SaveCategoryResponse (Err error) ->
-            ( { model | error = Just "There was an error while saving the Category" }, [] )
+            update (NotifyError "There was an error while saving the Category") model
+
+        NotifyError error ->
+            -- NOTE: Handled in Main
+            ( model, [] )
 
 
 
@@ -101,18 +104,6 @@ view : Model -> Html Msg
 view model =
     div []
         [ div []
-            [ Maybe.withDefault (text "") <|
-                Maybe.map
-                    (\err ->
-                        div
-                            [ class "alert alert-danger alert-dismissible fade show"
-                            , attribute "role" "alert"
-                            ]
-                            [ text <| "Error: " ++ err ]
-                    )
-                    model.error
-            ]
-        , div []
             [ label [] [ text "Category Name: " ]
             , input
                 [ type_ "text"

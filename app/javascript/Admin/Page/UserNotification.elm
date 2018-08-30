@@ -1,4 +1,4 @@
-module Admin.Page.UserNotification exposing (..)
+module Page.UserNotification exposing (..)
 
 import Html exposing (..)
 import Html.Attributes exposing (..)
@@ -6,6 +6,9 @@ import Html.Events exposing (..)
 import Admin.Data.ReaderCmd exposing (..)
 import Admin.Views.Common exposing (..)
 import Process
+import Reader
+import Task
+import Json.Encode exposing (string)
 
 
 -- MODEL
@@ -49,14 +52,14 @@ update msg model =
     case msg of
         InsertNotification notification ->
             ( { model | notifications = (List.append model.notifications [ notification ]) }
-            , [ Unit <| Reader.Reader (always <| Task.perform (always (RemoveNotification notification)) <| Process.sleep 20) ]
+            , [ Unit <| Reader.Reader (always <| Task.perform (always (RemoveNotification notification)) <| Process.sleep 5000) ]
             )
 
         RemoveNotification notification ->
             ( { model | notifications = List.filter (not << isNotificationEqual notification) model.notifications }, [] )
 
         ClearNotifications ->
-            ( { model | notification = [] }, [] )
+            ( { model | notifications = [] }, [] )
 
 
 isNotificationEqual notificationA notificationB =
@@ -79,26 +82,25 @@ getMessage notification =
 -- VIEW
 
 
-notificationView : UserNotification -> Html msg
+notificationView : UserNotification -> Html Msg
 notificationView userNotification =
     case userNotification of
         ErrorNotification message ->
-            div [ class "alert alert-danger alert-dismissible fade show" ]
-                [ text message, button [ type_ "button", class "close" ] [ text "&times;" ] ]
+            div [ class "alert alert-danger alert-dismissible" ]
+                [ text message, button [ type_ "button", class "close", onClick (RemoveNotification userNotification) ] [ span [ property "innerHTML" (string "&times;") ] [] ] ]
 
         SuccessNotification message ->
-            div [ class "alert alert-success alert-dismissible fade show" ]
-                [ text message, button [ type_ "button", class "close" ] [ text "&times;" ] ]
+            div [ class "alert alert-success alert-dismissible" ]
+                [ text message, button [ type_ "button", class "close", onClick (RemoveNotification userNotification) ] [ span [ property "innerHTML" (string "&times;") ] [] ] ]
 
         NoNotification ->
             text ""
 
 
-notificationsColoumn : List UserNotification -> Html msg
+notificationsColoumn : List UserNotification -> Html Msg
 notificationsColoumn notifications =
     div [ class "notifications-coloumn" ]
-        [ List.map notificationView notifications
-        ]
+        (List.map notificationView notifications)
 
 
 view model =

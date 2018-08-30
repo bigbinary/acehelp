@@ -115,4 +115,14 @@ $blueThemeColor: rgb(60, 170, 249);
       }
     }
   }
+
+  .floating-notifications{
+    position: absolute;
+    right: 0;
+    width: 360px;
+    text-align: center;
+    margin: 5px;
+    z-index: 1;
+  }
+
 }
