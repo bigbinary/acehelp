@@ -126,18 +126,18 @@ errorsIn fields =
 statusClass : AvailabilitySatus -> String
 statusClass status =
     case status of
-        Online ->
+        Active ->
             "online-status"
 
-        Offline ->
+        Inactive ->
             "offline-status"
 
 
 statusToButtonText : AvailabilitySatus -> String
 statusToButtonText status =
     case status of
-        Offline ->
-            "Online"
+        Inactive ->
+            "Active"
 
-        Online ->
-            "Offline"
+        Active ->
+            "Inactive"

@@ -40,7 +40,7 @@ ActiveRecord::Schema.define(version: 2018_08_23_102533) do
     t.uuid "organization_id"
     t.integer "upvotes_count", default: 0
     t.integer "downvotes_count", default: 0
-    t.string "status", default: "offline", null: false
+    t.string "status", default: "inactive", null: false
     t.index ["organization_id"], name: "index_articles_on_organization_id"
   end
 
@@ -49,7 +49,7 @@ ActiveRecord::Schema.define(version: 2018_08_23_102533) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.uuid "organization_id"
-    t.string "status", default: "online", null: false
+    t.string "status", default: "active", null: false
     t.index ["organization_id"], name: "index_categories_on_organization_id"
   end
 

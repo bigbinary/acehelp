@@ -22,16 +22,16 @@ class Mutations::ChangeCategoryStatusMutationsTest < ActiveSupport::TestCase
     GRAPHQL
   end
 
-  test "update category status with ONLINE" do
-    result = AceHelp::Client.execute(@query, input: { id: @category.id, status: "online" })
+  test "update category status with ACTIVE" do
+    result = AceHelp::Client.execute(@query, input: { id: @category.id, status: "active" })
     @category.reload
-    assert_equal Category.statuses[:online], @category.status
+    assert_equal Category.statuses[:active], @category.status
   end
 
-  test "update category status with OFFLINE" do
-    result = AceHelp::Client.execute(@query, input: { id: @category.id, status: "offline" })
+  test "update category status with INACTIVE" do
+    result = AceHelp::Client.execute(@query, input: { id: @category.id, status: "inactive" })
     @category.reload
-    assert_equal Category.statuses[:offline], @category.status
+    assert_equal Category.statuses[:inactive], @category.status
   end
 
   test "update category with invalid status" do

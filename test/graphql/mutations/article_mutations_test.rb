@@ -151,8 +151,8 @@ class Mutations::ArticleMutationsTest < ActiveSupport::TestCase
               }
     GRAPHQL
 
-    result = AceHelp::Client.execute(mutation, input: { id: @article.id, status: "online" })
-    assert_equal result.data.update_article_status.article.status, "online"
+    result = AceHelp::Client.execute(mutation, input: { id: @article.id, status: "active" })
+    assert_equal result.data.update_article_status.article.status, "active"
   end
 
   test "update article status mutation failure" do
@@ -174,6 +174,6 @@ class Mutations::ArticleMutationsTest < ActiveSupport::TestCase
     assert_raises (ArgumentError) do
       AceHelp::Client.execute(mutation, input: { id: @article.id, status: "invalid" })
     end
-    # assert_not_empty result.data.update_article_status.errors.flat_map(&:path) & ["updateArticleStatus", "attribute", "status"]
+
   end
 end

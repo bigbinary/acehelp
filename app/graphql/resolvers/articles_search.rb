@@ -5,10 +5,12 @@ class Resolvers::ArticlesSearch < GraphQL::Function
 
   argument :id, types.String
   argument :url, types.String
+  argument :status, types.String
   argument :search_string, types.String
 
   def call(obj, args, context)
     Article.search_using(
-      context[:organization], article_id: args[:id], url: args[:url], search_string: args[:search_string])
+      context[:organization], article_id: args[:id], url: args[:url], status: args[:status], search_string: args[:search_string]
+    )
   end
 end

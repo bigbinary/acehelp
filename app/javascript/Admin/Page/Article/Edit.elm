@@ -51,7 +51,7 @@ initModel articleId =
     , error = Nothing
     , updateTaskId = Nothing
     , status = None
-    , articleStatus = Offline
+    , articleStatus = Inactive
     , originalArticle = Nothing
     , isEditable = False
     }
