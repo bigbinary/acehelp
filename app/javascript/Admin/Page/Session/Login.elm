@@ -13,6 +13,7 @@ import Reader exposing (Reader)
 import Task exposing (Task)
 import Admin.Data.User exposing (..)
 import Admin.Data.ReaderCmd exposing (..)
+import Admin.Data.Session exposing (..)
 
 
 -- MODEL
@@ -50,7 +51,7 @@ type Msg
     | ForgotPasswordRedirect
     | SetUsername String
     | SetPassword String
-    | LoginResponse (Result GQLClient.Error UserWithOrganization)
+    | LoginResponse (Result GQLClient.Error LoginData)
 
 
 update : Msg -> Model -> ( Model, List (ReaderCmd Msg) )

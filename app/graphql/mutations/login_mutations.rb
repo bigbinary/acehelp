@@ -7,9 +7,7 @@ class Mutations::LoginMutations
     input_field :email, !types.String
     input_field :password, !types.String
 
-
-    return_field :user, Types::UserType
-    return_field :authentication_token, types.String
+    return_field :user_with_token, Types::UserWithTokenType
 
     return_field :errors, types[Types::ErrorType]
 
@@ -27,8 +25,7 @@ class Mutations::LoginMutations
       end
 
       {
-        authentication_token: token_hash,
-        user: user,
+        user_with_token: { authentication_token: token_hash, user: user },
         errors: errors
       }
     }
