@@ -7,8 +7,8 @@ import GraphQL.Request.Builder.Arg as Arg
 
 
 type alias LoginData =
-    { authentication_token : String
-    , user : User
+    { authentication_token : Token
+    , user : UserWithOrganization
     }
 
 
@@ -17,6 +17,12 @@ type alias SignupInputs =
     , email : String
     , password : String
     , confirmPassword : String
+    }
+
+
+type alias Token =
+    { uid : String
+    , access_token : String
     }
 
 
@@ -54,19 +60,31 @@ signupMutation =
                     )
 
 
+tokenObject : GQLBuilder.ValueSpec GQLBuilder.NonNull GQLBuilder.ObjectType Token vars
+tokenObject =
+    GQLBuilder.object Token
+        |> GQLBuilder.with (GQLBuilder.field "access_token" [] GQLBuilder.string)
+        |> GQLBuilder.with (GQLBuilder.field "uid" [] GQLBuilder.string)
+
+
 loginDataExtractor : GQLBuilder.ValueSpec GQLBuilder.NonNull GQLBuilder.ObjectType LoginData vars
 loginDataExtractor =
     (GQLBuilder.object LoginData
-        |> GQLBuilder.with (GQLBuilder.field "token" [] GQLBuilder.string)
+        |> GQLBuilder.with
+            (GQLBuilder.field
+                "authentication_token"
+                []
+                (tokenObject)
+            )
         |> GQLBuilder.with
             (GQLBuilder.field "user"
                 []
-                (userObject)
+                (userWithOrganizationObject)
             )
     )
 
 
-loginMutation : GQLBuilder.Document GQLBuilder.Mutation UserWithOrganization { a | email : String, password : String }
+loginMutation : GQLBuilder.Document GQLBuilder.Mutation LoginData { a | email : String, password : String }
 loginMutation =
     let
         emailVar =
@@ -86,9 +104,9 @@ loginMutation =
                       )
                     ]
                     (GQLBuilder.extract <|
-                        GQLBuilder.field "user"
+                        GQLBuilder.field "user_with_token"
                             []
-                            (userWithOrganizationObject)
+                            (loginDataExtractor)
                     )
                 )
 

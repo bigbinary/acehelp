@@ -778,17 +778,17 @@ update msg model =
                         Login.update loginMsg currentPageModel
                 in
                     case loginMsg of
-                        Login.LoginResponse (Ok user) ->
+                        Login.LoginResponse (Ok userWithToken) ->
                             let
                                 ( updatedModel, updatedCmd ) =
-                                    case String.isEmpty (user.organization.api_key) of
+                                    case String.isEmpty (userWithToken.user.organization.api_key) of
                                         True ->
                                             updateNavigation (NavigateTo Route.OrganizationCreate)
 
                                         _ ->
                                             let
                                                 org =
-                                                    user.organization
+                                                    userWithToken.user.organization
                                             in
                                                 update (NavigateTo (Route.ArticleList org.api_key))
                                                     ({ model
@@ -798,7 +798,7 @@ update msg model =
                                                     )
                             in
                                 ( { updatedModel
-                                    | userId = user.id
+                                    | userId = userWithToken.user.id
                                   }
                                 , updatedCmd
                                 )
