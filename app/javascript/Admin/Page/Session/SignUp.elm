@@ -11,6 +11,7 @@ import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
 import Reader exposing (Reader)
+import Regex exposing (Regex)
 import Task exposing (Task)
 
 
@@ -29,7 +30,7 @@ type alias Model =
 initModel : Model
 initModel =
     { firstName = Field (validateEmpty "First Name") ""
-    , email = Field (validateEmpty "Email") ""
+    , email = Field (validateEmpty "Email" >> andThen validateEmail) ""
     , password = Field (validateEmpty "Password") ""
     , confirmPassword = Field (validateEmpty "Confirm Password") ""
     , error = Nothing
@@ -50,10 +51,11 @@ type Msg
     | EmailInput String
     | PasswordInput String
     | ConfirmPasswordInput String
-    | SignUp
-    | SignUpResponse (Result GQLClient.Error User)
     | ForgotPasswordRedirect
     | LoginRedirect
+    | SignUp
+    | SignUpResponse (Result GQLClient.Error User)
+    | HideError
 
 
 update : Msg -> Model -> ( Model, List (ReaderCmd Msg) )
@@ -95,9 +97,17 @@ update msg model =
                                         "Unknown Error"
                             )
                         |> String.join ", "
+
+                formValidation =
+                    isAllValid fields
+
+                passwordValidation =
+                    (Field.value model.password) == (Field.value model.confirmPassword)
             in
-                if isAllValid fields then
+                if formValidation && passwordValidation then
                     signUp model
+                else if not passwordValidation then
+                    ( { model | error = Just "Please enter valid passwords" }, [] )
                 else
                     ( { model | error = Just errors }, [] )
 
@@ -118,6 +128,9 @@ update msg model =
 
                 GQLClient.GraphQLError err ->
                     ( { model | error = Just <| String.join ". " <| List.map .message err }, [] )
+
+        HideError ->
+            ( { model | error = Nothing }, [] )
 
 
 signUp : Model -> ( Model, List (ReaderCmd Msg) )
@@ -152,6 +165,23 @@ view model =
                     ]
                 , div [ class "center-form col-md-12" ]
                     [ div []
+                        [ Maybe.withDefault (text "") <|
+                            Maybe.map
+                                (\err ->
+                                    div
+                                        [ class "alert alert-danger"
+                                        ]
+                                        [ span
+                                            [ class "close-error-icon"
+                                            , onClick HideError
+                                            ]
+                                            []
+                                        , text <| "Error: " ++ err
+                                        ]
+                                )
+                                model.error
+                        ]
+                    , div [ onSubmit SignUp ]
                         [ div [ class "form-group" ]
                             [ input
                                 [ Html.Attributes.value <|
