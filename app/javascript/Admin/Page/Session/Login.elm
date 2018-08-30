@@ -44,8 +44,8 @@ init =
 
 type Msg
     = Login
-    | ForgotPassword
-    | Signup
+    | SignupRedirect
+    | ForgotPasswordRedirect
     | SetUsername String
     | SetPassword String
     | LoginResponse (Result GQLClient.Error String)
@@ -89,10 +89,10 @@ update msg model =
         LoginResponse (Err err) ->
             ( model, [] )
 
-        ForgotPassword ->
+        SignupRedirect ->
             ( model, [] )
 
-        Signup ->
+        ForgotPasswordRedirect ->
             ( model, [] )
 
         SetUsername username ->
@@ -108,14 +108,14 @@ update msg model =
 
 view : Model -> Html Msg
 view model =
-    div [ class "pageWrap" ]
+    div [ class "page-wrap" ]
         [ div [ class "container login-container" ]
-            [ div [ class "pageContent row" ]
+            [ div [ class "page-content row" ]
                 [ div [ class "col-md-12" ]
-                    [ h2 [ class "formHeader" ] [ text "Sign-In to AceHelp" ]
+                    [ h2 [ class "form-header" ] [ text "Sign-In to AceHelp" ]
                     ]
-                , div [ class "centerForm col-md-12" ]
-                    [ Html.form []
+                , div [ class "center-form col-md-12" ]
+                    [ div []
                         [ div [ class "form-group" ]
                             [ input
                                 [ Html.Attributes.value <|
@@ -140,7 +140,7 @@ view model =
                                 ]
                                 []
                             ]
-                        , div [ class "formSection" ]
+                        , div [ class "form-section" ]
                             [ button
                                 [ type_ "submit"
                                 , class "btn btn-primary"
@@ -148,17 +148,17 @@ view model =
                                 ]
                                 [ text "Login" ]
                             ]
-                        , div [ class "formSection row" ]
-                            [ span [ class "btn col-md-6" ]
-                                [ Html.a
-                                    [ href "/users/sign_up" ]
-                                    [ span [] [ text "Sign Up" ] ]
+                        , div [ class "form-section row" ]
+                            [ span
+                                [ class "col-md-6 btn btn-link"
+                                , onClick SignupRedirect
                                 ]
-                            , span [ class "btn" ]
-                                [ Html.a
-                                    [ href "/users/forgot_password" ]
-                                    [ span [] [ text "Forgot password" ] ]
+                                [ text "Sign Up" ]
+                            , span
+                                [ class "btn btn-link"
+                                , onClick ForgotPasswordRedirect
                                 ]
+                                [ text "Forgot password" ]
                             ]
                         ]
                     ]
