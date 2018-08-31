@@ -145,21 +145,28 @@ update msg model =
         SaveArticle ->
             save model
 
-        SaveArticleResponse (Ok article) ->
-            ( { model
-                | articleId = article.id
-                , title = Field.update model.title article.title
-                , desc = Field.update model.desc article.desc
-                , articleStatus = availablityStatusIso.reverseGet article.status
-                , categories = itemSelection (List.map .id article.categories) model.categories
-                , urls = itemSelection (List.map .id article.urls) model.urls
-                , originalArticle = Just article
-                , status = None
-                , isEditable = False
-                , success = Just ("Article updated successfully.")
-              }
-            , [ Strict <| Reader.Reader <| always <| insertArticleContent article.desc ]
-            )
+        SaveArticleResponse (Ok articleResp) ->
+            case articleResp of
+                Just article ->
+                    ( { model
+                        | articleId = article.id
+                        , title = Field.update model.title article.title
+                        , desc = Field.update model.desc article.desc
+                        , articleStatus = availablityStatusIso.reverseGet article.status
+                        , categories = itemSelection (List.map .id article.categories) model.categories
+                        , urls = itemSelection (List.map .id article.urls) model.urls
+                        , originalArticle = Just article
+                        , status = None
+                        , isEditable = False
+                        , success = Just ("Article updated successfully.")
+                      }
+                    , [ Strict <| Reader.Reader <| always <| insertArticleContent article.desc ]
+                    )
+
+                Nothing ->
+                    ( { model | error = Just "There was an error saving up the article", originalArticle = Nothing }
+                    , []
+                    )
 
         SaveArticleResponse (Err error) ->
             ( { model | error = Just "There was an error saving the article", status = None }, [] )
