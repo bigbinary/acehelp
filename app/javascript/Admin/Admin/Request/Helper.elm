@@ -82,6 +82,7 @@ requestOptionsWithToken reqTokens env apiKey appUrl =
                     List.append
                         [ Http.header "uid" tokens.uid
                         , Http.header "access_token" tokens.access_token
+                        , Http.header "client" tokens.client
                         ]
                         headers
                 )
@@ -193,6 +194,7 @@ strictContextBuilder gqlRequest =
                                 Task.succeed
                                     ( { access_token = Maybe.withDefault "" <| Dict.get "access_token" response.headers
                                       , uid = Maybe.withDefault "" <| Dict.get "uid" response.headers
+                                      , client = Maybe.withDefault "default" <| Dict.get "client" response.headers
                                       }
                                     , decodedValue
                                     )
@@ -220,6 +222,7 @@ semiStrictContextBuilder gqlRequest =
                                 Task.succeed
                                     ( { access_token = Maybe.withDefault "" <| Dict.get "access_token" response.headers
                                       , uid = Maybe.withDefault "" <| Dict.get "uid" response.headers
+                                      , client = Maybe.withDefault "default" <| Dict.get "client" response.headers
                                       }
                                     , decodedValue
                                     )

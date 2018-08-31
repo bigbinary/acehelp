@@ -2,6 +2,7 @@
 
 class GraphqlController < ApplicationController
   include LoadOrganization
+  include SetUserByToken
 
   def execute
     result = AcehelpSchema.execute(query, variables: variables, context: context, operation_name: operation_name)
@@ -29,7 +30,7 @@ class GraphqlController < ApplicationController
     def context
       context = {}
       context[:organization] = @organization if @organization.present?
-      # context[:current_user] = current_user if current_user
+      context[:current_user] = @resource if @resource.present?
       context[:request] = request
       context
     end

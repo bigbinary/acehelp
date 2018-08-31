@@ -22,6 +22,7 @@ type alias SignupInputs =
 type alias Token =
     { uid : String
     , access_token : String
+    , client : String
     }
 
 
@@ -60,6 +61,7 @@ tokenObject =
     GQLBuilder.object Token
         |> GQLBuilder.with (GQLBuilder.field "uid" [] GQLBuilder.string)
         |> GQLBuilder.with (GQLBuilder.field "access_token" [] GQLBuilder.string)
+        |> GQLBuilder.with (GQLBuilder.field "client" [] GQLBuilder.string)
 
 
 loginDataObject : GQLBuilder.ValueSpec GQLBuilder.NonNull GQLBuilder.ObjectType LoginData vars

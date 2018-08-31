@@ -68,6 +68,6 @@ requestUpdateCategoryStatus categoryId categoryStatus =
     Reader.Reader
         (\( tokens, nodeEnv, apiKey, appUrl ) ->
             (GQLClient.customSendMutation (requestOptionsWithToken (Just tokens) nodeEnv apiKey appUrl) <|
-                GQLBuilder.request { id = categoryId, status = categoryStatus } updateCategoryStatusMutation
+                GQLBuilder.request { id = categoryId, status = reverseCurrentAvailabilityStatus (categoryStatus) } updateCategoryStatusMutation
             )
         )

@@ -103,6 +103,6 @@ requestUpdateArticleStatus articleId articleStatus =
     Reader.Reader
         (\( tokens, nodeEnv, apiKey, appUrl ) ->
             (GQLClient.customSendMutation (requestOptionsWithToken (Just tokens) nodeEnv apiKey appUrl) <|
-                GQLBuilder.request { id = articleId, status = availablityStatusIso.get articleStatus } articleStatusMutation
+                GQLBuilder.request { id = articleId, status = reverseCurrentAvailabilityStatus (availablityStatusIso.get articleStatus) } articleStatusMutation
             )
         )

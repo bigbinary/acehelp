@@ -124,6 +124,7 @@ init flags location =
             , currentToken =
                 { uid = ""
                 , access_token = ""
+                , client = ""
                 }
             }
     in
@@ -874,10 +875,10 @@ update msg model =
                 ( { model | notifications = [] }, Cmd.none )
 
             ReceivedUidHeader uid ->
-                ( { model | currentToken = { uid = uid, access_token = model.currentToken.access_token } }, Cmd.none )
+                ( { model | currentToken = { uid = uid, access_token = model.currentToken.access_token, client = model.currentToken.client } }, Cmd.none )
 
             ReceivedAccessTokenHeader accessToken ->
-                ( { model | currentToken = { uid = model.currentToken.uid, access_token = accessToken } }, Cmd.none )
+                ( { model | currentToken = { uid = model.currentToken.uid, access_token = accessToken, client = model.currentToken.client } }, Cmd.none )
 
 
 
