@@ -11,7 +11,6 @@ import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
 import Reader exposing (Reader)
-import Regex exposing (Regex)
 import Task exposing (Task)
 
 
@@ -54,7 +53,7 @@ type Msg
     | ForgotPasswordRedirect
     | LoginRedirect
     | SignUp
-    | SignUpResponse (Result GQLClient.Error User)
+    | SignUpResponse (Result GQLClient.Error UserWithErrors)
     | HideError
 
 
@@ -102,24 +101,47 @@ update msg model =
                     isAllValid fields
 
                 passwordValidation =
-                    (Field.value model.password) == (Field.value model.confirmPassword)
+                    Field.value model.password == Field.value model.confirmPassword
             in
                 if formValidation && passwordValidation then
                     signUp model
                 else if not passwordValidation then
-                    ( { model | error = Just "Please enter valid passwords" }, [] )
+                    ( { model
+                        | error = Just "Please enter valid passwords"
+                        , password = Field.update model.password ""
+                        , confirmPassword = Field.update model.confirmPassword ""
+                      }
+                    , []
+                    )
                 else
                     ( { model | error = Just errors }, [] )
 
-        SignUpResponse (Ok user) ->
-            ( { model
-                | firstName = Field.update model.firstName ""
-                , email = Field.update model.email ""
-                , password = Field.update model.password ""
-                , confirmPassword = Field.update model.confirmPassword ""
-              }
-            , []
-            )
+        SignUpResponse (Ok userWithErrors) ->
+            let
+                errors =
+                    case userWithErrors.errors of
+                        Just errors ->
+                            List.map .message errors |> String.join ", "
+
+                        Nothing ->
+                            ""
+            in
+                if (String.length errors) > 0 then
+                    ( { model
+                        | password = Field.update model.password ""
+                        , confirmPassword = Field.update model.confirmPassword ""
+                      }
+                    , []
+                    )
+                else
+                    ( { model
+                        | firstName = Field.update model.firstName ""
+                        , email = Field.update model.email ""
+                        , password = Field.update model.password ""
+                        , confirmPassword = Field.update model.confirmPassword ""
+                      }
+                    , []
+                    )
 
         SignUpResponse (Err error) ->
             case error of

@@ -2,8 +2,8 @@ module Admin.Data.Session exposing (..)
 
 import Admin.Data.User exposing (..)
 import GraphQL.Request.Builder as GQLBuilder
-import GraphQL.Request.Builder.Variable as Var
 import GraphQL.Request.Builder.Arg as Arg
+import GraphQL.Request.Builder.Variable as Var
 
 
 type alias SignupInputs =
@@ -14,7 +14,7 @@ type alias SignupInputs =
     }
 
 
-signupMutation : GQLBuilder.Document GQLBuilder.Mutation User SignupInputs
+signupMutation : GQLBuilder.Document GQLBuilder.Mutation UserWithErrors SignupInputs
 signupMutation =
     let
         firstNameVar =
@@ -41,11 +41,7 @@ signupMutation =
                             ]
                       )
                     ]
-                    (GQLBuilder.extract <|
-                        GQLBuilder.field "user"
-                            []
-                            userObject
-                    )
+                    userWithErrorObject
 
 
 loginMutation : GQLBuilder.Document GQLBuilder.Mutation String { a | email : String, password : String }
