@@ -87,7 +87,7 @@ update msg model =
             ( model, [] )
 
         LoginResponse (Err err) ->
-            ( model, [] )
+            ( { model | error = [ "Username or Password is incorrect. Please try again" ] }, [] )
 
         SignupRedirect ->
             ( model, [] )
@@ -115,7 +115,21 @@ view model =
                     [ h2 [ class "form-header" ] [ text "Sign-In to AceHelp" ]
                     ]
                 , div [ class "center-form col-md-12" ]
-                    [ div []
+                    [ case model.error of
+                        [] ->
+                            text ""
+
+                        _ ->
+                            div []
+                                [ div
+                                    [ class "alert alert-danger"
+                                    ]
+                                    (List.map
+                                        (\er -> div [] [ text er ])
+                                        model.error
+                                    )
+                                ]
+                    , div []
                         [ div [ class "form-group" ]
                             [ input
                                 [ Html.Attributes.value <|
