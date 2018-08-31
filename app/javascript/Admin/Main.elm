@@ -398,15 +398,9 @@ update msg model =
                         ArticleEdit.update aeMsg
                             currentPageModel
                 in
-                    case aeMsg of
-                        ArticleEdit.SaveArticleResponse (Ok id) ->
-                            updateNavigation (NavigateTo (Route.ArticleList model.organizationKey))
-                                |> renderFlashMessages "Article updated successfully." "success"
-
-                        _ ->
-                            ( { model | currentPage = Loaded (ArticleEdit newModel) }
-                            , runReaderCmds ArticleEditMsg cmds
-                            )
+                    ( { model | currentPage = Loaded (ArticleEdit newModel) }
+                    , runReaderCmds ArticleEditMsg cmds
+                    )
 
             UrlCreateMsg cuMsg ->
                 let
