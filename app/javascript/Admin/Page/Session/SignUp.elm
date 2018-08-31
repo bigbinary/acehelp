@@ -181,7 +181,7 @@ view model =
                                 )
                                 model.error
                         ]
-                    , div [ onSubmit SignUp ]
+                    , div []
                         [ div [ class "form-group" ]
                             [ input
                                 [ Html.Attributes.value <|
