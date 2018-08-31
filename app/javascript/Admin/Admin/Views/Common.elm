@@ -35,7 +35,7 @@ multiSelectMenu title values onselect =
 
 loadingIndicator : String -> Html msg
 loadingIndicator msg =
-    div [ class "loading-indicator" ] [ text msg, spinner ]
+    div [ class "loading-indicator" ] [ span [ class "spinner-label" ] [ text msg ], spinner ]
 
 
 spinner : Html msg

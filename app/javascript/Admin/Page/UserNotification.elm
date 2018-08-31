@@ -22,14 +22,12 @@ type UserNotification
 
 type alias Model =
     { notifications : List UserNotification
-    , showLoading : Bool
-    , spinnerLabel : String
     }
 
 
 initModel : Model
 initModel =
-    { notifications = [], showLoading = False, spinnerLabel = "" }
+    { notifications = [] }
 
 
 init : ( Model, List (ReaderCmd Msg) )
@@ -103,11 +101,11 @@ notificationsColoumn notifications =
         (List.map notificationView notifications)
 
 
-view model =
+view showLoading spinnerLabel model =
     div [ class "floating-notifications" ]
-        [ case model.showLoading of
+        [ case showLoading of
             True ->
-                div [ class "spinner-notification" ] [ loadingIndicator model.spinnerLabel ]
+                div [ class "spinner-notification" ] [ loadingIndicator spinnerLabel ]
 
             False ->
                 text ""

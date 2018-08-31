@@ -21,6 +21,7 @@ import Page.UserNotification exposing (..)
 type alias Model =
     { id : String
     , name : Field String String
+    , error : Maybe String
     }
 
 
@@ -28,6 +29,7 @@ initModel : Model
 initModel =
     { id = "0"
     , name = Field (validateEmpty "Name") ""
+    , error = Nothing
     }
 
 
@@ -46,7 +48,6 @@ type Msg
     = CategoryNameInput CategoryName
     | SaveCategory
     | SaveCategoryResponse (Result GQLClient.Error (Maybe Category))
-    | NotifyError String
 
 
 update : Msg -> Model -> ( Model, List (ReaderCmd Msg) )
@@ -77,7 +78,7 @@ update msg model =
                 if isAllValid fields then
                     saveCategory model
                 else
-                    update (NotifyError errors) model
+                    ( { model | error = Just errors }, [] )
 
         SaveCategoryResponse (Ok id) ->
             -- NOTE: Redirection handled in Main
@@ -89,11 +90,7 @@ update msg model =
             )
 
         SaveCategoryResponse (Err error) ->
-            update (NotifyError "There was an error while saving the Category") model
-
-        NotifyError error ->
-            -- NOTE: Handled in Main
-            ( model, [] )
+            ( { model | error = Just "There was an error while saving the Category" }, [] )
 
 
 
@@ -104,6 +101,18 @@ view : Model -> Html Msg
 view model =
     div []
         [ div []
+            [ Maybe.withDefault (text "") <|
+                Maybe.map
+                    (\err ->
+                        div
+                            [ class "alert alert-danger alert-dismissible fade show"
+                            , attribute "role" "alert"
+                            ]
+                            [ text <| "Error: " ++ err ]
+                    )
+                    model.error
+            ]
+        , div []
             [ label [] [ text "Category Name: " ]
             , input
                 [ type_ "text"

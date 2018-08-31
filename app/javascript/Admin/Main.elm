@@ -537,9 +537,6 @@ update msg model =
                     updateNavigation (NavigateTo (Route.CategoryList model.organizationKey))
                         |> renderFlashMessages (UserNotification.SuccessNotification "Category created successfully.")
 
-                CategoryCreate.NotifyError error ->
-                    renderFlashMessages (UserNotification.ErrorNotification error) ( model, Cmd.none )
-
                 _ ->
                     ( { model
                         | currentPage = Loaded (CategoryCreate newModel)
@@ -968,10 +965,10 @@ view model =
         viewWithTopMenu =
             case model.currentPage of
                 TransitioningFrom _ ->
-                    adminLayout model [ viewContent, loadingIndicator "Loading.." ]
+                    adminLayout True "Loading.." model [ viewContent ]
 
                 Loaded _ ->
-                    adminLayout model [ viewContent ]
+                    adminLayout False "" model [ viewContent ]
     in
     case getPage model.currentPage of
         Login _ ->
@@ -993,13 +990,13 @@ view model =
             viewWithTopMenu
 
 
-adminLayout : Model -> List (Html Msg) -> Html Msg
-adminLayout model viewContent =
+adminLayout : Bool -> String -> Model -> List (Html Msg) -> Html Msg
+adminLayout showLoading spinnerLabel model viewContent =
     div []
         [ adminHeader model
         , div
             []
-            [ Html.map UserNotificationMsg <| UserNotification.view model.notifications ]
+            [ Html.map UserNotificationMsg <| UserNotification.view showLoading spinnerLabel model.notifications ]
         , div [ class "container main-wrapper" ] viewContent
         ]
 
