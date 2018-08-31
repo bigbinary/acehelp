@@ -11,7 +11,9 @@ class ApplicationController < ActionController::Base
 
   private
     def ensure_user_is_logged_in
-      unless current_user
+      uid = cookies.signed[:uid]
+      @resource = User.find_by(email: uid)
+      unless @resource
         redirect_to new_user_session_path
       end
     end
