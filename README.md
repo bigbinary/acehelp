@@ -21,7 +21,7 @@ brew services start elasticsearch
 
 ./bin/yarn install
 
-npm install -g elm
+npm install elm@0.18.0
 
 elm-package install -y
 
