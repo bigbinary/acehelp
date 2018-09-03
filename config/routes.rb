@@ -17,6 +17,10 @@ Rails.application.routes.draw do
     resources :organizations, only: :new
   end
 
+  namespace :users do
+    resources :sessions , only: :new
+  end
+
   resources :organizations, only: [:show], param: :api_key do
     resources :articles, only: :index
     get "*path", to: "admin/dashboard#index", constraints: -> (request) do

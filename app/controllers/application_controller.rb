@@ -14,7 +14,7 @@ class ApplicationController < ActionController::Base
       uid = cookies.signed[:uid]
       @resource = User.find_by(email: uid)
       unless @resource
-        redirect_to new_user_session_path
+        redirect_to new_users_session_path
       end
     end
 

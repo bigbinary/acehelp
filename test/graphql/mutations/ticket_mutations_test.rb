@@ -4,13 +4,10 @@ require "test_helper"
 require "graphql/client_host"
 
 class Mutations::TicketMutationsTest < ActiveSupport::TestCase
-  include Devise::Test::IntegrationHelpers
-
   setup do
     @agent = agents(:illya_kuryakin)
     @ticket = tickets(:payment_issue_ticket)
     @ticket.save
-    sign_in @agent
   end
 
   test "create ticket mutations" do
@@ -25,7 +22,7 @@ class Mutations::TicketMutationsTest < ActiveSupport::TestCase
               }
             GRAPHQL
 
-    result = AceHelp::Client.execute(query, input: {  name: "Ticket_name",
+    result = AceHelp::ClientLoggedIn.call(@agent).execute(query, input: {  name: "Ticket_name",
                                                       email: "contact@email.com",
                                                       message: "Dummy" })
     assert_equal result.data.add_ticket.ticket.name, "Ticket_name"
@@ -44,7 +41,7 @@ class Mutations::TicketMutationsTest < ActiveSupport::TestCase
               }
     GRAPHQL
 
-    result = AceHelp::Client.execute(query, input: {  name: "",
+    result = AceHelp::ClientLoggedIn.call(@agent).execute(query, input: {  name: "",
                                                       email: "contact@email.com",
                                                       message: "Dummy" })
 
@@ -66,7 +63,7 @@ class Mutations::TicketMutationsTest < ActiveSupport::TestCase
                 }
               }
             GRAPHQL
-    result = AceHelp::Client.execute(query, input: {  name: "",
+    result = AceHelp::ClientLoggedIn.call(@agent).execute(query, input: {  name: "",
                                                       email: "",
                                                       message: "Dummy" })
     assert_nil result.data.add_ticket.ticket
@@ -86,7 +83,7 @@ class Mutations::TicketMutationsTest < ActiveSupport::TestCase
                 }
               }
     GRAPHQL
-    result = AceHelp::Client.execute(query, input: { name: "", email: "", message: "Dummy" })
+    result = AceHelp::ClientLoggedIn.call(@agent).execute(query, input: { name: "", email: "", message: "Dummy" })
     assert_not_empty result.data.add_ticket.errors.flat_map(&:path) & ["addTicket", "email"]
   end
 
@@ -104,7 +101,7 @@ class Mutations::TicketMutationsTest < ActiveSupport::TestCase
                 }
               }
     GRAPHQL
-    result = AceHelp::Client.execute(query, id: @ticket.id)
+    result = AceHelp::ClientLoggedIn.call(@agent).execute(query, id: @ticket.id)
     @ticket.reload
     assert_not_nil @ticket.deleted_at
   end
