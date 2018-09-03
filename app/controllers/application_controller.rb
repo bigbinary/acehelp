@@ -14,19 +14,11 @@ class ApplicationController < ActionController::Base
       uid = cookies.signed[:uid]
       @resource = User.find_by(email: uid)
       unless @resource
-        redirect_to new_users_session_path
+        redirect_to users_sign_in_path
       end
     end
 
     def configure_permitted_parameters
       devise_parameter_sanitizer.permit(:sign_up, keys: [:first_name])
-    end
-
-    def after_sign_in_path_for(resource)
-      if resource.organizations.exists?
-        organization_articles_path(resource.organizations.first.api_key)
-      else
-        new_organization_path
-      end
     end
 end

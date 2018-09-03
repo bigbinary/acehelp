@@ -17,9 +17,8 @@ Rails.application.routes.draw do
     resources :organizations, only: :new
   end
 
-  namespace :users do
-    resources :sessions , only: :new
-  end
+  get "/users/sign_in", to: "users#sign_in"
+  delete "/users/sign_out", to: "users#sign_out"
 
   resources :organizations, only: [:show], param: :api_key do
     resources :articles, only: :index

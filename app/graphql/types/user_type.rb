@@ -16,7 +16,9 @@ Types::UserType = GraphQL::ObjectType.define do
   end
   field :organization, -> { Types::OrganizationType } do
     resolve -> (obj, args, context) {
-      obj.organizations.first
+      if obj.organizations.exists?
+        obj.organizations.first
+      end
     }
   end
 end

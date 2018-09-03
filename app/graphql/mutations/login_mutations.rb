@@ -23,7 +23,6 @@ class Mutations::LoginMutations
       else
         errors = Utils::ErrorHandler.new.error("Email is not registered with our system", context)
       end
-
       {
         user_with_token: { authentication_token: token_hash, user: user },
         errors: errors

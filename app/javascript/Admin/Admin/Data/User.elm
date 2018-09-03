@@ -38,7 +38,7 @@ userWithErrorObject =
 type alias UserWithOrganization =
     { id : String
     , email : String
-    , organization : Organization
+    , organization : Maybe Organization
     }
 
 userObject : GQLBuilder.ValueSpec GQLBuilder.NonNull GQLBuilder.ObjectType User vars
@@ -62,5 +62,5 @@ userWithOrganizationObject =
         |> GQLBuilder.with
             (GQLBuilder.field "organization"
                 []
-                (organizationObject)
+                (GQLBuilder.nullable organizationObject)
             )

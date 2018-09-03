@@ -816,14 +816,14 @@ update msg model =
                         Login.LoginResponse (Ok userWithToken) ->
                             let
                                 ( updatedModel, updatedCmd ) =
-                                    case String.isEmpty (userWithToken.user.organization.api_key) of
-                                        True ->
+                                    case (userWithToken.user.organization) of
+                                        Nothing ->
                                             updateNavigation (NavigateTo Route.OrganizationCreate)
 
-                                        _ ->
+                                        Just organization ->
                                             let
                                                 org =
-                                                    userWithToken.user.organization
+                                                    organization
                                             in
                                                 update (NavigateTo (Route.ArticleList org.api_key))
                                                     ({ model
