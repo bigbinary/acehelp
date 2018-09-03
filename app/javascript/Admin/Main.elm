@@ -1,6 +1,7 @@
 module Main exposing (..)
 
 import Admin.Request.Helper exposing (ApiKey, NodeEnv, logoutRequest)
+import Field exposing (..)
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
@@ -746,8 +747,29 @@ update msg model =
                         SignUp.update suMsg currentPageModel
                 in
                     case suMsg of
-                        SignUp.SignUpResponse (Ok id) ->
-                            updateNavigation (NavigateTo Route.Login)
+                        SignUp.SignUpResponse (Ok userWithErrors) ->
+                            let
+                                errors =
+                                    case userWithErrors.errors of
+                                        Just errors ->
+                                            List.map .message errors |> String.join ", "
+
+                                        Nothing ->
+                                            ""
+
+                                updatedModel =
+                                    { currentPageModel
+                                        | error = Just errors
+                                        , password = Field.update currentPageModel.password ""
+                                        , confirmPassword = Field.update currentPageModel.confirmPassword ""
+                                    }
+                            in
+                                if (String.length errors) > 0 then
+                                    ( { model | currentPage = Loaded (SignUp updatedModel) }
+                                    , runReaderCmds SignUpMsg cmds
+                                    )
+                                else
+                                    updateNavigation (NavigateTo Route.Login)
 
                         SignUp.LoginRedirect ->
                             updateNavigation (NavigateTo Route.Login)
