@@ -404,16 +404,26 @@ setAppState appState model =
                 ( _, cmd ) =
                     SuggestedList.init model.context
             in
-                ( Animation.interrupt
-                    [ Animation.to
-                        [ Animation.opacity 1
-                        , Animation.right <| Animation.px 0
-                        ]
-                    ]
-                    model.containerAnimation
-                , TransitioningFrom (getSection model.sectionState)
-                , sectionCmdToCmd model.nodeEnv model.apiKey SuggestedArticlesMsg cmd
-                )
+                case model.currentAppState of
+                    Minimized ->
+                        ( Animation.interrupt
+                            [ Animation.to
+                                [ Animation.opacity 1
+                                , Animation.right <| Animation.px 0
+                                ]
+                            ]
+                            model.containerAnimation
+                        , TransitioningFrom (getSection model.sectionState)
+                        , sectionCmdToCmd model.nodeEnv model.apiKey SuggestedArticlesMsg cmd
+                        )
+
+                    Maximized ->
+                        ( Animation.interrupt
+                            [ Animation.to [ Animation.opacity 1 ] ]
+                            model.containerAnimation
+                        , Loaded (getSection model.sectionState)
+                        , Cmd.none
+                        )
 
         Minimized ->
             ( Animation.interrupt
@@ -538,6 +548,7 @@ subscriptions model =
         [ Animation.subscription Animate [ model.containerAnimation ]
         , userInfo <| decodeUserInfo >> ReceivedUserInfo
         , openArticle <| OpenArticleWithId
+        , openWidget <| always (SetAppState Maximized)
         , closeWidget <| always (SetAppState Minimized)
         ]
 
