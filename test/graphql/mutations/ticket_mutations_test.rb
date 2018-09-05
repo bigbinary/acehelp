@@ -4,13 +4,30 @@ require "test_helper"
 require "graphql/client_host"
 
 class Mutations::TicketMutationsTest < ActiveSupport::TestCase
-  include Devise::Test::IntegrationHelpers
-
   setup do
     @agent = agents(:illya_kuryakin)
+    @agent.password = @agent.password_confirmation = "SelfDestructIn5"
+    @agent.save
+    login_query = <<-GRAPHQL
+      mutation($login_keys: LoginUserInput!) {
+          loginUser(input: $login_keys) {
+            user_with_token {
+              authentication_token {
+                client
+                access_token
+                uid
+              }
+            }
+            errors {
+              message
+              path
+            }
+          }
+      }
+    GRAPHQL
     @ticket = tickets(:payment_issue_ticket)
     @ticket.save
-    sign_in @agent
+    AceHelp::Client.execute(login_query, login_keys: { email: @agent.email, password: "SelfDestructIn5" })
   end
 
   test "create ticket mutations" do

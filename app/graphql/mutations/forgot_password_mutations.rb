@@ -12,7 +12,7 @@ class Mutations::ForgotPasswordMutations
     resolve ->(object, inputs, context) {
       user = User.find_by_email(inputs[:email])
       if user
-        user.send_reset_password_instructions
+        user.reset_password_token
         status = true
       else
         errors = Utils::ErrorHandler.new.error("Email is not registered with our system", context)

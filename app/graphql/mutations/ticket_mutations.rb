@@ -15,7 +15,7 @@ class Mutations::TicketMutations
       new_ticket = Ticket.new(name: inputs[:name],
                               email: inputs[:email],
                               message: inputs[:message],
-                              user_agent: context[:user_agent],
+                              user_agent: context[:request].user_agent,
                               organization_id: context[:organization].id
                               )
 
@@ -74,7 +74,6 @@ class Mutations::TicketMutations
           ticket_id: ticket.id
         ) if inputs[:comment].present?
         new_comment.assign_agent_to_ticket(context[:current_user].id) if new_comment
-
         if inputs[:note].present?
           Note.add_note!(
             details: inputs[:note],

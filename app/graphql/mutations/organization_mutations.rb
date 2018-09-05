@@ -12,7 +12,7 @@ class Mutations::OrganizationMutations
     return_field :errors, types[Types::ErrorType]
 
     resolve -> (object, inputs, context) {
-      user = User.find_by_id(inputs[:user_id])
+      user = User.find_by_id(context[:current_user].id)
       if user
         sanitized_params = inputs.to_h.slice("name", "email")
         new_org = user.add_organization(sanitized_params)

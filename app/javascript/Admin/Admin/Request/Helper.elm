@@ -2,7 +2,7 @@ module Admin.Request.Helper exposing (..)
 
 import Http
 import Json.Decode exposing (Decoder)
-import GraphQL.Client.Http exposing (RequestOptions)
+import GraphQL.Client.Http as GQLClient exposing (RequestOptions)
 
 
 type alias ApiKey =

@@ -1,20 +1,23 @@
 # Read about fixtures at http://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
 
 super_admin:
-  email: super+admin@example.com
+  email: <%= email =  "super+admin@example.com" %>
   first_name: Alan
   last_name: Lee
   role: 'super_admin'
+  uid: <%= email %>
 
 brad:
-  email: brad+user@example.com
+  email: <%= email = "brad+user@example.com" %>
   first_name: Brad
   last_name: Pitt
   role: 'user'
   organization: bigbinary
+  uid: <%= email %>
 
 hunt:
-  email: ethan.hunt@example.com
+  email: <%= email = "ethan.hunt@example.com" %>
   first_name: Ethan
   last_name: Hunt
   role: 'user'
+  uid: <%= email %>

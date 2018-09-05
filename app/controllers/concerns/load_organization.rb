@@ -9,14 +9,14 @@ module LoadOrganization
 
   def load_organization
     api_key = request.headers["api-key"] || params["organization_api_key"]
-    return if api_key.nil?
+    return if api_key.blank?
     @organization = Organization.find_by(api_key: api_key)
-    render_unauthorized(unathorized_error_message) && return if @organization.blank?
+    render_unauthorized(unathorized_api_key) && return if @organization.blank?
   end
 
   private
 
-    def unathorized_error_message
+    def unathorized_api_key
       "Unauthorized request: Missing or invalid API Key"
     end
 end

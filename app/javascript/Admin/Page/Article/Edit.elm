@@ -182,6 +182,7 @@ update msg model =
                         , categories = itemSelection (List.map .id article.categories) model.categories
                         , urls = itemSelection (List.map .id article.urls) model.urls
                         , originalArticle = Just article
+                        , error = Nothing
                       }
                     , [ Strict <| Reader.Reader <| always <| insertArticleContent article.desc ]
                     )
@@ -207,6 +208,7 @@ update msg model =
 
                                 Nothing ->
                                     List.map Unselected categories
+                        , error = Nothing
                       }
                     , []
                     )
@@ -235,6 +237,7 @@ update msg model =
 
                                 Nothing ->
                                     List.map Unselected urls
+                        , error = Nothing
                       }
                     , []
                     )
@@ -272,6 +275,7 @@ update msg model =
                         , urls = itemSelection (List.map .id article.urls) model.urls
                         , originalArticle = Just article
                         , isEditable = False
+                        , error = Nothing
                       }
                     , [ Strict <| Reader.Reader <| always <| insertArticleContent article.desc ]
                     )

@@ -62,11 +62,11 @@ requestCreateCategory categoryInputs =
         )
 
 
-requestUpdateCategoryStatus : CategoryId -> AvailabilitySatus -> Reader ( NodeEnv, ApiKey, AppUrl ) (Task GQLClient.Error (Maybe (List Category)))
+requestUpdateCategoryStatus : CategoryId -> String -> Reader ( NodeEnv, ApiKey, AppUrl ) (Task GQLClient.Error (Maybe (List Category)))
 requestUpdateCategoryStatus categoryId categoryStatus =
     Reader.Reader
         (\( nodeEnv, apiKey, appUrl ) ->
             (GQLClient.customSendMutation (requestOptions nodeEnv apiKey appUrl) <|
-                GQLBuilder.request { id = categoryId, status = reverseCurrentAvailabilityStatus (availablityStatusIso.get categoryStatus) } updateCategoryStatusMutation
+                GQLBuilder.request { id = categoryId, status = reverseCurrentAvailabilityStatus (categoryStatus) } updateCategoryStatusMutation
             )
         )

@@ -4,7 +4,6 @@ require "test_helper"
 require "graphql/client_host"
 
 class Mutations::ForgotPasswordMutationsTest < ActiveSupport::TestCase
-
   setup do
     @ethan = users(:hunt)
 
@@ -22,12 +21,12 @@ class Mutations::ForgotPasswordMutationsTest < ActiveSupport::TestCase
   end
 
   test "Successful password recovery request" do
-    result =  AceHelp::Client.execute(@query, recover_keys: { email: @ethan.email})
-    assert_equal true,  result.data.forgot_password.status
+    result = AceHelp::Client.execute(@query, recover_keys: { email: @ethan.email })
+    assert_equal true, result.data.forgot_password.status
   end
 
   test "Unsupported email password recovery" do
-    result =  AceHelp::Client.execute(@query, recover_keys: { email: "unsupported@email.com" })
+    result = AceHelp::Client.execute(@query, recover_keys: { email: "unsupported@email.com" })
     assert_not_empty result.data.forgot_password.errors.flat_map(&:path) & ["forgotPassword"]
   end
 end

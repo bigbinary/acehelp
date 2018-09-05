@@ -5,7 +5,26 @@ require "graphql/client_host"
 
 class Mutations::OrganizationMutationsTest < ActiveSupport::TestCase
   setup do
-    @brad_user = users(:brad)
+    @user = users(:brad)
+    @user.password = @user.password_confirmation = "SelfDestructIn5"
+    @user.save
+    login_query = <<-GRAPHQL
+      mutation($login_keys: LoginUserInput!) {
+        loginUser(input: $login_keys) {
+          user_with_token {
+            authentication_token {
+              client
+              access_token
+              uid
+            }
+          }
+          errors {
+            message
+            path
+          }
+        }
+      }
+    GRAPHQL
     @common_org_query = <<-GRAPHQL
               mutation($input: CreateOrganizationInput!) {
                 addOrganization(input: $input) {
@@ -20,11 +39,12 @@ class Mutations::OrganizationMutationsTest < ActiveSupport::TestCase
                 }
               }
     GRAPHQL
+    AceHelp::Client.execute(login_query, login_keys: { email: @user.email, password: "SelfDestructIn5" })
   end
 
   test "create organization" do
     result = AceHelp::Client.execute(@common_org_query, input: {
-      user_id: @brad_user.id,
+      user_id: @user.id,
       name: "Org Name",
       email: "org_general_email@gmail.com"
     })
@@ -43,7 +63,7 @@ class Mutations::OrganizationMutationsTest < ActiveSupport::TestCase
   test "create organization without name" do
     assert_raise(Graphlient::Errors::GraphQLError) do
       AceHelp::Client.execute(@common_org_query, input: {
-        user_id: @brad_user.id,
+        user_id: @user.id,
         email: "org_general_email@gmail.com"
       })
     end

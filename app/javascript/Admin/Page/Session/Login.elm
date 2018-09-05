@@ -11,6 +11,9 @@ import Html.Attributes exposing (..)
 import Html.Events exposing (..)
 import Reader exposing (Reader)
 import Task exposing (Task)
+import Admin.Data.User exposing (..)
+import Admin.Data.ReaderCmd exposing (..)
+import Admin.Data.Session exposing (..)
 
 
 -- MODEL
@@ -48,7 +51,7 @@ type Msg
     | ForgotPasswordRedirect
     | SetUsername String
     | SetPassword String
-    | LoginResponse (Result GQLClient.Error String)
+    | LoginResponse (Result GQLClient.Error LoginData)
 
 
 update : Msg -> Model -> ( Model, List (ReaderCmd Msg) )
@@ -154,26 +157,26 @@ view model =
                                 ]
                                 []
                             ]
-                        , div [ class "form-section" ]
-                            [ button
-                                [ type_ "submit"
-                                , class "btn btn-primary"
-                                , onClick Login
-                                ]
-                                [ text "Login" ]
+                        ]
+                    , div [ class "form-section" ]
+                        [ button
+                            [ type_ "button"
+                            , class "btn-login btn btn-primary"
+                            , onClick Login
                             ]
-                        , div [ class "form-section row" ]
-                            [ span
-                                [ class "col-md-6 btn btn-link"
-                                , onClick SignupRedirect
-                                ]
-                                [ text "Sign Up" ]
-                            , span
-                                [ class "btn btn-link"
-                                , onClick ForgotPasswordRedirect
-                                ]
-                                [ text "Forgot password" ]
-                            ]
+                            [ text "Login" ]
+                        ]
+                    ]
+                , div [ class "links-section col-md-12" ]
+                    [ span [ class "btn" ]
+                        [ Html.a
+                            [ href "/users/sign_up" ]
+                            [ span [] [ text "Sign Up" ] ]
+                        ]
+                    , span [ class "btn" ]
+                        [ Html.a
+                            [ href "/users/forgot_password" ]
+                            [ span [] [ text "Forgot password" ] ]
                         ]
                     ]
                 ]

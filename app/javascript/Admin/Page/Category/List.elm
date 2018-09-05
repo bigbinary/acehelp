@@ -172,7 +172,7 @@ updateCategoryStatus : Model -> CategoryId -> AvailabilitySatus -> ( Model, List
 updateCategoryStatus model categoryId categoryStatus =
     let
         cmd =
-            Strict <| Reader.map (Task.attempt CategoriesLoaded) (requestUpdateCategoryStatus categoryId categoryStatus)
+            Strict <| Reader.map (Task.attempt CategoriesLoaded) (requestUpdateCategoryStatus categoryId <| availablityStatusIso.get categoryStatus)
     in
         ( model, [ cmd ] )
 

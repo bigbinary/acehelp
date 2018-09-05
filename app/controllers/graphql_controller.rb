@@ -2,9 +2,12 @@
 
 class GraphqlController < ApplicationController
   include LoadOrganization
+  include SetUserByToken
 
   def execute
     result = AcehelpSchema.execute(query, variables: variables, context: context, operation_name: operation_name)
+    set_cookies_after_successful_login(result)
+    context
     render json: result
   rescue => e
     show_error_in_logs(e)
@@ -29,10 +32,8 @@ class GraphqlController < ApplicationController
     def context
       context = {}
       context[:organization] = @organization if @organization.present?
-      context[:current_user] = current_user if current_user
-      if request_is_mutation_for?("addTicket")
-        context[:user_agent] = request.user_agent
-      end
+      context[:current_user] = @resource if @resource.present?
+      context[:request] = request
       context
     end
 

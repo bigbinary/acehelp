@@ -6,13 +6,25 @@ import GraphQL.Request.Builder.Arg as Arg
 import GraphQL.Request.Builder.Variable as Var
 
 
+type alias LoginData =
+    { authentication_token : Token
+    , user : UserWithOrganization
+    }
+
+
+type alias Token =
+    { uid : String
+    , access_token : String
+    , client : String
+    }
+
+
 type alias SignupInputs =
     { firstName : String
     , email : String
     , password : String
     , confirmPassword : String
     }
-
 
 signupMutation : GQLBuilder.Document GQLBuilder.Mutation UserWithErrors SignupInputs
 signupMutation =
@@ -44,7 +56,32 @@ signupMutation =
                     userWithErrorObject
 
 
-loginMutation : GQLBuilder.Document GQLBuilder.Mutation String { a | email : String, password : String }
+loginDataObject : GQLBuilder.ValueSpec GQLBuilder.NonNull GQLBuilder.ObjectType LoginData vars
+loginDataObject =
+    (GQLBuilder.object LoginData
+        |> GQLBuilder.with
+            (GQLBuilder.field
+                "authentication_token"
+                []
+                (tokenObject)
+            )
+        |> GQLBuilder.with
+            (GQLBuilder.field "user"
+                []
+                (userWithOrganizationObject)
+            )
+    )
+
+
+tokenObject : GQLBuilder.ValueSpec GQLBuilder.NonNull GQLBuilder.ObjectType Token vars
+tokenObject =
+    GQLBuilder.object Token
+        |> GQLBuilder.with (GQLBuilder.field "access_token" [] GQLBuilder.string)
+        |> GQLBuilder.with (GQLBuilder.field "uid" [] GQLBuilder.string)
+        |> GQLBuilder.with (GQLBuilder.field "client" [] GQLBuilder.string)
+
+
+loginMutation : GQLBuilder.Document GQLBuilder.Mutation LoginData { a | email : String, password : String }
 loginMutation =
     let
         emailVar =
@@ -64,9 +101,9 @@ loginMutation =
                       )
                     ]
                     (GQLBuilder.extract <|
-                        GQLBuilder.field "authentication_token"
+                        GQLBuilder.field "user_with_token"
                             []
-                            GQLBuilder.string
+                            (loginDataObject)
                     )
                 )
 

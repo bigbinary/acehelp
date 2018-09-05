@@ -1,8 +1,6 @@
 # frozen_string_literal: true
 
 Rails.application.routes.draw do
-  devise_for :users, controllers: {registrations: "registrations"}
-
   root to: "home#index"
 
   post "/graphql", to: "graphql#execute"
@@ -14,6 +12,9 @@ Rails.application.routes.draw do
   scope module: 'admin' do
     resources :organizations, only: :new
   end
+
+  get "/users/sign_in", to: "users#sign_in"
+  delete "/users/sign_out", to: "users#sign_out"
 
   resources :organizations, only: [:show], param: :api_key do
     resources :articles, only: :index

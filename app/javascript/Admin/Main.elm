@@ -786,8 +786,8 @@ update msg model =
                 let
                     currentPageModel =
                         case getPage model.currentPage of
-                            Login signUpModel ->
-                                signUpModel
+                            Login loginModel ->
+                                loginModel
 
                             _ ->
                                 Login.initModel
@@ -801,6 +801,31 @@ update msg model =
 
                         Login.ForgotPasswordRedirect ->
                             updateNavigation (NavigateTo Route.ForgotPassword)
+
+                        Login.LoginResponse (Ok user_with_token) ->
+                            let
+                                ( updatedModel, updatedCmd ) =
+                                    case (user_with_token.user.organization) of
+                                        Nothing ->
+                                            updateNavigation (NavigateTo Route.OrganizationCreate)
+
+                                        Just organization ->
+                                            let
+                                                org =
+                                                    organization
+                                            in
+                                                update (NavigateTo (Route.ArticleList org.api_key))
+                                                    ({ model
+                                                        | organizationKey = org.api_key
+                                                        , organizationName = org.name
+                                                     }
+                                                    )
+                            in
+                                ( { updatedModel
+                                    | userId = user_with_token.user.id
+                                  }
+                                , updatedCmd
+                                )
 
                         _ ->
                             ( { model | currentPage = Loaded (Login newModel) }
@@ -843,13 +868,17 @@ update msg model =
 
 subscriptions : Model -> Sub Msg
 subscriptions model =
-    case getPage model.currentPage of
-        ArticleEdit articleEditModel ->
-            Sub.map ArticleEditMsg <| ArticleEdit.subscriptions articleEditModel
+    let
+        subs =
+            case getPage model.currentPage of
+                ArticleEdit articleEditModel ->
+                    Sub.map ArticleEditMsg <| ArticleEdit.subscriptions articleEditModel
 
-        _ ->
-            Sub.batch
-                [ timedOut <| TimedOut ]
+                _ ->
+                    Sub.batch
+                        [ timedOut <| TimedOut ]
+    in
+        subs
 
 
 

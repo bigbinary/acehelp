@@ -129,7 +129,7 @@ update msg model =
                         , note = Note ticket.id ""
                         , comments = ticket.comments
                         , notes = ticket.notes
-                        , success = Just "Ticket Updated Successfully..."
+                        , success = Nothing
                       }
                     , []
                     )

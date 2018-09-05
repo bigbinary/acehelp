@@ -4,13 +4,29 @@ require "test_helper"
 require "graphql/client_host"
 
 class Mutations::PostCommentInTicketMutationsTest < ActiveSupport::TestCase
-  include Devise::Test::IntegrationHelpers
-
   setup do
     @ticket = tickets(:payment_issue_ticket)
     @agent = agents(:illya_kuryakin)
-    sign_in @agent
+    @agent.password = @agent.password_confirmation = "SelfDestructIn5"
+    @agent.save
     @comment_info = "Comment about a ticket by agent #{@agent.name}"
+    login_query = <<-GRAPHQL
+      mutation($login_keys: LoginUserInput!) {
+          loginUser(input: $login_keys) {
+            user_with_token {
+              authentication_token {
+                client
+                access_token
+                uid
+              }
+            }
+            errors {
+              message
+              path
+            }
+          }
+      }
+    GRAPHQL
     @mutation_query = <<-GRAPHQL
       mutation($input: UpdateTicketInput!) {
           updateTicket(input: $input) {
@@ -31,8 +47,7 @@ class Mutations::PostCommentInTicketMutationsTest < ActiveSupport::TestCase
           }
       }
     GRAPHQL
-
-
+    AceHelp::Client.execute(login_query, login_keys: { email: @agent.email, password: "SelfDestructIn5" })
   end
 
   test "post comment" do
@@ -66,8 +81,6 @@ class Mutations::PostCommentInTicketMutationsTest < ActiveSupport::TestCase
 
   test "post comment as a user" do
     @user = users :brad
-    sign_out @agent
-    sign_in @user
     @ticket.update status: Ticket.statuses[:resolved]
     assert_equal Ticket.statuses[:resolved], @ticket.status
     result = AceHelp::Client.execute(@mutation_query, input: {

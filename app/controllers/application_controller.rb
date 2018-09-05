@@ -7,25 +7,20 @@ class ApplicationController < ActionController::Base
   rescue_from ActiveRecord::RecordNotFound, with: :render_not_found
   skip_before_action :verify_authenticity_token
 
-  acts_as_token_authentication_handler_for User, fallback: :none
+  include Concerns::DeviseTokenAuthentication
 
   private
-
     def ensure_user_is_logged_in
-      unless current_user
-        redirect_to new_user_session_path
+      uid = cookies.signed[:uid]
+      @resource = User.find_by(email: uid)
+      if @resource
+        new_organization_path if @resource.organizations.empty?
+      else
+        redirect_to users_sign_in_path
       end
     end
 
     def configure_permitted_parameters
       devise_parameter_sanitizer.permit(:sign_up, keys: [:first_name])
-    end
-
-    def after_sign_in_path_for(resource)
-      if resource.organizations.exists?
-        organization_articles_path(resource.organizations.first.api_key)
-      else
-        new_organization_path
-      end
     end
 end

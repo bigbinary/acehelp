@@ -12,7 +12,7 @@ gem "rails", "~> 5.2.1"
 gem "devise", "~> 4.4.0"
 
 # Use this gem to support token-authentication with devise
-gem 'simple_token_authentication', '~> 1.0'
+gem 'devise_token_auth'
 
 # Use pg as the database for Active Record
 gem "pg"
@@ -116,7 +116,7 @@ group :test do
   # Easy installation and use of chromedriver to run system tests with Chrome
   gem "chromedriver-helper"
   # A friendlier Ruby client for consuming GraphQL-based APIs.
-  gem "graphlient", "~> 0.3.1"
+  gem "graphlient", "~> 0.3.2"
   # SimpleCov is a code coverage analysis tool for Ruby
   gem "simplecov", require: false
 end
