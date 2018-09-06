@@ -33,7 +33,7 @@ module Concerns
               auth_header = @resource.extend_batch_buffer(@token, @client_id)
               auth_header[DeviseTokenAuth.headers_names[:"access-token"]] = " "
               auth_header[DeviseTokenAuth.headers_names[:"expiry"]] = " "
-              update_cookies_after_every_result(auth_header) # if Rails.env.test?
+              update_cookies_after_every_result(auth_header) if Rails.env.test?
             else
               auth_header = @resource.create_new_auth_token(@client_id)
               update_cookies_after_every_result(auth_header)
