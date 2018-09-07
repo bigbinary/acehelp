@@ -22,6 +22,7 @@ class Mutations::SignupMutations
           new_user = User.create(first_name: inputs[:first_name], password: inputs[:password], email: inputs[:email])
 
           token = new_user.create_new_auth_token
+          puts("===================token set after signup : #{token["uid"]}==============")
         else
           errors = Utils::ErrorHandler.new.error("confirm password do not match", context)
         end
