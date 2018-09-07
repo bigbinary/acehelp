@@ -19,8 +19,7 @@ task :not_production do
 end
 
 desc "Sets up the project by running migration and populating sample data"
-task setup: [:environment, :not_production, "db:drop", "db:create"] do
-  system "rake db:migrate"
+task setup: [:environment, :not_production, "db:drop", "db:create", "db:migrate"] do
   ["setup_sample_data"].each { |cmd| system "rake #{cmd}" }
 end
 
@@ -35,7 +34,6 @@ end
 
 desc "Deletes all records and populates sample data"
 task setup_sample_data: [:environment] do
-
   OrganizationUser.delete_all
   ArticleUrl.delete_all
   Article.delete_all
