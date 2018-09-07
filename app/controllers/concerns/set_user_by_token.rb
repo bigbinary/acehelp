@@ -15,6 +15,7 @@ module SetUserByToken
     access_token = cookies.signed[:access_token]
     uid = cookies.signed[:uid]
     @client_id = cookies.signed[:client]
+    logger.info("================ #{access_token}, #{uid}, #{@client_id} ===========")
     return unless access_token.present? && uid.present?
 
     set_cookies(access_token, @client_id, uid)
@@ -28,7 +29,6 @@ module SetUserByToken
     return unless result["data"] && result["data"]["loginUser"] && result["data"]["loginUser"]["user_with_token"]
     token = result["data"]["loginUser"]["user_with_token"]["authentication_token"]
     if token.present?
-      logger.info("================Token setup for login mutation : #{token["uid"]}=============")
       set_cookies(token["access_token"], token["client"], token["uid"])
       set_resource(token["uid"])
     end
@@ -36,7 +36,6 @@ module SetUserByToken
 
   def update_cookies_after_every_result(auth_header)
     set_cookies(auth_header["access-token"], auth_header["client"], auth_header["uid"])
-    logger.info("================ auth_header setup : #{auth_header["uid"]} =============")
     set_resource(auth_header["uid"])
   end
 

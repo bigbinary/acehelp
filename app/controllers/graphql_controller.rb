@@ -34,7 +34,6 @@ class GraphqlController < ApplicationController
       context[:organization] = @organization if @organization.present?
       context[:current_user] = @resource if @resource.present?
       context[:request] = request
-      logger.info("=================context set for current_user: #{context[:current_user]} , #{@resource}=====================")
       context
     end
 
