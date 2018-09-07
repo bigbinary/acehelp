@@ -12,7 +12,7 @@ gem "rails", "~> 5.2.1"
 gem "devise", "~> 4.4.0"
 
 # Use this gem to support token-authentication with devise
-gem 'devise_token_auth'
+gem 'devise_token_auth', github: 'BigBinary/devise_token_auth'
 
 # Use pg as the database for Active Record
 gem "pg"
