@@ -15,6 +15,7 @@ module SetUserByToken
     access_token = cookies.signed[:access_token]
     uid = cookies.signed[:uid]
     @client_id = cookies.signed[:client]
+    logger.info("================ #{access_token}, #{uid}, #{@client_id} ===========")
     return unless access_token.present? && uid.present?
 
     set_cookies(access_token, @client_id, uid)
