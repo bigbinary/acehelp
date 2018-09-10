@@ -14,9 +14,9 @@ class Mutations::ArticleMutations
 
     resolve ->(object, inputs, context) {
       new_article = Article.new(
-        title: inputs[:title],
-        desc: inputs[:desc],
-        organization_id: context[:organization].id
+        # title: inputs[:title],
+        # desc: inputs[:desc],
+        # organization_id: context[:organization].id
       )
 
       if new_article.save
@@ -30,6 +30,7 @@ class Mutations::ArticleMutations
         end
         article = new_article
       else
+        debugger
         errors = Utils::ErrorHandler.new.detailed_error(new_article, context)
       end
 
