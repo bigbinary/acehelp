@@ -12,6 +12,7 @@ import Html.Events exposing (..)
 import Reader exposing (Reader)
 import Task exposing (Task)
 import Admin.Data.ReaderCmd exposing (..)
+import Page.UserNotification exposing (..)
 
 
 -- MODEL
@@ -84,7 +85,6 @@ update msg model =
             ( { model
                 | id = "0"
                 , name = Field.update model.name ""
-                , error = Nothing
               }
             , []
             )

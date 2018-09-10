@@ -7,6 +7,7 @@ import Admin.Request.Helper exposing (..)
 type ReaderCmd msg
     = Strict (Reader ( NodeEnv, ApiKey, AppUrl ) (Cmd msg))
     | Open (Reader ( NodeEnv, AppUrl ) (Cmd msg))
+    | Unit (Reader () (Cmd msg))
 
 
 map : (Cmd msg -> Cmd msg1) -> ReaderCmd msg -> ReaderCmd msg1
@@ -17,6 +18,9 @@ map fn readerCmd =
 
         Open reader ->
             Open <| Reader.map fn reader
+
+        Unit reader ->
+            Unit <| Reader.map fn reader
 
 
 readerCmdToCmd : NodeEnv -> ApiKey -> AppUrl -> (a -> msg) -> List (ReaderCmd a) -> Cmd msg
@@ -32,5 +36,9 @@ readerCmdToCmd nodeEnv apiKey appUrl mapMsg cmds =
                     Open reader ->
                         Cmd.map mapMsg <|
                             Reader.run reader ( nodeEnv, appUrl )
+
+                    Unit reader ->
+                        Cmd.map mapMsg <|
+                            Reader.run reader ()
             )
             cmds

@@ -1,4 +1,4 @@
-module Page.Common.View exposing (..)
+module Admin.Views.Common exposing (..)
 
 import Html exposing (..)
 import Html.Events exposing (..)
@@ -33,6 +33,17 @@ multiSelectMenu title values onselect =
         ]
 
 
-loadingIndicator : Html msg
-loadingIndicator =
-    div [ class "loading-indicator" ] [ text "" ]
+loadingIndicator : String -> Html msg
+loadingIndicator msg =
+    div [ class "loading-indicator" ] [ span [ class "spinner-label" ] [ text msg ], spinner ]
+
+
+spinner : Html msg
+spinner =
+    div [ class "spinner" ]
+        [ div [ class "rect rect1" ] []
+        , div [ class "rect rect2" ] []
+        , div [ class "rect rect3" ] []
+        , div [ class "rect rect4" ] []
+        , div [ class "rect rect5" ] []
+        ]

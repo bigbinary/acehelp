@@ -32,15 +32,9 @@ $blueThemeColor: rgb(60, 170, 249);
   }
 
   .loading-indicator{
-    background-image: url("../../images/loading.gif");
-    background-repeat: no-repeat;
-    background-size: 60px 70px;
-    width: 60px;
-    height: 70px;
     text-align: center;
-    position: absolute;
-    right: 50px;
-    top:80px;
+    display: flex;
+    justify-content: center;
   }
 
   #content-wrapper {
@@ -119,4 +113,14 @@ $blueThemeColor: rgb(60, 170, 249);
       }
     }
   }
+
+  .floating-notifications{
+    position: absolute;
+    right: 0;
+    width: 360px;
+    text-align: center;
+    margin: 5px;
+    z-index: 1;
+  }
+
 }
