@@ -49,4 +49,7 @@ Types::MutationType = GraphQL::ObjectType.define do
   field :updateTicket, field: Mutations::TicketMutations::Update.field
   field :changeCategoryStatus, field: Mutations::ChangeCategoryStatusMutation::Perform.field
   field :changeTriggerStatus, field: Mutations::ChangeTriggerStatusMutation::Perform.field
+
+  field :changeVisibilityOfWidget, field: Mutations::WidgetSettingMutation::EnableDisableWidget.field
+  field :saveOrganizationWidgetSetting, field: Mutations::WidgetSettingMutation::Create.field
 end
