@@ -4,10 +4,10 @@
     font-family: "proxima-nova", Arial, sans-serif;
     font-size: 14px;
     line-height: 20px;
-    z-index: 2147483000;
     
     #mini-view {
         position: fixed;
+        z-index: 2147483000;
         width: 60px;
         height: 60px;
         top: 80%;
@@ -45,6 +45,7 @@
 
     #max-view {
       position: fixed;
+      z-index: 2147483000;
       top: 0;
       background: #fff;
       height: 100%;
