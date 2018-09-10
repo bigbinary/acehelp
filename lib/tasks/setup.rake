@@ -34,10 +34,10 @@ end
 
 desc "Deletes all records and populates sample data"
 task setup_sample_data: [:environment] do
-  User.delete_all
   OrganizationUser.delete_all
   ArticleUrl.delete_all
   ArticleCategory.delete_all
+  User.delete_all
   Article.delete_all
   Comment.delete_all
   Ticket.delete_all
