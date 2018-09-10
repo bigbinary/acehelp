@@ -1,4 +1,4 @@
-module Main exposing (Flags, Model, Msg(..), Page(..), PageState(..), adminHeader, adminLayout, combineCmds, getPage, init, main, navigateTo, setRoute, subscriptions, update, view)
+module Main exposing (Flags, Model, Msg(..), Page(..), PageState(..), combineCmds, getPage, init, main, navigateTo, setRoute, subscriptions, update, view)
 
 import Admin.Data.ReaderCmd exposing (..)
 import Admin.Ports exposing (..)
@@ -6,8 +6,6 @@ import Admin.Request.Helper exposing (ApiKey, NodeEnv, logoutRequest)
 import Admin.Views.Common exposing (..)
 import Field exposing (..)
 import Html exposing (..)
-import Html.Attributes exposing (..)
-import Html.Events exposing (..)
 import Http
 import Navigation exposing (..)
 import Page.Article.Create as ArticleCreate
@@ -32,6 +30,8 @@ import Page.Url.Create as UrlCreate
 import Page.Url.Edit as UrlEdit
 import Page.Url.List as UrlList
 import Page.UserNotification as UserNotification
+import Page.View as MainView
+import Admin.Ports exposing (..)
 import Route
 
 
@@ -954,13 +954,16 @@ view model =
                     Html.map ForgotPasswordMsg
                         (ForgotPassword.view forgotPasswordModel)
 
+        headerContent =
+            (MainView.adminHeader model.organizationKey model.organizationName model.route NavigateTo SignOut)
+
         viewWithTopMenu =
             case model.currentPage of
                 TransitioningFrom _ ->
-                    adminLayout True "Loading.." model [ viewContent ]
+                    MainView.adminLayout headerContent UserNotificationMsg True "Loading.." model.notifications [ viewContent ]
 
                 Loaded _ ->
-                    adminLayout False "" model [ viewContent ]
+                    MainView.adminLayout headerContent UserNotificationMsg False "" model.notifications [ viewContent ]
     in
         case getPage model.currentPage of
             Login _ ->
@@ -980,124 +983,6 @@ view model =
 
             _ ->
                 viewWithTopMenu
-
-
-adminLayout : Bool -> String -> Model -> List (Html Msg) -> Html Msg
-adminLayout showLoading spinnerLabel model viewContent =
-    div []
-        [ adminHeader model
-        , div
-            []
-            [ Html.map UserNotificationMsg <| UserNotification.view showLoading spinnerLabel model.notifications ]
-        , div [ class "container main-wrapper" ] viewContent
-        ]
-
-
-adminHeader : Model -> Html Msg
-adminHeader model =
-    nav [ class "header navbar navbar-dark bg-primary navbar-expand flex-column flex-md-row" ]
-        [ div [ class "container" ]
-            [ ul
-                [ class "navbar-nav mr-auto mt-2 mt-lg-0 " ]
-                [ li [ class "nav-item" ]
-                    [ Html.a
-                        [ classList
-                            [ ( "navbar-brand", True ) ]
-                        ]
-                        [ span [] [ text model.organizationName ] ]
-                    ]
-                , li [ class "nav-item" ]
-                    [ Html.a
-                        [ classList
-                            [ ( "nav-link", True )
-                            , ( "active"
-                              , (model.route
-                                    == Route.ArticleList
-                                        model.organizationKey
-                                )
-                                    || (model.route == Route.ArticleCreate model.organizationKey)
-                              )
-                            ]
-                        , onClick <| NavigateTo (Route.ArticleList model.organizationKey)
-                        ]
-                        [ span [] [ text "Articles" ] ]
-                    ]
-                , li [ class "nav-item" ]
-                    [ Html.a
-                        [ classList
-                            [ ( "nav-link", True )
-                            , ( "active"
-                              , (model.route == Route.UrlList model.organizationKey)
-                                    || (model.route == Route.UrlCreate model.organizationKey)
-                              )
-                            ]
-                        , onClick <| NavigateTo (Route.UrlList model.organizationKey)
-                        ]
-                        [ span [] [ text "URL" ] ]
-                    ]
-                , li [ class "nav-item" ]
-                    [ Html.a
-                        [ classList
-                            [ ( "nav-link", True )
-                            , ( "active"
-                              , (model.route == Route.CategoryList model.organizationKey)
-                                    || (model.route == Route.CategoryCreate model.organizationKey)
-                              )
-                            ]
-                        , onClick <| NavigateTo (Route.CategoryList model.organizationKey)
-                        ]
-                        [ span [] [ text "Category" ] ]
-                    ]
-                , li [ class "nav-item" ]
-                    [ Html.a
-                        [ classList
-                            [ ( "nav-link", True )
-                            , ( "active", model.route == Route.TicketList model.organizationKey )
-                            ]
-                        , onClick <| NavigateTo (Route.TicketList model.organizationKey)
-                        ]
-                        [ span [] [ text "Ticket" ] ]
-                    ]
-                , li [ class "nav-item" ]
-                    [ Html.a
-                        [ classList
-                            [ ( "nav-link", True )
-                            , ( "active", model.route == Route.FeedbackList model.organizationKey )
-                            ]
-                        , onClick <| NavigateTo (Route.FeedbackList model.organizationKey)
-                        ]
-                        [ span [] [ text "Feedback" ] ]
-                    ]
-                , li [ class "nav-item" ]
-                    [ Html.a
-                        [ classList
-                            [ ( "nav-link", True )
-                            , ( "active", model.route == Route.TeamList model.organizationKey )
-                            ]
-                        , onClick <| NavigateTo (Route.TeamList model.organizationKey)
-                        ]
-                        [ span [] [ text "Team" ] ]
-                    ]
-                , li [ class "nav-item" ]
-                    [ Html.a
-                        [ classList
-                            [ ( "nav-link", True )
-                            , ( "active", model.route == Route.Settings model.organizationKey )
-                            ]
-                        , onClick <| NavigateTo (Route.Settings model.organizationKey)
-                        ]
-                        [ span [] [ text "Settings" ] ]
-                    ]
-                ]
-            , ul [ class "navbar-nav ml-auto" ]
-                [ li [ class "nav-item " ]
-                    [ Html.a [ class "nav-link", onClick SignOut ]
-                        [ text "Logout" ]
-                    ]
-                ]
-            ]
-        ]
-
 
 
 -- MAIN
