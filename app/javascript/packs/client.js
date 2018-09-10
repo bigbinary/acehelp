@@ -49,6 +49,12 @@ var AceHelp = (function() {
         _app.ports.openArticle.send(articleId);
     }
 
+    function _openWidget() {
+        if (!_app) throw new Error("AceHelp: Widget has not been initialized");
+
+        _app.ports.openWidget.send(null);
+    }
+
     function _closeWidget() {
         if (!_app) throw new Error("AceHelp: Widget has not been initialized");
 
@@ -93,6 +99,14 @@ var AceHelp = (function() {
          */
         userInfo: _userInfo,
         openArticle: _openArticle,
+
+        /**
+         * Open the Ace Help widget programmatically.
+         *
+         * @example
+         * window.AceHelp.openWidget();
+         */
+        openWidget: _openWidget,
 
         /**
          * Close the Ace Help widget programmatically.
