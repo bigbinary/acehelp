@@ -14,9 +14,9 @@ class Mutations::ArticleMutations
 
     resolve ->(object, inputs, context) {
       new_article = Article.new(
-        # title: inputs[:title],
-        # desc: inputs[:desc],
-        # organization_id: context[:organization].id
+        title: inputs[:title],
+        desc: inputs[:desc],
+        organization_id: context[:organization].id
       )
 
       if new_article.save
@@ -179,7 +179,7 @@ class Mutations::ArticleMutations
     resolve ->(object, inputs, context) {
       article = Article.find_by(id: inputs[:id], organization_id: context[:organization].id)
 
-      if article
+      if nil# article
         if article.update_attributes(status: inputs[:status].downcase)
           new_article = article
           article.categories.update_all(status: :active) if article.active?
