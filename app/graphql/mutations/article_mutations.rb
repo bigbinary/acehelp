@@ -30,7 +30,6 @@ class Mutations::ArticleMutations
         end
         article = new_article
       else
-        debugger
         errors = Utils::ErrorHandler.new.detailed_error(new_article, context)
       end
 
@@ -179,7 +178,7 @@ class Mutations::ArticleMutations
     resolve ->(object, inputs, context) {
       article = Article.find_by(id: inputs[:id], organization_id: context[:organization].id)
 
-      if nil# article
+      if article
         if article.update_attributes(status: inputs[:status].downcase)
           new_article = article
           article.categories.update_all(status: :active) if article.active?
