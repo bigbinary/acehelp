@@ -6,7 +6,6 @@ class UsersController < ApplicationController
   end
 
   def sign_out
-    session.clear
-    session.delete(:uid)
+    warden.logout
   end
 end

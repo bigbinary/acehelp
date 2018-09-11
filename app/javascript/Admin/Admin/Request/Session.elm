@@ -31,7 +31,7 @@ signupRequest signupInputs =
         )
 
 
-requestLogin : { a | email : String, password : String } -> Reader ( NodeEnv, AppUrl ) (Task GQLClient.Error LoginData)
+requestLogin : { a | email : String, password : String } -> Reader ( NodeEnv, AppUrl ) (Task GQLClient.Error UserWithOrganization)
 requestLogin authInputs =
     Reader.Reader
         (\( nodeEnv, appUrl ) ->

@@ -67,17 +67,18 @@ class Mutations::TicketMutations
 
     resolve ->(object, inputs, context) {
       ticket = Ticket.find_by(id: inputs[:id])
+      debugger
       if ticket.present?
         new_comment = Comment.add_comment(
           info: inputs[:comment],
-          user_id: context[:current_user].id,
+          user_id: context[:current_user]["id"],
           ticket_id: ticket.id
         ) if inputs[:comment].present?
-        new_comment.assign_agent_to_ticket(context[:current_user].id) if new_comment
+        new_comment.assign_agent_to_ticket(context[:current_user]["id"]) if new_comment
         if inputs[:note].present?
           Note.add_note!(
             details: inputs[:note],
-            agent_id: context[:current_user].id,
+            agent_id: context[:current_user]["id"],
             ticket_id: ticket.id
           )
         end

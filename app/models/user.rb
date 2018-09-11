@@ -5,7 +5,6 @@ class User < ApplicationRecord
   # :confirmable, :lockable, :timeoutable and :omniauthable
   devise :database_authenticatable, :registerable,
           :recoverable, :rememberable, :trackable, :validatable
-  include DeviseTokenAuth::Concerns::User
 
   belongs_to :organization, autosave: true, dependent: :destroy, required: false
 

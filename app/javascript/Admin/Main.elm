@@ -787,10 +787,10 @@ update msg model =
                         Login.ForgotPasswordRedirect ->
                             updateNavigation (NavigateTo Route.ForgotPassword)
 
-                        Login.LoginResponse (Ok user_with_token) ->
+                        Login.LoginResponse (Ok user) ->
                             let
                                 ( updatedModel, updatedCmd ) =
-                                    case user_with_token.user.organization of
+                                    case (user.organization) of
                                         Nothing ->
                                             updateNavigation (NavigateTo Route.OrganizationCreate)
 
@@ -806,7 +806,7 @@ update msg model =
                                                     }
                             in
                                 ( { updatedModel
-                                    | userId = user_with_token.user.id
+                                    | userId = user.id
                                   }
                                 , updatedCmd
                                 )
