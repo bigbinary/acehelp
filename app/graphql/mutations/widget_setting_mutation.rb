@@ -4,17 +4,14 @@ class Mutations::WidgetSettingMutation
   Create = GraphQL::Relay::Mutation.define do
     name "SaveSettings"
 
-    input_field :api_key, types.String
-    input_field :app_url, types.String
     input_field :base_url, types.String
 
     return_field :setting, Types::SettingType
     return_field :errors, types[Types::ErrorType]
 
     resolve ->(object, inputs, context) {
-      setting = Setting.new(
-        api_key: inputs[:api_key],
-        app_url: inputs[:app_url],
+      new_setting = Setting.new(
+        organization_id: context[:organization].id,
         base_url: inputs[:base_url]
       )
       if new_setting.save
@@ -39,9 +36,9 @@ class Mutations::WidgetSettingMutation
     return_field :errors, types[Types::ErrorType]
 
     resolve ->(object, inputs, context) {
-      setting = Setting.find_by(id: inputs[:id], organization_id: context[:organization].id)
+      setting = Setting.find_or_create_by(organization_id: context[:organization].id)
       if setting
-        if setting.send(inputs[:visibility])
+        if setting.update_attributes(visibility: inputs[:visibility])
           updated_settings = setting
         else
           errors = Utils::ErrorHandler.new.detailed_error(setting, context)
