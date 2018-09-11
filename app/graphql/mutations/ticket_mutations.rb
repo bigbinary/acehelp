@@ -67,7 +67,6 @@ class Mutations::TicketMutations
 
     resolve ->(object, inputs, context) {
       ticket = Ticket.find_by(id: inputs[:id])
-      debugger
       if ticket.present?
         new_comment = Comment.add_comment(
           info: inputs[:comment],

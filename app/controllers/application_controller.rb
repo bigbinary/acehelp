@@ -9,8 +9,8 @@ class ApplicationController < ActionController::Base
 
   private
     def ensure_user_is_logged_in
-      email = warden.user["email"]
-      @resource = User.find_by_email(email)
+      email = warden.user["email"] if warden.user
+      @resource = User.find_by(email: email)
       if @resource
         new_organization_path if @resource.organizations.empty?
       else

@@ -11,12 +11,8 @@ class Mutations::AssignUserToOrganizationMutationsTest < ActiveSupport::TestCase
     @login_query = <<-GRAPHQL
       mutation($login_keys: LoginUserInput!) {
           loginUser(input: $login_keys) {
-            user_with_token {
-              authentication_token {
-                client
-                access_token
-                uid
-              }
+            user {
+              id
             }
             errors {
               message
