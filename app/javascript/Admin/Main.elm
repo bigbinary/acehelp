@@ -690,18 +690,38 @@ update msg model =
                     OrganizationCreate.update oCMsg currentPageModel
             in
             case oCMsg of
-                OrganizationCreate.SaveOrgResponse (Ok org) ->
-                    ( { model
-                        | organizationKey = org.api_key
-                        , organizationName = org.name
-                      }
-                    , Navigation.pushUrl model.navKey (Route.routeToString <| Route.ArticleList org.api_key)
-                    )
+                OrganizationCreate.SaveOrgResponse (Ok orgWithErrors) ->
+                    let
+                        errors =
+                            case orgWithErrors.errors of
+                                Just errors ->
+                                    List.map .message errors |> String.join ", "
 
-                _ ->
-                    ( { model | currentPage = Loaded (OrganizationCreate newModel) }
-                    , runReaderCmds OrganizationCreateMsg cmds
-                    )
+                                Nothing ->
+                                    ""
+
+                        --org = orgWithErrors.organization
+                        updatedModel =
+                            { currentPageModel
+                                | error = Just errors
+                            }
+                    in
+                        case orgWithErrors.organization of
+                            Just organization ->
+                                let
+                                    org =
+                                        organization
+                                in
+                                    update (NavigateTo (Route.ArticleList org.api_key))
+                                        { model
+                                            | organizationKey = org.api_key
+                                            , organizationName = org.name
+                                        }
+
+                            Nothing ->
+                                ( { model | currentPage = Loaded (OrganizationCreate updatedModel) }
+                                , runReaderCmds OrganizationCreateMsg cmds
+                                )
 
         SignUpMsg suMsg ->
             let

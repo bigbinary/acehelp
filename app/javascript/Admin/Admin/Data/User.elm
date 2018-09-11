@@ -2,17 +2,13 @@ module Admin.Data.User exposing (Error, User, UserWithErrors, UserWithOrganizati
 
 import Admin.Data.Organization exposing (..)
 import GraphQL.Request.Builder as GQLBuilder
+import Admin.Data.Common exposing (..)
 
 
 type alias User =
     { id : String
     , email : String
     }
-
-
-type alias Error =
-    { message : String }
-
 
 type alias UserWithErrors =
     { user : Maybe User
@@ -49,12 +45,6 @@ userObject =
     GQLBuilder.object User
         |> GQLBuilder.with (GQLBuilder.field "id" [] GQLBuilder.string)
         |> GQLBuilder.with (GQLBuilder.field "email" [] GQLBuilder.string)
-
-
-errorObject : GQLBuilder.ValueSpec GQLBuilder.NonNull GQLBuilder.ObjectType Error vars
-errorObject =
-    GQLBuilder.object Error
-        |> GQLBuilder.with (GQLBuilder.field "message" [] GQLBuilder.string)
 
 
 userWithOrganizationObject : GQLBuilder.ValueSpec GQLBuilder.NonNull GQLBuilder.ObjectType UserWithOrganization vars

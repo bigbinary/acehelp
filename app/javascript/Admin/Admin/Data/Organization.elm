@@ -5,7 +5,7 @@ import GraphQL.Request.Builder as GQLBuilder
 import GraphQL.Request.Builder.Arg as Arg
 import GraphQL.Request.Builder.Variable as Var
 import Json.Decode exposing (..)
-
+import Admin.Data.Common exposing (..)
 
 type alias OrganizationId =
     String
@@ -29,13 +29,13 @@ type alias OrganizationData =
     }
 
 
-type alias OrganizationResponse =
-    { organization : Organization
-    , articles : List ArticleSummary
+type alias OrganizationWithError =
+    { organization : Maybe Organization
+    , errors : Maybe (List Error)
     }
 
 
-createOrganizationMutation : GQLBuilder.Document GQLBuilder.Mutation Organization OrganizationData
+createOrganizationMutation : GQLBuilder.Document GQLBuilder.Mutation OrganizationWithError OrganizationData
 createOrganizationMutation =
     let
         nameVar =
@@ -47,21 +47,35 @@ createOrganizationMutation =
         userIdVar =
             Var.required "user_id" .userId Var.string
     in
-    GQLBuilder.mutationDocument <|
-        GQLBuilder.extract
-            (GQLBuilder.field "addOrganization"
-                [ ( "input"
-                  , Arg.object
-                        [ ( "name", Arg.variable nameVar )
-                        , ( "email", Arg.variable emailVar )
-                        , ( "user_id", Arg.variable userIdVar )
-                        ]
-                  )
-                ]
-                (GQLBuilder.extract <|
-                    GQLBuilder.field "organization"
-                        []
-                        organizationObject
+        GQLBuilder.mutationDocument <|
+            (GQLBuilder.extract
+                (GQLBuilder.field "addOrganization"
+                    [ ( "input"
+                      , Arg.object
+                            [ ( "name", Arg.variable nameVar )
+                            , ( "email", Arg.variable emailVar )
+                            , ( "user_id", Arg.variable userIdVar )
+                            ]
+                      )
+                    ]
+                    organizationWithErrorsObject
+                )
+            )
+
+
+organizationWithErrorsObject : GQLBuilder.ValueSpec GQLBuilder.NonNull GQLBuilder.ObjectType OrganizationWithError vars
+organizationWithErrorsObject =
+    GQLBuilder.object OrganizationWithError
+        |> GQLBuilder.with
+            (GQLBuilder.field "organization"
+                []
+                (GQLBuilder.nullable organizationObject)
+            )
+        |> GQLBuilder.with
+            (GQLBuilder.field "errors"
+                []
+                (GQLBuilder.nullable
+                    (GQLBuilder.list errorObject)
                 )
             )
 

@@ -50,7 +50,7 @@ type Msg
     = OrgNameInput String
     | OrgEmailInput String
     | SaveOrganization
-    | SaveOrgResponse (Result GQLClient.Error Organization)
+    | SaveOrgResponse (Result GQLClient.Error OrganizationWithError)
 
 
 update : Msg -> Model -> ( Model, List (ReaderCmd Msg) )

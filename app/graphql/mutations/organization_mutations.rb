@@ -27,7 +27,7 @@ class Mutations::OrganizationMutations
       end
       {
         organization: organization,
-        errors: errors.first
+        errors: errors
       }
     }
   end
