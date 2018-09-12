@@ -18,8 +18,6 @@ class User < ApplicationRecord
 
   scope :for_organization, ->(org) { joins(organization_users: :organization).where(organization_users: { organization_id: org.id }) }
 
-  before_validation :set_uid_for_user
-
   def name
     ("#{first_name} #{last_name}".squish).presence || "Anonymous"
   end
@@ -53,9 +51,4 @@ class User < ApplicationRecord
     InviteUserMailer.welcome_email(self.id, org_id, sender_id, token).deliver_now
   end
   handle_asynchronously :send_welcome_mail, queue: "devise"
-
-  private
-    def set_uid_for_user
-      self.uid = self.email unless self.uid.blank?
-    end
 end
