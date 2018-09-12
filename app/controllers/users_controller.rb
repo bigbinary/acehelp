@@ -6,9 +6,6 @@ class UsersController < ApplicationController
   end
 
   def sign_out
-    session.destroy
-    cookies.delete :uid
-    cookies.delete :access_token
-    cookies.delete :client
+    warden.logout
   end
 end

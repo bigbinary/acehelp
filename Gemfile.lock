@@ -1,11 +1,3 @@
-GIT
-  remote: https://github.com/BigBinary/devise_token_auth.git
-  revision: 5987cc6fb0970f0d426d931116fcabed83a3a58b
-  specs:
-    devise_token_auth (1.0.0.rc1)
-      devise (> 3.5.2, < 4.6)
-      rails (< 6)
-
 GEM
   remote: https://rubygems.org/
   specs:
@@ -311,7 +303,6 @@ DEPENDENCIES
   delayed_job_active_record
   delayed_job_recurring
   devise (~> 4.4.0)
-  devise_token_auth!
   graphlient (~> 0.3.2)
   graphql
   graphql-preload

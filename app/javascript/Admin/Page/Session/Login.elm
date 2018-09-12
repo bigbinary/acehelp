@@ -51,7 +51,7 @@ type Msg
     | ForgotPasswordRedirect
     | SetUsername String
     | SetPassword String
-    | LoginResponse (Result GQLClient.Error LoginData)
+    | LoginResponse (Result GQLClient.Error UserWithOrganization)
 
 
 update : Msg -> Model -> ( Model, List (ReaderCmd Msg) )

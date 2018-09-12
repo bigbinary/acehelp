@@ -7,12 +7,10 @@ class ApplicationController < ActionController::Base
   rescue_from ActiveRecord::RecordNotFound, with: :render_not_found
   skip_before_action :verify_authenticity_token
 
-  include Concerns::DeviseTokenAuthentication
-
   private
     def ensure_user_is_logged_in
-      uid = cookies.signed[:uid]
-      @resource = User.find_by(email: uid)
+      email = warden.user["email"] if warden.user
+      @resource = User.find_by(email: email)
       if @resource
         new_organization_path if @resource.organizations.empty?
       else

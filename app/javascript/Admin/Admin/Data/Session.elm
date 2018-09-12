@@ -26,6 +26,7 @@ type alias SignupInputs =
     , confirmPassword : String
     }
 
+
 signupMutation : GQLBuilder.Document GQLBuilder.Mutation UserWithErrors SignupInputs
 signupMutation =
     let
@@ -81,7 +82,7 @@ tokenObject =
         |> GQLBuilder.with (GQLBuilder.field "client" [] GQLBuilder.string)
 
 
-loginMutation : GQLBuilder.Document GQLBuilder.Mutation LoginData { a | email : String, password : String }
+loginMutation : GQLBuilder.Document GQLBuilder.Mutation UserWithOrganization { a | email : String, password : String }
 loginMutation =
     let
         emailVar =
@@ -101,9 +102,9 @@ loginMutation =
                       )
                     ]
                     (GQLBuilder.extract <|
-                        GQLBuilder.field "user_with_token"
+                        GQLBuilder.field "user"
                             []
-                            (loginDataObject)
+                            (userWithOrganizationObject)
                     )
                 )
 
