@@ -957,6 +957,9 @@ view model =
         headerContent =
             (MainView.adminHeader model.organizationKey model.organizationName model.route NavigateTo SignOut)
 
+        logoutHeaderOption =
+            (MainView.logoutOption SignOut)
+
         viewWithTopMenu =
             case model.currentPage of
                 TransitioningFrom _ ->
@@ -979,10 +982,11 @@ view model =
                 viewContent
 
             OrganizationCreate _ ->
-                viewContent
+                MainView.adminLayout (MainView.logoutOption SignOut) UserNotificationMsg False "" model.notifications [ viewContent ]
 
             _ ->
                 viewWithTopMenu
+
 
 
 -- MAIN
