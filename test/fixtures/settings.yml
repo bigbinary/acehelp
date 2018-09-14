@@ -1,0 +1,8 @@
+# Read about fixtures at http://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+aceinvoice:
+  base_url: "http://aceinvoice.com"
+  organization: aceinvoice
+
+bigbinary:
+  base_url: "http://bigbinary.com"
+  organization: bigbinary
