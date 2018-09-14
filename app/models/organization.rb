@@ -10,6 +10,7 @@ class Organization < ApplicationRecord
   has_many :users, through: :organization_users
 
   has_many :owners, class_name: "User"
+  has_one :setting
 
   validates :name, presence: true
   validates :email, presence: true
