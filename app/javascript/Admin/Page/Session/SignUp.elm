@@ -117,31 +117,7 @@ update msg model =
                     ( { model | error = Just errors }, [] )
 
         SignUpResponse (Ok userWithErrors) ->
-            let
-                errors =
-                    case userWithErrors.errors of
-                        Just errors ->
-                            List.map .message errors |> String.join ", "
-
-                        Nothing ->
-                            ""
-            in
-                if (String.length errors) > 0 then
-                    ( { model
-                        | password = Field.update model.password ""
-                        , confirmPassword = Field.update model.confirmPassword ""
-                      }
-                    , []
-                    )
-                else
-                    ( { model
-                        | firstName = Field.update model.firstName ""
-                        , email = Field.update model.email ""
-                        , password = Field.update model.password ""
-                        , confirmPassword = Field.update model.confirmPassword ""
-                      }
-                    , []
-                    )
+            ( model, [] )
 
         SignUpResponse (Err error) ->
             case error of

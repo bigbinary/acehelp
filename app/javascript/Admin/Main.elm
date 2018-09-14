@@ -754,7 +754,7 @@ update msg model =
                                     , runReaderCmds SignUpMsg cmds
                                     )
                                 else
-                                    updateNavigation (NavigateTo Route.Login)
+                                    updateNavigation (NavigateTo Route.OrganizationCreate)
 
                         SignUp.LoginRedirect ->
                             updateNavigation (NavigateTo Route.Login)
@@ -983,6 +983,7 @@ view model =
 
             _ ->
                 viewWithTopMenu
+
 
 
 -- MAIN
