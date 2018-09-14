@@ -2,7 +2,14 @@
 
 class HomeController < ApplicationController
   def index
-    render
+    if user_signed_in?
+      if current_user.organizations.empty?
+        redirect_to new_organization_path
+      else
+        organization = current_user.organizations.first
+        redirect_to organization_articles_path(organization.api_key)
+      end
+    end
   end
 
   def new
