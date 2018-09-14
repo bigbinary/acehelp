@@ -19,6 +19,7 @@ class Mutations::OrganizationMutations
 
         if new_org
           organization = new_org
+          Setting.where(organization_id: organization.id).first_or_create!
         else
           errors = Utils::ErrorHandler.new.detailed_error(new_org, context)
         end
