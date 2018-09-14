@@ -1,5 +1,6 @@
 module Main exposing (Flags, Model, Msg(..), Page(..), PageState(..), combineCmds, getPage, init, main, navigateTo, setRoute, subscriptions, update, view)
 
+import Admin.Data.Common exposing (..)
 import Admin.Data.ReaderCmd exposing (..)
 import Admin.Request.Helper exposing (ApiKey, NodeEnv, logoutRequest)
 import Admin.Views.Common exposing (..)
@@ -635,7 +636,6 @@ update msg model =
                 TeamMemberCreate.SaveTeamResponse (Ok id) ->
                     updateNavigation (Route.TeamList model.organizationKey) ( newModel, newCmds )
                         |> renderFlashMessages (UserNotification.SuccessNotification "Team member added successfully.")
-
                 _ ->
                     ( newModel, newCmds )
 
@@ -653,9 +653,44 @@ update msg model =
                     TicketEdit.update teMsg
                         currentPageModel
             in
-            ( { model | currentPage = Loaded (TicketEdit newModel) }
-            , runReaderCmds TicketEditMsg cmds
-            )
+                ( { model | currentPage = Loaded (TicketEdit newModel) }
+                , runReaderCmds TicketEditMsg cmds
+                )
+
+        OrganizationCreateMsg oCMsg ->
+            let
+                currentPageModel =
+                    case getPage model.currentPage of
+                        OrganizationCreate orgCreateModel ->
+                            orgCreateModel
+
+                        _ ->
+                            OrganizationCreate.initModel model.userId
+
+                ( newModel, cmds ) =
+                    OrganizationCreate.update oCMsg currentPageModel
+            in
+                case oCMsg of
+                    OrganizationCreate.SaveOrgResponse (Ok orgWithErrors) ->
+                        let
+                            --org = orgWithErrors.organization
+                            updatedModel =
+                                { currentPageModel
+                                    | errors = flattenErrors orgWithErrors.errors
+                                }
+                        in
+                            case orgWithErrors.organization of
+                                Just org ->
+                                    update (NavigateTo (Route.ArticleList org.api_key))
+                                        { model
+                                            | organizationKey = org.api_key
+                                            , organizationName = org.name
+                                        }
+
+                                Nothing ->
+                                    ( { model | currentPage = Loaded (OrganizationCreate updatedModel) }
+                                    , runReaderCmds OrganizationCreateMsg cmds
+                                    )
 
         SettingsMsg settingsMsg ->
             let
@@ -676,52 +711,6 @@ update msg model =
             , runReaderCmds SettingsMsg cmds
             )
 
-        OrganizationCreateMsg oCMsg ->
-            let
-                currentPageModel =
-                    case getPage model.currentPage of
-                        OrganizationCreate orgCreateModel ->
-                            orgCreateModel
-
-                        _ ->
-                            OrganizationCreate.initModel model.userId
-
-                ( newModel, cmds ) =
-                    OrganizationCreate.update oCMsg currentPageModel
-            in
-            case oCMsg of
-                OrganizationCreate.SaveOrgResponse (Ok orgWithErrors) ->
-                    let
-                        errors =
-                            case orgWithErrors.errors of
-                                Just errors ->
-                                    List.map .message errors |> String.join ", "
-
-                                Nothing ->
-                                    ""
-
-                        --org = orgWithErrors.organization
-                        updatedModel =
-                            { currentPageModel
-                                | error = Just errors
-                            }
-                    in
-                        case orgWithErrors.organization of
-                            Just organization ->
-                                let
-                                    org =
-                                        organization
-                                in
-                                    update (NavigateTo (Route.ArticleList org.api_key))
-                                        { model
-                                            | organizationKey = org.api_key
-                                            , organizationName = org.name
-                                        }
-
-                            Nothing ->
-                                ( { model | currentPage = Loaded (OrganizationCreate updatedModel) }
-                                , runReaderCmds OrganizationCreateMsg cmds
-                                )
 
         SignUpMsg suMsg ->
             let

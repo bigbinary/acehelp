@@ -14,12 +14,11 @@ import Reader exposing (Reader)
 import Task exposing (Task)
 
 
-
 -- MODEL
 
 
 type alias Model =
-    { error : Maybe String
+    { errors : List String
     , name : Field String String
     , email : Field String String
     , user_id : String
@@ -28,7 +27,7 @@ type alias Model =
 
 initModel : String -> Model
 initModel userId =
-    { error = Nothing
+    { errors = []
     , name = Field (validateEmpty "Name") ""
     , email = Field (validateEmpty "Email" >> andThen validateEmail) ""
     , user_id = userId
@@ -79,33 +78,36 @@ update msg model =
                                     Passed okay ->
                                         "Unknown Error"
                             )
-                        |> String.join ", "
             in
-            if isAllValid fields then
-                save model
-
-            else
-                ( { model | error = Just "Please check your inputs" }, [] )
+                if isAllValid fields then
+                    save model
+                else
+                    ( { model | errors = errors }, [] )
 
         SaveOrgResponse (Ok org) ->
             ( model, [] )
 
         SaveOrgResponse (Err error) ->
-            ( { model | error = Just (toString error) }, [] )
+            ( { model | errors = [ "There was an error while saving organization details" ] }, [] )
+
+
+renderErrors : List String -> Html Msg
+renderErrors errors =
+    case errors of
+        [] ->
+            text ""
+
+        _ ->
+            div [ class "alert alert-danger alert-dismissible fade show", attribute "role" "alert" ]
+                [ text <| (++) "Error: " <| String.join ", " errors ]
 
 
 view : Model -> Html Msg
 view model =
     div [ class "container" ]
         [ div []
-            [ Maybe.withDefault (text "") <|
-                Maybe.map
-                    (\err ->
-                        div [ class "alert alert-danger alert-dismissible fade show", attribute "role" "alert" ]
-                            [ text <| "Error: " ++ err
-                            ]
-                    )
-                    model.error
+            [ renderErrors
+                model.errors
             ]
         , div []
             [ label [] [ text "Name: " ]
