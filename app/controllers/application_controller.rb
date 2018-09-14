@@ -9,12 +9,10 @@ class ApplicationController < ActionController::Base
 
   private
     def ensure_user_is_logged_in
-      email = warden.user["email"] if warden.user
-      @resource = User.find_by(email: email)
-      if @resource
-        new_organization_path if @resource.organizations.empty?
+      if user_signed_in?
+        new_organization_path if current_user.organizations.empty?
       else
-        redirect_to users_sign_in_path
+        redirect_to new_user_session_path
       end
     end
 
