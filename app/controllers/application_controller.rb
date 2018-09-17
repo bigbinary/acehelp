@@ -9,9 +9,7 @@ class ApplicationController < ActionController::Base
 
   private
     def ensure_user_is_logged_in
-      if user_signed_in?
-        new_organization_path if current_user.organizations.empty?
-      else
+      unless user_signed_in?
         redirect_to new_user_session_path
       end
     end
