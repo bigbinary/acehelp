@@ -1,12 +1,12 @@
-module Request.ContactUs exposing (..)
+module Request.ContactUs exposing (requestAddTicketMutation)
 
-import Task exposing (Task)
-import Reader exposing (Reader)
-import Data.ContactUs exposing (..)
 import Data.Common exposing (GQLError)
-import Request.Helpers exposing (..)
+import Data.ContactUs exposing (..)
 import GraphQL.Client.Http as GQLClient
 import GraphQL.Request.Builder as GQLBuilder
+import Reader exposing (Reader)
+import Request.Helpers exposing (..)
+import Task exposing (Task)
 
 
 requestAddTicketMutation :

@@ -1,17 +1,18 @@
-module Page.Session.ForgotPassword exposing (..)
+module Page.Session.ForgotPassword exposing (Model, Msg(..), init, initModel, update, view)
 
-import Html exposing (..)
-import Html.Attributes exposing (..)
-import Html.Events exposing (..)
+import Admin.Data.ReaderCmd exposing (..)
+import Admin.Request.Session exposing (..)
 import Field exposing (..)
 import Field.ValidationResult exposing (..)
 import GraphQL.Client.Http as GQLClient
 import Helpers exposing (..)
-import Admin.Request.Session exposing (..)
+import Html exposing (..)
+import Html.Attributes exposing (..)
+import Html.Events exposing (..)
 import Reader exposing (Reader)
-import Task exposing (Task)
 import Request.Helpers exposing (..)
-import Admin.Data.ReaderCmd exposing (..)
+import Task exposing (Task)
+
 
 
 -- MODEL
@@ -90,7 +91,7 @@ update msg model =
                         False ->
                             []
             in
-                ( { model | error = error }, cmd )
+            ( { model | error = error }, cmd )
 
 
 

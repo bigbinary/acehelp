@@ -10,5 +10,6 @@ html
     meta name="user_email" value="#{@current_user&.email}" /
     meta name="app_url" value="#{ENV['HEROKU_APP_NAME'] || ''}" /
     title Acehelp
+    = yield :head
   body
     = yield

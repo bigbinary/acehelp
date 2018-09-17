@@ -1,15 +1,15 @@
-module Page.Article.Common exposing (..)
+module Page.Article.Common exposing (SaveSatus(..), articleUrls, categoryToValue, errorView, errorsIn, itemSelection, multiSelectCategoryList, multiSelectUrlList, savingIndicator, statusClass, statusToButtonText, successView, urlToValue)
 
-import Html exposing (..)
-import Html.Attributes exposing (..)
 import Admin.Data.Category exposing (..)
-import Admin.Data.Url exposing (..)
 import Admin.Data.Common exposing (..)
 import Admin.Data.Status exposing (..)
+import Admin.Data.Url exposing (..)
 import Admin.Views.Common exposing (..)
 import Field exposing (..)
 import Field.ValidationResult exposing (..)
 import Helpers exposing (..)
+import Html exposing (..)
+import Html.Attributes exposing (..)
 
 
 type SaveSatus
@@ -103,19 +103,20 @@ itemSelection selectedItemList itemList =
         switchItem item =
             if List.member item.id selectedItemList then
                 Selected item
+
             else
                 Unselected item
     in
-        List.map
-            (\item ->
-                case item of
-                    Selected innerItem ->
-                        switchItem innerItem
+    List.map
+        (\item ->
+            case item of
+                Selected innerItem ->
+                    switchItem innerItem
 
-                    Unselected innerItem ->
-                        switchItem innerItem
-            )
-            itemList
+                Unselected innerItem ->
+                    switchItem innerItem
+        )
+        itemList
 
 
 errorsIn : List (Field String v) -> Maybe String

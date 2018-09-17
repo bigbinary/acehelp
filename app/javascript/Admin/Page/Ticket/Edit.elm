@@ -1,14 +1,15 @@
-module Page.Ticket.Edit exposing (..)
+module Page.Ticket.Edit exposing (Model, Msg(..), agentOption, agentsDropDown, assignTicketAgent, closeTicketButton, commentRows, defaultOption, deleteTicket, deleteTicketButton, init, initModel, noteRows, save, statusOption, ticketInputs, ticketNoteComment, ticketStatusDropDown, update, updateTicketStatus, view)
 
+import Admin.Data.ReaderCmd exposing (..)
+import Admin.Data.Ticket exposing (..)
+import Admin.Request.Ticket exposing (..)
+import GraphQL.Client.Http as GQLClient
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
-import Admin.Request.Ticket exposing (..)
-import Admin.Data.Ticket exposing (..)
 import Reader exposing (Reader)
 import Task exposing (Task)
-import GraphQL.Client.Http as GQLClient
-import Admin.Data.ReaderCmd exposing (..)
+
 
 
 -- MODEL
@@ -51,7 +52,7 @@ init : TicketId -> ( Model, List (ReaderCmd Msg) )
 init ticketId =
     ( initModel ticketId
     , [ Strict <| Reader.map (Task.attempt TicketLoaded) (requestTicketById ticketId)
-      , Strict <| Reader.map (Task.attempt AgentsLoaded) (requestAgents)
+      , Strict <| Reader.map (Task.attempt AgentsLoaded) requestAgents
       ]
     )
 
@@ -77,10 +78,10 @@ update : Msg -> Model -> ( Model, List (ReaderCmd Msg) )
 update msg model =
     case msg of
         NoteInput note ->
-            ( { model | note = (Note model.ticketId note) }, [] )
+            ( { model | note = Note model.ticketId note }, [] )
 
         CommentInput comment ->
-            ( { model | comment = (Comment model.ticketId comment) }, [] )
+            ( { model | comment = Comment model.ticketId comment }, [] )
 
         UpdateTicket ->
             save model
@@ -159,7 +160,7 @@ update msg model =
                     ( model, [] )
 
         AgentsLoaded (Err err) ->
-            ( { model | error = Just (toString err) }, [] )
+            ( { model | error = Just "There was an error loading Agents" }, [] )
 
 
 
@@ -289,7 +290,7 @@ updateTicketStatus model ticketInput =
         cmd =
             Strict <| Reader.map (Task.attempt UpdateTicketResponse) (updateTicket ticketInput)
     in
-        ( model, [ cmd ] )
+    ( model, [ cmd ] )
 
 
 assignTicketAgent : Model -> TicketAgentInput -> ( Model, List (ReaderCmd Msg) )
@@ -298,7 +299,7 @@ assignTicketAgent model ticketAgentInput =
         cmd =
             Strict <| Reader.map (Task.attempt UpdateTicketResponse) (assignTicketToAgent { id = ticketAgentInput.id, agent_id = ticketAgentInput.agent_id })
     in
-        ( model, [ cmd ] )
+    ( model, [ cmd ] )
 
 
 deleteTicket : Model -> ( Model, List (ReaderCmd Msg) )
@@ -307,7 +308,7 @@ deleteTicket model =
         cmd =
             Strict <| Reader.map (Task.attempt DeleteTicketResponse) (deleteTicketRequest model.ticketId)
     in
-        ( model, [ cmd ] )
+    ( model, [ cmd ] )
 
 
 save : Model -> ( Model, List (ReaderCmd Msg) )
@@ -317,7 +318,7 @@ save model =
             Strict <|
                 Reader.map (Task.attempt UpdateTicketResponse) (addNotesAndCommentToTicket (ticketNoteComment model))
     in
-        ( model, [ cmd ] )
+    ( model, [ cmd ] )
 
 
 ticketStatusDropDown : Model -> Html Msg
@@ -349,21 +350,23 @@ agentsDropDown model =
 statusOption : Model -> TicketStatus -> Html Msg
 statusOption model status =
     if status.value == model.status then
-        option [ value (status.value), selected True ] [ text (status.key) ]
+        option [ value status.value, selected True ] [ text status.key ]
+
     else
-        option [ value (status.value) ] [ text (status.key) ]
+        option [ value status.value ] [ text status.key ]
 
 
-agentOption selectedAgent agent =
-    case selectedAgent of
+agentOption currentAgent agent =
+    case currentAgent of
         Nothing ->
-            option [ value (agent.id) ] [ text (agent.name) ]
+            option [ value agent.id ] [ text agent.name ]
 
         Just selectedAgent ->
             if agent == selectedAgent then
-                option [ value (agent.id), selected True ] [ text (agent.name) ]
+                option [ value agent.id, selected True ] [ text agent.name ]
+
             else
-                option [ value (agent.id) ] [ text (agent.name) ]
+                option [ value agent.id ] [ text agent.name ]
 
 
 defaultOption _ =
@@ -386,7 +389,7 @@ deleteTicketButton model =
     div []
         [ p [] []
         , button
-            [ onClick (DeleteTicket)
+            [ onClick DeleteTicket
             , class "btn btn-primary deleteTicket"
             ]
             [ text "Delete Ticket" ]

@@ -1,4 +1,4 @@
-module Views.Loading exposing (..)
+module Views.Loading exposing (sectionLoadingView)
 
 import Html exposing (..)
 import Html.Attributes as Attributes exposing (id)

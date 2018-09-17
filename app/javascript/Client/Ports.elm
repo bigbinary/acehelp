@@ -1,9 +1,9 @@
-port module Ports exposing (..)
+port module Ports exposing (UserInfo, closeWidget, decodeUserInfo, onUrlChange, openArticle, openWidget, userInfo)
 
-import Json.Encode exposing (Value)
-import Json.Decode as Decode
-import Json.Decode.Pipeline exposing (decode, required, optional)
 import Data.Article exposing (ArticleId)
+import Json.Decode as Decode
+import Json.Decode.Pipeline exposing (optional, required)
+import Json.Encode exposing (Value)
 
 
 type alias UserInfo =
@@ -28,6 +28,9 @@ port openWidget : (() -> msg) -> Sub msg
 port closeWidget : (() -> msg) -> Sub msg
 
 
+port onUrlChange : (String -> msg) -> Sub msg
+
+
 
 -- OUTGOING PORTS
 -- DECODERS
@@ -37,16 +40,16 @@ decodeUserInfo : Value -> UserInfo
 decodeUserInfo userInfoValue =
     let
         decoder =
-            decode UserInfo
+            Decode.succeed UserInfo
                 |> optional "name" Decode.string ""
                 |> optional "email" Decode.string ""
 
         result =
             Decode.decodeValue decoder userInfoValue
     in
-        case result of
-            Ok userInfo ->
-                userInfo
+    case result of
+        Ok dUserInfo ->
+            dUserInfo
 
-            Err _ ->
-                { name = "", email = "" }
+        Err _ ->
+            { name = "", email = "" }

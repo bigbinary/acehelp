@@ -1,4 +1,4 @@
-module Admin.Data.User exposing (..)
+module Admin.Data.User exposing (Error, User, UserWithErrors, UserWithOrganization, errorObject, userObject, userWithErrorObject, userWithOrganizationObject)
 
 import Admin.Data.Organization exposing (..)
 import GraphQL.Request.Builder as GQLBuilder
@@ -9,6 +9,7 @@ type alias User =
     , email : String
     }
 
+
 type alias Error =
     { message : String }
 
@@ -18,11 +19,13 @@ type alias UserWithErrors =
     , errors : Maybe (List Error)
     }
 
+
 type alias UserWithOrganization =
     { id : String
     , email : String
     , organization : Maybe Organization
     }
+
 
 userWithErrorObject : GQLBuilder.ValueSpec GQLBuilder.NonNull GQLBuilder.ObjectType UserWithErrors vars
 userWithErrorObject =
@@ -39,6 +42,7 @@ userWithErrorObject =
                     (GQLBuilder.list errorObject)
                 )
             )
+
 
 userObject : GQLBuilder.ValueSpec GQLBuilder.NonNull GQLBuilder.ObjectType User vars
 userObject =

@@ -1,9 +1,10 @@
-module Page.Settings exposing (..)
+module Page.Settings exposing (Model, Msg(..), codeSnippet, errorView, init, initModel, jsCodeView, update, view)
 
+import Admin.Data.ReaderCmd exposing (..)
+import Admin.Request.Helper exposing (ApiKey, AppUrl, NodeEnv, baseUrl)
 import Html exposing (..)
 import Html.Attributes exposing (..)
-import Admin.Request.Helper exposing (baseUrl, NodeEnv, ApiKey, AppUrl)
-import Admin.Data.ReaderCmd exposing (..)
+
 
 
 -- Model

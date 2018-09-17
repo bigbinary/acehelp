@@ -1,6 +1,7 @@
-module Page.Category.Create exposing (..)
+module Page.Category.Create exposing (Model, Msg(..), categroyCeateInputs, init, initModel, saveCategory, update, view)
 
 import Admin.Data.Category exposing (..)
+import Admin.Data.ReaderCmd exposing (..)
 import Admin.Request.Category exposing (..)
 import Field exposing (..)
 import Field.ValidationResult exposing (..)
@@ -9,10 +10,10 @@ import Helpers exposing (..)
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
+import Page.UserNotification exposing (..)
 import Reader exposing (Reader)
 import Task exposing (Task)
-import Admin.Data.ReaderCmd exposing (..)
-import Page.UserNotification exposing (..)
+
 
 
 -- MODEL
@@ -75,10 +76,11 @@ update msg model =
                             )
                         |> String.join ", "
             in
-                if isAllValid fields then
-                    saveCategory model
-                else
-                    ( { model | error = Just errors }, [] )
+            if isAllValid fields then
+                saveCategory model
+
+            else
+                ( { model | error = Just errors }, [] )
 
         SaveCategoryResponse (Ok id) ->
             -- NOTE: Redirection handled in Main
@@ -148,4 +150,4 @@ saveCategory model =
         cmd =
             Strict <| Reader.map (Task.attempt SaveCategoryResponse) (requestCreateCategory <| categroyCeateInputs model)
     in
-        ( model, [ cmd ] )
+    ( model, [ cmd ] )

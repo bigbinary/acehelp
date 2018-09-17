@@ -1,20 +1,19 @@
-module Admin.Request.Feedback exposing (..)
+module Admin.Request.Feedback exposing (requestFeedbackById, requestFeedbacks, requestUpdateFeedbackStatus)
 
-import Admin.Request.Helper exposing (..)
-import Reader exposing (Reader)
-import Task exposing (Task)
 import Admin.Data.Feedback exposing (..)
+import Admin.Request.Helper exposing (..)
 import GraphQL.Client.Http as GQLClient
 import GraphQL.Request.Builder as GQLBuilder
+import Reader exposing (Reader)
+import Task exposing (Task)
 
 
 requestFeedbacks : FeedbackStatus -> Reader ( NodeEnv, ApiKey, AppUrl ) (Task GQLClient.Error (Maybe (List Feedback)))
 requestFeedbacks status =
     Reader.Reader
         (\( nodeEnv, apiKey, appUrl ) ->
-            (GQLClient.customSendQuery (requestOptions nodeEnv apiKey appUrl) <|
+            GQLClient.customSendQuery (requestOptions nodeEnv apiKey appUrl) <|
                 GQLBuilder.request { status = status } requestFeedbacksQuery
-            )
         )
 
 
@@ -23,10 +22,9 @@ requestFeedbackById feedbackId =
     Reader.Reader
         (\( nodeEnv, apiKey, appUrl ) ->
             GQLClient.customSendQuery (requestOptions nodeEnv apiKey appUrl) <|
-                (GQLBuilder.request
+                GQLBuilder.request
                     { id = feedbackId }
                     feedbackByIdQuery
-                )
         )
 
 
@@ -34,7 +32,6 @@ requestUpdateFeedbackStatus : FeedbackId -> String -> Reader ( NodeEnv, ApiKey, 
 requestUpdateFeedbackStatus feedbackId feedbackStatus =
     Reader.Reader
         (\( nodeEnv, apiKey, appUrl ) ->
-            (GQLClient.customSendMutation (requestOptions nodeEnv apiKey appUrl) <|
+            GQLClient.customSendMutation (requestOptions nodeEnv apiKey appUrl) <|
                 GQLBuilder.request { id = feedbackId, status = feedbackStatus } updateFeedabackStatusMutation
-            )
         )

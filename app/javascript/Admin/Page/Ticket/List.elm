@@ -1,17 +1,20 @@
-module Page.Ticket.List exposing (..)
+module Page.Ticket.List exposing (Model, Msg(..), init, initModel, rows, update, view)
 
 --import Http
 
+import Admin.Data.ReaderCmd exposing (..)
+import Admin.Data.Ticket exposing (..)
+import Admin.Request.Helper exposing (ApiKey)
+import Admin.Request.Ticket exposing (..)
+import Admin.Views.Common exposing (renderError)
+import GraphQL.Client.Http as GQLClient
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
-import Admin.Views.Common exposing (renderError)
-import Admin.Request.Ticket exposing (..)
-import Admin.Data.Ticket exposing (..)
-import Task exposing (Task)
 import Reader exposing (Reader)
-import GraphQL.Client.Http as GQLClient
-import Admin.Data.ReaderCmd exposing (..)
+import Route exposing (..)
+import Task exposing (Task)
+
 
 
 -- MODEL
@@ -41,7 +44,6 @@ init =
 
 type Msg
     = TicketLoaded (Result GQLClient.Error (Maybe (List Ticket)))
-    | OnEditTicketClick TicketId
 
 
 update : Msg -> Model -> ( Model, List (ReaderCmd Msg) )
@@ -56,19 +58,15 @@ update msg model =
                     ( model, [] )
 
         TicketLoaded (Err err) ->
-            ( { model | error = Just (toString err) }, [] )
-
-        OnEditTicketClick _ ->
-            -- NOTE: Handled in Main
-            ( model, [] )
+            ( { model | error = Just "There was an error loading tickets" }, [] )
 
 
 
 -- VIEW
 
 
-view : Model -> Html Msg
-view model =
+view : ApiKey -> Model -> Html Msg
+view orgKey model =
     div
         [ id "ticket_list"
         ]
@@ -79,20 +77,20 @@ view model =
             [ id "content-wrapper" ]
             (List.map
                 (\ticket ->
-                    rows model ticket
+                    rows orgKey model ticket
                 )
                 model.ticketList
             )
         ]
 
 
-rows : Model -> Ticket -> Html Msg
-rows model ticket =
+rows : ApiKey -> Model -> Ticket -> Html Msg
+rows orgKey model ticket =
     div
         [ class "listingRow" ]
         [ span [ class "row-id" ] [ text ticket.id ]
         , span [ class "row-name" ] [ text ticket.name ]
         , span [ class "row-email" ] [ text ticket.email ]
         , span [ class "row-message" ] [ text ticket.message ]
-        , span [ onClick <| OnEditTicketClick ticket.id ] [ text " | Edit Ticket" ]
+        , span [] [ a [ href <| routeToString <| UrlEdit orgKey ticket.id ] [ text " | Edit Ticket" ] ]
         ]

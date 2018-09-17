@@ -1,4 +1,4 @@
-module Admin.Data.Url exposing (..)
+module Admin.Data.Url exposing (CreateUrlInput, UrlData, UrlId, UrlsListResponse, createUrlMutation, deleteUrlMutation, nullableUrlObject, requestUrlsQuery, updateUrlMutation, urlByIdQuery, urlObject)
 
 import GraphQL.Request.Builder as GQLBuilder
 import GraphQL.Request.Builder.Arg as Arg
@@ -45,13 +45,13 @@ urlByIdQuery =
         idVar =
             Var.required "id" .id Var.string
     in
-        GQLBuilder.queryDocument
-            (GQLBuilder.extract
-                (GQLBuilder.field "url"
-                    [ ( "id", Arg.variable idVar ) ]
-                    nullableUrlObject
-                )
+    GQLBuilder.queryDocument
+        (GQLBuilder.extract
+            (GQLBuilder.field "url"
+                [ ( "id", Arg.variable idVar ) ]
+                nullableUrlObject
             )
+        )
 
 
 createUrlMutation : GQLBuilder.Document GQLBuilder.Mutation (Maybe UrlData) CreateUrlInput
@@ -60,19 +60,19 @@ createUrlMutation =
         urlVar =
             Var.required "url" .url Var.string
     in
-        GQLBuilder.mutationDocument <|
-            GQLBuilder.extract <|
-                GQLBuilder.field "addUrl"
-                    [ ( "input"
-                      , Arg.object
-                            [ ( "url", Arg.variable urlVar ) ]
-                      )
-                    ]
-                    (GQLBuilder.extract <|
-                        GQLBuilder.field "url"
-                            []
-                            nullableUrlObject
-                    )
+    GQLBuilder.mutationDocument <|
+        GQLBuilder.extract <|
+            GQLBuilder.field "addUrl"
+                [ ( "input"
+                  , Arg.object
+                        [ ( "url", Arg.variable urlVar ) ]
+                  )
+                ]
+                (GQLBuilder.extract <|
+                    GQLBuilder.field "url"
+                        []
+                        nullableUrlObject
+                )
 
 
 deleteUrlMutation : GQLBuilder.Document GQLBuilder.Mutation UrlId { a | id : UrlId }
@@ -81,19 +81,19 @@ deleteUrlMutation =
         idVar =
             Var.required "id" .id Var.string
     in
-        GQLBuilder.mutationDocument <|
-            GQLBuilder.extract <|
-                GQLBuilder.field "deleteUrl"
-                    [ ( "input"
-                      , Arg.object
-                            [ ( "id", Arg.variable idVar ) ]
-                      )
-                    ]
-                    (GQLBuilder.extract <|
-                        GQLBuilder.field "deletedId"
-                            []
-                            GQLBuilder.string
-                    )
+    GQLBuilder.mutationDocument <|
+        GQLBuilder.extract <|
+            GQLBuilder.field "deleteUrl"
+                [ ( "input"
+                  , Arg.object
+                        [ ( "id", Arg.variable idVar ) ]
+                  )
+                ]
+                (GQLBuilder.extract <|
+                    GQLBuilder.field "deletedId"
+                        []
+                        GQLBuilder.string
+                )
 
 
 urlObject : GQLBuilder.ValueSpec GQLBuilder.NonNull GQLBuilder.ObjectType UrlData vars
@@ -117,16 +117,16 @@ updateUrlMutation =
         urlVar =
             Var.required "url" .url Var.string
     in
-        GQLBuilder.mutationDocument <|
-            GQLBuilder.extract <|
-                GQLBuilder.field "updateUrl"
-                    [ ( "input"
-                      , Arg.object
-                            [ ( "url", Arg.variable urlVar ), ( "id", Arg.variable idVar ) ]
-                      )
-                    ]
-                    (GQLBuilder.extract <|
-                        GQLBuilder.field "url"
-                            []
-                            nullableUrlObject
-                    )
+    GQLBuilder.mutationDocument <|
+        GQLBuilder.extract <|
+            GQLBuilder.field "updateUrl"
+                [ ( "input"
+                  , Arg.object
+                        [ ( "url", Arg.variable urlVar ), ( "id", Arg.variable idVar ) ]
+                  )
+                ]
+                (GQLBuilder.extract <|
+                    GQLBuilder.field "url"
+                        []
+                        nullableUrlObject
+                )

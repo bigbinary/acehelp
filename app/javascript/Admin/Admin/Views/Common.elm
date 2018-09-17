@@ -1,16 +1,17 @@
-module Admin.Views.Common exposing (..)
+module Admin.Views.Common exposing (loadingIndicator, multiSelectMenu, renderError, spinner)
 
-import Html exposing (..)
-import Html.Events exposing (..)
-import Html.Attributes exposing (..)
-import Json.Decode as Json
 import Admin.Data.Common exposing (..)
+import Html exposing (..)
+import Html.Attributes exposing (..)
+import Html.Events exposing (..)
+import Json.Decode as Json
 
 
 renderError : Maybe String -> String
 renderError error =
-    if (error == Nothing) then
+    if error == Nothing then
         ""
+
     else
         Maybe.withDefault "" <| Maybe.map ((++) "Error : ") error
 

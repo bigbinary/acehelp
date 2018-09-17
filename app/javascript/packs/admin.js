@@ -7,7 +7,7 @@
 // To reference this file, add <%= javascript_pack_tag 'application' %> to the appropriate
 // layout file, like app/views/layouts/application.html.erb
 
-import Elm from "../Admin/Main";
+import { Elm } from "../Admin/Main";
 import "bootstrap";
 import "trix";
 import "../../assets/stylesheets/admin/index.scss";
@@ -26,13 +26,16 @@ document.addEventListener("DOMContentLoaded", () => {
     var user_id = user_id_target.getAttribute("value");
     var user_email = user_email_target.getAttribute("value");
     var app_url = app_url_target.getAttribute("value");
-    var app = Elm.Main.embed(node, {
-        node_env: process.env.NODE_ENV,
-        organization_key: org_key,
-        organization_name: org_name,
-        user_id: user_id,
-        user_email: user_email,
-        app_url: app_url
+    var app = Elm.Main.init({
+        node: node,
+        flags: {
+            node_env: process.env.NODE_ENV,
+            organization_key: org_key,
+            organization_name: org_name,
+            user_id: user_id,
+            user_email: user_email,
+            app_url: app_url
+        }
     });
 
     // INCOMING PORTS
@@ -45,19 +48,6 @@ document.addEventListener("DOMContentLoaded", () => {
         var divEl = document.getElementById("trix-show");
         if (divEl) {
             divEl.innerHTML = html;
-        }
-    });
-
-    app.ports.removeTrixEditor.subscribe(function() {
-        var trixEl = document.querySelector("trix-editor");
-        if (trixEl) {
-            var editorEl = trixEl.editor.element;
-            var editorContentEl = document.getElementById(
-                editorEl.getAttribute("input")
-            );
-            if (editorEl) editorEl.parentNode.removeChild(editorEl);
-            if (editorContentEl)
-                editorContentEl.parentNode.removeChild(editorContentEl);
         }
     });
 

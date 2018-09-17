@@ -1,5 +1,6 @@
-module Page.Team.Create exposing (..)
+module Page.Team.Create exposing (Model, Msg(..), init, initModel, save, update, view)
 
+import Admin.Data.ReaderCmd exposing (..)
 import Admin.Data.Team exposing (..)
 import Admin.Request.Team exposing (..)
 import Field exposing (..)
@@ -11,7 +12,7 @@ import Html.Attributes exposing (..)
 import Html.Events exposing (..)
 import Reader exposing (Reader)
 import Task exposing (Task)
-import Admin.Data.ReaderCmd exposing (..)
+
 
 
 -- MODEL
@@ -86,10 +87,11 @@ update msg model =
                             )
                         |> String.join ", "
             in
-                if isAllValid fields then
-                    save model
-                else
-                    ( { model | error = Just errors }, [] )
+            if isAllValid fields then
+                save model
+
+            else
+                ( { model | error = Just errors }, [] )
 
         SaveTeamResponse (Ok id) ->
             ( model, [] )
@@ -174,4 +176,4 @@ save model =
                         }
                     )
     in
-        ( model, [ cmd ] )
+    ( model, [ cmd ] )

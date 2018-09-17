@@ -1,8 +1,8 @@
-module Admin.Request.Helper exposing (..)
+module Admin.Request.Helper exposing (ApiKey, AppUrl, MethodType, NodeEnv, QueryParameters, RequestData, Url, baseUrl, constructUrl, defaultRequestHeaders, graphqlUrl, httpRequest, logoutRequest, requestOptions)
 
+import GraphQL.Client.Http as GQLClient exposing (RequestOptions)
 import Http
 import Json.Decode exposing (Decoder)
-import GraphQL.Client.Http as GQLClient exposing (RequestOptions)
 
 
 type alias ApiKey =
@@ -74,12 +74,12 @@ requestOptions env apiKey appUrl =
         url =
             graphqlUrl env appUrl
     in
-        { method = "POST"
-        , url = url
-        , headers = headers
-        , timeout = Nothing
-        , withCredentials = False
-        }
+    { method = "POST"
+    , url = url
+    , headers = headers
+    , timeout = Nothing
+    , withCredentials = False
+    }
 
 
 constructUrl : String -> List ( String, String ) -> String
@@ -94,7 +94,7 @@ constructUrl url params =
                 ++ String.join "&"
                     (List.map
                         (\( key, value ) ->
-                            Http.encodeUri key ++ "=" ++ value
+                            key ++ "=" ++ value
                         )
                         params
                     )
@@ -127,15 +127,15 @@ httpRequest requestData decoder =
         callUrl =
             constructUrl requestData.url requestData.params
     in
-        Http.request
-            { method = requestData.method
-            , headers = headers
-            , url = constructUrl requestData.url requestData.params
-            , body = requestData.body
-            , expect = Http.expectJson decoder
-            , timeout = Nothing
-            , withCredentials = False
-            }
+    Http.request
+        { method = requestData.method
+        , headers = headers
+        , url = constructUrl requestData.url requestData.params
+        , body = requestData.body
+        , expect = Http.expectJson decoder
+        , timeout = Nothing
+        , withCredentials = False
+        }
 
 
 logoutRequest : NodeEnv -> AppUrl -> Http.Request String
@@ -143,7 +143,7 @@ logoutRequest env appUrl =
     Http.request
         { method = "DELETE"
         , headers = []
-        , url = (baseUrl env appUrl) ++ "users/sign_out"
+        , url = baseUrl env appUrl ++ "users/sign_out"
         , body = Http.emptyBody
         , expect = Http.expectString
         , timeout = Nothing

@@ -1,19 +1,20 @@
-module Page.Url.Create exposing (..)
+module Page.Url.Create exposing (Model, Msg(..), init, initModel, save, update, view)
 
+import Admin.Data.ReaderCmd exposing (..)
+import Admin.Data.Url exposing (..)
+import Admin.Request.Url exposing (..)
+import Field exposing (..)
+import Field.ValidationResult exposing (..)
+import GraphQL.Client.Http as GQLClient
+import Helpers exposing (..)
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
-import Admin.Request.Url exposing (..)
-import Request.Helpers exposing (NodeEnv, ApiKey)
-import Admin.Data.Url exposing (..)
 import Reader exposing (Reader)
-import Task exposing (Task)
-import GraphQL.Client.Http as GQLClient
-import Field exposing (..)
-import Field.ValidationResult exposing (..)
-import Helpers exposing (..)
+import Request.Helpers exposing (ApiKey, NodeEnv)
 import Route
-import Admin.Data.ReaderCmd exposing (..)
+import Task exposing (Task)
+
 
 
 -- MODEL
@@ -82,10 +83,11 @@ update msg model =
                             )
                         |> String.join ", "
             in
-                if isAllValid fields then
-                    save model
-                else
-                    ( { model | error = Just errors }, [] )
+            if isAllValid fields then
+                save model
+
+            else
+                ( { model | error = Just errors }, [] )
 
         SaveUrlResponse (Ok id) ->
             -- NOTE: Redirection handled in Main
@@ -145,4 +147,4 @@ save model =
         cmd =
             Strict <| Reader.map (Task.attempt SaveUrlResponse) (createUrl { url = Field.value model.url })
     in
-        ( model, [ cmd ] )
+    ( model, [ cmd ] )

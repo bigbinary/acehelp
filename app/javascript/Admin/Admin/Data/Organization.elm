@@ -1,11 +1,10 @@
-module Admin.Data.Organization exposing (..)
+module Admin.Data.Organization exposing (Organization, OrganizationData, OrganizationId, OrganizationResponse, UserId, createOrganizationMutation, organizationObject)
 
-import Json.Decode exposing (..)
-import Json.Decode.Pipeline as Pipeline exposing (decode, hardcoded, optional, required)
 import Admin.Data.Article exposing (ArticleSummary)
 import GraphQL.Request.Builder as GQLBuilder
 import GraphQL.Request.Builder.Arg as Arg
 import GraphQL.Request.Builder.Variable as Var
+import Json.Decode exposing (..)
 
 
 type alias OrganizationId =
@@ -48,23 +47,23 @@ createOrganizationMutation =
         userIdVar =
             Var.required "user_id" .userId Var.string
     in
-        GQLBuilder.mutationDocument <|
-            GQLBuilder.extract
-                (GQLBuilder.field "addOrganization"
-                    [ ( "input"
-                      , Arg.object
-                            [ ( "name", Arg.variable nameVar )
-                            , ( "email", Arg.variable emailVar )
-                            , ( "user_id", Arg.variable userIdVar )
-                            ]
-                      )
-                    ]
-                    (GQLBuilder.extract <|
-                        GQLBuilder.field "organization"
-                            []
-                            organizationObject
-                    )
+    GQLBuilder.mutationDocument <|
+        GQLBuilder.extract
+            (GQLBuilder.field "addOrganization"
+                [ ( "input"
+                  , Arg.object
+                        [ ( "name", Arg.variable nameVar )
+                        , ( "email", Arg.variable emailVar )
+                        , ( "user_id", Arg.variable userIdVar )
+                        ]
+                  )
+                ]
+                (GQLBuilder.extract <|
+                    GQLBuilder.field "organization"
+                        []
+                        organizationObject
                 )
+            )
 
 
 organizationObject : GQLBuilder.ValueSpec GQLBuilder.NonNull GQLBuilder.ObjectType Organization vars

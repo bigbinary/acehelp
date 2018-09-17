@@ -3,14 +3,13 @@
   "private": true,
   "dependencies": {
     "@rails/webpacker": "3.5",
-    "bootstrap": "^4.1.2",
-    "elm": "0.18.0",
-    "elm-webpack-loader": "4.5.0",
-    "trix": "^0.11.4"
+    "bootstrap": "4.1.2",
+    "elm": "0.19",
+    "elm-webpack-loader": "5.0.0",
+    "trix": "0.11.4"
   },
   "devDependencies": {
-    "elm-format": "0.6.1-alpha",
-    "elm-hot-loader": "0.5.4",
+    "elm-format": "0.8.0",
     "husky": "0.14.3",
     "jquery": "^3.3.1",
     "lint-staged": "7.0.4",

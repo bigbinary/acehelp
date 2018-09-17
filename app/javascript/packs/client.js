@@ -1,4 +1,4 @@
-import Elm from "../Client/Main";
+import { Elm } from "../Client/Main";
 import "../../assets/stylesheets/client/index.scss";
 
 /**
@@ -13,12 +13,30 @@ var AceHelp = (function() {
         var node = document.getElementById("acehelp-hook");
         node = node || document.createElement("div");
         node.id = domId;
-        _app = Elm.Main.embed(node, {
-            node_env: process.env.NODE_ENV,
-            api_key: apiKey
-        });
-        _bindDataElements();
+
         document.body.appendChild(node);
+
+        _app = Elm.Main.init({
+            node: node,
+            flags: {
+                node_env: process.env.NODE_ENV,
+                api_key: apiKey,
+                location: location.href
+            }
+        });
+
+        _bindDataElements();
+
+        // Inform app of browser navigation (the BACK and FORWARD buttons)
+        document.addEventListener("popstate", function() {
+            _app.ports.onUrlChange.send(location.href);
+        });
+
+        // // Change the URL upon request, inform app of the change.
+        // _app.ports.pushUrl.subscribe(function(url) {
+        //     history.pushState({}, '', url);
+        //     _app.ports.onUrlChange.send(location.href);
+        // });
     }
 
     function _userInfo(user) {

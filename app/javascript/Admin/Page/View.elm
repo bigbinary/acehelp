@@ -1,11 +1,11 @@
-module Page.View exposing (..)
+module Page.View exposing (adminHeader, adminLayout, logoutOption)
 
 import Admin.Request.Helper exposing (ApiKey, NodeEnv)
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
-import Route exposing (..)
 import Page.UserNotification as UserNotification
+import Route exposing (..)
 
 
 adminLayout : Html msg -> (UserNotification.Msg -> msg) -> Bool -> String -> UserNotification.Model -> List (Html msg) -> Html msg
@@ -19,21 +19,21 @@ adminLayout headerContent userNotificationMsg showLoading spinnerLabel notificat
         ]
 
 
-adminHeader : ApiKey -> String -> Route.Route -> (Route.Route -> msg) -> msg -> Html msg
-adminHeader orgKey orgName currentRoute navigateTo signOut =
+adminHeader : ApiKey -> String -> Route.Route -> msg -> Html msg
+adminHeader orgKey orgName currentRoute signOut =
     nav [ class "header navbar navbar-dark bg-primary navbar-expand flex-column flex-md-row" ]
         [ div [ class "container" ]
             [ ul
                 [ class "navbar-nav mr-auto mt-2 mt-lg-0 " ]
                 [ li [ class "nav-item" ]
-                    [ Html.a
+                    [ a
                         [ classList
                             [ ( "navbar-brand", True ) ]
                         ]
                         [ span [] [ text orgName ] ]
                     ]
                 , li [ class "nav-item" ]
-                    [ Html.a
+                    [ a
                         [ classList
                             [ ( "nav-link", True )
                             , ( "active"
@@ -44,12 +44,12 @@ adminHeader orgKey orgName currentRoute navigateTo signOut =
                                     || (currentRoute == Route.ArticleCreate orgKey)
                               )
                             ]
-                        , onClick <| (navigateTo (Route.ArticleList orgKey))
+                        , href <| routeToString <| Route.ArticleList orgKey
                         ]
                         [ span [] [ text "Articles" ] ]
                     ]
                 , li [ class "nav-item" ]
-                    [ Html.a
+                    [ a
                         [ classList
                             [ ( "nav-link", True )
                             , ( "active"
@@ -57,12 +57,12 @@ adminHeader orgKey orgName currentRoute navigateTo signOut =
                                     || (currentRoute == Route.UrlCreate orgKey)
                               )
                             ]
-                        , onClick <| navigateTo (Route.UrlList orgKey)
+                        , href <| routeToString <| Route.UrlList orgKey
                         ]
                         [ span [] [ text "URL" ] ]
                     ]
                 , li [ class "nav-item" ]
-                    [ Html.a
+                    [ a
                         [ classList
                             [ ( "nav-link", True )
                             , ( "active"
@@ -70,54 +70,54 @@ adminHeader orgKey orgName currentRoute navigateTo signOut =
                                     || (currentRoute == Route.CategoryCreate orgKey)
                               )
                             ]
-                        , onClick <| navigateTo (Route.CategoryList orgKey)
+                        , href <| routeToString <| Route.CategoryList orgKey
                         ]
                         [ span [] [ text "Category" ] ]
                     ]
                 , li [ class "nav-item" ]
-                    [ Html.a
+                    [ a
                         [ classList
                             [ ( "nav-link", True )
                             , ( "active", currentRoute == Route.TicketList orgKey )
                             ]
-                        , onClick <| navigateTo (Route.TicketList orgKey)
+                        , href <| routeToString <| Route.TicketList orgKey
                         ]
                         [ span [] [ text "Ticket" ] ]
                     ]
                 , li [ class "nav-item" ]
-                    [ Html.a
+                    [ a
                         [ classList
                             [ ( "nav-link", True )
                             , ( "active", currentRoute == Route.FeedbackList orgKey )
                             ]
-                        , onClick <| navigateTo (Route.FeedbackList orgKey)
+                        , href <| routeToString <| Route.FeedbackList orgKey
                         ]
                         [ span [] [ text "Feedback" ] ]
                     ]
                 , li [ class "nav-item" ]
-                    [ Html.a
+                    [ a
                         [ classList
                             [ ( "nav-link", True )
                             , ( "active", currentRoute == Route.TeamList orgKey )
                             ]
-                        , onClick <| navigateTo (Route.TeamList orgKey)
+                        , href <| routeToString <| Route.TeamList orgKey
                         ]
                         [ span [] [ text "Team" ] ]
                     ]
                 , li [ class "nav-item" ]
-                    [ Html.a
+                    [ a
                         [ classList
                             [ ( "nav-link", True )
                             , ( "active", currentRoute == Route.Settings orgKey )
                             ]
-                        , onClick <| navigateTo (Route.Settings orgKey)
+                        , href <| routeToString <| Route.Settings orgKey
                         ]
                         [ span [] [ text "Settings" ] ]
                     ]
                 ]
             , ul [ class "navbar-nav ml-auto" ]
                 [ li [ class "nav-item " ]
-                    [ Html.a [ class "nav-link", onClick signOut ]
+                    [ a [ class "nav-link", onClick signOut ]
                         [ text "Logout" ]
                     ]
                 ]

@@ -1,17 +1,18 @@
-module Page.Url.Edit exposing (..)
+module Page.Url.Edit exposing (Model, Msg(..), init, initModel, save, update, urlInputs, view)
 
+import Admin.Data.ReaderCmd exposing (..)
+import Admin.Data.Url exposing (..)
+import Admin.Request.Url exposing (..)
+import Field exposing (..)
+import Field.ValidationResult exposing (..)
+import GraphQL.Client.Http as GQLClient
+import Helpers exposing (..)
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
-import Admin.Request.Url exposing (..)
-import Admin.Data.Url exposing (..)
 import Reader exposing (Reader)
 import Task exposing (Task)
-import Field exposing (..)
-import Helpers exposing (..)
-import Field.ValidationResult exposing (..)
-import GraphQL.Client.Http as GQLClient
-import Admin.Data.ReaderCmd exposing (..)
+
 
 
 -- MODEL
@@ -77,10 +78,11 @@ update msg model =
                             )
                         |> String.join ", "
             in
-                if isAllValid fields then
-                    save model
-                else
-                    ( { model | error = Just errors }, [] )
+            if isAllValid fields then
+                save model
+
+            else
+                ( { model | error = Just errors }, [] )
 
         UpdateUrlResponse (Ok id) ->
             ( model, [] )
@@ -159,6 +161,6 @@ save : Model -> ( Model, List (ReaderCmd Msg) )
 save model =
     let
         cmd =
-            (Strict <| Reader.map (Task.attempt UpdateUrlResponse) (updateUrl <| urlInputs model))
+            Strict <| Reader.map (Task.attempt UpdateUrlResponse) (updateUrl <| urlInputs model)
     in
-        ( model, [ cmd ] )
+    ( model, [ cmd ] )

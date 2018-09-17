@@ -1,7 +1,4 @@
-port module Admin.Ports exposing (..)
-
-import Time exposing (Time)
-
+port module Admin.Ports exposing (clearTimeout, insertArticleContent, setTimeout, timedOut, timeoutInitialized, trixChange, trixInitialize)
 
 -- INCOMING PORTS
 
@@ -26,10 +23,7 @@ port timedOut : (Int -> msg) -> Sub msg
 port insertArticleContent : String -> Cmd msg
 
 
-port removeTrixEditor : () -> Cmd msg
-
-
-port setTimeout : Time -> Cmd msg
+port setTimeout : Int -> Cmd msg
 
 
 port clearTimeout : Int -> Cmd msg

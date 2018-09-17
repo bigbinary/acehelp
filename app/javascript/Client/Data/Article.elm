@@ -1,13 +1,13 @@
-module Data.Article exposing (..)
+module Data.Article exposing (Article, ArticleId, ArticleListResponse, ArticleResponse, ArticleSummary, addFeedbackMutation, articleQuery, articleSummaryField, articlesQuery, decodeArticle, decodeArticleResponse, decodeArticleSummary, decodeArticles, downvoteMutation, searchArticlesQuery, suggestedArticledQuery, upvoteMutation, voteMutation)
 
 import Data.Common exposing (..)
-import Request.Helpers exposing (..)
-import Json.Decode exposing (int, string, float, nullable, list, Decoder)
-import Json.Decode.Pipeline exposing (decode, required, optional, hardcoded)
+import Data.ContactUs exposing (FeedbackForm)
 import GraphQL.Request.Builder as GQLBuilder
 import GraphQL.Request.Builder.Arg as Arg
 import GraphQL.Request.Builder.Variable as Var
-import Data.ContactUs exposing (FeedbackForm)
+import Json.Decode as Decode exposing (Decoder, float, int, list, nullable, string, succeed)
+import Json.Decode.Pipeline exposing (hardcoded, optional, required)
+import Request.Helpers exposing (..)
 
 
 type alias ArticleId =
@@ -45,15 +45,15 @@ articleQuery =
         articleIdVar =
             Var.required "articleId" .articleId Var.string
     in
-        GQLBuilder.queryDocument <|
-            GQLBuilder.extract <|
-                GQLBuilder.field "article"
-                    [ ( "id", Arg.variable articleIdVar ) ]
-                    (GQLBuilder.object Article
-                        |> GQLBuilder.with (GQLBuilder.field "id" [] GQLBuilder.string)
-                        |> GQLBuilder.with (GQLBuilder.field "title" [] GQLBuilder.string)
-                        |> GQLBuilder.with (GQLBuilder.field "desc" [] GQLBuilder.string)
-                    )
+    GQLBuilder.queryDocument <|
+        GQLBuilder.extract <|
+            GQLBuilder.field "article"
+                [ ( "id", Arg.variable articleIdVar ) ]
+                (GQLBuilder.object Article
+                    |> GQLBuilder.with (GQLBuilder.field "id" [] GQLBuilder.string)
+                    |> GQLBuilder.with (GQLBuilder.field "title" [] GQLBuilder.string)
+                    |> GQLBuilder.with (GQLBuilder.field "desc" [] GQLBuilder.string)
+                )
 
 
 searchArticlesQuery : GQLBuilder.Document GQLBuilder.Query (List ArticleSummary) { vars | searchString : String }
@@ -62,16 +62,16 @@ searchArticlesQuery =
         searchStringVar =
             Var.required "searchString" .searchString Var.string
     in
-        GQLBuilder.queryDocument <|
-            GQLBuilder.extract <|
-                GQLBuilder.field "articles"
-                    [ ( "search_string", Arg.variable searchStringVar ) ]
-                    (GQLBuilder.list
-                        (GQLBuilder.object ArticleSummary
-                            |> GQLBuilder.with (GQLBuilder.field "id" [] GQLBuilder.string)
-                            |> GQLBuilder.with (GQLBuilder.field "title" [] GQLBuilder.string)
-                        )
+    GQLBuilder.queryDocument <|
+        GQLBuilder.extract <|
+            GQLBuilder.field "articles"
+                [ ( "search_string", Arg.variable searchStringVar ) ]
+                (GQLBuilder.list
+                    (GQLBuilder.object ArticleSummary
+                        |> GQLBuilder.with (GQLBuilder.field "id" [] GQLBuilder.string)
+                        |> GQLBuilder.with (GQLBuilder.field "title" [] GQLBuilder.string)
                     )
+                )
 
 
 articleSummaryField : GQLBuilder.SelectionSpec GQLBuilder.Field (List ArticleSummary) vars
@@ -101,18 +101,18 @@ suggestedArticledQuery =
         statusVar =
             Var.optional "status" .status Var.string ""
     in
-        GQLBuilder.queryDocument <|
-            GQLBuilder.extract <|
-                GQLBuilder.field "articles"
-                    [ ( "url", Arg.variable urlVar )
-                    , ( "status", Arg.variable statusVar )
-                    ]
-                    (GQLBuilder.list
-                        (GQLBuilder.object ArticleSummary
-                            |> GQLBuilder.with (GQLBuilder.field "id" [] GQLBuilder.string)
-                            |> GQLBuilder.with (GQLBuilder.field "title" [] GQLBuilder.string)
-                        )
+    GQLBuilder.queryDocument <|
+        GQLBuilder.extract <|
+            GQLBuilder.field "articles"
+                [ ( "url", Arg.variable urlVar )
+                , ( "status", Arg.variable statusVar )
+                ]
+                (GQLBuilder.list
+                    (GQLBuilder.object ArticleSummary
+                        |> GQLBuilder.with (GQLBuilder.field "id" [] GQLBuilder.string)
+                        |> GQLBuilder.with (GQLBuilder.field "title" [] GQLBuilder.string)
                     )
+                )
 
 
 
@@ -123,7 +123,7 @@ voteMutation : String -> GQLBuilder.Document GQLBuilder.Mutation ArticleSummary 
 voteMutation voteType =
     let
         articleIdVar =
-            Var.required "articleId" (toString << .articleId) Var.id
+            Var.required "articleId" .articleId Var.id
 
         article =
             GQLBuilder.extract <|
@@ -141,7 +141,7 @@ voteMutation voteType =
                     article
                 )
     in
-        GQLBuilder.mutationDocument queryRoot
+    GQLBuilder.mutationDocument queryRoot
 
 
 addFeedbackMutation : GQLBuilder.Document GQLBuilder.Mutation (Maybe (List GQLError)) FeedbackForm
@@ -156,18 +156,18 @@ addFeedbackMutation =
         articleIdVar =
             Var.required "article_id" .article_id Var.string
     in
-        GQLBuilder.mutationDocument <|
-            GQLBuilder.extract <|
-                GQLBuilder.field "addFeedback"
-                    [ ( "input"
-                      , Arg.object
-                            [ ( "name", Arg.variable guestNameVar )
-                            , ( "message", Arg.variable guestMessageVar )
-                            , ( "article_id", Arg.variable articleIdVar )
-                            ]
-                      )
-                    ]
-                    errorsExtractor
+    GQLBuilder.mutationDocument <|
+        GQLBuilder.extract <|
+            GQLBuilder.field "addFeedback"
+                [ ( "input"
+                  , Arg.object
+                        [ ( "name", Arg.variable guestNameVar )
+                        , ( "message", Arg.variable guestMessageVar )
+                        , ( "article_id", Arg.variable articleIdVar )
+                        ]
+                  )
+                ]
+                errorsExtractor
 
 
 upvoteMutation : GQLBuilder.Document GQLBuilder.Mutation ArticleSummary { vars | articleId : ArticleId }
@@ -186,20 +186,20 @@ downvoteMutation =
 
 decodeArticles : Decoder ArticleListResponse
 decodeArticles =
-    decode ArticleListResponse
+    succeed ArticleListResponse
         |> required "articles" (list decodeArticleSummary)
 
 
 decodeArticleSummary : Decoder ArticleSummary
 decodeArticleSummary =
-    decode ArticleSummary
+    succeed ArticleSummary
         |> required "id" string
         |> required "title" string
 
 
 decodeArticle : Decoder Article
 decodeArticle =
-    decode Article
+    succeed Article
         |> required "id" string
         |> required "title" string
         |> required "desc" string
@@ -207,5 +207,5 @@ decodeArticle =
 
 decodeArticleResponse : Decoder ArticleResponse
 decodeArticleResponse =
-    decode ArticleResponse
+    succeed ArticleResponse
         |> required "article" decodeArticle

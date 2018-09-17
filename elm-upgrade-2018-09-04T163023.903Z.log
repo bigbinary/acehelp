@@ -1,0 +1,74 @@
+INFO: Found elm at node_modules/.bin/elm
+INFO: Found elm 0.19.0
+INFO: Found elm-format at node_modules/.bin/elm-format
+INFO: Found elm-format 0.8.0
+INFO: Cleaning ./elm-stuff before upgrading
+INFO: Converting elm-package.json -> elm.json
+INFO: Detected an application project (this project has no exposed modules)
+INFO: Switching from NoRedInk/elm-decode-pipeline (deprecated) to NoRedInk/elm-json-decode-pipeline
+INFO: Installing latest version of NoRedInk/elm-json-decode-pipeline
+INFO: Installing latest version of arturopala/elm-monocle
+WARNING: bigbinary/elm-form-field has not been upgraded to 0.19 yet!
+WARNING: bigbinary/elm-reader has not been upgraded to 0.19 yet!
+WARNING: eeue56/elm-html-test has not been upgraded to 0.19 yet!
+INFO: Installing latest version of elm-community/json-extra
+INFO: Switching from elm-lang/core (deprecated) to elm/core
+INFO: Installing latest version of elm/core
+INFO: Detected use of elm-lang/core#Json.Decode; installing elm/json
+INFO: Detected use of elm-lang/core#Time; installing elm/time
+INFO: Detected use of elm-lang/core#Regex; installing elm/regex
+INFO: Switching from elm-lang/html (deprecated) to elm/html
+INFO: Installing latest version of elm/html
+INFO: Switching from elm-lang/http (deprecated) to elm/http
+INFO: Installing latest version of elm/http
+INFO: Switching from elm-lang/navigation (deprecated) to elm/browser
+INFO: Installing latest version of elm/browser
+INFO: Switching from elm-lang/navigation (deprecated) to elm/url
+INFO: Installing latest version of elm/url
+INFO: Switching from elm-lang/svg (deprecated) to elm/svg
+INFO: Installing latest version of elm/svg
+WARNING: eskimoblood/elm-color-extra has not been upgraded to 0.19 yet!
+INFO: Switching from evancz/url-parser (deprecated) to elm/url
+INFO: Installing latest version of elm/url
+INFO: Installing latest version of jamesmacaulay/elm-graphql
+WARNING: jystic/elm-font-awesome has not been upgraded to 0.19 yet!
+INFO: Installing latest version of mdgriffith/elm-style-animation
+INFO: Installing latest version of wernerdegroot/listzipper
+INFO: Upgrading *.elm files in app/javascript/Client/
+INFO: Upgrading *.elm files in app/javascript/Admin/
+
+
+SUCCESS! Your project's dependencies and code have been upgraded.
+However, your project may not yet compile due to API changes in your
+dependencies.
+
+See <https://github.com/elm/compiler/blob/master/upgrade-docs/0.19.md>
+and the documentation for your dependencies for more information.
+
+WARNING! 5 of your dependencies have not yet been upgraded to
+support Elm 0.19.
+  - https://github.com/bigbinary/elm-form-field
+  - https://github.com/bigbinary/elm-reader
+  - https://github.com/eeue56/elm-html-test
+  - https://github.com/eskimoblood/elm-color-extra
+  - https://github.com/jystic/elm-font-awesome
+
+Here are some common upgrade steps that you will need to do manually:
+
+- NoRedInk/elm-json-decode-pipeline
+  - [ ] Changes uses of Json.Decode.Pipeline.decode to Json.Decode.succeed
+- elm/core
+  - [ ] Replace uses of toString with String.fromInt, String.fromFloat, or Debug.toString as appropriate
+- undefined
+  - [ ] Read the new documentation here: https://package.elm-lang.org/packages/elm/time/latest/
+  - [ ] Replace uses of Date and Time with Time.Posix
+- elm/html
+  - [ ] If you used Html.program*, install elm/browser and switch to Browser.element or Browser.document
+  - [ ] If you used Html.beginnerProgram, install elm/browser and switch Browser.sandbox
+- elm/browser
+  - [ ] Change code using Navigation.program* to use Browser.application
+  - [ ] Use the Browser.Key passed to your init function in any calls to Browser.Navigation.pushUrl/replaceUrl/back/forward
+- elm/url
+  - [ ] Changes uses of Navigation.Key to Url.Url
+  - [ ] Change code using UrlParser.* to use Url.Parser.*
+

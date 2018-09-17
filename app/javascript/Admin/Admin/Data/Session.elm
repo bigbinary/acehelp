@@ -1,4 +1,4 @@
-module Admin.Data.Session exposing (..)
+module Admin.Data.Session exposing (LoginData, SignupInputs, Token, forgotPasswordMutation, loginDataObject, loginMutation, signupMutation, tokenObject)
 
 import Admin.Data.User exposing (..)
 import GraphQL.Request.Builder as GQLBuilder
@@ -42,36 +42,35 @@ signupMutation =
         confirmPasswordVar =
             Var.required "confirm_password" .confirmPassword Var.string
     in
-        GQLBuilder.mutationDocument <|
-            GQLBuilder.extract <|
-                GQLBuilder.field "signup"
-                    [ ( "input"
-                      , Arg.object
-                            [ ( "first_name", Arg.variable firstNameVar )
-                            , ( "email", Arg.variable emailVar )
-                            , ( "password", Arg.variable passwordVar )
-                            , ( "confirm_password", Arg.variable confirmPasswordVar )
-                            ]
-                      )
-                    ]
-                    userWithErrorObject
+    GQLBuilder.mutationDocument <|
+        GQLBuilder.extract <|
+            GQLBuilder.field "signup"
+                [ ( "input"
+                  , Arg.object
+                        [ ( "first_name", Arg.variable firstNameVar )
+                        , ( "email", Arg.variable emailVar )
+                        , ( "password", Arg.variable passwordVar )
+                        , ( "confirm_password", Arg.variable confirmPasswordVar )
+                        ]
+                  )
+                ]
+                userWithErrorObject
 
 
 loginDataObject : GQLBuilder.ValueSpec GQLBuilder.NonNull GQLBuilder.ObjectType LoginData vars
 loginDataObject =
-    (GQLBuilder.object LoginData
+    GQLBuilder.object LoginData
         |> GQLBuilder.with
             (GQLBuilder.field
                 "authentication_token"
                 []
-                (tokenObject)
+                tokenObject
             )
         |> GQLBuilder.with
             (GQLBuilder.field "user"
                 []
-                (userWithOrganizationObject)
+                userWithOrganizationObject
             )
-    )
 
 
 tokenObject : GQLBuilder.ValueSpec GQLBuilder.NonNull GQLBuilder.ObjectType Token vars
@@ -91,22 +90,22 @@ loginMutation =
         passwordVar =
             Var.required "password" .password Var.string
     in
-        GQLBuilder.mutationDocument <|
-            GQLBuilder.extract
-                (GQLBuilder.field "loginUser"
-                    [ ( "input"
-                      , Arg.object
-                            [ ( "email", Arg.variable emailVar )
-                            , ( "password", Arg.variable passwordVar )
-                            ]
-                      )
-                    ]
-                    (GQLBuilder.extract <|
-                        GQLBuilder.field "user"
-                            []
-                            (userWithOrganizationObject)
-                    )
+    GQLBuilder.mutationDocument <|
+        GQLBuilder.extract
+            (GQLBuilder.field "loginUser"
+                [ ( "input"
+                  , Arg.object
+                        [ ( "email", Arg.variable emailVar )
+                        , ( "password", Arg.variable passwordVar )
+                        ]
+                  )
+                ]
+                (GQLBuilder.extract <|
+                    GQLBuilder.field "user"
+                        []
+                        userWithOrganizationObject
                 )
+            )
 
 
 forgotPasswordMutation : GQLBuilder.Document GQLBuilder.Mutation String { a | email : String }
@@ -115,18 +114,18 @@ forgotPasswordMutation =
         emailVar =
             Var.required "email" .email Var.string
     in
-        GQLBuilder.mutationDocument <|
-            GQLBuilder.extract
-                (GQLBuilder.field "forgotPassword"
-                    [ ( "input"
-                      , Arg.object
-                            [ ( "email", Arg.variable emailVar )
-                            ]
-                      )
-                    ]
-                    (GQLBuilder.extract <|
-                        GQLBuilder.field "status"
-                            []
-                            GQLBuilder.string
-                    )
+    GQLBuilder.mutationDocument <|
+        GQLBuilder.extract
+            (GQLBuilder.field "forgotPassword"
+                [ ( "input"
+                  , Arg.object
+                        [ ( "email", Arg.variable emailVar )
+                        ]
+                  )
+                ]
+                (GQLBuilder.extract <|
+                    GQLBuilder.field "status"
+                        []
+                        GQLBuilder.string
                 )
+            )

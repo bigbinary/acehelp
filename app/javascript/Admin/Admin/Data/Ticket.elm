@@ -1,8 +1,8 @@
-module Admin.Data.Ticket exposing (..)
+module Admin.Data.Ticket exposing (Agent, Comment, Note, Ticket, TicketAgentInput, TicketId, TicketInput, TicketNoteComment, TicketStatus, addTicketNotesAndCommentMutation, agentObject, assignTicketToAgentMutation, commentObject, deleteTicketMutation, noteObject, requestAgentsQuery, requestTicketByIdQuery, requestTicketQuery, ticketObject, ticketStatusObject, updateTicketMutation)
 
+import GraphQL.Request.Builder as GQLBuilder
 import GraphQL.Request.Builder.Arg as Arg
 import GraphQL.Request.Builder.Variable as Var
-import GraphQL.Request.Builder as GQLBuilder
 
 
 type alias Ticket =
@@ -73,7 +73,7 @@ requestTicketQuery =
                 []
                 (GQLBuilder.nullable
                     (GQLBuilder.list
-                        (ticketObject)
+                        ticketObject
                     )
                 )
             )
@@ -86,13 +86,13 @@ requestTicketByIdQuery =
         idVar =
             Var.required "id" .id Var.string
     in
-        GQLBuilder.queryDocument
-            (GQLBuilder.extract
-                (GQLBuilder.field "ticket"
-                    [ ( "id", Arg.variable idVar ) ]
-                    (GQLBuilder.nullable ticketObject)
-                )
+    GQLBuilder.queryDocument
+        (GQLBuilder.extract
+            (GQLBuilder.field "ticket"
+                [ ( "id", Arg.variable idVar ) ]
+                (GQLBuilder.nullable ticketObject)
             )
+        )
 
 
 requestAgentsQuery : GQLBuilder.Document GQLBuilder.Query (Maybe (List Agent)) vars
@@ -103,7 +103,7 @@ requestAgentsQuery =
                 []
                 (GQLBuilder.nullable
                     (GQLBuilder.list
-                        (agentObject)
+                        agentObject
                     )
                 )
             )
@@ -137,19 +137,19 @@ deleteTicketMutation =
         idVar =
             Var.required "id" .id Var.string
     in
-        GQLBuilder.mutationDocument <|
-            GQLBuilder.extract <|
-                GQLBuilder.field "deleteTicket"
-                    [ ( "input"
-                      , Arg.object
-                            [ ( "id", Arg.variable idVar ) ]
-                      )
-                    ]
-                    (GQLBuilder.extract <|
-                        GQLBuilder.field "ticket"
-                            []
-                            (GQLBuilder.nullable ticketObject)
-                    )
+    GQLBuilder.mutationDocument <|
+        GQLBuilder.extract <|
+            GQLBuilder.field "deleteTicket"
+                [ ( "input"
+                  , Arg.object
+                        [ ( "id", Arg.variable idVar ) ]
+                  )
+                ]
+                (GQLBuilder.extract <|
+                    GQLBuilder.field "ticket"
+                        []
+                        (GQLBuilder.nullable ticketObject)
+                )
 
 
 noteObject : GQLBuilder.ValueSpec GQLBuilder.NonNull GQLBuilder.ObjectType Note vars
@@ -168,21 +168,21 @@ updateTicketMutation =
         statusVar =
             Var.required "status" .status Var.string
     in
-        GQLBuilder.mutationDocument <|
-            GQLBuilder.extract <|
-                GQLBuilder.field "changeTicketStatus"
-                    [ ( "input"
-                      , Arg.object
-                            [ ( "status", Arg.variable statusVar )
-                            , ( "id", Arg.variable idVar )
-                            ]
-                      )
-                    ]
-                    (GQLBuilder.extract <|
-                        GQLBuilder.field "ticket"
-                            []
-                            (GQLBuilder.nullable ticketObject)
-                    )
+    GQLBuilder.mutationDocument <|
+        GQLBuilder.extract <|
+            GQLBuilder.field "changeTicketStatus"
+                [ ( "input"
+                  , Arg.object
+                        [ ( "status", Arg.variable statusVar )
+                        , ( "id", Arg.variable idVar )
+                        ]
+                  )
+                ]
+                (GQLBuilder.extract <|
+                    GQLBuilder.field "ticket"
+                        []
+                        (GQLBuilder.nullable ticketObject)
+                )
 
 
 addTicketNotesAndCommentMutation : GQLBuilder.Document GQLBuilder.Mutation (Maybe Ticket) TicketNoteComment
@@ -197,22 +197,22 @@ addTicketNotesAndCommentMutation =
         commentVar =
             Var.required "comment" .comment Var.string
     in
-        GQLBuilder.mutationDocument <|
-            GQLBuilder.extract <|
-                GQLBuilder.field "updateTicket"
-                    [ ( "input"
-                      , Arg.object
-                            [ ( "comment", Arg.variable commentVar )
-                            , ( "note", Arg.variable noteVar )
-                            , ( "id", Arg.variable idVar )
-                            ]
-                      )
-                    ]
-                    (GQLBuilder.extract <|
-                        GQLBuilder.field "ticket"
-                            []
-                            (GQLBuilder.nullable ticketObject)
-                    )
+    GQLBuilder.mutationDocument <|
+        GQLBuilder.extract <|
+            GQLBuilder.field "updateTicket"
+                [ ( "input"
+                  , Arg.object
+                        [ ( "comment", Arg.variable commentVar )
+                        , ( "note", Arg.variable noteVar )
+                        , ( "id", Arg.variable idVar )
+                        ]
+                  )
+                ]
+                (GQLBuilder.extract <|
+                    GQLBuilder.field "ticket"
+                        []
+                        (GQLBuilder.nullable ticketObject)
+                )
 
 
 assignTicketToAgentMutation : GQLBuilder.Document GQLBuilder.Mutation (Maybe Ticket) TicketAgentInput
@@ -224,21 +224,21 @@ assignTicketToAgentMutation =
         agentIdVar =
             Var.required "agent_id" .agent_id Var.string
     in
-        GQLBuilder.mutationDocument <|
-            GQLBuilder.extract <|
-                GQLBuilder.field "assignTicketToAgent"
-                    [ ( "input"
-                      , Arg.object
-                            [ ( "agent_id", Arg.variable agentIdVar )
-                            , ( "ticket_id", Arg.variable idVar )
-                            ]
-                      )
-                    ]
-                    (GQLBuilder.extract <|
-                        GQLBuilder.field "ticket"
-                            []
-                            (GQLBuilder.nullable ticketObject)
-                    )
+    GQLBuilder.mutationDocument <|
+        GQLBuilder.extract <|
+            GQLBuilder.field "assignTicketToAgent"
+                [ ( "input"
+                  , Arg.object
+                        [ ( "agent_id", Arg.variable agentIdVar )
+                        , ( "ticket_id", Arg.variable idVar )
+                        ]
+                  )
+                ]
+                (GQLBuilder.extract <|
+                    GQLBuilder.field "ticket"
+                        []
+                        (GQLBuilder.nullable ticketObject)
+                )
 
 
 ticketObject : GQLBuilder.ValueSpec GQLBuilder.NonNull GQLBuilder.ObjectType Ticket vars

@@ -1,4 +1,4 @@
-module Page.Errors exposing (..)
+module Page.Errors exposing (notFound)
 
 import Html exposing (..)
 import Html.Attributes exposing (..)
@@ -10,8 +10,8 @@ notFound =
         [ div [ class "error" ] []
         , div
             [ class "text boldExclamationText" ]
-            [ text ("OOPS!") ]
+            [ text "OOPS!" ]
         , div
             [ class "text friendlyMessage" ]
-            [ text ("Page you are looking for does not exists") ]
+            [ text "Page you are looking for does not exists" ]
         ]

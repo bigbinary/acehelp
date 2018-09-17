@@ -1,15 +1,15 @@
-module Request.Organization exposing (..)
+module Request.Organization exposing (requestOrganizations)
 
-import Task exposing (Task)
-import Reader exposing (Reader)
-import Request.Helpers exposing (..)
+import Data.Organization exposing (..)
 import GraphQL.Client.Http as GQLClient
 import GraphQL.Request.Builder as GQLBuilder
-import Data.Organization exposing (..)
+import Reader exposing (Reader)
+import Request.Helpers exposing (..)
+import Task exposing (Task)
 
 
-requestOrganizations : ApiKey -> Reader ( NodeEnv, ApiKey ) (Task GQLClient.Error Organization)
-requestOrganizations apiKey =
+requestOrganizations : Reader ( NodeEnv, ApiKey ) (Task GQLClient.Error Organization)
+requestOrganizations =
     Reader.Reader
         (\( env, apiKey ) ->
             GQLClient.customSendQuery (requestOptions env apiKey) <|

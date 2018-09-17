@@ -1,17 +1,18 @@
-module Section.Search.SearchBar exposing (..)
+module Section.Search.SearchBar exposing (Model, Msg(..), init, initModel, requestSearch, update, view)
 
-import Html exposing (..)
-import Html.Attributes as Attributes exposing (class, style, placeholder, type_)
-import Html.Events exposing (onClick, onInput)
-import Http
 import Data.Article exposing (ArticleSummary)
-import Request.Article exposing (requestSearchArticles)
-import Request.Helpers exposing (NodeEnv, ApiKey)
-import FontAwesome.Solid as SolidIcon
-import Reader exposing (Reader, run)
-import Task exposing (Task)
 import Data.Common exposing (..)
 import GraphQL.Client.Http as GQLClient
+import Html exposing (..)
+import Html.Attributes as Attributes exposing (class, placeholder, style, type_)
+import Html.Events exposing (onClick, onInput)
+import Http
+import Reader exposing (Reader, run)
+import Request.Article exposing (requestSearchArticles)
+import Request.Helpers exposing (ApiKey, NodeEnv)
+import Task exposing (Task)
+import Views.FontAwesome as FontAwesome exposing (..)
+
 
 
 -- MODEL
@@ -43,14 +44,14 @@ type Msg
 
 view : Model -> String -> Html Msg
 view model color =
-    div [ class "ah-search-bar", style [ ( "background-color", color ) ] ]
+    div [ class "ah-search-bar", style "background-color" color ]
         [ input
             [ type_ "text"
             , onInput OnSearchQueryInput
             , placeholder "Search for an Article"
             ]
             []
-        , span [ onClick OnSearch ] [ SolidIcon.search ]
+        , span [ onClick OnSearch ] [ FontAwesome.search ]
         ]
 
 

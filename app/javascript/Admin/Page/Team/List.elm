@@ -1,16 +1,19 @@
-module Page.Team.List exposing (..)
+module Page.Team.List exposing (Model, Msg(..), deleteRecord, init, initModel, row, update, view)
 
 --import Http
 
+import Admin.Data.ReaderCmd exposing (..)
 import Admin.Data.Team exposing (..)
+import Admin.Request.Helper exposing (ApiKey)
 import Admin.Request.Team exposing (..)
 import GraphQL.Client.Http as GQLClient
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
 import Reader exposing (Reader)
+import Route exposing (..)
 import Task exposing (Task)
-import Admin.Data.ReaderCmd exposing (..)
+
 
 
 -- MODEL
@@ -44,7 +47,6 @@ type Msg
     = TeamListLoaded (Result GQLClient.Error (Maybe (List Team)))
     | DeleteTeamMember String
     | DeleteTeamMemberResponse (Result GQLClient.Error (Maybe (List Team)))
-    | OnAddTeamMemberClick
 
 
 update : Msg -> Model -> ( Model, List (ReaderCmd Msg) )
@@ -75,17 +77,13 @@ update msg model =
         DeleteTeamMemberResponse (Err error) ->
             ( { model | error = Just "An error occured while deleting the Team Member" }, [] )
 
-        OnAddTeamMemberClick ->
-            -- NOTE: Handled in Main
-            ( model, [] )
-
 
 
 -- VIEW
 
 
-view : Model -> Html Msg
-view model =
+view : ApiKey -> Model -> Html Msg
+view orgKey model =
     div
         [ id "feedback_list" ]
         [ div []
@@ -98,8 +96,8 @@ view model =
                     )
                     model.error
             ]
-        , button
-            [ onClick OnAddTeamMemberClick
+        , a
+            [ href <| routeToString <| TeamMemberCreate orgKey
             , class "btn btn-primary"
             ]
             [ text " + Add Team Member " ]
@@ -139,4 +137,4 @@ deleteRecord model userEmail =
         cmd =
             Strict <| Reader.map (Task.attempt TeamListLoaded) (removeTeamMember userEmail)
     in
-        ( model, [ cmd ] )
+    ( model, [ cmd ] )

@@ -1,4 +1,4 @@
-module Admin.Data.Common exposing (..)
+module Admin.Data.Common exposing (Option(..), Value, targetSelectedOptions)
 
 import Json.Decode as Json
 import Json.Decode.Extra as JsonEx

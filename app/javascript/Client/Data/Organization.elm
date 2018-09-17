@@ -1,8 +1,8 @@
-module Data.Organization exposing (..)
+module Data.Organization exposing (Organization, organizationQuery)
 
+import GraphQL.Request.Builder as GQLBuilder
 import GraphQL.Request.Builder.Arg as Arg
 import GraphQL.Request.Builder.Variable as Var
-import GraphQL.Request.Builder as GQLBuilder
 
 
 type alias Organization =

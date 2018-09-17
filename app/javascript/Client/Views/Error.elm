@@ -1,11 +1,12 @@
-module Views.Error exposing (..)
+module Views.Error exposing (ApiErrorMessage, Model, errorMessageView, view)
 
+import GraphQL.Client.Http as GQLClient
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Http
-import Json.Decode exposing (string)
-import Json.Decode.Pipeline exposing (decode, required)
-import GraphQL.Client.Http as GQLClient
+import Json.Decode exposing (string, succeed)
+import Json.Decode.Pipeline exposing (required)
+
 
 
 -- MODEL
@@ -52,14 +53,14 @@ view gqlError =
                 Http.BadStatus response ->
                     let
                         apiMessage =
-                            decode ApiErrorMessage
+                            succeed ApiErrorMessage
                                 |> Json.Decode.Pipeline.required "error" string
                     in
-                        ( toString response.status.code, response.status.message, "" )
+                    ( String.fromInt response.status.code, response.status.message, "" )
     in
-        errorMessageView (text boldExclamationText)
-            (text friendlyMessage)
-            (text systemMessage)
+    errorMessageView (text boldExclamationText)
+        (text friendlyMessage)
+        (text systemMessage)
 
 
 errorMessageView : Html msg -> Html msg -> Html msg -> Html msg

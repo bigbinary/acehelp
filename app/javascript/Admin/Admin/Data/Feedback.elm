@@ -1,8 +1,8 @@
-module Admin.Data.Feedback exposing (..)
+module Admin.Data.Feedback exposing (Feedback, FeedbackId, FeedbackStatus, FeedbackStatusInput, feedbackByIdQuery, feedbackExtractor, requestFeedbacksQuery, updateFeedabackStatusMutation)
 
+import GraphQL.Request.Builder as GQLBuilder
 import GraphQL.Request.Builder.Arg as Arg
 import GraphQL.Request.Builder.Variable as Var
-import GraphQL.Request.Builder as GQLBuilder
 
 
 type alias FeedbackId =
@@ -33,16 +33,16 @@ requestFeedbacksQuery =
         statusVar =
             Var.required "status" .status Var.string
     in
-        GQLBuilder.queryDocument <|
-            GQLBuilder.extract
-                (GQLBuilder.field "feedbacks"
-                    [ ( "status", Arg.variable statusVar ) ]
-                    (GQLBuilder.nullable
-                        (GQLBuilder.list
-                            feedbackExtractor
-                        )
+    GQLBuilder.queryDocument <|
+        GQLBuilder.extract
+            (GQLBuilder.field "feedbacks"
+                [ ( "status", Arg.variable statusVar ) ]
+                (GQLBuilder.nullable
+                    (GQLBuilder.list
+                        feedbackExtractor
                     )
                 )
+            )
 
 
 feedbackByIdQuery : GQLBuilder.Document GQLBuilder.Query (Maybe Feedback) { vars | id : String }
@@ -51,15 +51,15 @@ feedbackByIdQuery =
         idVar =
             Var.required "id" .id Var.string
     in
-        GQLBuilder.queryDocument
-            (GQLBuilder.extract
-                (GQLBuilder.field "feedback"
-                    [ ( "id", Arg.variable idVar ) ]
-                    (GQLBuilder.nullable
-                        feedbackExtractor
-                    )
+    GQLBuilder.queryDocument
+        (GQLBuilder.extract
+            (GQLBuilder.field "feedback"
+                [ ( "id", Arg.variable idVar ) ]
+                (GQLBuilder.nullable
+                    feedbackExtractor
                 )
             )
+        )
 
 
 updateFeedabackStatusMutation : GQLBuilder.Document GQLBuilder.Mutation (Maybe Feedback) FeedbackStatusInput
@@ -71,30 +71,29 @@ updateFeedabackStatusMutation =
         statusVar =
             Var.required "status" .status Var.string
     in
-        GQLBuilder.mutationDocument <|
-            GQLBuilder.extract <|
-                GQLBuilder.field "updateFeedbackStatus"
-                    [ ( "input"
-                      , Arg.object
-                            [ ( "id", Arg.variable idVar )
-                            , ( "status", Arg.variable statusVar )
-                            ]
-                      )
-                    ]
-                    (GQLBuilder.extract <|
-                        GQLBuilder.field "feedback"
-                            []
-                            (GQLBuilder.nullable
-                                feedbackExtractor
-                            )
-                    )
+    GQLBuilder.mutationDocument <|
+        GQLBuilder.extract <|
+            GQLBuilder.field "updateFeedbackStatus"
+                [ ( "input"
+                  , Arg.object
+                        [ ( "id", Arg.variable idVar )
+                        , ( "status", Arg.variable statusVar )
+                        ]
+                  )
+                ]
+                (GQLBuilder.extract <|
+                    GQLBuilder.field "feedback"
+                        []
+                        (GQLBuilder.nullable
+                            feedbackExtractor
+                        )
+                )
 
 
 feedbackExtractor : GQLBuilder.ValueSpec GQLBuilder.NonNull GQLBuilder.ObjectType Feedback vars
 feedbackExtractor =
-    (GQLBuilder.object Feedback
+    GQLBuilder.object Feedback
         |> GQLBuilder.with (GQLBuilder.field "id" [] GQLBuilder.string)
         |> GQLBuilder.with (GQLBuilder.field "name" [] GQLBuilder.string)
         |> GQLBuilder.with (GQLBuilder.field "message" [] GQLBuilder.string)
         |> GQLBuilder.with (GQLBuilder.field "status" [] GQLBuilder.string)
-    )

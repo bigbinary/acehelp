@@ -1,25 +1,27 @@
-module Views.Style exposing (..)
+module Views.Style exposing (tickShape)
 
-import Color exposing (..)
+-- import Color exposing (..)
+
+import Html exposing (..)
+import Html.Attributes exposing (class, classList, id, style)
 import Svg
 import Svg.Attributes
 
 
-acehelpGrey : Color
-acehelpGrey =
-    Color.rgb 153 153 153
 
-
-acehelpBlue : Color
-acehelpBlue =
-    Color.rgb 60 170 249
+-- acehelpGrey : Color
+-- acehelpGrey =
+--     Color.rgb 153 153 153
+-- acehelpBlue : Color
+-- acehelpBlue =
+--     Color.rgb 60 170 249
 
 
 tickShape : String -> String -> Svg.Svg msg
 tickShape width height =
     Svg.svg
         [ Svg.Attributes.style ("width: " ++ width ++ "px; " ++ "height: " ++ height ++ "px")
-        , Svg.Attributes.viewBox ("0 0 507.2 507.2")
+        , Svg.Attributes.viewBox "0 0 507.2 507.2"
         ]
         [ Svg.circle
             [ Svg.Attributes.fill "#32BA7C"

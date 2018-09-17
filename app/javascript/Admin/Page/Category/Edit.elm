@@ -1,6 +1,7 @@
-module Page.Category.Edit exposing (..)
+module Page.Category.Edit exposing (Model, Msg(..), categoryUpdateInputs, init, initModel, update, updateCategory, view)
 
 import Admin.Data.Category exposing (..)
+import Admin.Data.ReaderCmd exposing (..)
 import Admin.Request.Category exposing (..)
 import Field exposing (..)
 import Field.ValidationResult exposing (..)
@@ -11,7 +12,7 @@ import Html.Attributes exposing (..)
 import Html.Events exposing (..)
 import Reader exposing (Reader)
 import Task exposing (Task)
-import Admin.Data.ReaderCmd exposing (..)
+
 
 
 -- MODEL
@@ -102,10 +103,11 @@ update msg model =
                             )
                         |> String.join ", "
             in
-                if isAllValid fields then
-                    updateCategory model
-                else
-                    ( { model | error = Just errors }, [] )
+            if isAllValid fields then
+                updateCategory model
+
+            else
+                ( { model | error = Just errors }, [] )
 
         UpdateCategoryResponse (Ok id) ->
             ( model, [] )
@@ -183,4 +185,4 @@ updateCategory model =
         cmd =
             Strict <| Reader.map (Task.attempt UpdateCategoryResponse) (requestUpdateCategory <| categoryUpdateInputs model)
     in
-        ( model, [ cmd ] )
+    ( model, [ cmd ] )

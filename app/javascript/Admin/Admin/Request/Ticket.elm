@@ -1,11 +1,11 @@
-module Admin.Request.Ticket exposing (..)
+module Admin.Request.Ticket exposing (addNotesAndCommentToTicket, assignTicketToAgent, deleteTicketRequest, requestAgents, requestTicketById, requestTickets, updateTicket)
 
-import Admin.Request.Helper exposing (..)
-import Reader exposing (Reader)
-import Task exposing (Task)
 import Admin.Data.Ticket exposing (..)
+import Admin.Request.Helper exposing (..)
 import GraphQL.Client.Http as GQLClient
 import GraphQL.Request.Builder as GQLBuilder
+import Reader exposing (Reader)
+import Task exposing (Task)
 
 
 requestTickets : Reader ( NodeEnv, ApiKey, AppUrl ) (Task GQLClient.Error (Maybe (List Ticket)))
@@ -31,7 +31,7 @@ requestTicketById ticketId =
     Reader.Reader
         (\( nodeEnv, apiKey, appUrl ) ->
             GQLClient.customSendQuery (requestOptions nodeEnv apiKey appUrl) <|
-                (GQLBuilder.request { id = ticketId } requestTicketByIdQuery)
+                GQLBuilder.request { id = ticketId } requestTicketByIdQuery
         )
 
 
@@ -39,9 +39,8 @@ updateTicket : TicketInput -> Reader ( NodeEnv, ApiKey, AppUrl ) (Task GQLClient
 updateTicket ticketInput =
     Reader.Reader
         (\( nodeEnv, apiKey, appUrl ) ->
-            (GQLClient.customSendMutation (requestOptions nodeEnv apiKey appUrl) <|
+            GQLClient.customSendMutation (requestOptions nodeEnv apiKey appUrl) <|
                 GQLBuilder.request ticketInput updateTicketMutation
-            )
         )
 
 
@@ -49,9 +48,8 @@ deleteTicketRequest : TicketId -> Reader ( NodeEnv, ApiKey, AppUrl ) (Task GQLCl
 deleteTicketRequest ticketId =
     Reader.Reader
         (\( nodeEnv, apiKey, appUrl ) ->
-            (GQLClient.customSendMutation (requestOptions nodeEnv apiKey appUrl) <|
+            GQLClient.customSendMutation (requestOptions nodeEnv apiKey appUrl) <|
                 GQLBuilder.request { id = ticketId } deleteTicketMutation
-            )
         )
 
 
@@ -59,9 +57,8 @@ addNotesAndCommentToTicket : TicketNoteComment -> Reader ( NodeEnv, ApiKey, AppU
 addNotesAndCommentToTicket ticket =
     Reader.Reader
         (\( nodeEnv, apiKey, appUrl ) ->
-            (GQLClient.customSendMutation (requestOptions nodeEnv apiKey appUrl) <|
+            GQLClient.customSendMutation (requestOptions nodeEnv apiKey appUrl) <|
                 GQLBuilder.request ticket addTicketNotesAndCommentMutation
-            )
         )
 
 
@@ -69,7 +66,6 @@ assignTicketToAgent : TicketAgentInput -> Reader ( NodeEnv, ApiKey, AppUrl ) (Ta
 assignTicketToAgent ticketAgentInput =
     Reader.Reader
         (\( nodeEnv, apiKey, appUrl ) ->
-            (GQLClient.customSendMutation (requestOptions nodeEnv apiKey appUrl) <|
+            GQLClient.customSendMutation (requestOptions nodeEnv apiKey appUrl) <|
                 GQLBuilder.request ticketAgentInput assignTicketToAgentMutation
-            )
         )

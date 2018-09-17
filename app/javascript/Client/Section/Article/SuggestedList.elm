@@ -1,20 +1,19 @@
-module Section.Article.SuggestedList exposing (..)
+module Section.Article.SuggestedList exposing (Model, Msg(..), init, initModel, update, view)
 
+import Animation
 import Data.Article exposing (..)
 import Data.Common exposing (..)
+import GraphQL.Client.Http as GQLClient
+import Html exposing (..)
+import Html.Attributes exposing (class, id)
+import Html.Events exposing (onClick)
+import Reader exposing (Reader)
 import Request.Article exposing (..)
 import Request.Helpers exposing (..)
-import Views.Container exposing (popInInitialAnim)
-import Html exposing (..)
-import Html.Events exposing (onClick)
-import Html.Attributes exposing (id, class)
-import Animation
 import Task exposing (Task)
-import Reader exposing (Reader)
-import FontAwesome.Solid as SolidIcon
-import Views.Error exposing (errorMessageView)
-import GraphQL.Client.Http as GQLClient
-import Views.Error as Error
+import Views.Error as Error exposing (errorMessageView)
+import Views.FontAwesome as FontAwesome exposing (..)
+
 
 
 -- MODEL
@@ -34,12 +33,10 @@ initModel =
     Ok []
 
 
-initAnim : Animation.State
-initAnim =
-    Animation.style popInInitialAnim
 
-
-
+-- initAnim : Animation.State
+-- initAnim =
+--     Animation.style popInInitialAnim
 -- UPDATE
 
 
@@ -94,7 +91,7 @@ view model =
                                     [ onClick <| LoadArticle article.id
                                     , class "selectable-row"
                                     ]
-                                    [ span [ class "row-icon" ] [ SolidIcon.file_alt ]
+                                    [ span [ class "row-icon" ] [ FontAwesome.file_alt ]
                                     , span [ class "row-title" ] [ text article.title ]
                                     ]
                             )

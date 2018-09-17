@@ -1,16 +1,19 @@
-module Page.Category.List exposing (..)
+module Page.Category.List exposing (Model, Msg(..), categoryRow, categoryStatusButton, deleteCategoryById, init, initModel, update, updateCategoryStatus, view)
 
 import Admin.Data.Category exposing (..)
+import Admin.Data.ReaderCmd exposing (..)
+import Admin.Data.Status exposing (..)
 import Admin.Request.Category exposing (..)
+import Admin.Request.Helper exposing (ApiKey)
 import GraphQL.Client.Http as GQLClient
-import Page.Article.Common exposing (statusToButtonText)
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
+import Page.Article.Common exposing (statusToButtonText)
 import Reader exposing (Reader)
+import Route exposing (..)
 import Task exposing (Task)
-import Admin.Data.ReaderCmd exposing (..)
-import Admin.Data.Status exposing (..)
+
 
 
 -- MODEL
@@ -44,8 +47,6 @@ type Msg
     = CategoriesLoaded (Result GQLClient.Error (Maybe (List Category)))
     | DeleteCategory CategoryId
     | DeleteCategoryResponse (Result GQLClient.Error (Maybe CategoryId))
-    | OnCreateCategoryClick
-    | OnEditCategoryClick CategoryId
     | UpdateCategoryStatus CategoryId AvailabilitySatus
 
 
@@ -81,14 +82,6 @@ update msg model =
         DeleteCategoryResponse (Err error) ->
             ( { model | error = Just "An error occured when deleting the Category" }, [] )
 
-        OnCreateCategoryClick ->
-            -- NOTE: Handled in Main
-            ( model, [] )
-
-        OnEditCategoryClick _ ->
-            -- NOTE: Handled in Main
-            ( model, [] )
-
         UpdateCategoryStatus categoryId status ->
             updateCategoryStatus model categoryId status
 
@@ -97,8 +90,8 @@ update msg model =
 -- VIEW
 
 
-view : Model -> Html Msg
-view model =
+view : ApiKey -> Model -> Html Msg
+view orgKey model =
     div
         []
         [ div
@@ -114,8 +107,8 @@ view model =
                     )
                     model.error
             ]
-        , button
-            [ onClick OnCreateCategoryClick
+        , a
+            [ href <| routeToString <| CategoryCreate orgKey
             , class "btn btn-primary"
             ]
             [ text "+ Category" ]
@@ -123,15 +116,15 @@ view model =
             [ class "listingSection" ]
             (List.map
                 (\category ->
-                    categoryRow category
+                    categoryRow orgKey category
                 )
                 model.categories
             )
         ]
 
 
-categoryRow : Category -> Html Msg
-categoryRow category =
+categoryRow : ApiKey -> Category -> Html Msg
+categoryRow orgKey category =
     div
         [ class "listingRow" ]
         [ div
@@ -139,9 +132,9 @@ categoryRow category =
             [ text category.name ]
         , div
             [ class "actionButtonColumn" ]
-            [ button
+            [ a
                 [ class "actionButton btn btn-primary"
-                , onClick (OnEditCategoryClick category.id)
+                , href <| routeToString <| CategoryEdit orgKey category.id
                 ]
                 [ text "Edit Category" ]
             ]
@@ -163,18 +156,18 @@ deleteCategoryById : Model -> CategoryId -> ( Model, List (ReaderCmd Msg) )
 deleteCategoryById model categoryId =
     let
         cmd =
-            (Strict <| Reader.map (Task.attempt DeleteCategoryResponse) (deleteCategory categoryId))
+            Strict <| Reader.map (Task.attempt DeleteCategoryResponse) (deleteCategory categoryId)
     in
-        ( model, [ cmd ] )
+    ( model, [ cmd ] )
 
 
 updateCategoryStatus : Model -> CategoryId -> AvailabilitySatus -> ( Model, List (ReaderCmd Msg) )
 updateCategoryStatus model categoryId categoryStatus =
     let
         cmd =
-            Strict <| Reader.map (Task.attempt CategoriesLoaded) (requestUpdateCategoryStatus categoryId <| availablityStatusIso.get categoryStatus)
+            Strict <| Reader.map (Task.attempt CategoriesLoaded) (requestUpdateCategoryStatus categoryId categoryStatus)
     in
-        ( model, [ cmd ] )
+    ( model, [ cmd ] )
 
 
 categoryStatusButton : Category -> Html Msg

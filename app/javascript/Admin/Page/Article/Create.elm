@@ -1,22 +1,24 @@
-module Page.Article.Create exposing (..)
+module Page.Article.Create exposing (Model, Msg(..), articleInputs, init, initModel, save, update, view)
 
-import Html exposing (..)
-import Html.Attributes exposing (..)
-import Html.Events exposing (..)
 import Admin.Data.Article exposing (..)
+import Admin.Data.Category exposing (..)
+import Admin.Data.Common exposing (..)
+import Admin.Data.ReaderCmd exposing (..)
+import Admin.Data.Url exposing (UrlData, UrlId)
 import Admin.Request.Article exposing (..)
 import Admin.Request.Category exposing (..)
 import Admin.Request.Url exposing (..)
-import Admin.Data.Category exposing (..)
-import Admin.Data.Url exposing (UrlData, UrlId)
-import Admin.Data.Common exposing (..)
-import Reader exposing (Reader)
-import Task exposing (Task)
 import Field exposing (..)
-import Helpers exposing (..)
-import Page.Article.Common exposing (..)
 import GraphQL.Client.Http as GQLClient
-import Admin.Data.ReaderCmd exposing (..)
+import Helpers exposing (..)
+import Html exposing (..)
+import Html.Attributes exposing (..)
+import Html.Events exposing (..)
+import Page.Article.Common exposing (..)
+import Reader exposing (Reader)
+import Route exposing (..)
+import Task exposing (Task)
+
 
 
 -- Model
@@ -82,7 +84,6 @@ update msg model =
             save model
 
         SaveArticleResponse (Ok id) ->
-            -- NOTE: Redirection handled in Main
             ( { model
                 | title = Field.update model.title ""
                 , desc = Field.update model.desc ""
@@ -102,7 +103,7 @@ update msg model =
                     ( model, [] )
 
         CategoriesLoaded (Err err) ->
-            ( { model | error = Just (toString err) }, [] )
+            ( { model | error = Just "There was an error loading Categories" }, [] )
 
         CategorySelected categoryIds ->
             ( { model | categories = itemSelection categoryIds model.categories }, [] )
@@ -121,7 +122,7 @@ update msg model =
                     ( { model | error = Just "There was an error loading up Urls" }, [] )
 
         UrlsLoaded (Err err) ->
-            ( { model | error = Just (toString err) }, [] )
+            ( { model | error = Just "There was an error loading up Urls" }, [] )
 
         UrlSelected selectedUrlIds ->
             ( { model
@@ -170,6 +171,7 @@ view model =
             ]
         , if model.status == Saving then
             savingIndicator
+
           else
             text ""
         ]
@@ -186,10 +188,11 @@ save model =
                 Reader.map (Task.attempt SaveArticleResponse)
                     (requestCreateArticle (articleInputs model))
     in
-        if Field.isAllValid fields then
-            ( { model | error = Nothing, status = Saving }, [ cmd ] )
-        else
-            ( { model | error = errorsIn fields }, [] )
+    if Field.isAllValid fields then
+        ( { model | error = Nothing, status = Saving }, [ cmd ] )
+
+    else
+        ( { model | error = errorsIn fields }, [] )
 
 
 articleInputs : Model -> CreateArticleInputs

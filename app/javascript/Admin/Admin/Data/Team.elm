@@ -1,8 +1,8 @@
-module Admin.Data.Team exposing (..)
+module Admin.Data.Team exposing (Team, TeamMember, UserId, createTeamMemberMutation, removeUserFromOrganization, requestTeamQuery, teamMemberExtractor)
 
+import GraphQL.Request.Builder as GQLBuilder
 import GraphQL.Request.Builder.Arg as Arg
 import GraphQL.Request.Builder.Variable as Var
-import GraphQL.Request.Builder as GQLBuilder
 
 
 type alias UserId =
@@ -49,31 +49,30 @@ createTeamMemberMutation =
         lastNameVar =
             Var.required "lastName" .lastName Var.string
     in
-        GQLBuilder.mutationDocument <|
-            GQLBuilder.extract <|
-                GQLBuilder.field "assign_user_to_organization"
-                    [ ( "input"
-                      , Arg.object
-                            [ ( "email", Arg.variable emailVar )
-                            , ( "firstName", Arg.variable firstNameVar )
-                            , ( "lastName", Arg.variable lastNameVar )
-                            ]
-                      )
-                    ]
-                    (GQLBuilder.extract <|
-                        GQLBuilder.field "user"
-                            []
-                            (GQLBuilder.nullable teamMemberExtractor)
-                    )
+    GQLBuilder.mutationDocument <|
+        GQLBuilder.extract <|
+            GQLBuilder.field "assign_user_to_organization"
+                [ ( "input"
+                  , Arg.object
+                        [ ( "email", Arg.variable emailVar )
+                        , ( "firstName", Arg.variable firstNameVar )
+                        , ( "lastName", Arg.variable lastNameVar )
+                        ]
+                  )
+                ]
+                (GQLBuilder.extract <|
+                    GQLBuilder.field "user"
+                        []
+                        (GQLBuilder.nullable teamMemberExtractor)
+                )
 
 
 teamMemberExtractor : GQLBuilder.ValueSpec GQLBuilder.NonNull GQLBuilder.ObjectType Team vars
 teamMemberExtractor =
-    (GQLBuilder.object Team
+    GQLBuilder.object Team
         |> GQLBuilder.with (GQLBuilder.field "id" [] GQLBuilder.string)
         |> GQLBuilder.with (GQLBuilder.field "name" [] GQLBuilder.string)
         |> GQLBuilder.with (GQLBuilder.field "email" [] GQLBuilder.string)
-    )
 
 
 removeUserFromOrganization : GQLBuilder.Document GQLBuilder.Mutation (Maybe (List Team)) { a | email : String }
@@ -82,21 +81,21 @@ removeUserFromOrganization =
         emailVar =
             Var.required "email" .email Var.string
     in
-        GQLBuilder.mutationDocument <|
-            GQLBuilder.extract <|
-                GQLBuilder.field "dismissUser"
-                    [ ( "input"
-                      , Arg.object
-                            [ ( "email", Arg.variable emailVar ) ]
-                      )
-                    ]
-                    (GQLBuilder.extract
-                        (GQLBuilder.field "team"
-                            []
-                            (GQLBuilder.nullable
-                                (GQLBuilder.list
-                                    teamMemberExtractor
-                                )
+    GQLBuilder.mutationDocument <|
+        GQLBuilder.extract <|
+            GQLBuilder.field "dismissUser"
+                [ ( "input"
+                  , Arg.object
+                        [ ( "email", Arg.variable emailVar ) ]
+                  )
+                ]
+                (GQLBuilder.extract
+                    (GQLBuilder.field "team"
+                        []
+                        (GQLBuilder.nullable
+                            (GQLBuilder.list
+                                teamMemberExtractor
                             )
                         )
                     )
+                )

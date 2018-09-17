@@ -1,10 +1,9 @@
-module Helpers exposing (..)
+module Helpers exposing (flip, maybeToBool, stringToMaybe, validEmail, validateEmail, validateEmpty)
 
-import Time exposing (Time)
-import Task exposing (Task)
-import Process exposing (..)
 import Field.ValidationResult exposing (..)
+import Process exposing (..)
 import Regex exposing (Regex)
+import Task exposing (Task)
 
 
 validateEmpty : String -> String -> ValidationResult String String
@@ -19,7 +18,7 @@ validateEmpty fieldName fieldValue =
 
 validateEmail : String -> ValidationResult String String
 validateEmail s =
-    case (Regex.contains validEmail s) of
+    case Regex.contains validEmail s of
         True ->
             Passed s
 
@@ -29,14 +28,8 @@ validateEmail s =
 
 validEmail : Regex
 validEmail =
-    Regex.regex "^[a-zA-Z0-9.!#$%&'*+\\/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$"
-        |> Regex.caseInsensitive
-
-
-delayedTask : Time -> msg -> Task x msg
-delayedTask time msg =
-    Process.sleep time
-        |> Task.andThen (always <| Task.succeed msg)
+    Regex.fromStringWith { caseInsensitive = True, multiline = False } "^[a-zA-Z0-9.!#$%&'*+\\/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$"
+        |> Maybe.withDefault Regex.never
 
 
 
@@ -61,3 +54,8 @@ stringToMaybe str =
 
         False ->
             Just str
+
+
+flip : (a -> b -> c) -> b -> a -> c
+flip function arg1 arg2 =
+    function arg2 arg1

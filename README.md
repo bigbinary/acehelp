@@ -21,9 +21,7 @@ brew services start elasticsearch
 
 ./bin/yarn install
 
-npm install elm@0.18.0
-
-elm-package install -y
+yarn add elm@0.19
 
 rake searchkick:reindex:all
 

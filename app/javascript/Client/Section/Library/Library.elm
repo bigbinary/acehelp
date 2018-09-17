@@ -1,20 +1,19 @@
-module Section.Library.Library exposing (..)
+module Section.Library.Library exposing (Model, Msg(..), getCategoryWithId, init, initModel, update, view)
 
+import Animation
 import Data.Category exposing (..)
+import Data.Common exposing (..)
+import GraphQL.Client.Http as GQLClient
+import Html exposing (..)
+import Html.Attributes exposing (class, id)
+import Html.Events exposing (onClick)
+import Reader
 import Request.Category exposing (..)
 import Request.Helpers exposing (ApiKey, Context, NodeEnv)
-import Views.Container exposing (popInInitialAnim)
-import Html exposing (..)
-import Html.Events exposing (onClick)
-import Html.Attributes exposing (id, class)
-import Views.Error as Error
 import Task
-import Animation
-import Reader
-import FontAwesome.Solid as SolidIcon
-import GraphQL.Client.Http as GQLClient
-import Data.Common exposing (..)
 import Views.Error as Error
+import Views.FontAwesome as FontAwesome exposing (..)
+
 
 
 -- MODEL
@@ -34,12 +33,10 @@ initModel =
     Ok []
 
 
-initAnim : Animation.State
-initAnim =
-    Animation.style popInInitialAnim
 
-
-
+-- initAnim : Animation.State
+-- initAnim =
+--     Animation.style popInInitialAnim
 -- UPDATE
 
 
@@ -73,7 +70,7 @@ view model =
                             [ onClick <| LoadCategory category.id
                             , class "clickable selectable-row"
                             ]
-                            [ span [ class "row-icon" ] [ SolidIcon.folder ]
+                            [ span [ class "row-icon" ] [ FontAwesome.folder ]
                             , span [ class "row-title" ] [ text category.name ]
                             ]
                     )

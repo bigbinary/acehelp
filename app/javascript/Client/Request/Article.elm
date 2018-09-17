@@ -1,13 +1,13 @@
-module Request.Article exposing (..)
+module Request.Article exposing (requestAddFeedbackMutation, requestArticle, requestArticleList, requestDownvoteMutation, requestSearchArticles, requestSuggestedArticles, requestUpvoteMutation)
 
-import Task exposing (Task)
-import Reader exposing (Reader)
-import Request.Helpers exposing (..)
 import Data.Article exposing (..)
-import Data.ContactUs exposing (FeedbackForm)
 import Data.Common exposing (..)
+import Data.ContactUs exposing (FeedbackForm)
 import GraphQL.Client.Http as GQLClient
 import GraphQL.Request.Builder as GQLBuilder
+import Reader exposing (Reader)
+import Request.Helpers exposing (..)
+import Task exposing (Task)
 
 
 requestArticleList : Reader ( NodeEnv, ApiKey ) (Task GQLClient.Error (List ArticleSummary))
@@ -72,8 +72,7 @@ requestAddFeedbackMutation :
     FeedbackForm
     -> Reader ( NodeEnv, ApiKey ) (Task GQLClient.Error (Maybe (List GQLError)))
 requestAddFeedbackMutation feedbackFrom =
-    Debug.log (toString feedbackFrom)
-        Reader.Reader
+    Reader.Reader
         (\( env, apiKey ) ->
             GQLClient.sendMutation (graphqlUrl env) <|
                 GQLBuilder.request feedbackFrom addFeedbackMutation

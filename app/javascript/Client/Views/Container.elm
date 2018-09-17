@@ -1,11 +1,10 @@
-module Views.Container exposing (..)
+module Views.Container exposing (closeButton, leftArrowButton, topBar)
 
-import Html exposing (..)
-import Html.Attributes exposing (id, style, class, classList)
-import Html.Events exposing (onClick)
 import Animation
-import Color exposing (rgb)
-import FontAwesome.Solid as SolidIcon
+import Html exposing (..)
+import Html.Attributes exposing (class, classList, id, style)
+import Html.Events exposing (onClick)
+import Views.FontAwesome as FontAwesome exposing (..)
 
 
 leftArrowButton : msg -> Html msg
@@ -14,7 +13,7 @@ leftArrowButton clickMsg =
         [ class "back-button headerIcon"
         , onClick <| clickMsg
         ]
-        [ SolidIcon.angle_left ]
+        [ FontAwesome.angle_left ]
 
 
 closeButton : msg -> Html msg
@@ -23,7 +22,7 @@ closeButton clkMsg =
         [ class "close-button headerIcon"
         , onClick <| clkMsg
         ]
-        [ SolidIcon.plus ]
+        [ FontAwesome.plus ]
 
 
 topBar : Bool -> msg -> msg -> Html msg
@@ -40,27 +39,29 @@ topBar showBack onBack onClose =
         children =
             case showBack of
                 True ->
-                    (leftArrowButton onBack) :: initialChildren
+                    leftArrowButton onBack :: initialChildren
 
                 False ->
                     initialChildren
     in
-        div
-            [ classList [ ( "row-view", True ), ( "widgetHeader", True ) ]
-            , style [ ( "background-color", "rgb(60, 170, 249)" ), ( "color", "#fff" ) ]
-            ]
-            children
+    div
+        [ classList [ ( "row-view", True ), ( "widgetHeader", True ) ]
+        , style "background-color" "rgb(60, 170, 249)"
+        , style "color" "#fff"
+        ]
+        children
 
 
-popInInitialAnim : List Animation.Property
-popInInitialAnim =
-    [ Animation.opacity 0
-    , Animation.scale 0.6
-    , Animation.shadow
-        { offsetX = 0
-        , offsetY = 0
-        , size = 20
-        , blur = 0
-        , color = rgb 153 153 153
-        }
-    ]
+
+-- popInInitialAnim : List Animation.Property
+-- popInInitialAnim =
+--     [ Animation.opacity 0
+--     , Animation.scale 0.6
+--     , Animation.shadow
+--         { offsetX = 0
+--         , offsetY = 0
+--         , size = 20
+--         , blur = 0
+--         , color = rgb 153 153 153
+--         }
+--     ]

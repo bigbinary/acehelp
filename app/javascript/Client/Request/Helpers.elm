@@ -1,8 +1,8 @@
-module Request.Helpers exposing (..)
+module Request.Helpers exposing (ApiErrorMessage, ApiKey, Context(..), NodeEnv, QueryParameters, Url, apiUrl, constructUrl, contextToMaybe, defaultRequestHeaders, graphqlUrl, httpGet, httpPost, requestOptions)
 
-import Http exposing (request, encodeUri, header, Header)
-import Json.Decode exposing (Decoder)
 import GraphQL.Client.Http exposing (RequestOptions)
+import Http exposing (Header, header, request)
+import Json.Decode exposing (Decoder)
 
 
 type alias Url =
@@ -70,12 +70,12 @@ requestOptions nodeEnv apiKey =
         url =
             graphqlUrl nodeEnv
     in
-        { method = "POST"
-        , headers = headers
-        , url = url
-        , timeout = Nothing
-        , withCredentials = False
-        }
+    { method = "POST"
+    , headers = headers
+    , url = url
+    , timeout = Nothing
+    , withCredentials = False
+    }
 
 
 constructUrl : String -> List ( String, String ) -> String
@@ -91,7 +91,7 @@ constructUrl baseUrl queryParams =
                 ++ String.join "&"
                     (List.map
                         (\( key, value ) ->
-                            encodeUri key ++ "=" ++ value
+                            key ++ "=" ++ value
                         )
                         queryParams
                     )
@@ -121,15 +121,15 @@ httpGet apiKey context url queryParams decoder =
         callUrl =
             constructUrl url <| contextKeyValue ++ queryParams
     in
-        request
-            { method = "GET"
-            , headers = headers
-            , url = callUrl
-            , body = Http.emptyBody
-            , expect = Http.expectJson decoder
-            , timeout = Nothing
-            , withCredentials = False
-            }
+    request
+        { method = "GET"
+        , headers = headers
+        , url = callUrl
+        , body = Http.emptyBody
+        , expect = Http.expectJson decoder
+        , timeout = Nothing
+        , withCredentials = False
+        }
 
 
 httpPost : ApiKey -> Url -> Http.Body -> Decoder a -> Http.Request a
@@ -144,15 +144,15 @@ httpPost apiKey url body decoder =
         callUrl =
             constructUrl url []
     in
-        request
-            { method = "POST"
-            , headers = headers
-            , url = callUrl
-            , body = body
-            , expect = Http.expectJson decoder
-            , timeout = Nothing
-            , withCredentials = False
-            }
+    request
+        { method = "POST"
+        , headers = headers
+        , url = callUrl
+        , body = body
+        , expect = Http.expectJson decoder
+        , timeout = Nothing
+        , withCredentials = False
+        }
 
 
 defaultRequestHeaders : List Header

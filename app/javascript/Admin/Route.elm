@@ -1,37 +1,32 @@
-module Route exposing (Route(..), fromLocation, modifyUrl, routeToString)
+module Route exposing (Route(..), fromLocation, routeToString)
 
 import Admin.Data.Article exposing (ArticleId)
 import Admin.Data.Category exposing (CategoryId)
 import Admin.Data.Feedback exposing (FeedbackId)
 import Admin.Data.Url exposing (UrlId)
-import Navigation exposing (Location)
-import UrlParser as Url exposing ((</>), Parser, oneOf, parsePath, s, string)
-
-
--- ROUTING --
-
-
-type alias OrganizationApiKey =
-    String
+import Admin.Request.Helper exposing (..)
+import Browser.Navigation as Navigation exposing (Key)
+import Url exposing (Url)
+import Url.Parser as UrlParser exposing ((</>), Parser, oneOf, parse, s, string)
 
 
 type Route
-    = ArticleList OrganizationApiKey
-    | ArticleCreate OrganizationApiKey
-    | ArticleEdit OrganizationApiKey ArticleId
-    | CategoryList OrganizationApiKey
-    | CategoryCreate OrganizationApiKey
-    | CategoryEdit OrganizationApiKey CategoryId
-    | UrlList OrganizationApiKey
-    | UrlCreate OrganizationApiKey
-    | UrlEdit OrganizationApiKey UrlId
-    | TicketList OrganizationApiKey
-    | TicketEdit OrganizationApiKey String
-    | FeedbackList OrganizationApiKey
-    | FeedbackShow OrganizationApiKey FeedbackId
-    | TeamList OrganizationApiKey
-    | TeamMemberCreate OrganizationApiKey
-    | Settings OrganizationApiKey
+    = ArticleList ApiKey
+    | ArticleCreate ApiKey
+    | ArticleEdit ApiKey ArticleId
+    | CategoryList ApiKey
+    | CategoryCreate ApiKey
+    | CategoryEdit ApiKey CategoryId
+    | UrlList ApiKey
+    | UrlCreate ApiKey
+    | UrlEdit ApiKey UrlId
+    | TicketList ApiKey
+    | TicketEdit ApiKey String
+    | FeedbackList ApiKey
+    | FeedbackShow ApiKey FeedbackId
+    | TeamList ApiKey
+    | TeamMemberCreate ApiKey
+    | Settings ApiKey
     | SignUp
     | Dashboard
     | NotFound
@@ -43,27 +38,27 @@ type Route
 routeMatcher : Parser (Route -> a) a
 routeMatcher =
     oneOf
-        [ Url.map Dashboard (s "admin" </> s "")
-        , Url.map ArticleList (s "organizations" </> string </> s "articles")
-        , Url.map UrlList (s "organizations" </> string </> s "urls")
-        , Url.map CategoryList (s "organizations" </> string </> s "categories")
-        , Url.map TicketList (s "organizations" </> string </> s "tickets")
-        , Url.map FeedbackList (s "organizations" </> string </> s "feedbacks")
-        , Url.map FeedbackShow (s "organizations" </> string </> s "feedbacks" </> string)
-        , Url.map TeamList (s "organizations" </> string </> s "team")
-        , Url.map Settings (s "organizations" </> string </> s "settings")
-        , Url.map ArticleCreate (s "organizations" </> string </> s "articles" </> s "new")
-        , Url.map UrlCreate (s "organizations" </> string </> s "urls" </> s "new")
-        , Url.map CategoryCreate (s "organizations" </> string </> s "categories" </> s "new")
-        , Url.map TeamMemberCreate (s "organizations" </> string </> s "team" </> s "new")
-        , Url.map ArticleEdit (s "organizations" </> string </> s "articles" </> string)
-        , Url.map UrlEdit (s "organizations" </> string </> s "urls" </> string </> s "edit")
-        , Url.map TicketEdit (s "organizations" </> string </> s "tickets" </> string)
-        , Url.map OrganizationCreate (s "organizations" </> s "new")
-        , Url.map CategoryEdit (s "organizations" </> string </> s "categories" </> string)
-        , Url.map SignUp (s "users" </> s "sign_up")
-        , Url.map Login (s "users" </> s "sign_in")
-        , Url.map ForgotPassword (s "users" </> s "forgot_password")
+        [ UrlParser.map Dashboard (s "admin" </> s "")
+        , UrlParser.map ArticleList (s "organizations" </> string </> s "articles")
+        , UrlParser.map UrlList (s "organizations" </> string </> s "urls")
+        , UrlParser.map CategoryList (s "organizations" </> string </> s "categories")
+        , UrlParser.map TicketList (s "organizations" </> string </> s "tickets")
+        , UrlParser.map FeedbackList (s "organizations" </> string </> s "feedbacks")
+        , UrlParser.map FeedbackShow (s "organizations" </> string </> s "feedbacks" </> string)
+        , UrlParser.map TeamList (s "organizations" </> string </> s "team")
+        , UrlParser.map Settings (s "organizations" </> string </> s "settings")
+        , UrlParser.map ArticleCreate (s "organizations" </> string </> s "articles" </> s "new")
+        , UrlParser.map UrlCreate (s "organizations" </> string </> s "urls" </> s "new")
+        , UrlParser.map CategoryCreate (s "organizations" </> string </> s "categories" </> s "new")
+        , UrlParser.map TeamMemberCreate (s "organizations" </> string </> s "team" </> s "new")
+        , UrlParser.map ArticleEdit (s "organizations" </> string </> s "articles" </> string)
+        , UrlParser.map UrlEdit (s "organizations" </> string </> s "urls" </> string </> s "edit")
+        , UrlParser.map TicketEdit (s "organizations" </> string </> s "tickets" </> string)
+        , UrlParser.map OrganizationCreate (s "organizations" </> s "new")
+        , UrlParser.map CategoryEdit (s "organizations" </> string </> s "categories" </> string)
+        , UrlParser.map SignUp (s "users" </> s "sign_up")
+        , UrlParser.map Login (s "users" </> s "sign_in")
+        , UrlParser.map ForgotPassword (s "users" </> s "forgot_password")
         ]
 
 
@@ -142,17 +137,12 @@ routeToString page =
                 NotFound ->
                     []
     in
-        "/" ++ String.join "/" pieces
+    "/" ++ String.join "/" pieces
 
 
-modifyUrl : Route -> Cmd msg
-modifyUrl =
-    routeToString >> Navigation.modifyUrl
-
-
-fromLocation : Location -> Route
+fromLocation : Url -> Route
 fromLocation location =
-    case parsePath routeMatcher location of
+    case parse routeMatcher location of
         Just route ->
             route
 

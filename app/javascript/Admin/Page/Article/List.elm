@@ -1,16 +1,20 @@
-module Page.Article.List exposing (..)
+module Page.Article.List exposing (Model, Msg(..), init, initModel, rows, update, view)
 
+import Admin.Data.Article exposing (..)
+import Admin.Data.ReaderCmd exposing (..)
+import Admin.Data.Status exposing (..)
+import Admin.Request.Article exposing (..)
+import Admin.Request.Helper exposing (ApiKey)
+import GraphQL.Client.Http as GQLClient
+import Helpers exposing (flip)
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
-import Admin.Request.Article exposing (..)
-import Admin.Data.Article exposing (..)
-import Admin.Data.Status exposing (..)
 import Page.Article.Common exposing (statusToButtonText)
-import Task exposing (Task)
 import Reader exposing (Reader)
-import GraphQL.Client.Http as GQLClient
-import Admin.Data.ReaderCmd exposing (..)
+import Route exposing (..)
+import Task exposing (Task)
+
 
 
 -- Model
@@ -40,8 +44,6 @@ init =
 
 type Msg
     = ArticleListLoaded (Result GQLClient.Error (Maybe (List ArticleSummary)))
-    | OnArticleEditClick ArticleId
-    | OnArticleCreateClick
     | UpdateArticleStatus ArticleId AvailabilitySatus
     | UpdateArticleStatusResponse (Result GQLClient.Error (Maybe Article))
     | DeleteArticle ArticleId
@@ -85,7 +87,7 @@ update msg model =
                         Nothing ->
                             model.articles
             in
-                ( { model | articles = articles }, [] )
+            ( { model | articles = articles }, [] )
 
         DeleteArticleResponse (Err error) ->
             ( { model | error = Just "There was an error deleting the article" }, [] )
@@ -97,11 +99,12 @@ update msg model =
             let
                 articles =
                     case newArticle of
-                        Just article ->
+                        Just updatedArticle ->
                             List.map
                                 (\article ->
-                                    if article.id == article.id then
-                                        { article | status = article.status }
+                                    if article.id == updatedArticle.id then
+                                        { article | status = updatedArticle.status }
+
                                     else
                                         article
                                 )
@@ -110,26 +113,18 @@ update msg model =
                         Nothing ->
                             model.articles
             in
-                ( { model | articles = articles }, [] )
+            ( { model | articles = articles }, [] )
 
         UpdateArticleStatusResponse (Err error) ->
             ( { model | error = Just "There was an error wile updating the Status" }, [] )
-
-        OnArticleCreateClick ->
-            -- NOTE: Handled in Main
-            ( model, [] )
-
-        OnArticleEditClick articleId ->
-            -- NOTE: Handled in Main
-            ( model, [] )
 
 
 
 -- View
 
 
-view : Model -> Html Msg
-view model =
+view : ApiKey -> Model -> Html Msg
+view orgKey model =
     div
         [ id "article_list"
         ]
@@ -144,8 +139,8 @@ view model =
                     )
                     model.error
             ]
-        , button
-            [ onClick OnArticleCreateClick
+        , a
+            [ href <| routeToString <| ArticleCreate orgKey
             , class "btn btn-primary"
             ]
             [ text "+ Article" ]
@@ -153,22 +148,22 @@ view model =
             [ class "listingSection" ]
             (List.map
                 (\article ->
-                    rows model article
+                    rows orgKey model article
                 )
                 model.articles
             )
         ]
 
 
-rows : Model -> ArticleSummary -> Html Msg
-rows model article =
+rows : ApiKey -> Model -> ArticleSummary -> Html Msg
+rows orgKey model article =
     div
         [ class "listingRow" ]
         [ span
             [ class "textColumn" ]
             [ text article.title ]
-        , button
-            [ onClick (OnArticleEditClick article.id)
+        , a
+            [ href <| routeToString <| ArticleEdit orgKey article.id
             , class "actionButton btn btn-primary"
             ]
             [ text "Edit Article" ]

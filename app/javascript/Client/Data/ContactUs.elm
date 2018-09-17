@@ -1,12 +1,12 @@
-module Data.ContactUs exposing (FeedbackForm, ResponseMessage, RequestMessage, getEncodedContact, decodeMessage, addTicketMutation)
+module Data.ContactUs exposing (FeedbackForm, RequestMessage, ResponseMessage, addTicketMutation, decodeMessage, getEncodedContact)
 
-import Json.Encode as Encode
-import Json.Decode as Decode exposing (Decoder)
-import Json.Decode.Pipeline exposing (decode, required, optional)
+import Data.Common exposing (..)
 import GraphQL.Request.Builder as GQLBuilder
 import GraphQL.Request.Builder.Arg as Arg
 import GraphQL.Request.Builder.Variable as Var
-import Data.Common exposing (..)
+import Json.Decode as Decode exposing (Decoder)
+import Json.Decode.Pipeline exposing (optional, required)
+import Json.Encode as Encode
 
 
 type alias ResponseMessage =
@@ -30,8 +30,10 @@ type alias FeedbackForm =
     { comment : String
     , email : String
     , name : String
-    , article_id: String
+    , article_id : String
     }
+
+
 
 -- ENCODERS
 
@@ -68,23 +70,26 @@ addTicketMutation =
         messageVar =
             Var.required "message" .comment Var.string
     in
-        GQLBuilder.mutationDocument <|
-            GQLBuilder.extract <|
-                GQLBuilder.field "addTicket"
-                    [ ( "input"
-                      , Arg.object
-                            [ ( "name", Arg.variable nameVar )
-                            , ( "email", Arg.variable emailVar )
-                            , ( "message", Arg.variable messageVar )
-                            ]
-                      )
-                    ]
-                    errorsExtractor
+    GQLBuilder.mutationDocument <|
+        GQLBuilder.extract <|
+            GQLBuilder.field "addTicket"
+                [ ( "input"
+                  , Arg.object
+                        [ ( "name", Arg.variable nameVar )
+                        , ( "email", Arg.variable emailVar )
+                        , ( "message", Arg.variable messageVar )
+                        ]
+                  )
+                ]
+                errorsExtractor
+
+
+
 -- DECODERS
 
 
 decodeMessage : Decoder ResponseMessage
 decodeMessage =
-    decode ResponseMessage
+    Decode.succeed ResponseMessage
         |> optional "message" (Decode.map Just Decode.string) Nothing
         |> optional "errors" (Decode.map Just Decode.string) Nothing

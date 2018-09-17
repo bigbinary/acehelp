@@ -1,6 +1,6 @@
-module Data.Category exposing (..)
+module Data.Category exposing (Categories, Category, CategoryId, allCategoriesQuery)
 
-import Data.Article exposing (ArticleSummary, decodeArticleSummary, articleSummaryField)
+import Data.Article exposing (ArticleSummary, articleSummaryField, decodeArticleSummary)
 import GraphQL.Request.Builder as GQLBuilder
 
 

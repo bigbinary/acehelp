@@ -1,9 +1,10 @@
-port module Views.Tabs exposing (Model, Msg(..), Tabs(..), init, modelWithTabs, allTabs, update, view, tabToString)
+port module Views.Tabs exposing (Model, Msg(..), Tabs(..), allTabs, init, modelWithTabs, tabToString, update, view)
 
 import Html exposing (..)
-import Html.Attributes exposing (id, style, class, classList)
+import Html.Attributes exposing (class, classList, id, style)
 import Html.Events exposing (onClick, targetValue)
 import List.Zipper as Zipper exposing (Zipper)
+
 
 
 -- MODEL
@@ -53,7 +54,7 @@ update msg model =
                         |> Zipper.find ((==) newTab)
                         |> Zipper.withDefault ContactUs
             in
-                ( updatedTabs, Cmd.none )
+            ( updatedTabs, Cmd.none )
 
 
 
@@ -74,7 +75,7 @@ view model =
                             [ classList
                                 [ ( "tabs", True )
                                 , ( "selected"
-                                  , (Zipper.current model) == tab
+                                  , Zipper.current model == tab
                                   )
                                 ]
                             , onClick (TabSelected tab)
@@ -83,21 +84,19 @@ view model =
                             ]
                     )
     in
-        div
-            [ id "tab-group"
-            , style [ ( "background-color", "rgb(60, 170, 249)" ), ( "color", "#fff" ) ]
+    div
+        [ id "tab-group"
+        , style "background-color" "rgb(60, 170, 249)"
+        , style "color" "#fff"
+        ]
+    <|
+        span
+            [ id "under-tab"
+            , class (underTabClassForTab currentTab)
+            , style "background-color" "#ffffff"
             ]
-        <|
-            (span
-                [ id "under-tab"
-                , class (underTabClassForTab currentTab)
-                , style
-                    [ ( "background-color", "#ffffff" )
-                    ]
-                ]
-                []
-            )
-                :: tabsDom
+            []
+            :: tabsDom
 
 
 tabToString : Tabs -> String

@@ -1,26 +1,26 @@
-module Page.Article.Edit exposing (..)
+module Page.Article.Edit exposing (Model, Msg(..), articleInputs, delayTime, editAndSaveView, init, initModel, save, subscriptions, update, view)
 
-import Html exposing (..)
-import Html.Attributes exposing (..)
-import Html.Events exposing (..)
 import Admin.Data.Article exposing (..)
+import Admin.Data.Category exposing (..)
+import Admin.Data.Common exposing (..)
+import Admin.Data.ReaderCmd exposing (..)
+import Admin.Data.Status exposing (..)
+import Admin.Data.Url exposing (UrlData, UrlId)
+import Admin.Ports exposing (..)
 import Admin.Request.Article exposing (..)
 import Admin.Request.Category exposing (..)
 import Admin.Request.Url exposing (..)
-import Admin.Data.Category exposing (..)
-import Admin.Data.Url exposing (UrlData, UrlId)
-import Admin.Data.Common exposing (..)
-import Admin.Data.Status exposing (..)
+import Field exposing (..)
+import GraphQL.Client.Http as GQLClient
+import Helpers exposing (..)
+import Html exposing (..)
+import Html.Attributes exposing (..)
+import Html.Events exposing (..)
+import Page.Article.Common exposing (..)
 import Reader exposing (Reader)
 import Task exposing (Task)
 import Time
-import Field exposing (..)
-import Helpers exposing (..)
-import Admin.Ports exposing (..)
-import Page.Article.Common exposing (..)
-import GraphQL.Client.Http as GQLClient
-import Admin.Ports exposing (..)
-import Admin.Data.ReaderCmd exposing (..)
+
 
 
 -- Model
@@ -97,9 +97,9 @@ type Msg
 -- TODO: Fetch categories to populate categories dropdown
 
 
-delayTime : Float
+delayTime : Int
 delayTime =
-    Time.second * 2
+    2000
 
 
 update : Msg -> Model -> ( Model, List (ReaderCmd Msg) )
@@ -113,7 +113,7 @@ update msg model =
                 errors =
                     errorsIn [ newTitle, model.desc ]
             in
-                ( { model | title = newTitle, error = errors }, [] )
+            ( { model | title = newTitle, error = errors }, [] )
 
         ReceivedTimeoutId id ->
             let
@@ -125,7 +125,7 @@ update msg model =
                         Nothing ->
                             []
             in
-                ( { model | updateTaskId = Just id }, killCmd )
+            ( { model | updateTaskId = Just id }, killCmd )
 
         TimedOut id ->
             save model
@@ -138,9 +138,9 @@ update msg model =
                 errors =
                     errorsIn [ newDesc, model.title ]
             in
-                ( { model | desc = newDesc, error = errors }
-                , []
-                )
+            ( { model | desc = newDesc, error = errors }
+            , []
+            )
 
         SaveArticle ->
             save model
@@ -158,7 +158,7 @@ update msg model =
                         , originalArticle = Just article
                         , status = None
                         , isEditable = False
-                        , success = Just ("Article updated successfully.")
+                        , success = Just "Article updated successfully."
                       }
                     , [ Strict <| Reader.Reader <| always <| insertArticleContent article.desc ]
                     )
@@ -360,7 +360,7 @@ view model =
                         []
                         [ span
                             []
-                            [ text ("SaveSatus: ") ]
+                            [ text "SaveSatus: " ]
                         , span
                             [ class (statusClass model.articleStatus) ]
                             [ text (availablityStatusIso.get model.articleStatus) ]
@@ -369,12 +369,13 @@ view model =
                         [ onClick (UpdateStatus model.articleId model.articleStatus)
                         , class "btn btn-primary"
                         ]
-                        [ text ("Mark " ++ (statusToButtonText model.articleStatus)) ]
+                        [ text ("Mark " ++ statusToButtonText model.articleStatus) ]
                     ]
                 ]
             ]
         , if model.status == Saving then
             savingIndicator
+
           else
             text ""
         ]
@@ -437,10 +438,11 @@ save model =
                 Reader.map (Task.attempt SaveArticleResponse)
                     (requestUpdateArticle (articleInputs model))
     in
-        if Field.isAllValid fields && maybeToBool model.originalArticle then
-            ( { model | error = Nothing, status = Saving }, [ cmd ] )
-        else
-            ( { model | error = errorsIn fields }, [] )
+    if Field.isAllValid fields && maybeToBool model.originalArticle then
+        ( { model | error = Nothing, status = Saving }, [ cmd ] )
+
+    else
+        ( { model | error = errorsIn fields }, [] )
 
 
 

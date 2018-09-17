@@ -1,17 +1,19 @@
-module Page.Feedback.List exposing (..)
+module Page.Feedback.List exposing (Model, Msg(..), init, initModel, requestFeedbacksList, row, update, view)
 
 --import Http
 
+import Admin.Data.Feedback exposing (..)
+import Admin.Data.ReaderCmd exposing (..)
+import Admin.Request.Feedback exposing (..)
+import Admin.Request.Helper exposing (ApiKey)
+import GraphQL.Client.Http as GQLClient
 import Html exposing (..)
-import Html.Events exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
-import Admin.Request.Feedback exposing (..)
-import Admin.Data.Feedback exposing (..)
-import Task exposing (Task)
 import Reader exposing (Reader)
-import GraphQL.Client.Http as GQLClient
-import Admin.Data.ReaderCmd exposing (..)
+import Route exposing (..)
+import Task exposing (Task)
+
 
 
 -- MODEL
@@ -44,7 +46,6 @@ init =
 type Msg
     = FeedbackListLoaded (Result GQLClient.Error (Maybe (List Feedback)))
     | FeedbackListReloaded FeedbackStatus
-    | OnFeedbackClick FeedbackId
 
 
 update : Msg -> Model -> ( Model, List (ReaderCmd Msg) )
@@ -59,22 +60,18 @@ update msg model =
                     ( model, [] )
 
         FeedbackListLoaded (Err err) ->
-            ( { model | error = Just (toString err) }, [] )
+            ( { model | error = Just "Could not fetch Feedback list" }, [] )
 
         FeedbackListReloaded status ->
             requestFeedbacksList model status
-
-        OnFeedbackClick feedbackId ->
-            -- NOTE: Handled in Main
-            ( model, [] )
 
 
 
 -- VIEW
 
 
-view : Model -> Html Msg
-view model =
+view : ApiKey -> Model -> Html Msg
+view orgKey model =
     div
         [ id "feedback_list" ]
         [ div []
@@ -112,7 +109,7 @@ view model =
                 [ div [ id "content-wrapper" ]
                     (List.map
                         (\feedback ->
-                            row model feedback
+                            row orgKey model feedback
                         )
                         model.feedbackList
                     )
@@ -121,7 +118,7 @@ view model =
                 [ div [ id "content-wrapper" ]
                     (List.map
                         (\feedback ->
-                            row model feedback
+                            row orgKey model feedback
                         )
                         model.feedbackList
                     )
@@ -130,11 +127,11 @@ view model =
         ]
 
 
-row : Model -> Feedback -> Html Msg
-row model feedback =
+row : ApiKey -> Model -> Feedback -> Html Msg
+row orgKey model feedback =
     div
         [ class "feedback-row" ]
-        [ span [ class "row-id", onClick <| OnFeedbackClick feedback.id ] [ text feedback.id ]
+        [ span [ class "row-id" ] [ a [ href <| routeToString <| FeedbackShow feedback.id orgKey ] [ text feedback.id ] ]
         , span [ class "row-name" ] [ text feedback.name ]
         , span [ class "row-message" ] [ text feedback.message ]
         ]
@@ -146,4 +143,4 @@ requestFeedbacksList model status =
         cmd =
             Strict <| Reader.map (Task.attempt FeedbackListLoaded) (requestFeedbacks status)
     in
-        ( model, [ cmd ] )
+    ( model, [ cmd ] )

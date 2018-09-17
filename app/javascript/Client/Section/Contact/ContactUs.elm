@@ -1,18 +1,19 @@
-module Section.Contact.ContactUs exposing (..)
+module Section.Contact.ContactUs exposing (Field(..), Model, Msg(..), UserNotification(..), contramapField, fieldError, fieldValue, formView, init, initModel, isFieldErrored, isModelSubmittable, isValidEmail, modelToRequestMessage, successView, update, validEmail, validateBlankField, validateModel, view)
 
-import Http
-import Html exposing (..)
-import Html.Attributes exposing (class, classList, id, type_, placeholder, style, defaultValue)
-import Html.Events exposing (onClick, onInput)
-import Data.ContactUs exposing (..)
-import Request.ContactUs exposing (..)
-import Json.Decode
-import Views.Style exposing (tickShape)
-import Regex exposing (Regex)
 import Data.Common exposing (..)
+import Data.ContactUs exposing (..)
 import GraphQL.Client.Http as GQLClient
+import Html exposing (..)
+import Html.Attributes exposing (class, classList, id, placeholder, style, type_, value)
+import Html.Events exposing (onClick, onInput)
+import Http
+import Json.Decode
 import Reader
+import Regex exposing (Regex)
+import Request.ContactUs exposing (..)
 import Task
+import Views.Style exposing (tickShape)
+
 
 
 -- MODEL
@@ -76,7 +77,7 @@ fieldError (Field err value) =
 
 isFieldErrored : Field -> Bool
 isFieldErrored field =
-    case (fieldError field) of
+    case fieldError field of
         Just _ ->
             True
 
@@ -107,8 +108,8 @@ modelToRequestMessage model =
 
 validEmail : Regex
 validEmail =
-    Regex.regex "^[a-zA-Z0-9.!#$%&'*+\\/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$"
-        |> Regex.caseInsensitive
+    Regex.fromStringWith { caseInsensitive = True, multiline = False } "^[a-zA-Z0-9.!#$%&'*+\\/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$"
+        |> Maybe.withDefault Regex.never
 
 
 isValidEmail : Field -> Bool
@@ -140,11 +141,11 @@ validateModel model =
                 |> contramapField
                     (\err ->
                         case err of
-                            Just err ->
-                                Just err
+                            Just errMsg ->
+                                Just errMsg
 
                             Nothing ->
-                                case (isValidEmail email) of
+                                case isValidEmail email of
                                     True ->
                                         Nothing
 
@@ -155,12 +156,11 @@ validateModel model =
         validatedMessage =
             validateBlankField message "Message cannot be blank"
     in
-        ({ model
-            | name = validatedName
-            , email = validatedEmail
-            , message = validatedMessage
-         }
-        )
+    { model
+        | name = validatedName
+        , email = validatedEmail
+        , message = validatedMessage
+    }
 
 
 update : Msg -> Model -> ( Model, List (SectionCmd Msg) )
@@ -178,12 +178,12 @@ update msg model =
                         Nothing ->
                             MessageNotification "Thank you for your message. We will contact you soon!"
             in
-                ( { model
-                    | message = Field Nothing ""
-                    , userNotification = notification
-                  }
-                , []
-                )
+            ( { model
+                | message = Field Nothing ""
+                , userNotification = notification
+              }
+            , []
+            )
 
         RequestMessageCompleted (Err error) ->
             let
@@ -194,10 +194,10 @@ update msg model =
 
                 resultToUserNotification result =
                     case result of
-                        Ok error ->
-                            stringToUserNotification error
+                        Ok errorMsg ->
+                            stringToUserNotification errorMsg
 
-                        Err error ->
+                        Err errorMsg ->
                             NoNotification
 
                 decode =
@@ -214,19 +214,19 @@ update msg model =
                         _ ->
                             ErrorNotification "Something went wrong! Please try again later"
             in
-                ( { model | userNotification = errorMessage }, [] )
+            ( { model | userNotification = errorMessage }, [] )
 
         SendMessage ->
             let
                 newModel =
                     validateModel model
             in
-                case isModelSubmittable newModel of
-                    True ->
-                        ( newModel, [ Strict <| Reader.map (Task.attempt RequestMessageCompleted) (requestAddTicketMutation (modelToRequestMessage newModel)) ] )
+            case isModelSubmittable newModel of
+                True ->
+                    ( newModel, [ Strict <| Reader.map (Task.attempt RequestMessageCompleted) (requestAddTicketMutation (modelToRequestMessage newModel)) ] )
 
-                    False ->
-                        ( newModel, [] )
+                False ->
+                    ( newModel, [] )
 
         NameInput name ->
             ( { model | name = Field Nothing name }, [] )
@@ -255,14 +255,14 @@ formView model message =
     let
         userNotificationDom =
             Maybe.map
-                (\message ->
+                (\msg ->
                     div
                         [ classList
                             [ ( "user-notification", True )
                             , ( "error", True )
                             ]
                         ]
-                        [ text message ]
+                        [ text msg ]
                 )
                 message
                 |> Maybe.withDefault (text "")
@@ -275,51 +275,49 @@ formView model message =
                     )
                 |> Maybe.withDefault (text "")
     in
-        div [ id "contact-us-wrapper" ]
-            [ userNotificationDom
-            , h2 [] [ text "Send us a message" ]
-            , div [ class "contact-user" ]
-                [ span [ class "contact-name" ]
-                    [ input
-                        [ type_ "text"
-                        , placeholder "Your Name"
-                        , onInput NameInput
-                        , defaultValue (fieldValue model.name)
-                        ]
-                        []
-                    , fieldErrorDom model.name
-                    ]
-                , span [ class "contact-email" ]
-                    [ input
-                        [ type_ "text"
-                        , placeholder "Your Email"
-                        , onInput EmailInput
-                        , defaultValue (fieldValue model.email)
-                        ]
-                        []
-                    , fieldErrorDom model.email
-                    ]
-                ]
-
-            -- , input [ type_ "text", class "contact-subject", placeholder "Subject" ] []
-            , span [ class "contact-message" ]
-                [ textarea
-                    [ placeholder
-                        "How can we help?"
-                    , onInput MessageInput
+    div [ id "contact-us-wrapper" ]
+        [ userNotificationDom
+        , h2 [] [ text "Send us a message" ]
+        , div [ class "contact-user" ]
+            [ span [ class "contact-name" ]
+                [ input
+                    [ type_ "text"
+                    , placeholder "Your Name"
+                    , onInput NameInput
+                    , value (fieldValue model.name)
                     ]
                     []
-                , fieldErrorDom model.message
+                , fieldErrorDom model.name
                 ]
-            , div
-                [ class "regular-button"
-                , style
-                    [ ( "background-color", "rgb(60, 170, 249)" )
+            , span [ class "contact-email" ]
+                [ input
+                    [ type_ "text"
+                    , placeholder "Your Email"
+                    , onInput EmailInput
+                    , value (fieldValue model.email)
                     ]
-                , onClick SendMessage
+                    []
+                , fieldErrorDom model.email
                 ]
-                [ text "Send Message" ]
             ]
+
+        -- , input [ type_ "text", class "contact-subject", placeholder "Subject" ] []
+        , span [ class "contact-message" ]
+            [ textarea
+                [ placeholder
+                    "How can we help?"
+                , onInput MessageInput
+                ]
+                []
+            , fieldErrorDom model.message
+            ]
+        , div
+            [ class "regular-button"
+            , style "background-color" "rgb(60, 170, 249)"
+            , onClick SendMessage
+            ]
+            [ text "Send Message" ]
+        ]
 
 
 view : Model -> Html Msg
@@ -336,4 +334,4 @@ view model =
                 ErrorNotification message ->
                     formView model (Just message)
     in
-        div [ id "content-wrapper" ] [ contactUsDom ]
+    div [ id "content-wrapper" ] [ contactUsDom ]

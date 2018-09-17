@@ -1,14 +1,17 @@
-module Page.Url.List exposing (..)
+module Page.Url.List exposing (Model, Msg(..), deleteRecord, init, initModel, update, urlRow, view)
 
+import Admin.Data.ReaderCmd exposing (..)
 import Admin.Data.Url exposing (..)
+import Admin.Request.Helper exposing (ApiKey)
 import Admin.Request.Url exposing (..)
 import GraphQL.Client.Http as GQLClient
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
 import Reader exposing (Reader)
+import Route exposing (..)
 import Task exposing (Task)
-import Admin.Data.ReaderCmd exposing (..)
+
 
 
 -- MODEL
@@ -45,8 +48,6 @@ type Msg
     | UrlLoaded (Result GQLClient.Error (Maybe (List UrlData)))
     | DeleteUrl String
     | DeleteUrlResponse (Result GQLClient.Error UrlId)
-    | OnUrlCreateClick
-    | OnUrlEditClick UrlId
 
 
 update : Msg -> Model -> ( Model, List (ReaderCmd Msg) )
@@ -64,7 +65,7 @@ update msg model =
                     ( { model | urls = [], error = Just "There was an error loading up the Urls" }, [] )
 
         UrlLoaded (Err err) ->
-            ( { model | error = Just (toString err) }, [] )
+            ( { model | error = Just "There was an error loading up the Urls" }, [] )
 
         DeleteUrl urlId ->
             deleteRecord model urlId
@@ -75,21 +76,13 @@ update msg model =
         DeleteUrlResponse (Err error) ->
             ( { model | error = Just "An error occured while deleting the Url" }, [] )
 
-        OnUrlCreateClick ->
-            -- Note: Handled in Main
-            ( model, [] )
-
-        OnUrlEditClick _ ->
-            -- Note: Handled in Main
-            ( model, [] )
-
 
 
 -- VIEW
 
 
-view : Model -> Html Msg
-view model =
+view : ApiKey -> Model -> Html Msg
+view orgKey model =
     div
         [ id "url_listing" ]
         [ div
@@ -103,8 +96,8 @@ view model =
                     )
                     model.error
             ]
-        , button
-            [ onClick OnUrlCreateClick
+        , a
+            [ href <| routeToString <| UrlCreate orgKey
             , class "btn btn-primary"
             ]
             [ text "+ Url" ]
@@ -112,15 +105,15 @@ view model =
             [ class "listingSection" ]
             (List.map
                 (\url ->
-                    urlRow url
+                    urlRow orgKey url
                 )
                 model.urls
             )
         ]
 
 
-urlRow : UrlData -> Html Msg
-urlRow url =
+urlRow : ApiKey -> UrlData -> Html Msg
+urlRow orgKey url =
     div
         [ id url.id
         , class "listingRow"
@@ -129,8 +122,8 @@ urlRow url =
             [ class "textColumn" ]
             [ text url.url ]
         , div [ class "actionButtonColumn" ]
-            [ button
-                [ onClick (OnUrlEditClick url.id)
+            [ a
+                [ href <| routeToString <| UrlEdit orgKey url.id
                 , class "actionButton btn btn-primary"
                 ]
                 [ text "Edit Url" ]
@@ -151,4 +144,4 @@ deleteRecord model urlId =
         cmd =
             Strict <| Reader.map (Task.attempt DeleteUrlResponse) (deleteUrl urlId)
     in
-        ( model, [ cmd ] )
+    ( model, [ cmd ] )

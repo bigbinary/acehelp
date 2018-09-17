@@ -1,10 +1,10 @@
-module Admin.Data.Article exposing (..)
+module Admin.Data.Article exposing (Article, ArticleId, ArticleListResponse, ArticleSummary, CreateArticleInputs, UpdateArticleInputs, allArticlesQuery, articleByIdQuery, articleObject, articleStatusMutation, articleSummaryObject, articlesByUrlQuery, createArticleMutation, deleteArticleMutation, nullableArticleSummaryObject, updateArticleMutation)
 
+import Admin.Data.Category exposing (Category, CategoryId, categoryObject)
+import Admin.Data.Url exposing (UrlData, UrlId, urlObject)
+import GraphQL.Request.Builder as GQLBuilder
 import GraphQL.Request.Builder.Arg as Arg
 import GraphQL.Request.Builder.Variable as Var
-import GraphQL.Request.Builder as GQLBuilder
-import Admin.Data.Category exposing (CategoryId, categoryObject, Category)
-import Admin.Data.Url exposing (UrlId, UrlData, urlObject)
 
 
 type alias ArticleId =
@@ -55,17 +55,17 @@ articlesByUrlQuery =
         urlVar =
             Var.required "url" .url Var.string
     in
-        GQLBuilder.queryDocument
-            (GQLBuilder.extract
-                (GQLBuilder.field "articles"
-                    [ ( "url", Arg.variable urlVar ) ]
-                    (GQLBuilder.nullable
-                        (GQLBuilder.list
-                            articleSummaryObject
-                        )
+    GQLBuilder.queryDocument
+        (GQLBuilder.extract
+            (GQLBuilder.field "articles"
+                [ ( "url", Arg.variable urlVar ) ]
+                (GQLBuilder.nullable
+                    (GQLBuilder.list
+                        articleSummaryObject
                     )
                 )
             )
+        )
 
 
 allArticlesQuery : GQLBuilder.Document GQLBuilder.Query (Maybe (List ArticleSummary)) {}
@@ -89,13 +89,13 @@ articleByIdQuery =
         idVar =
             Var.required "id" .id Var.string
     in
-        GQLBuilder.queryDocument
-            (GQLBuilder.extract
-                (GQLBuilder.field "article"
-                    [ ( "id", Arg.variable idVar ) ]
-                    (GQLBuilder.nullable articleObject)
-                )
+    GQLBuilder.queryDocument
+        (GQLBuilder.extract
+            (GQLBuilder.field "article"
+                [ ( "id", Arg.variable idVar ) ]
+                (GQLBuilder.nullable articleObject)
             )
+        )
 
 
 createArticleMutation : GQLBuilder.Document GQLBuilder.Mutation (Maybe Article) CreateArticleInputs
@@ -110,23 +110,23 @@ createArticleMutation =
         categoryIdsVar =
             Var.optional "categoryIds" .categoryIds (Var.list Var.string) []
     in
-        GQLBuilder.mutationDocument <|
-            GQLBuilder.extract
-                (GQLBuilder.field "addArticle"
-                    [ ( "input"
-                      , Arg.object
-                            [ ( "title", Arg.variable titleVar )
-                            , ( "desc", Arg.variable descVar )
-                            , ( "category_ids", Arg.variable categoryIdsVar )
-                            ]
-                      )
-                    ]
-                    (GQLBuilder.extract <|
-                        GQLBuilder.field "article"
-                            []
-                            (GQLBuilder.nullable articleObject)
-                    )
+    GQLBuilder.mutationDocument <|
+        GQLBuilder.extract
+            (GQLBuilder.field "addArticle"
+                [ ( "input"
+                  , Arg.object
+                        [ ( "title", Arg.variable titleVar )
+                        , ( "desc", Arg.variable descVar )
+                        , ( "category_ids", Arg.variable categoryIdsVar )
+                        ]
+                  )
+                ]
+                (GQLBuilder.extract <|
+                    GQLBuilder.field "article"
+                        []
+                        (GQLBuilder.nullable articleObject)
                 )
+            )
 
 
 updateArticleMutation : GQLBuilder.Document GQLBuilder.Mutation (Maybe Article) UpdateArticleInputs
@@ -147,25 +147,25 @@ updateArticleMutation =
         urlIdVar =
             Var.optional "url_id" .urlId Var.string ""
     in
-        GQLBuilder.mutationDocument <|
-            GQLBuilder.extract
-                (GQLBuilder.field "updateArticle"
-                    [ ( "input"
-                      , Arg.object
-                            [ ( "id", Arg.variable idVar )
-                            , ( "title", Arg.variable titleVar )
-                            , ( "desc", Arg.variable descVar )
-                            , ( "category_id", Arg.variable categoryIdVar )
-                            , ( "url_id", Arg.variable urlIdVar )
-                            ]
-                      )
-                    ]
-                    (GQLBuilder.extract <|
-                        GQLBuilder.field "article"
-                            []
-                            (GQLBuilder.nullable articleObject)
-                    )
+    GQLBuilder.mutationDocument <|
+        GQLBuilder.extract
+            (GQLBuilder.field "updateArticle"
+                [ ( "input"
+                  , Arg.object
+                        [ ( "id", Arg.variable idVar )
+                        , ( "title", Arg.variable titleVar )
+                        , ( "desc", Arg.variable descVar )
+                        , ( "category_id", Arg.variable categoryIdVar )
+                        , ( "url_id", Arg.variable urlIdVar )
+                        ]
+                  )
+                ]
+                (GQLBuilder.extract <|
+                    GQLBuilder.field "article"
+                        []
+                        (GQLBuilder.nullable articleObject)
                 )
+            )
 
 
 deleteArticleMutation : GQLBuilder.Document GQLBuilder.Mutation (Maybe ArticleId) { a | id : ArticleId }
@@ -174,19 +174,19 @@ deleteArticleMutation =
         idVar =
             Var.required "id" .id Var.string
     in
-        GQLBuilder.mutationDocument <|
-            GQLBuilder.extract <|
-                GQLBuilder.field "deleteArticle"
-                    [ ( "input"
-                      , Arg.object
-                            [ ( "id", Arg.variable idVar ) ]
-                      )
-                    ]
-                    (GQLBuilder.extract <|
-                        GQLBuilder.field "deletedId"
-                            []
-                            (GQLBuilder.nullable GQLBuilder.string)
-                    )
+    GQLBuilder.mutationDocument <|
+        GQLBuilder.extract <|
+            GQLBuilder.field "deleteArticle"
+                [ ( "input"
+                  , Arg.object
+                        [ ( "id", Arg.variable idVar ) ]
+                  )
+                ]
+                (GQLBuilder.extract <|
+                    GQLBuilder.field "deletedId"
+                        []
+                        (GQLBuilder.nullable GQLBuilder.string)
+                )
 
 
 articleStatusMutation : GQLBuilder.Document GQLBuilder.Mutation (Maybe Article) { vars | id : ArticleId, status : String }
@@ -198,21 +198,21 @@ articleStatusMutation =
         statusVar =
             Var.required "status" .status Var.string
     in
-        GQLBuilder.mutationDocument <|
-            GQLBuilder.extract <|
-                GQLBuilder.field "updateArticleStatus"
-                    [ ( "input"
-                      , Arg.object
-                            [ ( "id", Arg.variable idVar )
-                            , ( "status", Arg.variable statusVar )
-                            ]
-                      )
-                    ]
-                    (GQLBuilder.extract <|
-                        GQLBuilder.field "article"
-                            []
-                            (GQLBuilder.nullable articleObject)
-                    )
+    GQLBuilder.mutationDocument <|
+        GQLBuilder.extract <|
+            GQLBuilder.field "updateArticleStatus"
+                [ ( "input"
+                  , Arg.object
+                        [ ( "id", Arg.variable idVar )
+                        , ( "status", Arg.variable statusVar )
+                        ]
+                  )
+                ]
+                (GQLBuilder.extract <|
+                    GQLBuilder.field "article"
+                        []
+                        (GQLBuilder.nullable articleObject)
+                )
 
 
 articleObject : GQLBuilder.ValueSpec GQLBuilder.NonNull GQLBuilder.ObjectType Article vars
@@ -221,7 +221,7 @@ articleObject =
         |> GQLBuilder.with (GQLBuilder.field "id" [] GQLBuilder.string)
         |> GQLBuilder.with (GQLBuilder.field "title" [] GQLBuilder.string)
         |> GQLBuilder.with (GQLBuilder.field "desc" [] GQLBuilder.string)
-        |> (GQLBuilder.with (GQLBuilder.field "status" [] GQLBuilder.string))
+        |> GQLBuilder.with (GQLBuilder.field "status" [] GQLBuilder.string)
         |> GQLBuilder.with
             (GQLBuilder.field "categories"
                 []

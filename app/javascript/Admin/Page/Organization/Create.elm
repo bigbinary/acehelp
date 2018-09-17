@@ -1,17 +1,18 @@
-module Page.Organization.Create exposing (..)
+module Page.Organization.Create exposing (Model, Msg(..), init, initModel, orgInputs, save, update, view)
 
-import Html exposing (..)
-import Html.Attributes exposing (..)
-import Html.Events exposing (..)
 import Admin.Data.Organization exposing (..)
+import Admin.Data.ReaderCmd exposing (..)
 import Admin.Request.Organization exposing (..)
-import Reader exposing (Reader)
 import Field exposing (..)
 import Field.ValidationResult exposing (..)
 import GraphQL.Client.Http as GQLClient
-import Task exposing (Task)
 import Helpers exposing (..)
-import Admin.Data.ReaderCmd exposing (..)
+import Html exposing (..)
+import Html.Attributes exposing (..)
+import Html.Events exposing (..)
+import Reader exposing (Reader)
+import Task exposing (Task)
+
 
 
 -- MODEL
@@ -80,10 +81,11 @@ update msg model =
                             )
                         |> String.join ", "
             in
-                if isAllValid fields then
-                    save model
-                else
-                    ( { model | error = Just "Please check your inputs" }, [] )
+            if isAllValid fields then
+                save model
+
+            else
+                ( { model | error = Just "Please check your inputs" }, [] )
 
         SaveOrgResponse (Ok org) ->
             ( model, [] )
@@ -141,4 +143,4 @@ save model =
         cmd =
             Open <| Reader.map (Task.attempt SaveOrgResponse) (requestCreateOrganization (orgInputs model))
     in
-        ( model, [ cmd ] )
+    ( model, [ cmd ] )

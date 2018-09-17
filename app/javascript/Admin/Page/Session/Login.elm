@@ -1,6 +1,8 @@
-module Page.Session.Login exposing (..)
+module Page.Session.Login exposing (Model, Msg(..), init, initModel, update, view)
 
 import Admin.Data.ReaderCmd exposing (..)
+import Admin.Data.Session exposing (..)
+import Admin.Data.User exposing (..)
 import Admin.Request.Session exposing (..)
 import Field exposing (..)
 import Field.ValidationResult exposing (..)
@@ -10,10 +12,9 @@ import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
 import Reader exposing (Reader)
+import Route exposing (..)
 import Task exposing (Task)
-import Admin.Data.User exposing (..)
-import Admin.Data.ReaderCmd exposing (..)
-import Admin.Data.Session exposing (..)
+
 
 
 -- MODEL
@@ -47,8 +48,6 @@ init =
 
 type Msg
     = Login
-    | SignupRedirect
-    | ForgotPasswordRedirect
     | SetUsername String
     | SetPassword String
     | LoginResponse (Result GQLClient.Error UserWithOrganization)
@@ -84,19 +83,13 @@ update msg model =
                         False ->
                             []
             in
-                ( { model | error = error }, cmd )
+            ( { model | error = error }, cmd )
 
         LoginResponse (Ok authId) ->
             ( model, [] )
 
         LoginResponse (Err err) ->
             ( { model | error = [ "Username or Password is incorrect. Please try again" ] }, [] )
-
-        SignupRedirect ->
-            ( model, [] )
-
-        ForgotPasswordRedirect ->
-            ( model, [] )
 
         SetUsername username ->
             ( { model | username = Field.update model.username username }, [] )
@@ -170,12 +163,12 @@ view model =
                 , div [ class "links-section col-md-12" ]
                     [ span [ class "btn" ]
                         [ Html.a
-                            [ href "/users/sign_up" ]
+                            [ href <| routeToString <| SignUp ]
                             [ span [] [ text "Sign Up" ] ]
                         ]
                     , span [ class "btn" ]
                         [ Html.a
-                            [ href "/users/forgot_password" ]
+                            [ href <| routeToString <| ForgotPassword ]
                             [ span [] [ text "Forgot password" ] ]
                         ]
                     ]

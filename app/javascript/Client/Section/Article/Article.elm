@@ -1,20 +1,19 @@
-module Section.Article.Article exposing (..)
+module Section.Article.Article exposing (FeedBack(..), Model, Msg(..), didThisHelpView, emptyForm, erroredFeedBack, feedbackSentView, init, initModel, negativeView, positiveView, update, view)
 
-import Data.Common exposing (GQLError)
 import Data.Article exposing (..)
+import Data.Common exposing (..)
 import Data.ContactUs exposing (FeedbackForm)
-import Request.Article exposing (..)
-import Request.ContactUs exposing (requestAddTicketMutation)
-import Request.Article exposing (requestAddFeedbackMutation)
+import GraphQL.Client.Http as GQLClient
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
-import Task
 import Reader exposing (Reader)
-import FontAwesome.Solid as SolidIcon
-import GraphQL.Client.Http as GQLClient
-import Data.Common exposing (..)
+import Request.Article exposing (..)
+import Request.ContactUs exposing (requestAddTicketMutation)
+import Task
 import Views.Error as Error
+import Views.FontAwesome as FontAwesome exposing (..)
+
 
 
 -- MODEL
@@ -164,7 +163,7 @@ update msg model =
                     Maybe.map (\currentForm -> { currentForm | name = name })
                         model.feedbackForm
             in
-                ( { model | feedbackForm = newForm }, [] )
+            ( { model | feedbackForm = newForm }, [] )
 
         EmailInput email ->
             let
@@ -172,7 +171,7 @@ update msg model =
                     Maybe.map (\currentForm -> { currentForm | email = email })
                         model.feedbackForm
             in
-                ( { model | feedbackForm = newForm }, [] )
+            ( { model | feedbackForm = newForm }, [] )
 
         CommentInput comment ->
             let
@@ -180,7 +179,7 @@ update msg model =
                     Maybe.map (\currentForm -> { currentForm | comment = comment })
                         model.feedbackForm
             in
-                ( { model | feedbackForm = newForm }, [] )
+            ( { model | feedbackForm = newForm }, [] )
 
 
 
@@ -210,23 +209,23 @@ view model =
                 ErroredFeedback ->
                     erroredFeedBack
     in
-        case model.article of
-            IsA article ->
-                div [ id "content-wrapper" ]
-                    [ div [ class "article-wrapper" ]
-                        [ h1 [] [ text article.title ]
-                        , div [ class "article-content trix-content" ]
-                            [ p [] [ text article.content ]
-                            ]
-                        , feebackView
+    case model.article of
+        IsA articleItem ->
+            div [ id "content-wrapper" ]
+                [ div [ class "article-wrapper" ]
+                    [ h1 [] [ text articleItem.title ]
+                    , div [ class "article-content trix-content" ]
+                        [ p [] [ text articleItem.content ]
                         ]
+                    , feebackView
                     ]
+                ]
 
-            Error error ->
-                Error.view error
+        Error error ->
+            Error.view error
 
-            None ->
-                text ""
+        None ->
+            text ""
 
 
 didThisHelpView : Html Msg
@@ -240,7 +239,7 @@ didThisHelpView =
                     Positive
                 )
             ]
-            [ SolidIcon.thumbs_up ]
+            [ FontAwesome.thumbs_up ]
         , div
             [ class "thumbs thumbs-down"
             , onClick
@@ -248,7 +247,7 @@ didThisHelpView =
                     Negative
                 )
             ]
-            [ SolidIcon.thumbs_down ]
+            [ FontAwesome.thumbs_down ]
         ]
 
 
@@ -288,7 +287,7 @@ negativeView =
         , div []
             [ div
                 [ class "regular-button"
-                , style [ ( "background-color", "rgb(60, 170, 249)" ) ]
+                , style "background-color" "rgb(60, 170, 249)"
                 , onClick SendFeedback
                 ]
                 [ text "Submit" ]
@@ -318,4 +317,4 @@ feedbackSentView model =
 erroredFeedBack : Html msg
 erroredFeedBack =
     div [ class "did-this-help" ]
-        [ (text "Something went wrong! Please try again") ]
+        [ text "Something went wrong! Please try again" ]

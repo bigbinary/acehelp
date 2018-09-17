@@ -1,15 +1,16 @@
-module Page.Feedback.Show exposing (..)
+module Page.Feedback.Show exposing (Model, Msg(..), feedbackStatusButton, init, initModel, update, updateFeedabackStatus, view)
 
+import Admin.Data.Feedback exposing (..)
+import Admin.Data.ReaderCmd exposing (..)
+import Admin.Request.Feedback exposing (..)
+import GraphQL.Client.Http as GQLClient
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
-import Admin.Data.Feedback exposing (..)
-import Admin.Request.Feedback exposing (..)
-import Request.Helpers exposing (NodeEnv, ApiKey)
 import Reader exposing (Reader)
+import Request.Helpers exposing (ApiKey, NodeEnv)
 import Task exposing (Task)
-import GraphQL.Client.Http as GQLClient
-import Admin.Data.ReaderCmd exposing (..)
+
 
 
 -- Model
@@ -135,7 +136,7 @@ updateFeedabackStatus model feedbackId feedbackStatus =
         cmd =
             Strict <| Reader.map (Task.attempt UpdateFeedbackResponse) (requestUpdateFeedbackStatus feedbackId feedbackStatus)
     in
-        ( model, [ cmd ] )
+    ( model, [ cmd ] )
 
 
 feedbackStatusButton : Model -> String -> Html Msg

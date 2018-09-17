@@ -1,7 +1,8 @@
-module Page.Session.SignUp exposing (..)
+module Page.Session.SignUp exposing (Model, Msg(..), init, initModel, signUp, update, view)
 
 import Admin.Data.ReaderCmd exposing (..)
 import Admin.Data.User exposing (..)
+import Admin.Request.Helper exposing (ApiKey)
 import Admin.Request.Session exposing (signupRequest)
 import Field exposing (..)
 import Field.ValidationResult exposing (..)
@@ -11,7 +12,9 @@ import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
 import Reader exposing (Reader)
+import Route exposing (..)
 import Task exposing (Task)
+
 
 
 -- MODEL
@@ -50,8 +53,6 @@ type Msg
     | EmailInput String
     | PasswordInput String
     | ConfirmPasswordInput String
-    | ForgotPasswordRedirect
-    | LoginRedirect
     | SignUp
     | SignUpResponse (Result GQLClient.Error UserWithErrors)
     | HideError
@@ -71,12 +72,6 @@ update msg model =
 
         ConfirmPasswordInput password ->
             ( { model | confirmPassword = Field.update model.confirmPassword password }, [] )
-
-        ForgotPasswordRedirect ->
-            ( model, [] )
-
-        LoginRedirect ->
-            ( model, [] )
 
         SignUp ->
             let
@@ -103,21 +98,52 @@ update msg model =
                 passwordValidation =
                     Field.value model.password == Field.value model.confirmPassword
             in
-                if formValidation && passwordValidation then
-                    signUp model
-                else if not passwordValidation then
-                    ( { model
-                        | error = Just "Please enter valid passwords"
-                        , password = Field.update model.password ""
-                        , confirmPassword = Field.update model.confirmPassword ""
-                      }
-                    , []
-                    )
-                else
-                    ( { model | error = Just errors }, [] )
+            if formValidation && passwordValidation then
+                signUp model
+
+            else if not passwordValidation then
+                ( { model
+                    | error = Just "Please enter valid passwords"
+                    , password = Field.update model.password ""
+                    , confirmPassword = Field.update model.confirmPassword ""
+                  }
+                , []
+                )
+
+            else
+                ( { model | error = Just errors }, [] )
+
+        HideError ->
+            ( { model | error = Nothing }, [] )
 
         SignUpResponse (Ok userWithErrors) ->
-            ( model, [] )
+            let
+                errors =
+                    case userWithErrors.errors of
+                        Just receivedErrors ->
+                            List.map .message receivedErrors |> String.join ", "
+
+                        Nothing ->
+                            ""
+            in
+            if String.length errors > 0 then
+                ( { model
+                    | password = Field.update model.password ""
+                    , confirmPassword = Field.update model.confirmPassword ""
+                    , error = Just errors
+                  }
+                , []
+                )
+
+            else
+                ( { model
+                    | firstName = Field.update model.firstName ""
+                    , email = Field.update model.email ""
+                    , password = Field.update model.password ""
+                    , confirmPassword = Field.update model.confirmPassword ""
+                  }
+                , [ navigateTo (\_ -> OrganizationCreate) ]
+                )
 
         SignUpResponse (Err error) ->
             case error of
@@ -126,9 +152,6 @@ update msg model =
 
                 GQLClient.GraphQLError err ->
                     ( { model | error = Just <| String.join ". " <| List.map .message err }, [] )
-
-        HideError ->
-            ( { model | error = Nothing }, [] )
 
 
 signUp : Model -> ( Model, List (ReaderCmd Msg) )
@@ -145,7 +168,7 @@ signUp model =
                         }
                     )
     in
-        ( model, [ cmd ] )
+    ( model, [ cmd ] )
 
 
 
@@ -235,12 +258,10 @@ view model =
                         , div [ class "form-section row" ]
                             [ span
                                 [ class "col-md-6 btn btn-link"
-                                , onClick LoginRedirect
                                 ]
-                                [ text "Sign In" ]
+                                [ a [ href <| routeToString <| Login ] [ text "Sign In" ] ]
                             , span
                                 [ class "btn btn-link"
-                                , onClick ForgotPasswordRedirect
                                 ]
                                 [ text "Forgot password" ]
                             ]

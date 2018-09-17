@@ -1,16 +1,15 @@
-module Section.Library.Category exposing (..)
+module Section.Library.Category exposing (Model, Msg(..), init, initModel, update, view)
 
-import Data.Category exposing (..)
-import Data.Article exposing (..)
-import Data.Common exposing (..)
-import Views.Container exposing (popInInitialAnim)
-import Html exposing (..)
-import Html.Events exposing (onClick)
-import Html.Attributes exposing (id, class)
 import Animation
-import FontAwesome.Solid as SolidIcon
-import Views.Error exposing (errorMessageView)
-import Views.Error as Error
+import Data.Article exposing (..)
+import Data.Category exposing (..)
+import Data.Common exposing (..)
+import Html exposing (..)
+import Html.Attributes exposing (class, id)
+import Html.Events exposing (onClick)
+import Views.Error as Error exposing (errorMessageView)
+import Views.FontAwesome as FontAwesome exposing (..)
+
 
 
 -- MODEL
@@ -30,12 +29,10 @@ initModel =
     Nothing
 
 
-initAnim : Animation.State
-initAnim =
-    Animation.style popInInitialAnim
 
-
-
+-- initAnim : Animation.State
+-- initAnim =
+--     Animation.style popInInitialAnim
 -- UPDATE
 
 
@@ -71,19 +68,18 @@ view model =
 
                 _ ->
                     div [ id "content-wrapper" ] <|
-                        (div [ class "row-view" ] [ h1 [] [ text category.name ] ])
-                            :: (List.map
-                                    (\article ->
-                                        div
-                                            [ onClick <| LoadArticle article.id
-                                            , class "selectable-row"
-                                            ]
-                                            [ span [ class "row-icon" ] [ SolidIcon.file_alt ]
-                                            , span [ class "row-title" ] [ text article.title ]
-                                            ]
-                                    )
-                                    category.articles
-                               )
+                        div [ class "row-view" ] [ h1 [] [ text category.name ] ]
+                            :: List.map
+                                (\article ->
+                                    div
+                                        [ onClick <| LoadArticle article.id
+                                        , class "selectable-row"
+                                        ]
+                                        [ span [ class "row-icon" ] [ FontAwesome.file_alt ]
+                                        , span [ class "row-title" ] [ text article.title ]
+                                        ]
+                                )
+                                category.articles
 
         Nothing ->
             text ""
