@@ -1,9 +1,7 @@
 module Main exposing (Flags, Model, Msg(..), Page(..), PageState(..), combineCmds, getPage, init, main, navigateTo, setRoute, subscriptions, update, view)
 
 import Admin.Data.ReaderCmd exposing (..)
-import Admin.Ports exposing (..)
 import Admin.Request.Helper exposing (ApiKey, NodeEnv, logoutRequest)
-import Admin.Views.Common exposing (..)
 import Field exposing (..)
 import Html exposing (..)
 import Http
@@ -31,7 +29,6 @@ import Page.Url.Edit as UrlEdit
 import Page.Url.List as UrlList
 import Page.UserNotification as UserNotification
 import Page.View as MainView
-import Admin.Ports exposing (..)
 import Route
 
 
@@ -742,6 +739,14 @@ update msg model =
                                         Nothing ->
                                             ""
 
+                                userId =
+                                    case userWithErrors.user of
+                                        Just user ->
+                                            user.id
+
+                                        Nothing ->
+                                            ""
+
                                 updatedModel =
                                     { currentPageModel
                                         | error = Just errors
@@ -754,7 +759,13 @@ update msg model =
                                     , runReaderCmds SignUpMsg cmds
                                     )
                                 else
-                                    updateNavigation (NavigateTo Route.OrganizationCreate)
+                                    let
+                                        ( updatedModel, updatedCmd ) =
+                                            updateNavigation (NavigateTo Route.OrganizationCreate)
+                                    in
+                                        ( { updatedModel | userId = userId }
+                                        , updatedCmd
+                                        )
 
                         SignUp.LoginRedirect ->
                             updateNavigation (NavigateTo Route.Login)
