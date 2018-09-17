@@ -70,7 +70,6 @@ end
 def create_data_for_ace_invoice_organization
   desc = "Article details is coming soon"
   org = Organization.create! name: "AceInvoice", email: "aceinvoice@example.com"
-  Setting.where(organization_id: org.id).first_or_create!
   OrganizationUser.create! organization_id: org.id, user_id: User.first.id
 
   getting_started_url = org.urls.create! url: "#{Rails.application.secrets.host}/pages/aceinvoice/getting_started"
@@ -127,7 +126,6 @@ end
 def create_data_for_eii_organization
   desc = "Article details is coming soon"
   org = Organization.create! name: "EventsInIndia", email: "eventsinindia@example.com"
-  Setting.where(organization_id: org.id).first_or_create!
   OrganizationUser.create! organization_id: org.id, user_id: User.first.id
 
   events_url = org.urls.create! url: "http://eventsinindia.com/events"

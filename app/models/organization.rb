@@ -17,6 +17,7 @@ class Organization < ApplicationRecord
 
   before_validation :ensure_api_key_assigned
   before_create :assign_slug
+  after_create :create_setting
 
   private
 
