@@ -123,3 +123,17 @@ adminHeader orgKey orgName currentRoute navigateTo signOut =
                 ]
             ]
         ]
+
+
+logoutOption : msg -> Html msg
+logoutOption signOut =
+    nav [ class "header navbar navbar-dark bg-primary navbar-expand flex-column flex-md-row" ]
+        [ div [ class "container" ]
+            [ ul [ class "navbar-nav ml-auto" ]
+                [ li [ class "nav-item " ]
+                    [ Html.a [ class "nav-link", onClick signOut ]
+                        [ text "Logout" ]
+                    ]
+                ]
+            ]
+        ]
