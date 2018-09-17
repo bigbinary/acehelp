@@ -11,22 +11,20 @@ import Helpers exposing (..)
 import Html exposing (..)
 import Html.Attributes exposing (..)
 
-
 type SaveSatus
     = Saving
     | None
 
 
-errorView : Maybe String -> Html msg
-errorView error =
-    Maybe.withDefault (text "") <|
-        Maybe.map
-            (\err ->
-                div [ class "alert alert-danger alert-dismissible fade show", attribute "role" "alert" ]
-                    [ text <| "Error: " ++ err
-                    ]
-            )
-            error
+errorView : List String -> Html msg
+errorView errors =
+    case errors of
+        [] ->
+            text ""
+
+        _ ->
+            div [ class "alert alert-danger alert-dismissible fade show", attribute "role" "alert" ]
+                [ text <| (++) "Error: " <| String.join ", " errors ]
 
 
 successView : Maybe String -> Html msg
@@ -119,7 +117,7 @@ itemSelection selectedItemList itemList =
         itemList
 
 
-errorsIn : List (Field String v) -> Maybe String
+errorsIn : List (Field String v) -> List String
 errorsIn fields =
     validateAll fields
         |> filterFailures
@@ -132,8 +130,6 @@ errorsIn fields =
                     Passed _ ->
                         "Unknown Error"
             )
-        |> String.join ", "
-        |> stringToMaybe
 
 
 statusClass : AvailabilitySatus -> String

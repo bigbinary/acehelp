@@ -32,7 +32,7 @@ type alias Model =
     , articleId : ArticleId
     , categories : List (Option Category)
     , urls : List (Option UrlData)
-    , error : Maybe String
+    , errors : List String
     , success : Maybe String
     , updateTaskId : Maybe Int
     , status : SaveSatus
@@ -49,7 +49,7 @@ initModel articleId =
     , articleId = articleId
     , categories = []
     , urls = []
-    , error = Nothing
+    , errors = []
     , success = Nothing
     , updateTaskId = Nothing
     , status = None
@@ -113,7 +113,7 @@ update msg model =
                 errors =
                     errorsIn [ newTitle, model.desc ]
             in
-            ( { model | title = newTitle, error = errors }, [] )
+                ( { model | title = newTitle, errors = errors }, [] )
 
         ReceivedTimeoutId id ->
             let
@@ -138,9 +138,9 @@ update msg model =
                 errors =
                     errorsIn [ newDesc, model.title ]
             in
-            ( { model | desc = newDesc, error = errors }
-            , []
-            )
+                ( { model | desc = newDesc, errors = errors }
+                , []
+                )
 
         SaveArticle ->
             save model
@@ -164,12 +164,17 @@ update msg model =
                     )
 
                 Nothing ->
-                    ( { model | error = Just "There was an error saving up the article", originalArticle = Nothing }
+                    ( { model | errors = [ "There was an error saving up the article" ], originalArticle = Nothing }
                     , []
                     )
 
         SaveArticleResponse (Err error) ->
-            ( { model | error = Just "There was an error saving the article", status = None }, [] )
+            ( { model
+                | errors = [ "There was an error saving the article" ]
+                , status = None
+              }
+            , []
+            )
 
         ArticleLoaded (Ok articleResp) ->
             case articleResp of
@@ -182,18 +187,18 @@ update msg model =
                         , categories = itemSelection (List.map .id article.categories) model.categories
                         , urls = itemSelection (List.map .id article.urls) model.urls
                         , originalArticle = Just article
-                        , error = Nothing
+                        , errors = []
                       }
                     , [ Strict <| Reader.Reader <| always <| insertArticleContent article.desc ]
                     )
 
                 Nothing ->
-                    ( { model | error = Just "There was an error loading up the article", originalArticle = Nothing }
+                    ( { model | errors = [ "There was an error loading up the article" ], originalArticle = Nothing }
                     , []
                     )
 
         ArticleLoaded (Err err) ->
-            ( { model | error = Just "There was an error loading up the article", originalArticle = Nothing }
+            ( { model | errors = [ "There was an error loading up the article" ], originalArticle = Nothing }
             , []
             )
 
@@ -208,16 +213,16 @@ update msg model =
 
                                 Nothing ->
                                     List.map Unselected categories
-                        , error = Nothing
+                        , errors = []
                       }
                     , []
                     )
 
                 Nothing ->
-                    ( { model | error = Just "There was an error loading up the Categories" }, [] )
+                    ( { model | errors = [ "There was an error loading up the Categories" ] }, [] )
 
         CategoriesLoaded (Err err) ->
-            ( { model | error = Just "There was an error loading up the Categories" }, [] )
+            ( { model | errors = [ "There was an error loading up the Categories" ] }, [] )
 
         CategorySelected categoryIds ->
             ( { model
@@ -237,16 +242,16 @@ update msg model =
 
                                 Nothing ->
                                     List.map Unselected urls
-                        , error = Nothing
+                        , errors = []
                       }
                     , []
                     )
 
                 Nothing ->
-                    ( { model | error = Just "There was an error loading up Urls" }, [] )
+                    ( { model | errors = [ "There was an error loading up Urls" ] }, [] )
 
         UrlsLoaded (Err err) ->
-            ( { model | error = Just "There was an error loading up Urls" }, [] )
+            ( { model | errors = [ "There was an error loading up Urls" ] }, [] )
 
         UrlSelected selectedUrlIds ->
             ( { model
@@ -275,7 +280,7 @@ update msg model =
                         , urls = itemSelection (List.map .id article.urls) model.urls
                         , originalArticle = Just article
                         , isEditable = False
-                        , error = Nothing
+                        , errors = []
                       }
                     , [ Strict <| Reader.Reader <| always <| insertArticleContent article.desc ]
                     )
@@ -306,7 +311,7 @@ update msg model =
 
         UpdateStatusResponse (Err error) ->
             ( { model
-                | error = Just "There was an error updating the article"
+                | errors = [ "There was an error updating the article" ]
                 , status = None
               }
             , []
@@ -320,7 +325,7 @@ update msg model =
 view : Model -> Html Msg
 view model =
     div []
-        [ errorView model.error
+        [ errorView model.errors
         , successView model.success
         , div [ class "row article-block" ]
             [ div [ class "col-md-8 article-title-content-block" ]
@@ -438,12 +443,10 @@ save model =
                 Reader.map (Task.attempt SaveArticleResponse)
                     (requestUpdateArticle (articleInputs model))
     in
-    if Field.isAllValid fields && maybeToBool model.originalArticle then
-        ( { model | error = Nothing, status = Saving }, [ cmd ] )
-
-    else
-        ( { model | error = errorsIn fields }, [] )
-
+        if Field.isAllValid fields && maybeToBool model.originalArticle then
+            ( { model | errors = [], status = Saving }, [ cmd ] )
+        else
+            ( { model | errors = errorsIn fields }, [] )
 
 
 -- Subscriptions

@@ -331,16 +331,15 @@ update msg model =
                     case getPage model.currentPage of
                         ArticleList articleListModel ->
                             articleListModel
-
                         _ ->
                             ArticleList.initModel
 
                 ( newModel, cmds ) =
                     ArticleList.update alMsg currentPageModel
             in
-            ( { model | currentPage = Loaded (ArticleList newModel) }
-            , runReaderCmds ArticleListMsg cmds
-            )
+                ( { model | currentPage = Loaded (ArticleList newModel) }
+                , runReaderCmds ArticleListMsg cmds
+                )
 
         ArticleCreateMsg caMsg ->
             let
@@ -352,22 +351,27 @@ update msg model =
                         _ ->
                             ArticleCreate.initModel
 
-                ( newPageModel, cmds ) =
+                ( newModel, cmds ) =
                     ArticleCreate.update caMsg
                         currentPageModel
-
-                ( newModel, newCmds ) =
-                    ( { model | currentPage = Loaded (ArticleCreate newPageModel) }
-                    , runReaderCmds ArticleCreateMsg cmds
-                    )
             in
-            case caMsg of
-                ArticleCreate.SaveArticleResponse (Ok id) ->
-                    updateNavigation (Route.ArticleList model.organizationKey) ( newModel, newCmds )
-                        |> renderFlashMessages (UserNotification.SuccessNotification "Article created successfully.")
+                case caMsg of
+                    ArticleCreate.SaveArticleResponse (Ok articleWithErrors) ->
+                        let
+                            updatedModel =
+                                { currentPageModel
+                                    | errors = flattenErrors articleWithErrors.errors
+                                }
+                        in
+                            case articleWithErrors.article of
+                                Just article ->
+                                    updateNavigation (NavigateTo (Route.ArticleList model.organizationKey))
+                                        |> renderFlashMessages (UserNotification.SuccessNotification "Article created successfully.")
 
-                _ ->
-                    ( newModel, newCmds )
+                                Nothing ->
+                                    ( { model | currentPage = Loaded (ArticleCreate updatedModel) }
+                                    , runReaderCmds ArticleCreateMsg cmds
+                                    )
 
         ArticleEditMsg aeMsg ->
             let

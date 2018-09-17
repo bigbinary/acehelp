@@ -1,10 +1,11 @@
 module Admin.Data.Article exposing (Article, ArticleId, ArticleListResponse, ArticleSummary, CreateArticleInputs, UpdateArticleInputs, allArticlesQuery, articleByIdQuery, articleObject, articleStatusMutation, articleSummaryObject, articlesByUrlQuery, createArticleMutation, deleteArticleMutation, nullableArticleSummaryObject, updateArticleMutation)
 
-import Admin.Data.Category exposing (Category, CategoryId, categoryObject)
-import Admin.Data.Url exposing (UrlData, UrlId, urlObject)
 import GraphQL.Request.Builder as GQLBuilder
 import GraphQL.Request.Builder.Arg as Arg
 import GraphQL.Request.Builder.Variable as Var
+import Admin.Data.Common exposing (..)
+import Admin.Data.Category exposing (CategoryId, categoryObject, Category)
+import Admin.Data.Url exposing (UrlId, UrlData, urlObject)
 
 
 type alias ArticleId =
@@ -46,6 +47,12 @@ type alias ArticleSummary =
 
 type alias ArticleListResponse =
     { articles : List Article
+    }
+
+
+type alias ArticleWithErrors =
+    { article : Maybe Article
+    , errors : Maybe (List Error)
     }
 
 
@@ -98,7 +105,7 @@ articleByIdQuery =
         )
 
 
-createArticleMutation : GQLBuilder.Document GQLBuilder.Mutation (Maybe Article) CreateArticleInputs
+createArticleMutation : GQLBuilder.Document GQLBuilder.Mutation ArticleWithErrors CreateArticleInputs
 createArticleMutation =
     let
         titleVar =
@@ -110,21 +117,18 @@ createArticleMutation =
         categoryIdsVar =
             Var.optional "categoryIds" .categoryIds (Var.list Var.string) []
     in
-    GQLBuilder.mutationDocument <|
-        GQLBuilder.extract
-            (GQLBuilder.field "addArticle"
-                [ ( "input"
-                  , Arg.object
-                        [ ( "title", Arg.variable titleVar )
-                        , ( "desc", Arg.variable descVar )
-                        , ( "category_ids", Arg.variable categoryIdsVar )
-                        ]
-                  )
-                ]
-                (GQLBuilder.extract <|
-                    GQLBuilder.field "article"
-                        []
-                        (GQLBuilder.nullable articleObject)
+        GQLBuilder.mutationDocument <|
+            (GQLBuilder.extract
+                (GQLBuilder.field "addArticle"
+                    [ ( "input"
+                      , Arg.object
+                            [ ( "title", Arg.variable titleVar )
+                            , ( "desc", Arg.variable descVar )
+                            , ( "category_ids", Arg.variable categoryIdsVar )
+                            ]
+                      )
+                    ]
+                    articleWithErrorsObject
                 )
             )
 
@@ -249,3 +253,14 @@ articleSummaryObject =
 nullableArticleSummaryObject : GQLBuilder.ValueSpec GQLBuilder.Nullable GQLBuilder.ObjectType (Maybe ArticleSummary) vars
 nullableArticleSummaryObject =
     GQLBuilder.nullable articleSummaryObject
+
+
+articleWithErrorsObject : GQLBuilder.ValueSpec GQLBuilder.NonNull GQLBuilder.ObjectType ArticleWithErrors vars
+articleWithErrorsObject =
+    GQLBuilder.object ArticleWithErrors
+        |> GQLBuilder.with
+            (GQLBuilder.field "article"
+                []
+                (GQLBuilder.nullable articleObject)
+            )
+        |> GQLBuilder.with errorsField
