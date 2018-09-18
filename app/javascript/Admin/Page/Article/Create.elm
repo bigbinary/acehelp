@@ -103,7 +103,7 @@ update msg model =
                     ( model, [] )
 
         CategoriesLoaded (Err err) ->
-            ( { model | errors = [] }, [] )
+            ( { model | errors = [ "There was an error while saving the Article" ] }, [] )
 
         CategorySelected categoryIds ->
             ( { model | categories = itemSelection categoryIds model.categories }, [] )

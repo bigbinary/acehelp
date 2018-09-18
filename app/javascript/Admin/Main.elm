@@ -362,14 +362,14 @@ update msg model =
                     )
             in
             case caMsg of
-                ArticleCreate.SaveArticleResponse (Ok articleWithErrors) ->
+                ArticleCreate.SaveArticleResponse (Ok articleResponse) ->
                     let
                         updatedModel =
                             { currentPageModel
-                                | errors = flattenErrors articleWithErrors.errors
+                                | errors = flattenErrors articleResponse.errors
                             }
                     in
-                    case articleWithErrors.article of
+                    case articleResponse.article of
                         Just article ->
                             updateNavigation (Route.ArticleList model.organizationKey) ( newModel, newCmds )
                                 |> renderFlashMessages (UserNotification.SuccessNotification "Article created successfully.")
@@ -685,15 +685,14 @@ update msg model =
                     OrganizationCreate.update oCMsg currentPageModel
             in
             case oCMsg of
-                OrganizationCreate.SaveOrgResponse (Ok orgWithErrors) ->
+                OrganizationCreate.SaveOrgResponse (Ok organizationResponse) ->
                     let
-                        --org = orgWithErrors.organization
                         updatedModel =
                             { currentPageModel
-                                | errors = flattenErrors orgWithErrors.errors
+                                | errors = flattenErrors organizationResponse.errors
                             }
                     in
-                    case orgWithErrors.organization of
+                    case organizationResponse.organization of
                         Just org ->
                             ( { model
                                 | organizationKey = org.api_key
