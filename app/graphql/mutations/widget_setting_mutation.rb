@@ -37,7 +37,8 @@ class Mutations::WidgetSettingMutation
     resolve ->(object, inputs, context) {
       setting = Setting.find_or_create_by(organization_id: context[:organization].id)
       if setting
-        if setting.update_attributes(visibility: inputs[:visibility])
+        if setting.update_attributes(visibility: inputs[:visibility].to_sym)
+
           updated_settings = setting
         else
           errors = Utils::ErrorHandler.new.detailed_error(setting, context)

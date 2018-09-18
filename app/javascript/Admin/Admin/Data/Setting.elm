@@ -1,14 +1,13 @@
-module Admin.Data.Setting exposing (..)
+module Admin.Data.Setting exposing (Setting, UpdateSettingInputs, organizationSettingQuery, settingObject, updateSettingMutation)
 
+import GraphQL.Request.Builder as GQLBuilder
 import GraphQL.Request.Builder.Arg as Arg
 import GraphQL.Request.Builder.Variable as Var
-import GraphQL.Request.Builder as GQLBuilder
 
 
 type alias Setting =
-    { baseUrl : String
-    , visibility : String
-    , organization : String
+    { base_url : Maybe String
+    , visibility : Bool
     }
 
 
@@ -20,29 +19,39 @@ type alias UpdateSettingInputs =
 settingObject : GQLBuilder.ValueSpec GQLBuilder.NonNull GQLBuilder.ObjectType Setting vars
 settingObject =
     GQLBuilder.object Setting
-        |> GQLBuilder.with (GQLBuilder.field "baseUrl" [] GQLBuilder.string)
-        |> GQLBuilder.with (GQLBuilder.field "visibility" [] GQLBuilder.string)
-        |> GQLBuilder.with (GQLBuilder.field "organization" [] GQLBuilder.string)
+        |> GQLBuilder.with (GQLBuilder.field "base_url" [] (GQLBuilder.nullable GQLBuilder.string))
+        |> GQLBuilder.with (GQLBuilder.field "visibility" [] GQLBuilder.bool)
 
 
 updateSettingMutation : GQLBuilder.Document GQLBuilder.Mutation Setting UpdateSettingInputs
 updateSettingMutation =
     let
         visibilityVar =
-            Var.required "status" .visibility Var.string
+            Var.required "visibility" .visibility Var.string
     in
-        GQLBuilder.mutationDocument <|
-            GQLBuilder.extract
-                (GQLBuilder.field "changeVisibilityOfWidget"
-                    [ ( "input"
-                      , Arg.object
-                            [ ( "status", Arg.variable visibilityVar )
-                            ]
-                      )
-                    ]
-                    (GQLBuilder.extract <|
-                        GQLBuilder.field "settingType"
-                            []
-                            settingObject
-                    )
+    GQLBuilder.mutationDocument <|
+        GQLBuilder.extract
+            (GQLBuilder.field "changeVisibilityOfWidget"
+                [ ( "input"
+                  , Arg.object
+                        [ ( "visibility", Arg.variable visibilityVar )
+                        ]
+                  )
+                ]
+                (GQLBuilder.extract <|
+                    GQLBuilder.field "setting"
+                        []
+                        settingObject
                 )
+            )
+
+
+organizationSettingQuery : GQLBuilder.Document GQLBuilder.Query Setting vars
+organizationSettingQuery =
+    GQLBuilder.queryDocument
+        (GQLBuilder.extract
+            (GQLBuilder.field "setting"
+                []
+                settingObject
+            )
+        )

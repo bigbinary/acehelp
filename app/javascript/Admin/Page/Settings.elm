@@ -11,6 +11,8 @@ import Html.Events exposing (..)
 import Reader exposing (Reader)
 import Task exposing (Task)
 
+
+
 -- Model
 
 
@@ -34,7 +36,7 @@ initModel =
 init : ( Model, List (ReaderCmd Msg) )
 init =
     ( initModel
-    , []
+    , [ Strict <| Reader.map (Task.attempt LoadSetting) requestOrganizationSetting ]
     )
 
 
@@ -43,7 +45,8 @@ init =
 
 
 type Msg
-    = ShowCode
+    = LoadSetting (Result GQLClient.Error Setting)
+    | ShowCode
     | ChangeToggleVisibility
     | SaveSetting
     | SaveSettingResponse (Result GQLClient.Error Setting)
@@ -56,24 +59,26 @@ update msg model =
             ( model, [] )
 
         ChangeToggleVisibility ->
-            let
-                toggleVisibility =
-                    not model.visibility
-            in
-                ( { model | visibility = toggleVisibility }, [] )
+            ( { model | visibility = not model.visibility }, [] )
 
         SaveSetting ->
             save model
 
         SaveSettingResponse (Ok settingResp) ->
             ( { model
-                | visibility = settingResp.visibility == "enable"
+                | visibility = settingResp.visibility
               }
             , []
             )
 
         SaveSettingResponse (Err error) ->
             ( { model | error = Just "There was an error saving this setting." }, [] )
+
+        LoadSetting (Ok setting) ->
+            ( { model | visibility = setting.visibility }, [] )
+
+        LoadSetting (Err err) ->
+            ( { model | error = Just "There was an error loading up the setting" }, [] )
 
 
 
@@ -107,7 +112,7 @@ save model =
                 Reader.map (Task.attempt SaveSettingResponse)
                     (requestUpdateSetting (settingInputs model))
     in
-        ( { model | error = Nothing }, [ cmd ] )
+    ( { model | error = Nothing }, [ cmd ] )
 
 
 view : NodeEnv -> ApiKey -> AppUrl -> Model -> Html Msg
@@ -181,12 +186,12 @@ codeSnippet nodeEnv organizationKey appUrl { visibility } =
         widgetToggleVisibility =
             settingStatus visibility
     in
-        "<script>"
-            ++ "var req=new XMLHttpRequest,baseUrl='"
-            ++ baseUrl nodeEnv appUrl
-            ++ "',apiKey='"
-            ++ organizationKey
-            ++ "',script=document.createElement('script');script.type='text/javascript',script.async=!0,script.onload=function(){var e=window.AceHelp;e&&e._internal.insertWidget({apiKey:apiKey},'"
-            ++ widgetToggleVisibility
-            ++ "')};var link=document.createElement('link');link.rel='stylesheet',link.type='text/css',link.media='all',req.responseType='json',req.open('GET',baseUrl+'/packs/manifest.json',!0),req.onload=function(){var e=document.getElementsByTagName('script')[0],t=req.response;link.href=baseUrl+t['client.css'],script.src=baseUrl+t['client.js'],e.parentNode.insertBefore(link,e),e.parentNode.insertBefore(script,e)},req.send();'"
-            ++ "\n</script>"
+    "<script>"
+        ++ "var req=new XMLHttpRequest,baseUrl='"
+        ++ baseUrl nodeEnv appUrl
+        ++ "',apiKey='"
+        ++ organizationKey
+        ++ "',script=document.createElement('script');script.type='text/javascript',script.async=!0,script.onload=function(){var e=window.AceHelp;e&&e._internal.insertWidget({apiKey:apiKey},'"
+        ++ widgetToggleVisibility
+        ++ "')};var link=document.createElement('link');link.rel='stylesheet',link.type='text/css',link.media='all',req.responseType='json',req.open('GET',baseUrl+'/packs/manifest.json',!0),req.onload=function(){var e=document.getElementsByTagName('script')[0],t=req.response;link.href=baseUrl+t['client.css'],script.src=baseUrl+t['client.js'],e.parentNode.insertBefore(link,e),e.parentNode.insertBefore(script,e)},req.send();'"
+        ++ "\n</script>"

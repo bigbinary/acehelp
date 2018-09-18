@@ -2,6 +2,7 @@
 
 class Setting < ApplicationRecord
   belongs_to :organization
+
   enum visibility: {
     enable: true,
     disable: false
