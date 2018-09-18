@@ -14,6 +14,7 @@ import Reader exposing (Reader)
 import Task exposing (Task)
 
 
+
 -- MODEL
 
 
@@ -49,7 +50,7 @@ type Msg
     = OrgNameInput String
     | OrgEmailInput String
     | SaveOrganization
-    | SaveOrgResponse (Result GQLClient.Error OrganizationWithError)
+    | SaveOrgResponse (Result GQLClient.Error OrganizationResponse)
 
 
 update : Msg -> Model -> ( Model, List (ReaderCmd Msg) )
@@ -79,10 +80,11 @@ update msg model =
                                         "Unknown Error"
                             )
             in
-                if isAllValid fields then
-                    save model
-                else
-                    ( { model | errors = errors }, [] )
+            if isAllValid fields then
+                save model
+
+            else
+                ( { model | errors = errors }, [] )
 
         SaveOrgResponse (Ok org) ->
             ( model, [] )

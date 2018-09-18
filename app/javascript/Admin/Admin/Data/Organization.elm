@@ -1,4 +1,4 @@
-module Admin.Data.Organization exposing (Organization, OrganizationData, OrganizationId, OrganizationWithError, UserId, createOrganizationMutation, organizationObject, organizationWithErrorsObject)
+module Admin.Data.Organization exposing (Organization, OrganizationData, OrganizationId, OrganizationResponse, UserId, createOrganizationMutation, organizationObject, organizationResponseObject)
 
 import Admin.Data.Article exposing (ArticleSummary)
 import Admin.Data.Common exposing (..)
@@ -30,13 +30,13 @@ type alias OrganizationData =
     }
 
 
-type alias OrganizationWithError =
+type alias OrganizationResponse =
     { organization : Maybe Organization
     , errors : Maybe (List Error)
     }
 
 
-createOrganizationMutation : GQLBuilder.Document GQLBuilder.Mutation OrganizationWithError OrganizationData
+createOrganizationMutation : GQLBuilder.Document GQLBuilder.Mutation OrganizationResponse OrganizationData
 createOrganizationMutation =
     let
         nameVar =
@@ -59,13 +59,13 @@ createOrganizationMutation =
                         ]
                   )
                 ]
-                organizationWithErrorsObject
+                organizationResponseObject
             )
 
 
-organizationWithErrorsObject : GQLBuilder.ValueSpec GQLBuilder.NonNull GQLBuilder.ObjectType OrganizationWithError vars
-organizationWithErrorsObject =
-    GQLBuilder.object OrganizationWithError
+organizationResponseObject : GQLBuilder.ValueSpec GQLBuilder.NonNull GQLBuilder.ObjectType OrganizationResponse vars
+organizationResponseObject =
+    GQLBuilder.object OrganizationResponse
         |> GQLBuilder.with
             (GQLBuilder.field "organization"
                 []

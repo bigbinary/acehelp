@@ -64,7 +64,7 @@ type Msg
     = TitleInput String
     | DescInput String
     | SaveArticle
-    | SaveArticleResponse (Result GQLClient.Error ArticleWithErrors)
+    | SaveArticleResponse (Result GQLClient.Error ArticleResponse)
     | CategoriesLoaded (Result GQLClient.Error (Maybe (List Category)))
     | CategorySelected (List CategoryId)
     | UrlsLoaded (Result GQLClient.Error (Maybe (List UrlData)))
@@ -188,10 +188,11 @@ save model =
                 Reader.map (Task.attempt SaveArticleResponse)
                     (requestCreateArticle (articleInputs model))
     in
-        if Field.isAllValid fields then
-            ( { model | errors = [], status = Saving }, [ cmd ] )
-        else
-            ( { model | errors = errorsIn fields }, [] )
+    if Field.isAllValid fields then
+        ( { model | errors = [], status = Saving }, [ cmd ] )
+
+    else
+        ( { model | errors = errorsIn fields }, [] )
 
 
 articleInputs : Model -> CreateArticleInputs

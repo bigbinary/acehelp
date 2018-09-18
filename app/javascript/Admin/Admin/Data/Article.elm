@@ -1,4 +1,4 @@
-module Admin.Data.Article exposing (Article, ArticleId, ArticleListResponse, ArticleSummary, ArticleWithErrors, CreateArticleInputs, UpdateArticleInputs, allArticlesQuery, articleByIdQuery, articleObject, articleStatusMutation, articleSummaryObject, articlesByUrlQuery, createArticleMutation, deleteArticleMutation, nullableArticleSummaryObject, updateArticleMutation)
+module Admin.Data.Article exposing (Article, ArticleId, ArticleListResponse, ArticleResponse, ArticleSummary, CreateArticleInputs, UpdateArticleInputs, allArticlesQuery, articleByIdQuery, articleObject, articleStatusMutation, articleSummaryObject, articlesByUrlQuery, createArticleMutation, deleteArticleMutation, nullableArticleSummaryObject, updateArticleMutation)
 
 import Admin.Data.Category exposing (Category, CategoryId, categoryObject)
 import Admin.Data.Common exposing (..)
@@ -50,7 +50,7 @@ type alias ArticleListResponse =
     }
 
 
-type alias ArticleWithErrors =
+type alias ArticleResponse =
     { article : Maybe Article
     , errors : Maybe (List Error)
     }
@@ -105,7 +105,7 @@ articleByIdQuery =
         )
 
 
-createArticleMutation : GQLBuilder.Document GQLBuilder.Mutation ArticleWithErrors CreateArticleInputs
+createArticleMutation : GQLBuilder.Document GQLBuilder.Mutation ArticleResponse CreateArticleInputs
 createArticleMutation =
     let
         titleVar =
@@ -128,7 +128,7 @@ createArticleMutation =
                         ]
                   )
                 ]
-                articleWithErrorsObject
+                articleResponseObject
             )
 
 
@@ -254,9 +254,9 @@ nullableArticleSummaryObject =
     GQLBuilder.nullable articleSummaryObject
 
 
-articleWithErrorsObject : GQLBuilder.ValueSpec GQLBuilder.NonNull GQLBuilder.ObjectType ArticleWithErrors vars
-articleWithErrorsObject =
-    GQLBuilder.object ArticleWithErrors
+articleResponseObject : GQLBuilder.ValueSpec GQLBuilder.NonNull GQLBuilder.ObjectType ArticleResponse vars
+articleResponseObject =
+    GQLBuilder.object ArticleResponse
         |> GQLBuilder.with
             (GQLBuilder.field "article"
                 []

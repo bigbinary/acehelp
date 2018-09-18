@@ -19,7 +19,7 @@ requestArticlesByUrl url =
         )
 
 
-requestCreateArticle : CreateArticleInputs -> Reader ( NodeEnv, ApiKey, AppUrl ) (Task GQLClient.Error ArticleWithErrors)
+requestCreateArticle : CreateArticleInputs -> Reader ( NodeEnv, ApiKey, AppUrl ) (Task GQLClient.Error ArticleResponse)
 requestCreateArticle articleInputs =
     Reader.Reader
         (\( nodeEnv, apiKey, appUrl ) ->
