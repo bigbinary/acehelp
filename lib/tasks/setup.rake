@@ -169,6 +169,15 @@ end
 def delete_all_records_from_all_tables
   ActiveRecord::Base.connection.schema_cache.clear!
 
+  OrganizationUser.delete_all
+  ArticleUrl.delete_all
+  ArticleCategory.delete_all
+  User.delete_all
+  Article.delete_all
+  Comment.delete_all
+  Ticket.delete_all
+  Url.delete_all
+
   ApplicationRecord.descendants.each do |klass|
     klass.reset_column_information
     klass.delete_all
