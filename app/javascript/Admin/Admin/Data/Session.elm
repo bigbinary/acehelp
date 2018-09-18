@@ -1,4 +1,4 @@
-module Admin.Data.Session exposing (LoginData, SignupInputs, Token, forgotPasswordMutation, loginDataObject, loginMutation, signupMutation, tokenObject)
+module Admin.Data.Session exposing (ForgotPasswordResponse, LoginData, SignupInputs, Token, forgotPasswordMutation, loginDataObject, loginMutation, signupMutation, tokenObject)
 
 import Admin.Data.User exposing (..)
 import GraphQL.Request.Builder as GQLBuilder
@@ -25,6 +25,10 @@ type alias SignupInputs =
     , password : String
     , confirmPassword : String
     }
+
+
+type alias ForgotPasswordResponse =
+    { status : Bool, errors : Maybe (List Error) }
 
 
 signupMutation : GQLBuilder.Document GQLBuilder.Mutation UserWithErrors SignupInputs
@@ -108,7 +112,7 @@ loginMutation =
             )
 
 
-forgotPasswordMutation : GQLBuilder.Document GQLBuilder.Mutation String { a | email : String }
+forgotPasswordMutation : GQLBuilder.Document GQLBuilder.Mutation ForgotPasswordResponse { a | email : String }
 forgotPasswordMutation =
     let
         emailVar =
@@ -123,9 +127,18 @@ forgotPasswordMutation =
                         ]
                   )
                 ]
-                (GQLBuilder.extract <|
-                    GQLBuilder.field "status"
-                        []
-                        GQLBuilder.string
+                (GQLBuilder.object ForgotPasswordResponse
+                    |> GQLBuilder.with
+                        (GQLBuilder.field "status"
+                            []
+                            GQLBuilder.bool
+                        )
+                    |> GQLBuilder.with
+                        (GQLBuilder.field "errors"
+                            []
+                            (GQLBuilder.nullable
+                                (GQLBuilder.list errorObject)
+                            )
+                        )
                 )
             )
