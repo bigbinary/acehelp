@@ -92,7 +92,7 @@ update msg model =
             )
 
         SaveArticleResponse (Err error) ->
-            ( { model | errors = [] }, [] )
+            ( { model | errors = [ "There was an error while saving the Article" ] }, [] )
 
         CategoriesLoaded (Ok receivedCategories) ->
             case receivedCategories of
@@ -103,7 +103,7 @@ update msg model =
                     ( model, [] )
 
         CategoriesLoaded (Err err) ->
-            ( { model | errors = [] }, [] )
+            ( { model | errors = [ "There was an error while saving the Article" ] }, [] )
 
         CategorySelected categoryIds ->
             ( { model | categories = itemSelection categoryIds model.categories }, [] )

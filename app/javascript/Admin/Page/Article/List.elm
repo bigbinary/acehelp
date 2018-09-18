@@ -72,7 +72,7 @@ update msg model =
                     )
 
         ArticleListLoaded (Err err) ->
-            ( { model | error = Just "There was an error wile updating the Status" }, [] )
+            ( { model | error = Just "There was an error loading articles" }, [] )
 
         DeleteArticle articleId ->
             ( model, [ Strict <| Reader.map (Task.attempt DeleteArticleResponse) <| requestDeleteArticle articleId ] )
@@ -116,7 +116,7 @@ update msg model =
             ( { model | articles = articles }, [] )
 
         UpdateArticleStatusResponse (Err error) ->
-            ( { model | error = Just "There was an error loading articles" }, [] )
+            ( { model | error = Just "There was an error while updating the Status" }, [] )
 
 
 
