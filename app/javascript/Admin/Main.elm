@@ -331,15 +331,16 @@ update msg model =
                     case getPage model.currentPage of
                         ArticleList articleListModel ->
                             articleListModel
+
                         _ ->
                             ArticleList.initModel
 
                 ( newModel, cmds ) =
                     ArticleList.update alMsg currentPageModel
             in
-                ( { model | currentPage = Loaded (ArticleList newModel) }
-                , runReaderCmds ArticleListMsg cmds
-                )
+            ( { model | currentPage = Loaded (ArticleList newModel) }
+            , runReaderCmds ArticleListMsg cmds
+            )
 
         ArticleCreateMsg caMsg ->
             let
@@ -351,27 +352,35 @@ update msg model =
                         _ ->
                             ArticleCreate.initModel
 
-                ( newModel, cmds ) =
+                ( newPageModel, cmds ) =
                     ArticleCreate.update caMsg
                         currentPageModel
-            in
-                case caMsg of
-                    ArticleCreate.SaveArticleResponse (Ok articleWithErrors) ->
-                        let
-                            updatedModel =
-                                { currentPageModel
-                                    | errors = flattenErrors articleWithErrors.errors
-                                }
-                        in
-                            case articleWithErrors.article of
-                                Just article ->
-                                    updateNavigation (NavigateTo (Route.ArticleList model.organizationKey))
-                                        |> renderFlashMessages (UserNotification.SuccessNotification "Article created successfully.")
 
-                                Nothing ->
-                                    ( { model | currentPage = Loaded (ArticleCreate updatedModel) }
-                                    , runReaderCmds ArticleCreateMsg cmds
-                                    )
+                ( newModel, newCmds ) =
+                    ( { model | currentPage = Loaded (ArticleCreate newPageModel) }
+                    , runReaderCmds ArticleCreateMsg cmds
+                    )
+            in
+            case caMsg of
+                ArticleCreate.SaveArticleResponse (Ok articleWithErrors) ->
+                    let
+                        updatedModel =
+                            { currentPageModel
+                                | errors = flattenErrors articleWithErrors.errors
+                            }
+                    in
+                    case articleWithErrors.article of
+                        Just article ->
+                            updateNavigation (Route.ArticleList model.organizationKey) ( newModel, newCmds )
+                                |> renderFlashMessages (UserNotification.SuccessNotification "Article created successfully.")
+
+                        Nothing ->
+                            ( { model | currentPage = Loaded (ArticleCreate updatedModel) }
+                            , runReaderCmds ArticleCreateMsg cmds
+                            )
+
+                _ ->
+                    ( newModel, newCmds )
 
         ArticleEditMsg aeMsg ->
             let
@@ -640,6 +649,7 @@ update msg model =
                 TeamMemberCreate.SaveTeamResponse (Ok id) ->
                     updateNavigation (Route.TeamList model.organizationKey) ( newModel, newCmds )
                         |> renderFlashMessages (UserNotification.SuccessNotification "Team member added successfully.")
+
                 _ ->
                     ( newModel, newCmds )
 
@@ -657,9 +667,9 @@ update msg model =
                     TicketEdit.update teMsg
                         currentPageModel
             in
-                ( { model | currentPage = Loaded (TicketEdit newModel) }
-                , runReaderCmds TicketEditMsg cmds
-                )
+            ( { model | currentPage = Loaded (TicketEdit newModel) }
+            , runReaderCmds TicketEditMsg cmds
+            )
 
         OrganizationCreateMsg oCMsg ->
             let
@@ -674,27 +684,33 @@ update msg model =
                 ( newModel, cmds ) =
                     OrganizationCreate.update oCMsg currentPageModel
             in
-                case oCMsg of
-                    OrganizationCreate.SaveOrgResponse (Ok orgWithErrors) ->
-                        let
-                            --org = orgWithErrors.organization
-                            updatedModel =
-                                { currentPageModel
-                                    | errors = flattenErrors orgWithErrors.errors
-                                }
-                        in
-                            case orgWithErrors.organization of
-                                Just org ->
-                                    update (NavigateTo (Route.ArticleList org.api_key))
-                                        { model
-                                            | organizationKey = org.api_key
-                                            , organizationName = org.name
-                                        }
+            case oCMsg of
+                OrganizationCreate.SaveOrgResponse (Ok orgWithErrors) ->
+                    let
+                        --org = orgWithErrors.organization
+                        updatedModel =
+                            { currentPageModel
+                                | errors = flattenErrors orgWithErrors.errors
+                            }
+                    in
+                    case orgWithErrors.organization of
+                        Just org ->
+                            ( { model
+                                | organizationKey = org.api_key
+                                , organizationName = org.name
+                              }
+                            , Navigation.pushUrl model.navKey (Route.routeToString <| Route.ArticleList org.api_key)
+                            )
 
-                                Nothing ->
-                                    ( { model | currentPage = Loaded (OrganizationCreate updatedModel) }
-                                    , runReaderCmds OrganizationCreateMsg cmds
-                                    )
+                        Nothing ->
+                            ( { model | currentPage = Loaded (OrganizationCreate updatedModel) }
+                            , runReaderCmds OrganizationCreateMsg cmds
+                            )
+
+                _ ->
+                    ( { model | currentPage = Loaded (OrganizationCreate newModel) }
+                    , runReaderCmds OrganizationCreateMsg cmds
+                    )
 
         SettingsMsg settingsMsg ->
             let
@@ -714,7 +730,6 @@ update msg model =
               }
             , runReaderCmds SettingsMsg cmds
             )
-
 
         SignUpMsg suMsg ->
             let

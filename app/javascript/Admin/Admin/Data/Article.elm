@@ -1,11 +1,11 @@
-module Admin.Data.Article exposing (Article, ArticleId, ArticleListResponse, ArticleSummary, CreateArticleInputs, UpdateArticleInputs, allArticlesQuery, articleByIdQuery, articleObject, articleStatusMutation, articleSummaryObject, articlesByUrlQuery, createArticleMutation, deleteArticleMutation, nullableArticleSummaryObject, updateArticleMutation)
+module Admin.Data.Article exposing (Article, ArticleId, ArticleListResponse, ArticleSummary, ArticleWithErrors, CreateArticleInputs, UpdateArticleInputs, allArticlesQuery, articleByIdQuery, articleObject, articleStatusMutation, articleSummaryObject, articlesByUrlQuery, createArticleMutation, deleteArticleMutation, nullableArticleSummaryObject, updateArticleMutation)
 
+import Admin.Data.Category exposing (Category, CategoryId, categoryObject)
+import Admin.Data.Common exposing (..)
+import Admin.Data.Url exposing (UrlData, UrlId, urlObject)
 import GraphQL.Request.Builder as GQLBuilder
 import GraphQL.Request.Builder.Arg as Arg
 import GraphQL.Request.Builder.Variable as Var
-import Admin.Data.Common exposing (..)
-import Admin.Data.Category exposing (CategoryId, categoryObject, Category)
-import Admin.Data.Url exposing (UrlId, UrlData, urlObject)
 
 
 type alias ArticleId =
@@ -117,19 +117,18 @@ createArticleMutation =
         categoryIdsVar =
             Var.optional "categoryIds" .categoryIds (Var.list Var.string) []
     in
-        GQLBuilder.mutationDocument <|
-            (GQLBuilder.extract
-                (GQLBuilder.field "addArticle"
-                    [ ( "input"
-                      , Arg.object
-                            [ ( "title", Arg.variable titleVar )
-                            , ( "desc", Arg.variable descVar )
-                            , ( "category_ids", Arg.variable categoryIdsVar )
-                            ]
-                      )
-                    ]
-                    articleWithErrorsObject
-                )
+    GQLBuilder.mutationDocument <|
+        GQLBuilder.extract
+            (GQLBuilder.field "addArticle"
+                [ ( "input"
+                  , Arg.object
+                        [ ( "title", Arg.variable titleVar )
+                        , ( "desc", Arg.variable descVar )
+                        , ( "category_ids", Arg.variable categoryIdsVar )
+                        ]
+                  )
+                ]
+                articleWithErrorsObject
             )
 
 

@@ -1,12 +1,12 @@
 module Admin.Data.Organization exposing (Organization, OrganizationData, OrganizationId, OrganizationWithError, UserId, createOrganizationMutation, organizationObject, organizationWithErrorsObject)
+
 import Admin.Data.Article exposing (ArticleSummary)
 import Admin.Data.Common exposing (..)
 import GraphQL.Request.Builder as GQLBuilder
 import GraphQL.Request.Builder.Arg as Arg
 import GraphQL.Request.Builder.Variable as Var
-import Json.Decode exposing (..)
-import Admin.Data.Common exposing (..)
-import Json.Decode.Pipeline as Pipeline exposing (decode, hardcoded, optional, required)
+import Json.Decode.Pipeline as Pipeline exposing (hardcoded, optional, required)
+
 
 type alias OrganizationId =
     String
@@ -48,19 +48,18 @@ createOrganizationMutation =
         userIdVar =
             Var.required "user_id" .userId Var.string
     in
-        GQLBuilder.mutationDocument <|
-            (GQLBuilder.extract
-                (GQLBuilder.field "addOrganization"
-                    [ ( "input"
-                      , Arg.object
-                            [ ( "name", Arg.variable nameVar )
-                            , ( "email", Arg.variable emailVar )
-                            , ( "user_id", Arg.variable userIdVar )
-                            ]
-                      )
-                    ]
-                    organizationWithErrorsObject
-                )
+    GQLBuilder.mutationDocument <|
+        GQLBuilder.extract
+            (GQLBuilder.field "addOrganization"
+                [ ( "input"
+                  , Arg.object
+                        [ ( "name", Arg.variable nameVar )
+                        , ( "email", Arg.variable emailVar )
+                        , ( "user_id", Arg.variable userIdVar )
+                        ]
+                  )
+                ]
+                organizationWithErrorsObject
             )
 
 

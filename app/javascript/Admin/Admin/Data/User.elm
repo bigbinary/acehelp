@@ -1,14 +1,15 @@
-module Admin.Data.User exposing (Error, User, UserWithErrors, UserWithOrganization, errorObject, userObject, userWithErrorObject, userWithOrganizationObject)
+module Admin.Data.User exposing (User, UserWithErrors, UserWithOrganization, userObject, userWithErrorObject, userWithOrganizationObject)
 
+import Admin.Data.Common exposing (..)
 import Admin.Data.Organization exposing (..)
 import GraphQL.Request.Builder as GQLBuilder
-import Admin.Data.Common exposing (..)
 
 
 type alias User =
     { id : String
     , email : String
     }
+
 
 type alias UserWithErrors =
     { user : Maybe User

@@ -1,9 +1,9 @@
-module Helpers exposing (flip, delayedTask, maybeToBool, maybeToList, stringToMaybe, validEmail, validateEmail, validateEmpty)
+module Helpers exposing (flip, maybeToBool, maybeToList, stringToMaybe, validEmail, validateEmail, validateEmpty)
+
 import Field.ValidationResult exposing (..)
 import Process exposing (..)
 import Regex exposing (Regex)
 import Task exposing (Task)
-import Time exposing (Time)
 
 
 validateEmpty : String -> String -> ValidationResult String String
@@ -54,6 +54,7 @@ stringToMaybe str =
 
         False ->
             Just str
+
 
 flip : (a -> b -> c) -> b -> a -> c
 flip function arg1 arg2 =
