@@ -29,7 +29,6 @@ class Mutations::WidgetSettingMutation
   EnableDisableWidget = GraphQL::Relay::Mutation.define do
     name "EnableDisableWidget"
 
-    input_field :id, !types.String
     input_field :visibility, !types.String
 
     return_field :setting, Types::SettingType
