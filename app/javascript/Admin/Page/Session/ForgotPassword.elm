@@ -132,8 +132,7 @@ view model =
                                 ]
                     , div []
                         [ div [ class "form-group" ]
-                            [ label [ for "email" ] [ text "Email" ]
-                            , input
+                            [ input
                                 [ Html.Attributes.value <| Field.value model.email
                                 , type_ "text"
                                 , class "form-control"
