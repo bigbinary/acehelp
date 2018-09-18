@@ -44,7 +44,7 @@ class Mutations::WidgetSettingMutationsTest < ActiveSupport::TestCase
               }
     GRAPHQL
 
-    result = AceHelp::CustomClient.call(organizations(:bigbinary).api_key).execute(query, input: { id: @setting.id, visibility: "enable" })
+    result = AceHelp::CustomClient.call(organizations(:bigbinary).api_key).execute(query, input: { visibility: "enable" })
 
     assert_equal result.data.change_visibility_of_widget.setting.base_url, "http://bigbinary.com"
 
