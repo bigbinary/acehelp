@@ -20,38 +20,25 @@ end
 
 desc "Sets up the project by running migration and populating sample data"
 task setup: [:environment, :not_production, "db:drop", "db:create", "db:migrate"] do
-  ["setup_sample_data"].each { |cmd| system "rake #{cmd}" }
-end
-
-def delete_all_records_from_all_tables
-  ActiveRecord::Base.connection.schema_cache.clear!
-
-  ApplicationRecord.descendants.each do |klass|
-    klass.reset_column_information
-    klass.delete_all
-  end
+  ["perform_on_every_deploy"].each { |cmd| system "rake #{cmd}" }
 end
 
 desc "Deletes all records and populates sample data"
 task setup_sample_data: [:environment] do
-  OrganizationUser.delete_all
-  ArticleUrl.delete_all
-  ArticleCategory.delete_all
-  User.delete_all
-  Article.delete_all
-  Comment.delete_all
-  Ticket.delete_all
-  Url.delete_all
-
   delete_all_records_from_all_tables
-  system "rake db:seed"
-
-  # reindex all elastic search tables
-  system "rake searchkick:reindex:all"
 
   create_user
 
   puts "sample data was added successfully"
+end
+
+desc "Perform steps required for every deployment"
+task perform_on_every_deploy: [:environment, :not_production, "setup_sample_data", "reindex_searchkick"] do
+end
+
+desc "Reindex all searchkick models"
+task reindex_searchkick: [:environment] do
+  system("rake searchkick:reindex:all")
 end
 
 def create_user(options = {})
@@ -177,4 +164,13 @@ def create_data_for_eii_organization
                   note: ''
 
 
+end
+
+def delete_all_records_from_all_tables
+  ActiveRecord::Base.connection.schema_cache.clear!
+
+  ApplicationRecord.descendants.each do |klass|
+    klass.reset_column_information
+    klass.delete_all
+  end
 end
