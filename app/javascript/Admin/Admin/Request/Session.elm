@@ -49,7 +49,7 @@ requestLogin authInputs =
         )
 
 
-requestResetPassword : { a | email : String } -> Reader ( NodeEnv, AppUrl ) (Task GQLClient.Error String)
+requestResetPassword : { a | email : String } -> Reader ( NodeEnv, AppUrl ) (Task GQLClient.Error ForgotPasswordResponse)
 requestResetPassword emailInput =
     Reader.Reader
         (\( nodeEnv, appUrl ) ->
