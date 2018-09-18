@@ -65,7 +65,7 @@ class Mutations::OrganizationMutationsTest < ActiveSupport::TestCase
     end
   end
 
-  test "settings present after organization create" do
+  test "default settings are created after an organization is created" do
     result = AceHelp::Client.execute(@common_org_query, input: {
       user_id: @user.id,
       name: "New Organisation Name",
@@ -73,6 +73,7 @@ class Mutations::OrganizationMutationsTest < ActiveSupport::TestCase
     })
     organization_id = result.data.add_organization.organization.id
     organization = Organization.find_by!(id: organization_id)
+
     assert organization.setting
   end
 end
