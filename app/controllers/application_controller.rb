@@ -10,14 +10,6 @@ class ApplicationController < ActionController::Base
   private
 
     def ensure_user_is_logged_in
-      p "--------------------------------------------"
-      p warden.session
-      p "--------------------------------------------"
-      p warden.user
-      p "--------------------------------------------"
-      p user_signed_in?
-      p "--------------------------------------------"
-
       unless user_signed_in?
         redirect_to new_user_session_path
       end
