@@ -8,11 +8,20 @@ class ApplicationController < ActionController::Base
   skip_before_action :verify_authenticity_token
 
   private
+
     def ensure_user_is_logged_in
+      p "--------------------------------------------"
+      p warden.session
+      p "--------------------------------------------"
+      p warden.user
+      p "--------------------------------------------"
+      p user_signed_in?
+      p "--------------------------------------------"
+
       unless user_signed_in?
         redirect_to new_user_session_path
       end
-    end
+        end
 
     def configure_permitted_parameters
       devise_parameter_sanitizer.permit(:sign_up, keys: [:first_name])
