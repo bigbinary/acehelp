@@ -85,7 +85,7 @@ update msg model =
                 save model
 
             else
-                ( { model | error = Just "Please check your inputs" }, [] )
+                ( { model | error = Just errors }, [] )
 
         SaveOrgResponse (Ok org) ->
             ( model, [] )
@@ -96,36 +96,40 @@ update msg model =
 
 view : Model -> Html Msg
 view model =
-    div [ class "container" ]
-        [ div []
-            [ Maybe.withDefault (text "") <|
-                Maybe.map
-                    (\err ->
-                        div [ class "alert alert-danger alert-dismissible fade show", attribute "role" "alert" ]
-                            [ text <| "Error: " ++ err
-                            ]
-                    )
-                    model.error
-            ]
-        , div []
-            [ label [] [ text "Name: " ]
-            , input
-                [ type_ "text"
-                , placeholder "Organization Name..."
-                , onInput OrgNameInput
+    Html.form [ onSubmit SaveOrganization ]
+        [ div [ class "container" ]
+            [ div []
+                [ Maybe.withDefault (text "") <|
+                    Maybe.map
+                        (\err ->
+                            div [ class "alert alert-danger alert-dismissible fade show", attribute "role" "alert" ]
+                                [ text <| "Error: " ++ err
+                                ]
+                        )
+                        model.error
                 ]
-                []
-            ]
-        , div []
-            [ label [] [ text "Email: " ]
-            , input
-                [ type_ "email"
-                , placeholder "Organization Email..."
-                , onInput OrgEmailInput
+            , div []
+                [ label [] [ text "Name: " ]
+                , input
+                    [ type_ "text"
+                    , placeholder "Organization Name..."
+                    , onInput OrgNameInput
+                    , required True
+                    ]
+                    []
                 ]
-                []
+            , div []
+                [ label [] [ text "Email: " ]
+                , input
+                    [ type_ "email"
+                    , placeholder "Organization Email..."
+                    , onInput OrgEmailInput
+                    , required True
+                    ]
+                    []
+                ]
+            , button [ type_ "submit", class "btn btn-primary" ] [ text "Save Organization" ]
             ]
-        , button [ onClick SaveOrganization, type_ "button", class "btn btn-primary" ] [ text "Save Organization" ]
         ]
 
 
