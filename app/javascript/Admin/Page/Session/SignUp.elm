@@ -255,16 +255,18 @@ view model =
                                 ]
                                 [ text "Sign Up" ]
                             ]
-                        , div [ class "form-section row" ]
-                            [ span
-                                [ class "col-md-6 btn btn-link"
-                                ]
-                                [ a [ href <| routeToString <| Login ] [ text "Sign In" ] ]
-                            , span
-                                [ class "btn btn-link"
-                                ]
-                                [ text "Forgot password" ]
-                            ]
+                        ]
+                    ]
+                , div [ class "links-section col-md-12" ]
+                    [ span [ class "btn" ]
+                        [ Html.a
+                            [ href <| routeToString <| Login ]
+                            [ span [] [ text "Sign In" ] ]
+                        ]
+                    , span [ class "btn" ]
+                        [ Html.a
+                            [ href <| routeToString <| ForgotPassword ]
+                            [ span [] [ text "Forgot password" ] ]
                         ]
                     ]
                 ]

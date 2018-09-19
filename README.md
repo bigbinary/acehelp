@@ -9,23 +9,7 @@
 ## Local Development setup
 
 ```
-./bin/bundle install
-
-# Database setup and populate sample data
-cp config/database.yml.postgresql config/database.yml
-
-brew install elasticsearch
-brew services start elasticsearch
-
-./bin/rails setup
-
-./bin/yarn install
-
-yarn add elm@0.19
-
-rake searchkick:reindex:all
-
-foreman start -f Procfile.dev
+./bin/setup
 ```
 
 Once we see `webpack: Compiled successfully.` message in terminal,

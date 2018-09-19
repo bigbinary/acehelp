@@ -101,7 +101,7 @@ update msg model =
 
 view : Model -> Html Msg
 view model =
-    div []
+    Html.form [ onSubmit SaveCategory ]
         [ div []
             [ Maybe.withDefault (text "") <|
                 Maybe.map
@@ -120,14 +120,14 @@ view model =
                 [ type_ "text"
                 , placeholder "Enter name for category..."
                 , onInput CategoryNameInput
+                , required True
                 ]
                 []
             ]
         , div []
             [ button
-                [ type_ "button"
+                [ type_ "submit"
                 , class "btn btn-primary"
-                , onClick SaveCategory
                 ]
                 [ text "Submit" ]
             ]

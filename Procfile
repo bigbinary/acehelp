@@ -1,2 +1,2 @@
 web: bundle exec puma -C config/puma.rb
-release: bundle exec rake db:migrate && bundle exec rake setup_sample_data
+release: bundle exec rake db:migrate && bundle exec rake perform_on_every_deploy

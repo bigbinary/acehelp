@@ -124,6 +124,7 @@ view model =
                     [ type_ "text"
                     , placeholder "Url..."
                     , onInput UrlInput
+                    , required True
                     ]
                     []
                 ]
@@ -133,6 +134,7 @@ view model =
                     [ type_ "text"
                     , placeholder "Title..."
                     , onInput TitleInput
+                    , required True
                     ]
                     []
                 ]

@@ -82,7 +82,6 @@ update msg model =
             in
             if isAllValid fields then
                 save model
-
             else
                 ( { model | errors = errors }, [] )
 
@@ -106,30 +105,34 @@ renderErrors errors =
 
 view : Model -> Html Msg
 view model =
-    div [ class "container" ]
-        [ div []
-            [ renderErrors
-                model.errors
-            ]
-        , div []
-            [ label [] [ text "Name: " ]
-            , input
-                [ type_ "text"
-                , placeholder "Organization Name..."
-                , onInput OrgNameInput
+    Html.form [ onSubmit SaveOrganization ]
+        [ div [ class "container" ]
+            [ div []
+                [ renderErrors
+                    model.errors
                 ]
-                []
-            ]
-        , div []
-            [ label [] [ text "Email: " ]
-            , input
-                [ type_ "email"
-                , placeholder "Organization Email..."
-                , onInput OrgEmailInput
+            , div []
+                [ label [] [ text "Name: " ]
+                , input
+                    [ type_ "text"
+                    , placeholder "Organization Name..."
+                    , onInput OrgNameInput
+                    , required True
+                    ]
+                    []
                 ]
-                []
+            , div []
+                [ label [] [ text "Email: " ]
+                , input
+                    [ type_ "email"
+                    , placeholder "Organization Email..."
+                    , onInput OrgEmailInput
+                    , required True
+                    ]
+                    []
+                ]
+            , button [ type_ "submit", class "btn btn-primary" ] [ text "Save Organization" ]
             ]
-        , button [ onClick SaveOrganization, type_ "button", class "btn btn-primary" ] [ text "Save Organization" ]
         ]
 
 
