@@ -119,7 +119,7 @@ update msg model =
                     )
 
                 Nothing ->
-                    ( { model | errors = [ "There was an error loading up Urls" ] }, [] )
+                    ( { model | errors = [ "There was an error while loading Urls" ] }, [] )
 
         UrlsLoaded (Err err) ->
             ( { model | errors = [] }, [] )
