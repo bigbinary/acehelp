@@ -19,6 +19,7 @@ class Mutations::SignupMutations
       else
         if inputs[:password] == inputs[:confirm_password]
           new_user = User.create(first_name: inputs[:first_name], password: inputs[:password], email: inputs[:email])
+          context[:warden].logout(:user)
           context[:warden].set_user(new_user)
         else
           errors = Utils::ErrorHandler.new.error("confirm password do not match", context)
