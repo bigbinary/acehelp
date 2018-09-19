@@ -1,4 +1,4 @@
-module Admin.Request.Session exposing (requestLogin, requestResetPassword, signupRequest)
+module Admin.Request.Session exposing (requestLogin, requestLogout, requestResetPassword, signupRequest)
 
 import Admin.Data.Session exposing (..)
 import Admin.Data.User exposing (..)
@@ -64,4 +64,21 @@ requestResetPassword emailInput =
                 GQLBuilder.request
                     emailInput
                     forgotPasswordMutation
+        )
+
+
+requestLogout =
+    Reader.Reader
+        (\( nodeEnv, appUrl ) ->
+            GQLClient.customSendMutation
+                { method = "POST"
+                , url = graphqlUrl nodeEnv appUrl
+                , headers = []
+                , timeout = Nothing
+                , withCredentials = False
+                }
+            <|
+                GQLBuilder.request
+                    {}
+                    logoutMutation
         )

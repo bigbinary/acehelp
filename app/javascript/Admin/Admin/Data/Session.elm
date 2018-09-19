@@ -1,4 +1,4 @@
-module Admin.Data.Session exposing (ForgotPasswordResponse, LoginData, SignupInputs, Token, forgotPasswordMutation, loginDataObject, loginMutation, signupMutation, tokenObject)
+module Admin.Data.Session exposing (ForgotPasswordResponse, LoginData, SignupInputs, Token, forgotPasswordMutation, loginDataObject, loginMutation, logoutMutation, signupMutation, tokenObject)
 
 import Admin.Data.Common exposing (..)
 import Admin.Data.User exposing (..)
@@ -141,5 +141,17 @@ forgotPasswordMutation =
                                 (GQLBuilder.list errorObject)
                             )
                         )
+                )
+            )
+
+
+logoutMutation : GQLBuilder.Document GQLBuilder.Mutation String {}
+logoutMutation =
+    GQLBuilder.mutationDocument <|
+        GQLBuilder.extract
+            (GQLBuilder.field "logoutUser"
+                []
+                (GQLBuilder.extract <|
+                    GQLBuilder.field "status" [] GQLBuilder.string
                 )
             )

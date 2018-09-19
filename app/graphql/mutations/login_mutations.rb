@@ -29,4 +29,23 @@ class Mutations::LoginMutations
     }
 
   end
+
+  Logout = GraphQL::Relay::Mutation.define do
+    return_field :errors, types[Types::ErrorType]
+    return_field :status, types.Boolean
+
+    resolve ->(object, inputs, context) {
+      if context[:current_user].present?
+        user = context[:warden].instance_variable_get(:@users).delete(:user)
+        context[:warden].session_serializer.delete(:user, user)
+      else
+        errors = Utils::ErrorHandler.new.error("There is no logged in user present.", context)
+      end
+      {
+        status: "success",
+        errors: errors
+      }
+    }
+
+  end
 end

@@ -72,4 +72,11 @@ class GraphqlController < ApplicationController
     def request_is_mutation_for?(mutation_type)
       request_is_mutation? && params[:query] =~ /#{mutation_type}/
     end
+
+  # def logout_user
+  #   scope = Devise::Mapping.find_scope!(:user)
+  #   # @controller.instance_variable_set(:"@current_#{scope}", nil)
+  #   user = warden.instance_variable_get(:@users).delete(scope)
+  #   warden.session_serializer.delete(scope, user)
+  # end
 end
