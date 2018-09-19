@@ -33,7 +33,7 @@ initModel =
     , success = Nothing
     , firstName = ""
     , lastName = ""
-    , email = Field (validateEmpty "Email") ""
+    , email = Field validateEmail ""
     }
 
 

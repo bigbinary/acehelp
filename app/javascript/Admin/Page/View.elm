@@ -26,7 +26,7 @@ adminHeader orgKey orgName currentRoute signOut =
             [ ul
                 [ class "navbar-nav mr-auto mt-2 mt-lg-0 " ]
                 [ li [ class "nav-item" ]
-                    [ a
+                    [ span
                         [ classList
                             [ ( "navbar-brand", True ) ]
                         ]
