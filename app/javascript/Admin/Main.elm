@@ -724,6 +724,14 @@ update msg model =
                             , runReaderCmds SignUpMsg cmds
                             )
 
+                        userId =
+                            case userWithErrors.user of
+                                Just user ->
+                                    user.id
+
+                                Nothing ->
+                                    ""
+
                         newUpdatedModel =
                             case getPage newMainModel.currentPage of
                                 OrganizationCreate orgModel ->
@@ -732,7 +740,7 @@ update msg model =
                                 _ ->
                                     newMainModel
                     in
-                    ( newUpdatedModel, newCmds )
+                    ( { newUpdatedModel | userId = userId }, newCmds )
 
                 _ ->
                     ( { model | currentPage = Loaded (SignUp newModel) }
