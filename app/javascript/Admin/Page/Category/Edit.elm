@@ -73,7 +73,7 @@ update msg model =
                     ( model, [] )
 
         CategoryLoaded (Err err) ->
-            ( { model | error = Just "There was an error loading up the article" }
+            ( { model | error = Just "There was an error while loading the article" }
             , []
             )
 

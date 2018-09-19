@@ -77,7 +77,7 @@ update msg model =
                     ( model, [] )
 
         FeedbackLoaded (Err err) ->
-            ( { model | error = Just "There was an error loading up the Feedback" }
+            ( { model | error = Just "There was an error while loading the Feedback" }
             , []
             )
 
@@ -88,7 +88,7 @@ update msg model =
             ( model, [] )
 
         UpdateFeedbackResponse (Err error) ->
-            ( { model | error = Just "There was an error when updating the Feedback" }
+            ( { model | error = Just "There was an error while updating the Feedback" }
             , []
             )
 

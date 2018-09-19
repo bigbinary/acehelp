@@ -62,10 +62,10 @@ update msg model =
                     ( { model | urls = newUrls }, [] )
 
                 Nothing ->
-                    ( { model | urls = [], error = Just "There was an error loading up the Urls" }, [] )
+                    ( { model | urls = [], error = Just "There was an error while loading the Urls" }, [] )
 
         UrlLoaded (Err err) ->
-            ( { model | error = Just "There was an error loading up the Urls" }, [] )
+            ( { model | error = Just "There was an error while loading the Urls" }, [] )
 
         DeleteUrl urlId ->
             deleteRecord model urlId

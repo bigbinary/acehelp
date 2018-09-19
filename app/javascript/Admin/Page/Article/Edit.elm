@@ -113,7 +113,7 @@ update msg model =
                 errors =
                     errorsIn [ newTitle, model.desc ]
             in
-                ( { model | title = newTitle, errors = errors }, [] )
+            ( { model | title = newTitle, errors = errors }, [] )
 
         ReceivedTimeoutId id ->
             let
@@ -138,9 +138,9 @@ update msg model =
                 errors =
                     errorsIn [ newDesc, model.title ]
             in
-                ( { model | desc = newDesc, errors = errors }
-                , []
-                )
+            ( { model | desc = newDesc, errors = errors }
+            , []
+            )
 
         SaveArticle ->
             save model
@@ -164,13 +164,13 @@ update msg model =
                     )
 
                 Nothing ->
-                    ( { model | errors = [ "There was an error saving up the article" ], originalArticle = Nothing }
+                    ( { model | errors = [ "There was an error while saving the article" ], originalArticle = Nothing }
                     , []
                     )
 
         SaveArticleResponse (Err error) ->
             ( { model
-                | errors = [ "There was an error saving the article" ]
+                | errors = [ "There was an error while saving the article" ]
                 , status = None
               }
             , []
@@ -193,12 +193,12 @@ update msg model =
                     )
 
                 Nothing ->
-                    ( { model | errors = [ "There was an error loading up the article" ], originalArticle = Nothing }
+                    ( { model | errors = [ "There was an error loading the article" ], originalArticle = Nothing }
                     , []
                     )
 
         ArticleLoaded (Err err) ->
-            ( { model | errors = [ "There was an error loading up the article" ], originalArticle = Nothing }
+            ( { model | errors = [ "There was an error while loading the article" ], originalArticle = Nothing }
             , []
             )
 
@@ -219,10 +219,10 @@ update msg model =
                     )
 
                 Nothing ->
-                    ( { model | errors = [ "There was an error loading up the Categories" ] }, [] )
+                    ( { model | errors = [ "There was an error while loading Categories" ] }, [] )
 
         CategoriesLoaded (Err err) ->
-            ( { model | errors = [ "There was an error loading up the Categories" ] }, [] )
+            ( { model | errors = [ "There was an error while loading Categories" ] }, [] )
 
         CategorySelected categoryIds ->
             ( { model
@@ -248,10 +248,10 @@ update msg model =
                     )
 
                 Nothing ->
-                    ( { model | errors = [ "There was an error loading up Urls" ] }, [] )
+                    ( { model | errors = [ "There was an error loading Urls" ] }, [] )
 
         UrlsLoaded (Err err) ->
-            ( { model | errors = [ "There was an error loading up Urls" ] }, [] )
+            ( { model | errors = [ "There was an error loading Urls" ] }, [] )
 
         UrlSelected selectedUrlIds ->
             ( { model
@@ -443,10 +443,12 @@ save model =
                 Reader.map (Task.attempt SaveArticleResponse)
                     (requestUpdateArticle (articleInputs model))
     in
-        if Field.isAllValid fields && maybeToBool model.originalArticle then
-            ( { model | errors = [], status = Saving }, [ cmd ] )
-        else
-            ( { model | errors = errorsIn fields }, [] )
+    if Field.isAllValid fields && maybeToBool model.originalArticle then
+        ( { model | errors = [], status = Saving }, [ cmd ] )
+
+    else
+        ( { model | errors = errorsIn fields }, [] )
+
 
 
 -- Subscriptions
