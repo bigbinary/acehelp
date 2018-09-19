@@ -1,5 +1,6 @@
 module Main exposing (Flags, Model, Msg(..), Page(..), PageState(..), combineCmds, getPage, init, main, navigateTo, setRoute, subscriptions, update, view)
 
+import Admin.Data.Common exposing (..)
 import Admin.Data.ReaderCmd exposing (..)
 import Admin.Request.Helper exposing (ApiKey, NodeEnv, logoutRequest)
 import Admin.Views.Common exposing (..)
@@ -361,9 +362,22 @@ update msg model =
                     )
             in
             case caMsg of
-                ArticleCreate.SaveArticleResponse (Ok id) ->
-                    updateNavigation (Route.ArticleList model.organizationKey) ( newModel, newCmds )
-                        |> renderFlashMessages (UserNotification.SuccessNotification "Article created successfully.")
+                ArticleCreate.SaveArticleResponse (Ok articleResponse) ->
+                    let
+                        updatedModel =
+                            { currentPageModel
+                                | errors = flattenErrors articleResponse.errors
+                            }
+                    in
+                    case articleResponse.article of
+                        Just article ->
+                            updateNavigation (Route.ArticleList model.organizationKey) ( newModel, newCmds )
+                                |> renderFlashMessages (UserNotification.SuccessNotification "Article created successfully.")
+
+                        Nothing ->
+                            ( { model | currentPage = Loaded (ArticleCreate updatedModel) }
+                            , runReaderCmds ArticleCreateMsg cmds
+                            )
 
                 _ ->
                     ( newModel, newCmds )
@@ -657,6 +671,46 @@ update msg model =
             , runReaderCmds TicketEditMsg cmds
             )
 
+        OrganizationCreateMsg oCMsg ->
+            let
+                currentPageModel =
+                    case getPage model.currentPage of
+                        OrganizationCreate orgCreateModel ->
+                            orgCreateModel
+
+                        _ ->
+                            OrganizationCreate.initModel model.userId
+
+                ( newModel, cmds ) =
+                    OrganizationCreate.update oCMsg currentPageModel
+            in
+            case oCMsg of
+                OrganizationCreate.SaveOrgResponse (Ok organizationResponse) ->
+                    let
+                        updatedModel =
+                            { currentPageModel
+                                | errors = flattenErrors organizationResponse.errors
+                            }
+                    in
+                    case organizationResponse.organization of
+                        Just org ->
+                            ( { model
+                                | organizationKey = org.api_key
+                                , organizationName = org.name
+                              }
+                            , Navigation.pushUrl model.navKey (Route.routeToString <| Route.ArticleList org.api_key)
+                            )
+
+                        Nothing ->
+                            ( { model | currentPage = Loaded (OrganizationCreate updatedModel) }
+                            , runReaderCmds OrganizationCreateMsg cmds
+                            )
+
+                _ ->
+                    ( { model | currentPage = Loaded (OrganizationCreate newModel) }
+                    , runReaderCmds OrganizationCreateMsg cmds
+                    )
+
         SettingsMsg settingsMsg ->
             let
                 currentPageModel =
@@ -675,33 +729,6 @@ update msg model =
               }
             , runReaderCmds SettingsMsg cmds
             )
-
-        OrganizationCreateMsg oCMsg ->
-            let
-                currentPageModel =
-                    case getPage model.currentPage of
-                        OrganizationCreate orgCreateModel ->
-                            orgCreateModel
-
-                        _ ->
-                            OrganizationCreate.initModel model.userId
-
-                ( newModel, cmds ) =
-                    OrganizationCreate.update oCMsg currentPageModel
-            in
-            case oCMsg of
-                OrganizationCreate.SaveOrgResponse (Ok org) ->
-                    ( { model
-                        | organizationKey = org.api_key
-                        , organizationName = org.name
-                      }
-                    , Navigation.pushUrl model.navKey (Route.routeToString <| Route.ArticleList org.api_key)
-                    )
-
-                _ ->
-                    ( { model | currentPage = Loaded (OrganizationCreate newModel) }
-                    , runReaderCmds OrganizationCreateMsg cmds
-                    )
 
         SignUpMsg suMsg ->
             let

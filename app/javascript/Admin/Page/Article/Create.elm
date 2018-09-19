@@ -31,7 +31,7 @@ type alias Model =
     , categories : List (Option Category)
     , urls : List (Option UrlData)
     , status : SaveSatus
-    , error : Maybe String
+    , errors : List String
     }
 
 
@@ -43,7 +43,7 @@ initModel =
     , categories = []
     , urls = []
     , status = None
-    , error = Nothing
+    , errors = []
     }
 
 
@@ -64,7 +64,7 @@ type Msg
     = TitleInput String
     | DescInput String
     | SaveArticle
-    | SaveArticleResponse (Result GQLClient.Error (Maybe Article))
+    | SaveArticleResponse (Result GQLClient.Error ArticleResponse)
     | CategoriesLoaded (Result GQLClient.Error (Maybe (List Category)))
     | CategorySelected (List CategoryId)
     | UrlsLoaded (Result GQLClient.Error (Maybe (List UrlData)))
@@ -92,7 +92,7 @@ update msg model =
             )
 
         SaveArticleResponse (Err error) ->
-            ( { model | error = Just "There was an error while saving the Article", status = None }, [] )
+            ( { model | errors = [ "There was an error while saving the Article" ] }, [] )
 
         CategoriesLoaded (Ok receivedCategories) ->
             case receivedCategories of
@@ -103,7 +103,7 @@ update msg model =
                     ( model, [] )
 
         CategoriesLoaded (Err err) ->
-            ( { model | error = Just "There was an error loading Categories" }, [] )
+            ( { model | errors = [ "There was an error while loading Categories" ] }, [] )
 
         CategorySelected categoryIds ->
             ( { model | categories = itemSelection categoryIds model.categories }, [] )
@@ -119,10 +119,10 @@ update msg model =
                     )
 
                 Nothing ->
-                    ( { model | error = Just "There was an error loading up Urls" }, [] )
+                    ( { model | errors = [ "There was an error while loading Urls" ] }, [] )
 
         UrlsLoaded (Err err) ->
-            ( { model | error = Just "There was an error loading up Urls" }, [] )
+            ( { model | errors = [] }, [] )
 
         UrlSelected selectedUrlIds ->
             ( { model
@@ -140,7 +140,7 @@ update msg model =
 view : Model -> Html Msg
 view model =
     div []
-        [ errorView model.error
+        [ errorView model.errors
         , div [ class "row article-block" ]
             [ div [ class "col-md-8 article-title-content-block" ]
                 [ div
@@ -189,10 +189,10 @@ save model =
                     (requestCreateArticle (articleInputs model))
     in
     if Field.isAllValid fields then
-        ( { model | error = Nothing, status = Saving }, [ cmd ] )
+        ( { model | errors = [], status = Saving }, [ cmd ] )
 
     else
-        ( { model | error = errorsIn fields }, [] )
+        ( { model | errors = errorsIn fields }, [] )
 
 
 articleInputs : Model -> CreateArticleInputs

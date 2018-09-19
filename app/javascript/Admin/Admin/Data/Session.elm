@@ -1,5 +1,6 @@
 module Admin.Data.Session exposing (ForgotPasswordResponse, LoginData, SignupInputs, Token, forgotPasswordMutation, loginDataObject, loginMutation, signupMutation, tokenObject)
 
+import Admin.Data.Common exposing (..)
 import Admin.Data.User exposing (..)
 import GraphQL.Request.Builder as GQLBuilder
 import GraphQL.Request.Builder.Arg as Arg

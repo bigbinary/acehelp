@@ -1,10 +1,11 @@
-module Admin.Data.Organization exposing (Organization, OrganizationData, OrganizationId, OrganizationResponse, UserId, createOrganizationMutation, organizationObject)
+module Admin.Data.Organization exposing (Organization, OrganizationData, OrganizationId, OrganizationResponse, UserId, createOrganizationMutation, organizationObject, organizationResponseObject)
 
 import Admin.Data.Article exposing (ArticleSummary)
+import Admin.Data.Common exposing (..)
 import GraphQL.Request.Builder as GQLBuilder
 import GraphQL.Request.Builder.Arg as Arg
 import GraphQL.Request.Builder.Variable as Var
-import Json.Decode exposing (..)
+import Json.Decode.Pipeline as Pipeline exposing (hardcoded, optional, required)
 
 
 type alias OrganizationId =
@@ -30,12 +31,12 @@ type alias OrganizationData =
 
 
 type alias OrganizationResponse =
-    { organization : Organization
-    , articles : List ArticleSummary
+    { organization : Maybe Organization
+    , errors : Maybe (List Error)
     }
 
 
-createOrganizationMutation : GQLBuilder.Document GQLBuilder.Mutation Organization OrganizationData
+createOrganizationMutation : GQLBuilder.Document GQLBuilder.Mutation OrganizationResponse OrganizationData
 createOrganizationMutation =
     let
         nameVar =
@@ -58,12 +59,19 @@ createOrganizationMutation =
                         ]
                   )
                 ]
-                (GQLBuilder.extract <|
-                    GQLBuilder.field "organization"
-                        []
-                        organizationObject
-                )
+                organizationResponseObject
             )
+
+
+organizationResponseObject : GQLBuilder.ValueSpec GQLBuilder.NonNull GQLBuilder.ObjectType OrganizationResponse vars
+organizationResponseObject =
+    GQLBuilder.object OrganizationResponse
+        |> GQLBuilder.with
+            (GQLBuilder.field "organization"
+                []
+                (GQLBuilder.nullable organizationObject)
+            )
+        |> GQLBuilder.with errorsField
 
 
 organizationObject : GQLBuilder.ValueSpec GQLBuilder.NonNull GQLBuilder.ObjectType Organization vars

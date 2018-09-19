@@ -1,4 +1,4 @@
-module Helpers exposing (flip, maybeToBool, stringToMaybe, validEmail, validateEmail, validateEmpty)
+module Helpers exposing (flip, maybeToBool, maybeToList, stringToMaybe, validEmail, validateEmail, validateEmpty)
 
 import Field.ValidationResult exposing (..)
 import Process exposing (..)
@@ -59,3 +59,13 @@ stringToMaybe str =
 flip : (a -> b -> c) -> b -> a -> c
 flip function arg1 arg2 =
     function arg2 arg1
+
+
+maybeToList : Maybe a -> List a
+maybeToList maybe =
+    case maybe of
+        Just a ->
+            [ a ]
+
+        Nothing ->
+            []

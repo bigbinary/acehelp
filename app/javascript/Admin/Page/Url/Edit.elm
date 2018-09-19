@@ -101,10 +101,10 @@ update msg model =
                     )
 
                 Nothing ->
-                    ( { model | error = Just "There was an error loading up the url" }, [] )
+                    ( { model | error = Just "There was an error while loading the url" }, [] )
 
         UrlLoaded (Err err) ->
-            ( { model | error = Just "There was an error loading up the url" }, [] )
+            ( { model | error = Just "There was an error while loading the url" }, [] )
 
 
 

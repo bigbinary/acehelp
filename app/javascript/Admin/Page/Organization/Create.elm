@@ -19,7 +19,7 @@ import Task exposing (Task)
 
 
 type alias Model =
-    { error : Maybe String
+    { errors : List String
     , name : Field String String
     , email : Field String String
     , user_id : String
@@ -28,7 +28,7 @@ type alias Model =
 
 initModel : String -> Model
 initModel userId =
-    { error = Nothing
+    { errors = []
     , name = Field (validateEmpty "Name") ""
     , email = Field (validateEmpty "Email" >> andThen validateEmail) ""
     , user_id = userId
@@ -50,7 +50,7 @@ type Msg
     = OrgNameInput String
     | OrgEmailInput String
     | SaveOrganization
-    | SaveOrgResponse (Result GQLClient.Error Organization)
+    | SaveOrgResponse (Result GQLClient.Error OrganizationResponse)
 
 
 update : Msg -> Model -> ( Model, List (ReaderCmd Msg) )
@@ -79,19 +79,28 @@ update msg model =
                                     Passed okay ->
                                         "Unknown Error"
                             )
-                        |> String.join ", "
             in
             if isAllValid fields then
                 save model
-
             else
-                ( { model | error = Just errors }, [] )
+                ( { model | errors = errors }, [] )
 
         SaveOrgResponse (Ok org) ->
             ( model, [] )
 
         SaveOrgResponse (Err error) ->
-            ( { model | error = Just "An error occured while saving the Organization information. Please try again" }, [] )
+            ( { model | errors = [ "There was an error while saving organization details" ] }, [] )
+
+
+renderErrors : List String -> Html Msg
+renderErrors errors =
+    case errors of
+        [] ->
+            text ""
+
+        _ ->
+            div [ class "alert alert-danger alert-dismissible fade show", attribute "role" "alert" ]
+                [ text <| (++) "Error: " <| String.join ", " errors ]
 
 
 view : Model -> Html Msg
@@ -99,14 +108,8 @@ view model =
     Html.form [ onSubmit SaveOrganization ]
         [ div [ class "container" ]
             [ div []
-                [ Maybe.withDefault (text "") <|
-                    Maybe.map
-                        (\err ->
-                            div [ class "alert alert-danger alert-dismissible fade show", attribute "role" "alert" ]
-                                [ text <| "Error: " ++ err
-                                ]
-                        )
-                        model.error
+                [ renderErrors
+                    model.errors
                 ]
             , div []
                 [ label [] [ text "Name: " ]

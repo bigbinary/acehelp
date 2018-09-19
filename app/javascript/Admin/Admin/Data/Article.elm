@@ -1,6 +1,7 @@
-module Admin.Data.Article exposing (Article, ArticleId, ArticleListResponse, ArticleSummary, CreateArticleInputs, UpdateArticleInputs, allArticlesQuery, articleByIdQuery, articleObject, articleStatusMutation, articleSummaryObject, articlesByUrlQuery, createArticleMutation, deleteArticleMutation, nullableArticleSummaryObject, updateArticleMutation)
+module Admin.Data.Article exposing (Article, ArticleId, ArticleListResponse, ArticleResponse, ArticleSummary, CreateArticleInputs, UpdateArticleInputs, allArticlesQuery, articleByIdQuery, articleObject, articleStatusMutation, articleSummaryObject, articlesByUrlQuery, createArticleMutation, deleteArticleMutation, nullableArticleSummaryObject, updateArticleMutation)
 
 import Admin.Data.Category exposing (Category, CategoryId, categoryObject)
+import Admin.Data.Common exposing (..)
 import Admin.Data.Url exposing (UrlData, UrlId, urlObject)
 import GraphQL.Request.Builder as GQLBuilder
 import GraphQL.Request.Builder.Arg as Arg
@@ -46,6 +47,12 @@ type alias ArticleSummary =
 
 type alias ArticleListResponse =
     { articles : List Article
+    }
+
+
+type alias ArticleResponse =
+    { article : Maybe Article
+    , errors : Maybe (List Error)
     }
 
 
@@ -98,7 +105,7 @@ articleByIdQuery =
         )
 
 
-createArticleMutation : GQLBuilder.Document GQLBuilder.Mutation (Maybe Article) CreateArticleInputs
+createArticleMutation : GQLBuilder.Document GQLBuilder.Mutation ArticleResponse CreateArticleInputs
 createArticleMutation =
     let
         titleVar =
@@ -121,11 +128,7 @@ createArticleMutation =
                         ]
                   )
                 ]
-                (GQLBuilder.extract <|
-                    GQLBuilder.field "article"
-                        []
-                        (GQLBuilder.nullable articleObject)
-                )
+                articleResponseObject
             )
 
 
@@ -249,3 +252,14 @@ articleSummaryObject =
 nullableArticleSummaryObject : GQLBuilder.ValueSpec GQLBuilder.Nullable GQLBuilder.ObjectType (Maybe ArticleSummary) vars
 nullableArticleSummaryObject =
     GQLBuilder.nullable articleSummaryObject
+
+
+articleResponseObject : GQLBuilder.ValueSpec GQLBuilder.NonNull GQLBuilder.ObjectType ArticleResponse vars
+articleResponseObject =
+    GQLBuilder.object ArticleResponse
+        |> GQLBuilder.with
+            (GQLBuilder.field "article"
+                []
+                (GQLBuilder.nullable articleObject)
+            )
+        |> GQLBuilder.with errorsField

@@ -116,7 +116,7 @@ update msg model =
             ( { model | articles = articles }, [] )
 
         UpdateArticleStatusResponse (Err error) ->
-            ( { model | error = Just "There was an error wile updating the Status" }, [] )
+            ( { model | error = Just "There was an error while updating the Status" }, [] )
 
 
 
