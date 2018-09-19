@@ -15,7 +15,7 @@ class ApplicationController < ActionController::Base
       p "--------------------------------------------"
       p warden.user
       p "--------------------------------------------"
-      p user.signed_in?
+      p user_signed_in?
       p "--------------------------------------------"
 
       unless user_signed_in?
