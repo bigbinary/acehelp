@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class Mutations::SessionMutations
+class Mutations::LoginMutations
   Login = GraphQL::Relay::Mutation.define do
     name "LoginUser"
 
@@ -22,29 +22,7 @@ class Mutations::SessionMutations
         errors = Utils::ErrorHandler.new.error("Email is not registered with our system", context)
       end
       {
-        user: user,
-        errors: errors
-      }
-    }
-
-  end
-
-  Logout = GraphQL::Relay::Mutation.define do
-    name "LogoutUser"
-
-    input_field :userId, !types.String
-
-    return_field :errors, types[Types::ErrorType]
-    return_field :status, types.Boolean
-
-    resolve ->(object, inputs, context) {
-      if context[:current_user].present?
-        status = "success"
-      else
-        errors = Utils::ErrorHandler.new.error("There is no logged in user present.", context)
-      end
-      {
-        status: status,
+        user: valid_user,
         errors: errors
       }
     }

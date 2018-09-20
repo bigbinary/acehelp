@@ -2,7 +2,7 @@
 
 class HomeController < ApplicationController
   def index
-    if user_signed_in?
+    if current_user.present?
       if current_user.organizations.empty?
         redirect_to new_organization_path
       else
