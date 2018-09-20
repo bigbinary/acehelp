@@ -67,18 +67,16 @@ requestResetPassword emailInput =
         )
 
 
-requestLogout =
-    Reader.Reader
-        (\( nodeEnv, appUrl ) ->
-            GQLClient.customSendMutation
-                { method = "POST"
-                , url = graphqlUrl nodeEnv appUrl
-                , headers = []
-                , timeout = Nothing
-                , withCredentials = False
-                }
-            <|
-                GQLBuilder.request
-                    {}
-                    logoutMutation
-        )
+requestLogout : NodeEnv -> AppUrl -> Task GQLClient.Error String
+requestLogout nodeEnv appUrl =
+    GQLClient.customSendMutation
+        { method = "POST"
+        , url = graphqlUrl nodeEnv appUrl
+        , headers = []
+        , timeout = Nothing
+        , withCredentials = False
+        }
+    <|
+        GQLBuilder.request
+            {}
+            logoutMutation

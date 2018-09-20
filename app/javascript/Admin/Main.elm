@@ -3,10 +3,12 @@ module Main exposing (Flags, Model, Msg(..), Page(..), PageState(..), combineCmd
 import Admin.Data.Common exposing (..)
 import Admin.Data.ReaderCmd exposing (..)
 import Admin.Request.Helper exposing (ApiKey, NodeEnv, logoutRequest)
+import Admin.Request.Session exposing (..)
 import Admin.Views.Common exposing (..)
 import Browser
 import Browser.Navigation as Navigation exposing (..)
 import Field exposing (..)
+import GraphQL.Client.Http as GQLClient
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Http
@@ -34,6 +36,7 @@ import Page.Url.List as UrlList
 import Page.UserNotification as UserNotification
 import Page.View as MainView
 import Route
+import Task
 import Url exposing (Url)
 
 
@@ -144,7 +147,7 @@ type Msg
     | LoginMsg Login.Msg
     | ForgotPasswordMsg ForgotPassword.Msg
     | SignOut
-    | SignedOut (Result Http.Error String)
+    | SignedOut (Result GQLClient.Error String)
     | SignUpMsg SignUp.Msg
     | OrganizationCreateMsg OrganizationCreate.Msg
     | LinkClicked Browser.UrlRequest
@@ -835,7 +838,7 @@ update msg model =
             setRoute location model
 
         SignOut ->
-            ( model, Http.send SignedOut (logoutRequest model.nodeEnv model.appUrl) )
+            ( model, Task.attempt SignedOut <| requestLogout model.nodeEnv model.appUrl )
 
         SignedOut _ ->
             ( model, load (Admin.Request.Helper.baseUrl model.nodeEnv model.appUrl) )
