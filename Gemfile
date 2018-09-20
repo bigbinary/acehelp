@@ -89,6 +89,7 @@ group :development, :test do
   gem "minitest-ci"
   gem "minitest", "5.10.3"
   gem "awesome_print", "1.8.0"
+  gem "pry-rails"
 end
 
 group :development do

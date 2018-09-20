@@ -145,12 +145,21 @@ forgotPasswordMutation =
             )
 
 
-logoutMutation : GQLBuilder.Document GQLBuilder.Mutation String {}
+logoutMutation : GQLBuilder.Document GQLBuilder.Mutation String { a | userId : String }
 logoutMutation =
+    let
+        userIdVar =
+            Var.required "userId" .userId Var.string
+    in
     GQLBuilder.mutationDocument <|
         GQLBuilder.extract
             (GQLBuilder.field "logoutUser"
-                []
+                [ ( "input"
+                  , Arg.object
+                        [ ( "userId", Arg.variable userIdVar )
+                        ]
+                  )
+                ]
                 (GQLBuilder.extract <|
                     GQLBuilder.field "status" [] GQLBuilder.string
                 )

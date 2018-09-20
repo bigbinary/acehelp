@@ -67,8 +67,8 @@ requestResetPassword emailInput =
         )
 
 
-requestLogout : NodeEnv -> AppUrl -> Task GQLClient.Error String
-requestLogout nodeEnv appUrl =
+requestLogout : { a | userId : String } -> NodeEnv -> AppUrl -> Task GQLClient.Error String
+requestLogout userIdInput nodeEnv appUrl =
     GQLClient.customSendMutation
         { method = "POST"
         , url = graphqlUrl nodeEnv appUrl
@@ -78,5 +78,5 @@ requestLogout nodeEnv appUrl =
         }
     <|
         GQLBuilder.request
-            {}
+            userIdInput
             logoutMutation

@@ -37,8 +37,8 @@ Types::MutationType = GraphQL::ObjectType.define do
   field :addUrlToArticle, field: Mutations::UrlArticleMutations::AddUrlToArticle.field
   field :removeUrlFromArticle, field: Mutations::UrlArticleMutations::RemoveUrlFromArticle.field
 
-  field :loginUser, field: Mutations::LoginMutations::Login.field
-  field :logoutUser, field: Mutations::LoginMutations::Logout.field
+  field :loginUser, field: Mutations::SessionMutations::Login.field
+  field :logoutUser, field: Mutations::SessionMutations::Logout.field
   field :forgotPassword, field: Mutations::ForgotPasswordMutations::Perform.field
   field :signup, field: Mutations::SignupMutations::Signup.field
 

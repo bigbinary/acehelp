@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class Mutations::LoginMutations
+class Mutations::SessionMutations
   Login = GraphQL::Relay::Mutation.define do
     name "LoginUser"
 
@@ -31,6 +31,10 @@ class Mutations::LoginMutations
   end
 
   Logout = GraphQL::Relay::Mutation.define do
+    name "LogoutUser"
+
+    input_field :userId, !types.String
+
     return_field :errors, types[Types::ErrorType]
     return_field :status, types.Boolean
 
@@ -38,6 +42,7 @@ class Mutations::LoginMutations
       if context[:current_user].present?
         user = context[:warden].instance_variable_get(:@users).delete(:user)
         context[:warden].session_serializer.delete(:user, user)
+        context = {}
       else
         errors = Utils::ErrorHandler.new.error("There is no logged in user present.", context)
       end

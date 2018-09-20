@@ -838,7 +838,7 @@ update msg model =
             setRoute location model
 
         SignOut ->
-            ( model, Task.attempt SignedOut <| requestLogout model.nodeEnv model.appUrl )
+            ( model, Task.attempt SignedOut <| requestLogout { userId = model.userId } model.nodeEnv model.appUrl )
 
         SignedOut _ ->
             ( model, load (Admin.Request.Helper.baseUrl model.nodeEnv model.appUrl) )
