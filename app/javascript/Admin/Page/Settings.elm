@@ -131,7 +131,12 @@ jsCodeView nodeEnv organizationKey appUrl model =
         []
         [ errorView model.error
         , div
-            [ class "content-section" ]
+            [ class "content-header" ]
+            [ text "Widget Settings" ]
+        , div
+            [ class "content-text" ]
+            [ text "Insert the following script before the closing body tag of your site or app to display AceHelp's widget on your website." ]
+        , div []
             [ textarea
                 [ class "js-snippet"
                 , disabled True
@@ -139,9 +144,10 @@ jsCodeView nodeEnv organizationKey appUrl model =
                 [ text (codeSnippet nodeEnv organizationKey appUrl model)
                 ]
             ]
+        , hr [] []
         , div [ class "row toggle" ]
-            [ div [ class "col-md-6 toggle-label" ] [ text "Enable Widget" ]
-            , div [ class "col-md-6" ]
+            [ div [ class "col-md-4 toggle-label" ] [ text "Enable Widget" ]
+            , div [ class "col-md-8" ]
                 [ div []
                     [ label [ class "label toggle" ]
                         [ input
@@ -154,15 +160,17 @@ jsCodeView nodeEnv organizationKey appUrl model =
                         , div [ class "toggle-control" ] []
                         ]
                     ]
+                , div [ class "hint-text" ]
+                    [ text "Note: If you disable the widget, you can still open it via javascript code using the openWidget or openArticle API." ]
                 ]
             ]
         , div [ class "row toggle" ]
-            [ div [ class "col-md-12" ]
+            [ div [ class "offset-md-10 col-md-2" ]
                 [ button
                     [ class "btn btn-primary"
                     , onClick SaveSetting
                     ]
-                    [ text "Save" ]
+                    [ text "Save Changes" ]
                 ]
             ]
         ]

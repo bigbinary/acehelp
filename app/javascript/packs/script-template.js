@@ -8,7 +8,7 @@ script.async = true;
 script.onload = function() {
     var _ace = window.AceHelp;
     if (_ace) {
-        _ace._internal.insertWidget({ apiKey: apiKey }, true);
+        _ace._internal.insertWidget({ apiKey: apiKey });
     }
 };
 

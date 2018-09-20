@@ -8,7 +8,7 @@ var AceHelp = (function() {
     var internal = {};
     var _app;
 
-    function _insertWidget({ apiKey }, showWidget) {
+    function _insertWidget({ apiKey }) {
         var domId = "acehelp-hook";
         var node = document.getElementById("acehelp-hook");
         node = node || document.createElement("div");
@@ -37,10 +37,6 @@ var AceHelp = (function() {
         //     history.pushState({}, '', url);
         //     _app.ports.onUrlChange.send(location.href);
         // });
-
-        if (showWidget) {
-            document.body.appendChild(node);
-        }
     }
 
     function _userInfo(user) {

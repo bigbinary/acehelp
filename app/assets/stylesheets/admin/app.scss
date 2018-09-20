@@ -120,7 +120,17 @@ $blueThemeColor: rgb(60, 170, 249);
     z-index: 1;
   }
 
-  .content-section {
+  .content-header {
+    font-size: 20px;
     margin: 20px 0px;
+  }
+
+  .hint-text {
+    font-size: 10px;
+  }
+
+  .content-text {
+    font-size: 15px;
+    margin: 10px 0px;
   }
 }
