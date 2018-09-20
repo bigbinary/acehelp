@@ -97,7 +97,7 @@ update msg model =
             ( model, [] )
 
         SaveTeamResponse (Err error) ->
-            ( { model | error = Just "An error occured while saving the Team" }, [] )
+            ( { model | error = Just "Team member already present in current organization." }, [] )
 
 
 

@@ -3,6 +3,7 @@ module Admin.Data.Category exposing
     , CategoryId
     , CategoryList
     , CategoryName
+    , CategoryResponse
     , CreateCategoryInputs
     , DeleteCategoryInput
     , UpdateCategoryInputs
@@ -15,6 +16,7 @@ module Admin.Data.Category exposing
     , updateCategoryStatusMutation
     )
 
+import Admin.Data.Common exposing (..)
 import GraphQL.Request.Builder as GQLBuilder
 import GraphQL.Request.Builder.Arg as Arg
 import GraphQL.Request.Builder.Variable as Var
@@ -56,6 +58,12 @@ type alias DeleteCategoryInput =
     }
 
 
+type alias CategoryResponse =
+    { category : Maybe Category
+    , errors : Maybe (List Error)
+    }
+
+
 categoriesQuery : GQLBuilder.Document GQLBuilder.Query (Maybe (List Category)) vars
 categoriesQuery =
     GQLBuilder.queryDocument
@@ -88,7 +96,7 @@ categoryByIdQuery =
         )
 
 
-createCategoryMutation : GQLBuilder.Document GQLBuilder.Mutation (Maybe Category) CreateCategoryInputs
+createCategoryMutation : GQLBuilder.Document GQLBuilder.Mutation CategoryResponse CreateCategoryInputs
 createCategoryMutation =
     let
         nameVar =
@@ -101,16 +109,10 @@ createCategoryMutation =
                   , Arg.object [ ( "name", Arg.variable nameVar ) ]
                   )
                 ]
-                (GQLBuilder.extract <|
-                    GQLBuilder.field "category"
-                        []
-                        (GQLBuilder.nullable
-                            categoryObject
-                        )
-                )
+                categoryResponseObject
 
 
-udpateCategoryMutation : GQLBuilder.Document GQLBuilder.Mutation (Maybe Category) UpdateCategoryInputs
+udpateCategoryMutation : GQLBuilder.Document GQLBuilder.Mutation CategoryResponse UpdateCategoryInputs
 udpateCategoryMutation =
     let
         idVar =
@@ -133,13 +135,7 @@ udpateCategoryMutation =
                         ]
                   )
                 ]
-                (GQLBuilder.extract <|
-                    GQLBuilder.field "category"
-                        []
-                        (GQLBuilder.nullable
-                            categoryObject
-                        )
-                )
+                categoryResponseObject
 
 
 categoryObject : GQLBuilder.ValueSpec GQLBuilder.NonNull GQLBuilder.ObjectType Category vars
@@ -148,6 +144,17 @@ categoryObject =
         |> GQLBuilder.with (GQLBuilder.field "id" [] GQLBuilder.string)
         |> GQLBuilder.with (GQLBuilder.field "name" [] GQLBuilder.string)
         |> GQLBuilder.with (GQLBuilder.field "status" [] GQLBuilder.string)
+
+
+categoryResponseObject : GQLBuilder.ValueSpec GQLBuilder.NonNull GQLBuilder.ObjectType CategoryResponse vars
+categoryResponseObject =
+    GQLBuilder.object CategoryResponse
+        |> GQLBuilder.with
+            (GQLBuilder.field "category"
+                []
+                (GQLBuilder.nullable categoryObject)
+            )
+        |> GQLBuilder.with errorsField
 
 
 deleteCategoryMutation : GQLBuilder.Document GQLBuilder.Mutation (Maybe CategoryId) DeleteCategoryInput

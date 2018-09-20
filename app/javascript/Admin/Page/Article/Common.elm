@@ -31,17 +31,6 @@ type SaveSatus
     | None
 
 
-errorView : List String -> Html msg
-errorView errors =
-    case errors of
-        [] ->
-            text ""
-
-        _ ->
-            div [ class "alert alert-danger alert-dismissible fade show", attribute "role" "alert" ]
-                [ text <| (++) "Error: " <| String.join ", " errors ]
-
-
 successView : Maybe String -> Html msg
 successView success =
     Maybe.withDefault (text "") <|

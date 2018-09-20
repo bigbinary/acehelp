@@ -1,4 +1,4 @@
-module Admin.Views.Common exposing (loadingIndicator, multiSelectMenu, renderError, spinner)
+module Admin.Views.Common exposing (errorView, loadingIndicator, multiSelectMenu, renderError, spinner)
 
 import Admin.Data.Common exposing (..)
 import Html exposing (..)
@@ -58,3 +58,14 @@ spinner =
         , div [ class "rect rect4" ] []
         , div [ class "rect rect5" ] []
         ]
+
+
+errorView : List String -> Html msg
+errorView errors =
+    case errors of
+        [] ->
+            text ""
+
+        _ ->
+            div [ class "alert alert-danger alert-dismissible fade show", attribute "role" "alert" ]
+                [ text <| (++) "Error: " <| String.join ", " errors ]
