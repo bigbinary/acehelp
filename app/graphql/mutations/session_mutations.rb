@@ -41,8 +41,11 @@ class Mutations::SessionMutations
     resolve ->(object, inputs, context) {
       if context[:current_user].present?
         user = context[:warden].instance_variable_get(:@users).delete(:user)
+        context[:warden].logout(:user)
         context[:warden].session_serializer.delete(:user, user)
-        context = {}
+        context[:request].env["warden"].logout(:user)
+        context[:request].env["warden"].session_serializer.delete(:user, user)
+        context[:current_user] = nil
       else
         errors = Utils::ErrorHandler.new.error("There is no logged in user present.", context)
       end

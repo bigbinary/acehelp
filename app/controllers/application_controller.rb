@@ -8,10 +8,14 @@ class ApplicationController < ActionController::Base
   skip_before_action :verify_authenticity_token
 
   private
+
     def ensure_user_is_logged_in
       unless user_signed_in?
-        redirect_to new_user_session_path
+        redirect_to root_path
       end
+    end
+
+    def after_sign_out_path_for(resources)
     end
 
     def configure_permitted_parameters

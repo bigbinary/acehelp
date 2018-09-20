@@ -840,7 +840,10 @@ update msg model =
         SignOut ->
             ( model, Task.attempt SignedOut <| requestLogout { userId = model.userId } model.nodeEnv model.appUrl )
 
-        SignedOut _ ->
+        SignedOut (Ok response) ->
+            ( model, load (Admin.Request.Helper.baseUrl model.nodeEnv model.appUrl) )
+
+        SignedOut (Err error) ->
             ( model, load (Admin.Request.Helper.baseUrl model.nodeEnv model.appUrl) )
 
 
