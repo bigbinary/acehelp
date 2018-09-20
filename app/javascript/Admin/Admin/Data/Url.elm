@@ -3,6 +3,7 @@ module Admin.Data.Url exposing
     , UrlData
     , UrlId
     , UrlsListResponse
+    , UrlResponse
     , createUrlMutation
     , deleteUrlMutation
     , nullableUrlObject
@@ -12,6 +13,7 @@ module Admin.Data.Url exposing
     , urlObject
     )
 
+import Admin.Data.Common exposing (..)
 import GraphQL.Request.Builder as GQLBuilder
 import GraphQL.Request.Builder.Arg as Arg
 import GraphQL.Request.Builder.Variable as Var
@@ -34,6 +36,12 @@ type alias CreateUrlInput =
 
 type alias UrlsListResponse =
     { urls : List UrlData
+    }
+
+
+type alias UrlResponse =
+    { url : Maybe UrlData
+    , errors : Maybe (List Error)
     }
 
 
@@ -66,7 +74,7 @@ urlByIdQuery =
         )
 
 
-createUrlMutation : GQLBuilder.Document GQLBuilder.Mutation (Maybe UrlData) CreateUrlInput
+createUrlMutation : GQLBuilder.Document GQLBuilder.Mutation UrlResponse CreateUrlInput
 createUrlMutation =
     let
         urlVar =
@@ -80,11 +88,7 @@ createUrlMutation =
                         [ ( "url", Arg.variable urlVar ) ]
                   )
                 ]
-                (GQLBuilder.extract <|
-                    GQLBuilder.field "url"
-                        []
-                        nullableUrlObject
-                )
+                urlResponseObject
 
 
 deleteUrlMutation : GQLBuilder.Document GQLBuilder.Mutation UrlId { a | id : UrlId }
@@ -120,7 +124,7 @@ nullableUrlObject =
     GQLBuilder.nullable urlObject
 
 
-updateUrlMutation : GQLBuilder.Document GQLBuilder.Mutation (Maybe UrlData) UrlData
+updateUrlMutation : GQLBuilder.Document GQLBuilder.Mutation UrlResponse UrlData
 updateUrlMutation =
     let
         idVar =
@@ -137,8 +141,15 @@ updateUrlMutation =
                         [ ( "url", Arg.variable urlVar ), ( "id", Arg.variable idVar ) ]
                   )
                 ]
-                (GQLBuilder.extract <|
-                    GQLBuilder.field "url"
-                        []
-                        nullableUrlObject
-                )
+                urlResponseObject
+
+
+urlResponseObject : GQLBuilder.ValueSpec GQLBuilder.NonNull GQLBuilder.ObjectType UrlResponse vars
+urlResponseObject =
+    GQLBuilder.object UrlResponse
+        |> GQLBuilder.with
+            (GQLBuilder.field "url"
+                []
+                (GQLBuilder.nullable urlObject)
+            )
+        |> GQLBuilder.with errorsField

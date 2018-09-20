@@ -17,7 +17,7 @@ requestUrls =
         )
 
 
-createUrl : CreateUrlInput -> Reader ( NodeEnv, ApiKey, AppUrl ) (Task GQLClient.Error (Maybe UrlData))
+createUrl : CreateUrlInput -> Reader ( NodeEnv, ApiKey, AppUrl ) (Task GQLClient.Error UrlResponse)
 createUrl createUrlInput =
     Reader.Reader
         (\( nodeEnv, apiKey, appUrl ) ->
@@ -35,7 +35,7 @@ deleteUrl urlId =
         )
 
 
-updateUrl : UrlData -> Reader ( NodeEnv, ApiKey, AppUrl ) (Task GQLClient.Error (Maybe UrlData))
+updateUrl : UrlData -> Reader ( NodeEnv, ApiKey, AppUrl ) (Task GQLClient.Error UrlResponse)
 updateUrl urlData =
     Reader.Reader
         (\( nodeEnv, apiKey, appUrl ) ->
