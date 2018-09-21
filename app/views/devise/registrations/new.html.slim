@@ -1,3 +1,27 @@
 #admin-hook
+  .page-wrap
+    .container.login-container
+      .page-content.row
+        .col-md-12
+          h2.form-header
+            = "Sign-Up to AceHelp"
+        .center-form.col-md-12
+          = form_for(resource, as: resource_name, url: user_registration_path) do |f|
+            = devise_error_messages!
+            .form-group
+              = f.text_field :first_name, autocomplete: "off", class: "form-control", placeholder: "First Name"
+            .form-group
+              = f.email_field :email, autofocus: true, autocomplete: "email", class: "form-control", placeholder: "Email address"
+            .form-group
+              = f.password_field :password, autocomplete: "off", class: "form-control", placeholder: "Password"
+            .form-group
+              = f.password_field :password_confirmation, autocomplete: "off", class: "form-control", placeholder: "Confirm Password"
+            .actions
+              = f.submit "Sign up", class: "btn-login btn btn-primary"
+        .links-section.col-md-12
+          span.btn
+            = link_to "Sign In", new_user_session_path
+          span.btn
+            = link_to "Forgot Password", new_user_password_path
+
 = stylesheet_pack_tag 'admin'
-= javascript_pack_tag "admin"

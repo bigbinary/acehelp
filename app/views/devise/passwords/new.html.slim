@@ -1,10 +1,22 @@
-h2 Forgot your password?
-= form_for(resource, as: resource_name, url: password_path(resource_name), html: { method: :post }) do |f|
-  = devise_error_messages!
-  .field
-    = f.label :email
-    br/
-    = f.email_field :email, autofocus: true, autocomplete: "email"
-  .actions
-    = f.submit "Send me reset password instructions"
-= render "devise/shared/links"
+#admin-hook
+  .page-wrap
+    .container.login-container
+      .page-content.row
+        .col-md-12
+          h2.form-header
+            = "Forgot Your Password?"
+        .center-form.col-md-12
+          = form_for(resource, as: resource_name, url: password_path(resource_name), html: { method: :post }) do |f|
+            = devise_error_messages!
+            .form-group
+              = f.email_field :email, autofocus: true, autocomplete: "email", class: "form-control", placeholder: "Email address"
+            .actions
+              = f.submit "Send me reset password instructions", class: "btn-login btn btn-primary"
+        .links-section.col-md-12
+          span.btn
+            = link_to "Sign In", new_user_session_path
+          span.btn
+            = link_to "Sign Up", new_user_registration_path
+
+
+= stylesheet_pack_tag 'admin'
