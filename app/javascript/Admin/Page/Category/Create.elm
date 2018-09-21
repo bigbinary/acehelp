@@ -1,7 +1,7 @@
 module Page.Category.Create exposing
     ( Model
     , Msg(..)
-    , categroyCeateInputs
+    , categroyCreateInputs
     , init
     , initModel
     , saveCategory
@@ -147,8 +147,8 @@ view model =
 -- TODO: Add request for category create when backend is ready
 
 
-categroyCeateInputs : Model -> CreateCategoryInputs
-categroyCeateInputs { name } =
+categroyCreateInputs : Model -> CreateCategoryInputs
+categroyCreateInputs { name } =
     { name = Field.value name
     }
 
@@ -160,7 +160,7 @@ saveCategory model =
             Strict <|
                 Reader.map (Task.attempt SaveCategoryResponse)
                     (requestCreateCategory <|
-                        categroyCeateInputs model
+                        categroyCreateInputs model
                     )
     in
     ( model, [ cmd ] )
