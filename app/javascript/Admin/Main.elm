@@ -841,7 +841,7 @@ update msg model =
             ( model, Task.attempt SignedOut <| requestLogout { userId = model.userId } model.nodeEnv model.appUrl )
 
         SignedOut _ ->
-            ( model, Navigation.pushUrl model.navKey (Route.routeToString Route.Login) )
+            ( model, Navigation.load (Admin.Request.Helper.baseUrl model.nodeEnv model.appUrl) )
 
 
 
