@@ -439,11 +439,21 @@ update msg model =
                     )
             in
             case cuMsg of
-                UrlCreate.SaveUrlResponse (Ok id) ->
-                    updateNavigation (Route.UrlList model.organizationKey) ( newModel, newCmds )
-                        |> renderFlashMessages
-                            (UserNotification.SuccessNotification
-                                "Url created successfully."
+                UrlCreate.SaveUrlResponse (Ok urlResponse) ->
+                    let
+                        updatedModel =
+                            { currentPageModel
+                                | errors = flattenErrors urlResponse.errors
+                            }
+                    in
+                    case urlResponse.url of
+                        Just url ->
+                            updateNavigation (Route.UrlList model.organizationKey) ( newModel, newCmds )
+                                |> renderFlashMessages (UserNotification.SuccessNotification "Url created successfully.")
+
+                        Nothing ->
+                            ( { model | currentPage = Loaded (UrlCreate updatedModel) }
+                            , runReaderCmds UrlCreateMsg cmds
                             )
 
                 _ ->
@@ -468,11 +478,21 @@ update msg model =
                     )
             in
             case ueMsg of
-                UrlEdit.UpdateUrlResponse (Ok id) ->
-                    updateNavigation (Route.UrlList model.organizationKey) ( newModel, newCmds )
-                        |> renderFlashMessages
-                            (UserNotification.SuccessNotification
-                                "Url updated successfully."
+                UrlEdit.UpdateUrlResponse (Ok urlResponse) ->
+                    let
+                        updatedModel =
+                            { currentPageModel
+                                | errors = flattenErrors urlResponse.errors
+                            }
+                    in
+                    case urlResponse.url of
+                        Just url ->
+                            updateNavigation (Route.UrlList model.organizationKey) ( newModel, newCmds )
+                                |> renderFlashMessages (UserNotification.SuccessNotification "Url updated successfully.")
+
+                        Nothing ->
+                            ( { model | currentPage = Loaded (UrlEdit updatedModel) }
+                            , runReaderCmds UrlEditMsg cmds
                             )
 
                 _ ->

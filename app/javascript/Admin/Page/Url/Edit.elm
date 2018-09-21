@@ -19,7 +19,7 @@ import Task exposing (Task)
 
 
 type alias Model =
-    { error : Maybe String
+    { errors : List String
     , success : Maybe String
     , url : Field String String
     , urlId : UrlId
@@ -28,7 +28,7 @@ type alias Model =
 
 initModel : UrlId -> Model
 initModel urlId =
-    { error = Nothing
+    { errors = []
     , success = Nothing
     , url = Field (validateEmpty "Url") ""
     , urlId = urlId
@@ -49,7 +49,7 @@ init urlId =
 type Msg
     = UrlInput String
     | UpdateUrl
-    | UpdateUrlResponse (Result GQLClient.Error (Maybe UrlData))
+    | UpdateUrlResponse (Result GQLClient.Error UrlResponse)
     | UrlLoaded (Result GQLClient.Error (Maybe UrlData))
 
 
@@ -76,19 +76,18 @@ update msg model =
                                     Passed _ ->
                                         "Unknown Error"
                             )
-                        |> String.join ", "
             in
             if isAllValid fields then
                 save model
 
             else
-                ( { model | error = Just errors }, [] )
+                ( { model | errors = errors }, [] )
 
         UpdateUrlResponse (Ok id) ->
             ( model, [] )
 
         UpdateUrlResponse (Err error) ->
-            ( { model | error = Just "An error occured while updating the Url information" }, [] )
+            ( { model | errors = [ "An error occured while updating the Url information" ] }, [] )
 
         UrlLoaded (Ok url) ->
             case url of
@@ -101,33 +100,32 @@ update msg model =
                     )
 
                 Nothing ->
-                    ( { model | error = Just "There was an error while loading the url" }, [] )
+                    ( { model | errors = [ "There was an error while loading the url" ] }, [] )
 
         UrlLoaded (Err err) ->
-            ( { model | error = Just "There was an error while loading the url" }, [] )
+            ( { model | errors = [ "There was an error while loading the url" ] }, [] )
 
 
 
 -- VIEW
 
 
+errorView : List String -> Html msg
+errorView errors =
+    case errors of
+        [] ->
+            text ""
+
+        _ ->
+            div [ class "alert alert-danger alert-dismissible fade show", attribute "role" "alert" ]
+                [ text <| (++) "Error: " <| String.join ", " errors ]
+
+
 view : Model -> Html Msg
 view model =
     div [ class "container" ]
         [ Html.form [ onSubmit UpdateUrl ]
-            [ div []
-                [ Maybe.withDefault (text "") <|
-                    Maybe.map
-                        (\err ->
-                            div
-                                [ class "alert alert-danger alert-dismissible fade show"
-                                , attribute "role" "alert"
-                                ]
-                                [ text <| "Error: " ++ err
-                                ]
-                        )
-                        model.error
-                ]
+            [ errorView model.errors
             , div []
                 [ Maybe.withDefault (text "") <|
                     Maybe.map

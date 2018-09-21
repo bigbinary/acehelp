@@ -21,7 +21,7 @@ import Task exposing (Task)
 
 
 type alias Model =
-    { error : Maybe String
+    { errors : List String
     , id : String
     , url : Field String String
     , urlTitle : Field String String
@@ -30,9 +30,9 @@ type alias Model =
 
 initModel : Model
 initModel =
-    { error = Nothing
+    { errors = []
     , id = "0"
-    , url = Field (validateEmpty "Url") ""
+    , url = Field validateUrl ""
     , urlTitle = Field (validateEmpty "Title") ""
     }
 
@@ -52,7 +52,7 @@ type Msg
     = UrlInput String
     | TitleInput String
     | SaveUrl
-    | SaveUrlResponse (Result GQLClient.Error (Maybe UrlData))
+    | SaveUrlResponse (Result GQLClient.Error UrlResponse)
 
 
 update : Msg -> Model -> ( Model, List (ReaderCmd Msg) )
@@ -81,43 +81,41 @@ update msg model =
                                     Passed _ ->
                                         "Unknown Error"
                             )
-                        |> String.join ", "
             in
             if isAllValid fields then
                 save model
 
             else
-                ( { model | error = Just errors }, [] )
+                ( { model | errors = errors }, [] )
 
         SaveUrlResponse (Ok id) ->
             -- NOTE: Redirection handled in Main
             ( model, [] )
 
         SaveUrlResponse (Err error) ->
-            ( { model | error = Just "An error occured while saving the Url" }, [] )
+            ( { model | errors = [ "An error occured while saving the Url" ] }, [] )
 
 
 
 -- VIEW
 
 
+errorView : List String -> Html msg
+errorView errors =
+    case errors of
+        [] ->
+            text ""
+
+        _ ->
+            div [ class "alert alert-danger alert-dismissible fade show", attribute "role" "alert" ]
+                [ text <| (++) "Error: " <| String.join ", " errors ]
+
+
 view : Model -> Html Msg
 view model =
     div [ class "container" ]
         [ Html.form [ onSubmit SaveUrl ]
-            [ div []
-                [ Maybe.withDefault (text "") <|
-                    Maybe.map
-                        (\err ->
-                            div
-                                [ class "alert alert-danger alert-dismissible fade show"
-                                , attribute "role" "alert"
-                                ]
-                                [ text <| "Error: " ++ err
-                                ]
-                        )
-                        model.error
-                ]
+            [ errorView model.errors
             , div []
                 [ label [] [ text "URL: " ]
                 , input
