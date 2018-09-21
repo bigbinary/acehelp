@@ -62,8 +62,6 @@ $blueThemeColor: rgb(60, 170, 249);
     }
   }
 
-
-
   .close-error-icon::after {
     content: "\2716";
     cursor: pointer;
@@ -108,7 +106,6 @@ $blueThemeColor: rgb(60, 170, 249);
             color: #fff;
             font-size: 14px;
           }
-          
         }
       }
     }
@@ -123,4 +120,17 @@ $blueThemeColor: rgb(60, 170, 249);
     z-index: 1;
   }
 
+  .content-header {
+    font-size: 20px;
+    margin: 20px 0px;
+  }
+
+  .hint-text {
+    font-size: 10px;
+  }
+
+  .content-text {
+    font-size: 15px;
+    margin: 10px 0px;
+  }
 }
