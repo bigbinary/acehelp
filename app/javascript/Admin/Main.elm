@@ -885,10 +885,10 @@ update msg model =
             setRoute location model
 
         SignOut ->
-            ( model, Http.send SignedOut (logoutRequest model.nodeEnv model.appUrl) )
+            ( model, Http.send SignedOut <| logoutRequest model.nodeEnv model.appUrl )
 
         SignedOut _ ->
-            ( model, load (Admin.Request.Helper.baseUrl model.nodeEnv model.appUrl) )
+            ( model, Navigation.load (Admin.Request.Helper.baseUrl model.nodeEnv model.appUrl) )
 
 
 

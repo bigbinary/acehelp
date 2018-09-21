@@ -133,4 +133,10 @@ $blueThemeColor: rgb(60, 170, 249);
     font-size: 15px;
     margin: 10px 0px;
   }
+
+  button.sign-out {
+    background: transparent;
+    padding: 0;
+    border : 0;
+  }
 }

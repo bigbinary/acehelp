@@ -158,7 +158,7 @@ logoutRequest env appUrl =
     Http.request
         { method = "DELETE"
         , headers = []
-        , url = baseUrl env appUrl ++ "users/sign_out"
+        , url = baseUrl env appUrl ++ "/users/sign_out"
         , body = Http.emptyBody
         , expect = Http.expectString
         , timeout = Nothing
