@@ -1,17 +1,6 @@
-module Admin.Data.Url exposing
-    ( CreateUrlInput
-    , UrlData
-    , UrlId
-    , UrlsListResponse
-    , createUrlMutation
-    , deleteUrlMutation
-    , nullableUrlObject
-    , requestUrlsQuery
-    , updateUrlMutation
-    , urlByIdQuery
-    , urlObject
-    )
+module Admin.Data.Url exposing (CreateUrlInput, UrlData, UrlId, UrlResponse, UrlsListResponse, createUrlMutation, deleteUrlMutation, nullableUrlObject, requestUrlsQuery, updateUrlMutation, urlByIdQuery, urlObject, urlWithErrorObject)
 
+import Admin.Data.Common exposing (..)
 import GraphQL.Request.Builder as GQLBuilder
 import GraphQL.Request.Builder.Arg as Arg
 import GraphQL.Request.Builder.Variable as Var
@@ -34,6 +23,12 @@ type alias CreateUrlInput =
 
 type alias UrlsListResponse =
     { urls : List UrlData
+    }
+
+
+type alias UrlResponse =
+    { url : Maybe UrlData
+    , errors : Maybe (List Error)
     }
 
 
@@ -66,7 +61,7 @@ urlByIdQuery =
         )
 
 
-createUrlMutation : GQLBuilder.Document GQLBuilder.Mutation (Maybe UrlData) CreateUrlInput
+createUrlMutation : GQLBuilder.Document GQLBuilder.Mutation UrlResponse CreateUrlInput
 createUrlMutation =
     let
         urlVar =
@@ -80,11 +75,7 @@ createUrlMutation =
                         [ ( "url", Arg.variable urlVar ) ]
                   )
                 ]
-                (GQLBuilder.extract <|
-                    GQLBuilder.field "url"
-                        []
-                        nullableUrlObject
-                )
+                urlWithErrorObject
 
 
 deleteUrlMutation : GQLBuilder.Document GQLBuilder.Mutation UrlId { a | id : UrlId }
@@ -118,6 +109,23 @@ urlObject =
 nullableUrlObject : GQLBuilder.ValueSpec GQLBuilder.Nullable GQLBuilder.ObjectType (Maybe UrlData) vars
 nullableUrlObject =
     GQLBuilder.nullable urlObject
+
+
+urlWithErrorObject : GQLBuilder.ValueSpec GQLBuilder.NonNull GQLBuilder.ObjectType UrlResponse vars
+urlWithErrorObject =
+    GQLBuilder.object UrlResponse
+        |> GQLBuilder.with
+            (GQLBuilder.field "url"
+                []
+                (GQLBuilder.nullable urlObject)
+            )
+        |> GQLBuilder.with
+            (GQLBuilder.field "errors"
+                []
+                (GQLBuilder.nullable
+                    (GQLBuilder.list errorObject)
+                )
+            )
 
 
 updateUrlMutation : GQLBuilder.Document GQLBuilder.Mutation (Maybe UrlData) UrlData

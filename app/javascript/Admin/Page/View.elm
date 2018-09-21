@@ -1,4 +1,4 @@
-module Page.View exposing (adminHeader, adminLayout, logoutOption)
+module Page.View exposing (adminHeader, adminLayout, errorAlert, logoutOption)
 
 import Admin.Request.Helper exposing (ApiKey, NodeEnv)
 import Html exposing (..)
@@ -144,3 +144,18 @@ logoutOption signOut =
                 ]
             ]
         ]
+
+
+errorAlert : List String -> Html msg
+errorAlert errors =
+    case errors of
+        [] ->
+            text ""
+
+        _ ->
+            div
+                [ class "alert alert-danger alert-dismissible fade show"
+                , attribute "role" "alert"
+                ]
+                [ text <| String.join ", " errors
+                ]

@@ -1,4 +1,4 @@
-module Helpers exposing (flip, maybeToBool, maybeToList, stringToMaybe, validEmail, validateEmail, validateEmpty)
+module Helpers exposing (flip, maybeToBool, maybeToList, stringToMaybe, validEmail, validUrl, validateEmail, validateEmpty, validateUrl)
 
 import Field.ValidationResult exposing (..)
 import Process exposing (..)
@@ -30,6 +30,23 @@ validEmail : Regex
 validEmail =
     Regex.fromStringWith { caseInsensitive = True, multiline = False }
         "^[a-zA-Z0-9.!#$%&'*+\\/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$"
+        |> Maybe.withDefault Regex.never
+
+
+validateUrl : String -> ValidationResult String String
+validateUrl s =
+    case Regex.contains validUrl s of
+        True ->
+            Passed s
+
+        False ->
+            Failed "Please enter a valid Url"
+
+
+validUrl : Regex
+validUrl =
+    Regex.fromStringWith { caseInsensitive = True, multiline = False }
+        "^(?:http(s)?:\\/\\/)?[\\w.-]+(?:\\.[\\w\\.-]+)+[\\w\\-\\._~:/?#[\\]@!\\$&'\\(\\)\\*\\+,;=.]+$"
         |> Maybe.withDefault Regex.never
 
 
