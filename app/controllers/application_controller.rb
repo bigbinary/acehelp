@@ -13,15 +13,13 @@ class ApplicationController < ActionController::Base
       unless user_signed_in?
         redirect_to new_user_session_path
       end
-        end
+    end
 
     def configure_permitted_parameters
       devise_parameter_sanitizer.permit(:sign_up, keys: [:first_name])
     end
 
-  protected
-
-    def after_sign_out_path_for
+    def after_sign_out_path_for(resource)
       root_path
     end
 end

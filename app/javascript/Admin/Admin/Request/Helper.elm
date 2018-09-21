@@ -63,7 +63,7 @@ baseUrl env appUrl =
                     "https://staging.acehelp.com/"
 
                 False ->
-                    "https://" ++ appUrl ++ ".herokuapp.com"
+                    "https://" ++ appUrl ++ ".herokuapp.com/"
 
         "development" ->
             "http://localhost:3000/"
@@ -157,8 +157,8 @@ logoutRequest : NodeEnv -> AppUrl -> Http.Request String
 logoutRequest env appUrl =
     Http.request
         { method = "DELETE"
-        , headers = []
-        , url = baseUrl env appUrl ++ "/users/sign_out"
+        , headers = defaultRequestHeaders
+        , url = baseUrl env appUrl ++ "users/sign_out"
         , body = Http.emptyBody
         , expect = Http.expectString
         , timeout = Nothing
