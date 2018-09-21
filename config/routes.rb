@@ -4,7 +4,7 @@ Rails.application.routes.draw do
   root to: "home#index"
 
   post "/graphql", to: "graphql#execute"
-  devise_for :users, :skip => [:registration]
+  devise_for :users
 
   get "/pages/aceinvoice/getting_started", to: "home#getting_started"
   get "/pages/aceinvoice/integrations", to: "home#integrations"
