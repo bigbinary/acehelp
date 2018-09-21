@@ -32,7 +32,7 @@ initModel : Model
 initModel =
     { errors = []
     , id = "0"
-    , url = Field (validateEmpty "Url") ""
+    , url = Field validateUrl ""
     , urlTitle = Field (validateEmpty "Title") ""
     }
 
