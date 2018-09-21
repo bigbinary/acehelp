@@ -1,4 +1,13 @@
-module Page.Category.Edit exposing (Model, Msg(..), categoryUpdateInputs, init, initModel, update, updateCategory, view)
+module Page.Category.Edit exposing
+    ( Model
+    , Msg(..)
+    , categoryUpdateInputs
+    , init
+    , initModel
+    , update
+    , updateCategory
+    , view
+    )
 
 import Admin.Data.Category exposing (..)
 import Admin.Data.ReaderCmd exposing (..)
@@ -139,7 +148,10 @@ view model =
             [ Maybe.withDefault (text "") <|
                 Maybe.map
                     (\message ->
-                        div [ class "alert alert-success alert-dismissible fade show", attribute "role" "alert" ]
+                        div
+                            [ class "alert alert-success alert-dismissible fade show"
+                            , attribute "role" "alert"
+                            ]
                             [ text <| message
                             ]
                     )
@@ -183,6 +195,10 @@ updateCategory : Model -> ( Model, List (ReaderCmd Msg) )
 updateCategory model =
     let
         cmd =
-            Strict <| Reader.map (Task.attempt UpdateCategoryResponse) (requestUpdateCategory <| categoryUpdateInputs model)
+            Strict <|
+                Reader.map (Task.attempt UpdateCategoryResponse)
+                    (requestUpdateCategory <|
+                        categoryUpdateInputs model
+                    )
     in
     ( model, [ cmd ] )

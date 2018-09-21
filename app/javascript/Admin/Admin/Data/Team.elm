@@ -1,4 +1,12 @@
-module Admin.Data.Team exposing (Team, TeamMember, UserId, createTeamMemberMutation, removeUserFromOrganization, requestTeamQuery, teamMemberExtractor)
+module Admin.Data.Team exposing
+    ( Team
+    , TeamMember
+    , UserId
+    , createTeamMemberMutation
+    , removeUserFromOrganization
+    , requestTeamQuery
+    , teamMemberExtractor
+    )
 
 import GraphQL.Request.Builder as GQLBuilder
 import GraphQL.Request.Builder.Arg as Arg

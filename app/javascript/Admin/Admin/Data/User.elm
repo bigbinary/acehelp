@@ -1,4 +1,11 @@
-module Admin.Data.User exposing (User, UserWithErrors, UserWithOrganization, userObject, userWithErrorObject, userWithOrganizationObject)
+module Admin.Data.User exposing
+    ( User
+    , UserWithErrors
+    , UserWithOrganization
+    , userObject
+    , userWithErrorObject
+    , userWithOrganizationObject
+    )
 
 import Admin.Data.Common exposing (..)
 import Admin.Data.Organization exposing (..)

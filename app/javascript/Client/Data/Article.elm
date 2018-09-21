@@ -1,4 +1,23 @@
-module Data.Article exposing (Article, ArticleId, ArticleListResponse, ArticleResponse, ArticleSummary, addFeedbackMutation, articleQuery, articleSummaryField, articlesQuery, decodeArticle, decodeArticleResponse, decodeArticleSummary, decodeArticles, downvoteMutation, searchArticlesQuery, suggestedArticledQuery, upvoteMutation, voteMutation)
+module Data.Article exposing
+    ( Article
+    , ArticleId
+    , ArticleListResponse
+    , ArticleResponse
+    , ArticleSummary
+    , addFeedbackMutation
+    , articleQuery
+    , articleSummaryField
+    , articlesQuery
+    , decodeArticle
+    , decodeArticleResponse
+    , decodeArticleSummary
+    , decodeArticles
+    , downvoteMutation
+    , searchArticlesQuery
+    , suggestedArticledQuery
+    , upvoteMutation
+    , voteMutation
+    )
 
 import Data.Common exposing (..)
 import Data.ContactUs exposing (FeedbackForm)
@@ -92,7 +111,13 @@ articlesQuery =
         GQLBuilder.extract articleSummaryField
 
 
-suggestedArticledQuery : GQLBuilder.Document GQLBuilder.Query (List ArticleSummary) { vars | url : Maybe String, status : Maybe String }
+suggestedArticledQuery :
+    GQLBuilder.Document GQLBuilder.Query
+        (List ArticleSummary)
+        { vars
+            | url : Maybe String
+            , status : Maybe String
+        }
 suggestedArticledQuery =
     let
         urlVar =
@@ -119,7 +144,14 @@ suggestedArticledQuery =
 -- MUTATIONS
 
 
-voteMutation : String -> GQLBuilder.Document GQLBuilder.Mutation ArticleSummary { vars | articleId : ArticleId }
+voteMutation :
+    String
+    ->
+        GQLBuilder.Document GQLBuilder.Mutation
+            ArticleSummary
+            { vars
+                | articleId : ArticleId
+            }
 voteMutation voteType =
     let
         articleIdVar =

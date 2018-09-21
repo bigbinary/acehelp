@@ -1,4 +1,13 @@
-module Admin.Data.Common exposing (Error, Option(..), Value, errorObject, errorsField, flattenErrors, targetSelectedOptions)
+module Admin.Data.Common exposing
+    ( Error
+    , Option(..)
+    , Value
+    , errorObject
+    , errorsField
+    , flattenErrors
+    , targetSelectedOptions
+    )
+
 import GraphQL.Request.Builder as GQLBuilder
 import GraphQL.Request.Builder.Arg as Arg
 import GraphQL.Request.Builder.Variable as Var

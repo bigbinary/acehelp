@@ -1,4 +1,19 @@
-module Admin.Data.Category exposing (Category, CategoryId, CategoryList, CategoryName, CreateCategoryInputs, DeleteCategoryInput, UpdateCategoryInputs, categoriesQuery, categoryByIdQuery, categoryObject, createCategoryMutation, deleteCategoryMutation, udpateCategoryMutation, updateCategoryStatusMutation)
+module Admin.Data.Category exposing
+    ( Category
+    , CategoryId
+    , CategoryList
+    , CategoryName
+    , CreateCategoryInputs
+    , DeleteCategoryInput
+    , UpdateCategoryInputs
+    , categoriesQuery
+    , categoryByIdQuery
+    , categoryObject
+    , createCategoryMutation
+    , deleteCategoryMutation
+    , udpateCategoryMutation
+    , updateCategoryStatusMutation
+    )
 
 import GraphQL.Request.Builder as GQLBuilder
 import GraphQL.Request.Builder.Arg as Arg
@@ -156,7 +171,13 @@ deleteCategoryMutation =
                 )
 
 
-updateCategoryStatusMutation : GQLBuilder.Document GQLBuilder.Mutation (Maybe (List Category)) { vars | id : String, status : String }
+updateCategoryStatusMutation :
+    GQLBuilder.Document GQLBuilder.Mutation
+        (Maybe (List Category))
+        { vars
+            | id : String
+            , status : String
+        }
 updateCategoryStatusMutation =
     let
         idVar =

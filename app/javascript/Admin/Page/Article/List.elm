@@ -75,7 +75,12 @@ update msg model =
             ( { model | error = Just "There was an error loading articles" }, [] )
 
         DeleteArticle articleId ->
-            ( model, [ Strict <| Reader.map (Task.attempt DeleteArticleResponse) <| requestDeleteArticle articleId ] )
+            ( model
+            , [ Strict <|
+                    Reader.map (Task.attempt DeleteArticleResponse) <|
+                        requestDeleteArticle articleId
+              ]
+            )
 
         DeleteArticleResponse (Ok id) ->
             let
@@ -93,7 +98,12 @@ update msg model =
             ( { model | error = Just "There was an error deleting the article" }, [] )
 
         UpdateArticleStatus articleId articleStatus ->
-            ( model, [ Strict <| Reader.map (Task.attempt UpdateArticleStatusResponse) <| requestUpdateArticleStatus articleId articleStatus ] )
+            ( model
+            , [ Strict <|
+                    Reader.map (Task.attempt UpdateArticleStatusResponse) <|
+                        requestUpdateArticleStatus articleId articleStatus
+              ]
+            )
 
         UpdateArticleStatusResponse (Ok newArticle) ->
             let
@@ -133,7 +143,10 @@ view orgKey model =
             [ Maybe.withDefault (text "") <|
                 Maybe.map
                     (\err ->
-                        div [ class "alert alert-danger alert-dismissible fade show", attribute "role" "alert" ]
+                        div
+                            [ class "alert alert-danger alert-dismissible fade show"
+                            , attribute "role" "alert"
+                            ]
                             [ text <| "Error: " ++ err
                             ]
                     )

@@ -11,7 +11,9 @@ import Reader exposing (Reader)
 import Task exposing (Task)
 
 
-requestCreateOrganization : OrganizationData -> Reader ( NodeEnv, AppUrl ) (Task GQLClient.Error OrganizationResponse)
+requestCreateOrganization :
+    OrganizationData
+    -> Reader ( NodeEnv, AppUrl ) (Task GQLClient.Error OrganizationResponse)
 requestCreateOrganization orgInputs =
     Reader.Reader
         (\( nodeEnv, appUrl ) ->

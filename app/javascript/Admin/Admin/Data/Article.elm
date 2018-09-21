@@ -1,4 +1,22 @@
-module Admin.Data.Article exposing (Article, ArticleId, ArticleListResponse, ArticleResponse, ArticleSummary, CreateArticleInputs, UpdateArticleInputs, allArticlesQuery, articleByIdQuery, articleObject, articleStatusMutation, articleSummaryObject, articlesByUrlQuery, createArticleMutation, deleteArticleMutation, nullableArticleSummaryObject, updateArticleMutation)
+module Admin.Data.Article exposing
+    ( Article
+    , ArticleId
+    , ArticleListResponse
+    , ArticleResponse
+    , ArticleSummary
+    , CreateArticleInputs
+    , UpdateArticleInputs
+    , allArticlesQuery
+    , articleByIdQuery
+    , articleObject
+    , articleStatusMutation
+    , articleSummaryObject
+    , articlesByUrlQuery
+    , createArticleMutation
+    , deleteArticleMutation
+    , nullableArticleSummaryObject
+    , updateArticleMutation
+    )
 
 import Admin.Data.Category exposing (Category, CategoryId, categoryObject)
 import Admin.Data.Common exposing (..)
@@ -56,7 +74,12 @@ type alias ArticleResponse =
     }
 
 
-articlesByUrlQuery : GQLBuilder.Document GQLBuilder.Query (Maybe (List ArticleSummary)) { vars | url : String }
+articlesByUrlQuery :
+    GQLBuilder.Document GQLBuilder.Query
+        (Maybe (List ArticleSummary))
+        { vars
+            | url : String
+        }
 articlesByUrlQuery =
     let
         urlVar =
@@ -192,7 +215,13 @@ deleteArticleMutation =
                 )
 
 
-articleStatusMutation : GQLBuilder.Document GQLBuilder.Mutation (Maybe Article) { vars | id : ArticleId, status : String }
+articleStatusMutation :
+    GQLBuilder.Document GQLBuilder.Mutation
+        (Maybe Article)
+        { vars
+            | id : ArticleId
+            , status : String
+        }
 articleStatusMutation =
     let
         idVar =

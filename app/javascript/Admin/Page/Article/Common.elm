@@ -1,4 +1,18 @@
-module Page.Article.Common exposing (SaveSatus(..), articleUrls, categoryToValue, errorView, errorsIn, itemSelection, multiSelectCategoryList, multiSelectUrlList, savingIndicator, statusClass, statusToButtonText, successView, urlToValue)
+module Page.Article.Common exposing
+    ( SaveSatus(..)
+    , articleUrls
+    , categoryToValue
+    , errorView
+    , errorsIn
+    , itemSelection
+    , multiSelectCategoryList
+    , multiSelectUrlList
+    , savingIndicator
+    , statusClass
+    , statusToButtonText
+    , successView
+    , urlToValue
+    )
 
 import Admin.Data.Category exposing (..)
 import Admin.Data.Common exposing (..)
@@ -10,6 +24,7 @@ import Field.ValidationResult exposing (..)
 import Helpers exposing (..)
 import Html exposing (..)
 import Html.Attributes exposing (..)
+
 
 type SaveSatus
     = Saving

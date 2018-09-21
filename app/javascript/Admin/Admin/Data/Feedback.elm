@@ -1,4 +1,13 @@
-module Admin.Data.Feedback exposing (Feedback, FeedbackId, FeedbackStatus, FeedbackStatusInput, feedbackByIdQuery, feedbackExtractor, requestFeedbacksQuery, updateFeedabackStatusMutation)
+module Admin.Data.Feedback exposing
+    ( Feedback
+    , FeedbackId
+    , FeedbackStatus
+    , FeedbackStatusInput
+    , feedbackByIdQuery
+    , feedbackExtractor
+    , requestFeedbacksQuery
+    , updateFeedabackStatusMutation
+    )
 
 import GraphQL.Request.Builder as GQLBuilder
 import GraphQL.Request.Builder.Arg as Arg
@@ -27,7 +36,12 @@ type alias Feedback =
     }
 
 
-requestFeedbacksQuery : GQLBuilder.Document GQLBuilder.Query (Maybe (List Feedback)) { vars | status : FeedbackStatus }
+requestFeedbacksQuery :
+    GQLBuilder.Document GQLBuilder.Query
+        (Maybe (List Feedback))
+        { vars
+            | status : FeedbackStatus
+        }
 requestFeedbacksQuery =
     let
         statusVar =

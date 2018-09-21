@@ -1,4 +1,16 @@
-module Admin.Data.Url exposing (CreateUrlInput, UrlData, UrlId, UrlsListResponse, createUrlMutation, deleteUrlMutation, nullableUrlObject, requestUrlsQuery, updateUrlMutation, urlByIdQuery, urlObject)
+module Admin.Data.Url exposing
+    ( CreateUrlInput
+    , UrlData
+    , UrlId
+    , UrlsListResponse
+    , createUrlMutation
+    , deleteUrlMutation
+    , nullableUrlObject
+    , requestUrlsQuery
+    , updateUrlMutation
+    , urlByIdQuery
+    , urlObject
+    )
 
 import GraphQL.Request.Builder as GQLBuilder
 import GraphQL.Request.Builder.Arg as Arg

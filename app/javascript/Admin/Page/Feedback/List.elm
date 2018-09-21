@@ -131,7 +131,10 @@ row : ApiKey -> Model -> Feedback -> Html Msg
 row orgKey model feedback =
     div
         [ class "feedback-row" ]
-        [ span [ class "row-id" ] [ a [ href <| routeToString <| FeedbackShow feedback.id orgKey ] [ text feedback.id ] ]
+        [ span [ class "row-id" ]
+            [ a [ href <| routeToString <| FeedbackShow feedback.id orgKey ]
+                [ text feedback.id ]
+            ]
         , span [ class "row-name" ] [ text feedback.name ]
         , span [ class "row-message" ] [ text feedback.message ]
         ]

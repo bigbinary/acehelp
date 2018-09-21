@@ -1,4 +1,12 @@
-module Request.Article exposing (requestAddFeedbackMutation, requestArticle, requestArticleList, requestDownvoteMutation, requestSearchArticles, requestSuggestedArticles, requestUpvoteMutation)
+module Request.Article exposing
+    ( requestAddFeedbackMutation
+    , requestArticle
+    , requestArticleList
+    , requestDownvoteMutation
+    , requestSearchArticles
+    , requestSuggestedArticles
+    , requestUpvoteMutation
+    )
 
 import Data.Article exposing (..)
 import Data.Common exposing (..)

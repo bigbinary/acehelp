@@ -1,4 +1,26 @@
-module Page.Ticket.Edit exposing (Model, Msg(..), agentOption, agentsDropDown, assignTicketAgent, closeTicketButton, commentRows, defaultOption, deleteTicket, deleteTicketButton, init, initModel, noteRows, save, statusOption, ticketInputs, ticketNoteComment, ticketStatusDropDown, update, updateTicketStatus, view)
+module Page.Ticket.Edit exposing
+    ( Model
+    , Msg(..)
+    , agentOption
+    , agentsDropDown
+    , assignTicketAgent
+    , closeTicketButton
+    , commentRows
+    , defaultOption
+    , deleteTicket
+    , deleteTicketButton
+    , init
+    , initModel
+    , noteRows
+    , save
+    , statusOption
+    , ticketInputs
+    , ticketNoteComment
+    , ticketStatusDropDown
+    , update
+    , updateTicketStatus
+    , view
+    )
 
 import Admin.Data.ReaderCmd exposing (..)
 import Admin.Data.Ticket exposing (..)
@@ -177,7 +199,10 @@ view model =
                     [ Maybe.withDefault (text "") <|
                         Maybe.map
                             (\err ->
-                                div [ class "alert alert-danger alert-dismissible fade show", attribute "role" "alert" ]
+                                div
+                                    [ class "alert alert-danger alert-dismissible fade show"
+                                    , attribute "role" "alert"
+                                    ]
                                     [ text <| "Error: " ++ err
                                     ]
                             )
@@ -187,7 +212,10 @@ view model =
                     [ Maybe.withDefault (text "") <|
                         Maybe.map
                             (\message ->
-                                div [ class "alert alert-success alert-dismissible fade show", attribute "role" "alert" ]
+                                div
+                                    [ class "alert alert-success alert-dismissible fade show"
+                                    , attribute "role" "alert"
+                                    ]
                                     [ text <| message
                                     ]
                             )
@@ -257,7 +285,9 @@ view model =
                         ]
                     ]
                 , p [] []
-                , button [ type_ "submit", class "btn btn-primary", onClick UpdateTicket ] [ text "Submit" ]
+                , button [ type_ "submit", class "btn btn-primary", onClick UpdateTicket ]
+                    [ text "Submit"
+                    ]
                 ]
             ]
         , div [ class "col-sm" ]
@@ -297,7 +327,13 @@ assignTicketAgent : Model -> TicketAgentInput -> ( Model, List (ReaderCmd Msg) )
 assignTicketAgent model ticketAgentInput =
     let
         cmd =
-            Strict <| Reader.map (Task.attempt UpdateTicketResponse) (assignTicketToAgent { id = ticketAgentInput.id, agent_id = ticketAgentInput.agent_id })
+            Strict <|
+                Reader.map (Task.attempt UpdateTicketResponse)
+                    (assignTicketToAgent
+                        { id = ticketAgentInput.id
+                        , agent_id = ticketAgentInput.agent_id
+                        }
+                    )
     in
     ( model, [ cmd ] )
 
@@ -316,7 +352,10 @@ save model =
     let
         cmd =
             Strict <|
-                Reader.map (Task.attempt UpdateTicketResponse) (addNotesAndCommentToTicket (ticketNoteComment model))
+                Reader.map (Task.attempt UpdateTicketResponse)
+                    (addNotesAndCommentToTicket
+                        (ticketNoteComment model)
+                    )
     in
     ( model, [ cmd ] )
 

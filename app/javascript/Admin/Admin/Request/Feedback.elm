@@ -8,7 +8,9 @@ import Reader exposing (Reader)
 import Task exposing (Task)
 
 
-requestFeedbacks : FeedbackStatus -> Reader ( NodeEnv, ApiKey, AppUrl ) (Task GQLClient.Error (Maybe (List Feedback)))
+requestFeedbacks :
+    FeedbackStatus
+    -> Reader ( NodeEnv, ApiKey, AppUrl ) (Task GQLClient.Error (Maybe (List Feedback)))
 requestFeedbacks status =
     Reader.Reader
         (\( nodeEnv, apiKey, appUrl ) ->
@@ -17,7 +19,9 @@ requestFeedbacks status =
         )
 
 
-requestFeedbackById : FeedbackId -> Reader ( NodeEnv, ApiKey, AppUrl ) (Task GQLClient.Error (Maybe Feedback))
+requestFeedbackById :
+    FeedbackId
+    -> Reader ( NodeEnv, ApiKey, AppUrl ) (Task GQLClient.Error (Maybe Feedback))
 requestFeedbackById feedbackId =
     Reader.Reader
         (\( nodeEnv, apiKey, appUrl ) ->
@@ -28,7 +32,10 @@ requestFeedbackById feedbackId =
         )
 
 
-requestUpdateFeedbackStatus : FeedbackId -> String -> Reader ( NodeEnv, ApiKey, AppUrl ) (Task GQLClient.Error (Maybe Feedback))
+requestUpdateFeedbackStatus :
+    FeedbackId
+    -> String
+    -> Reader ( NodeEnv, ApiKey, AppUrl ) (Task GQLClient.Error (Maybe Feedback))
 requestUpdateFeedbackStatus feedbackId feedbackStatus =
     Reader.Reader
         (\( nodeEnv, apiKey, appUrl ) ->

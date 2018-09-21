@@ -8,7 +8,14 @@ import Page.UserNotification as UserNotification
 import Route exposing (..)
 
 
-adminLayout : Html msg -> (UserNotification.Msg -> msg) -> Bool -> String -> UserNotification.Model -> List (Html msg) -> Html msg
+adminLayout :
+    Html msg
+    -> (UserNotification.Msg -> msg)
+    -> Bool
+    -> String
+    -> UserNotification.Model
+    -> List (Html msg)
+    -> Html msg
 adminLayout headerContent userNotificationMsg showLoading spinnerLabel notifications viewContent =
     div []
         [ headerContent

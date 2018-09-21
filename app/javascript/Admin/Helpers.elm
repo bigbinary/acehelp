@@ -28,12 +28,13 @@ validateEmail s =
 
 validEmail : Regex
 validEmail =
-    Regex.fromStringWith { caseInsensitive = True, multiline = False } "^[a-zA-Z0-9.!#$%&'*+\\/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$"
+    Regex.fromStringWith { caseInsensitive = True, multiline = False }
+        "^[a-zA-Z0-9.!#$%&'*+\\/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$"
         |> Maybe.withDefault Regex.never
 
 
 
--- Natrual transformations
+-- Natural transformations
 
 
 maybeToBool : Maybe a -> Bool

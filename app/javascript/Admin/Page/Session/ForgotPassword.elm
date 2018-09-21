@@ -66,7 +66,14 @@ update msg model =
                     ( { model | email = Field.update model.email "", error = List.map .message errors }, [] )
 
                 Nothing ->
-                    ( { model | email = Field.update model.email "", success = [ "Please check your email. We have sent a link to reset your password" ] }, [] )
+                    ( { model
+                        | email = Field.update model.email ""
+                        , success =
+                            [ "Please check your email. We have sent a link to reset your password"
+                            ]
+                      }
+                    , []
+                    )
 
         SendResetPasswordLinkResponse (Err err) ->
             ( { model | error = [ "Uh oh. Something went wrong. Please try again" ] }, [] )
@@ -144,7 +151,9 @@ view model =
                             ]
                         ]
                     , div [ class "form-section" ]
-                        [ button [ onClick SendResetPasswordLink, class "btn btn-primary" ] [ text "Send Reset Password Link" ]
+                        [ button [ onClick SendResetPasswordLink, class "btn btn-primary" ]
+                            [ text "Send Reset Password Link"
+                            ]
                         ]
                     ]
                 , div [ class "links-section col-md-12" ]

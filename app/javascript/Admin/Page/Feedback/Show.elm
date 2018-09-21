@@ -1,4 +1,13 @@
-module Page.Feedback.Show exposing (Model, Msg(..), feedbackStatusButton, init, initModel, update, updateFeedabackStatus, view)
+module Page.Feedback.Show exposing
+    ( Model
+    , Msg(..)
+    , feedbackStatusButton
+    , init
+    , initModel
+    , update
+    , updateFeedabackStatus
+    , view
+    )
 
 import Admin.Data.Feedback exposing (..)
 import Admin.Data.ReaderCmd exposing (..)
@@ -105,7 +114,12 @@ view model =
             [ Maybe.withDefault (text "") <|
                 Maybe.map
                     (\err ->
-                        div [ class "alert alert-danger alert-dismissible fade show", attribute "role" "alert" ]
+                        div
+                            [ class "alert alert-danger alert-dismissible fade show"
+                            , attribute
+                                "role"
+                                "alert"
+                            ]
                             [ text <| "Error: " ++ err
                             ]
                     )
@@ -115,7 +129,10 @@ view model =
             [ Maybe.withDefault (text "") <|
                 Maybe.map
                     (\message ->
-                        div [ class "alert alert-success alert-dismissible fade show", attribute "role" "alert" ]
+                        div
+                            [ class "alert alert-success alert-dismissible fade show"
+                            , attribute "role" "alert"
+                            ]
                             [ text <| message
                             ]
                     )
@@ -134,7 +151,12 @@ updateFeedabackStatus : Model -> FeedbackId -> String -> ( Model, List (ReaderCm
 updateFeedabackStatus model feedbackId feedbackStatus =
     let
         cmd =
-            Strict <| Reader.map (Task.attempt UpdateFeedbackResponse) (requestUpdateFeedbackStatus feedbackId feedbackStatus)
+            Strict <|
+                Reader.map (Task.attempt UpdateFeedbackResponse)
+                    (requestUpdateFeedbackStatus
+                        feedbackId
+                        feedbackStatus
+                    )
     in
     ( model, [ cmd ] )
 

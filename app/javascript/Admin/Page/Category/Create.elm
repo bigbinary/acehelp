@@ -1,4 +1,13 @@
-module Page.Category.Create exposing (Model, Msg(..), categroyCeateInputs, init, initModel, saveCategory, update, view)
+module Page.Category.Create exposing
+    ( Model
+    , Msg(..)
+    , categroyCeateInputs
+    , init
+    , initModel
+    , saveCategory
+    , update
+    , view
+    )
 
 import Admin.Data.Category exposing (..)
 import Admin.Data.ReaderCmd exposing (..)
@@ -148,6 +157,10 @@ saveCategory : Model -> ( Model, List (ReaderCmd Msg) )
 saveCategory model =
     let
         cmd =
-            Strict <| Reader.map (Task.attempt SaveCategoryResponse) (requestCreateCategory <| categroyCeateInputs model)
+            Strict <|
+                Reader.map (Task.attempt SaveCategoryResponse)
+                    (requestCreateCategory <|
+                        categroyCeateInputs model
+                    )
     in
     ( model, [ cmd ] )

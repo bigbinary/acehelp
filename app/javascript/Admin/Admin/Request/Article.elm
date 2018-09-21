@@ -1,4 +1,12 @@
-module Admin.Request.Article exposing (requestAllArticles, requestArticleById, requestArticlesByUrl, requestCreateArticle, requestDeleteArticle, requestUpdateArticle, requestUpdateArticleStatus)
+module Admin.Request.Article exposing
+    ( requestAllArticles
+    , requestArticleById
+    , requestArticlesByUrl
+    , requestCreateArticle
+    , requestDeleteArticle
+    , requestUpdateArticle
+    , requestUpdateArticleStatus
+    )
 
 import Admin.Data.Article exposing (..)
 import Admin.Data.Session exposing (..)
@@ -10,7 +18,9 @@ import Reader exposing (Reader)
 import Task exposing (Task)
 
 
-requestArticlesByUrl : String -> Reader ( NodeEnv, ApiKey, AppUrl ) (Task GQLClient.Error (Maybe (List ArticleSummary)))
+requestArticlesByUrl :
+    String
+    -> Reader ( NodeEnv, ApiKey, AppUrl ) (Task GQLClient.Error (Maybe (List ArticleSummary)))
 requestArticlesByUrl url =
     Reader.Reader
         (\( nodeEnv, apiKey, appUrl ) ->
@@ -19,7 +29,9 @@ requestArticlesByUrl url =
         )
 
 
-requestCreateArticle : CreateArticleInputs -> Reader ( NodeEnv, ApiKey, AppUrl ) (Task GQLClient.Error ArticleResponse)
+requestCreateArticle :
+    CreateArticleInputs
+    -> Reader ( NodeEnv, ApiKey, AppUrl ) (Task GQLClient.Error ArticleResponse)
 requestCreateArticle articleInputs =
     Reader.Reader
         (\( nodeEnv, apiKey, appUrl ) ->
@@ -33,7 +45,9 @@ requestCreateArticle articleInputs =
         )
 
 
-requestUpdateArticle : UpdateArticleInputs -> Reader ( NodeEnv, ApiKey, AppUrl ) (Task GQLClient.Error (Maybe Article))
+requestUpdateArticle :
+    UpdateArticleInputs
+    -> Reader ( NodeEnv, ApiKey, AppUrl ) (Task GQLClient.Error (Maybe Article))
 requestUpdateArticle articleInputs =
     Reader.Reader
         (\( nodeEnv, apiKey, appUrl ) ->
@@ -49,7 +63,9 @@ requestUpdateArticle articleInputs =
         )
 
 
-requestArticleById : ArticleId -> Reader ( NodeEnv, ApiKey, AppUrl ) (Task GQLClient.Error (Maybe Article))
+requestArticleById :
+    ArticleId
+    -> Reader ( NodeEnv, ApiKey, AppUrl ) (Task GQLClient.Error (Maybe Article))
 requestArticleById articleId =
     Reader.Reader
         (\( nodeEnv, apiKey, appUrl ) ->
@@ -78,10 +94,19 @@ requestDeleteArticle articleId =
         )
 
 
-requestUpdateArticleStatus : ArticleId -> AvailabilitySatus -> Reader ( NodeEnv, ApiKey, AppUrl ) (Task GQLClient.Error (Maybe Article))
+requestUpdateArticleStatus :
+    ArticleId
+    -> AvailabilitySatus
+    -> Reader ( NodeEnv, ApiKey, AppUrl ) (Task GQLClient.Error (Maybe Article))
 requestUpdateArticleStatus articleId articleStatus =
     Reader.Reader
         (\( nodeEnv, apiKey, appUrl ) ->
             GQLClient.customSendMutation (requestOptions nodeEnv apiKey appUrl) <|
-                GQLBuilder.request { id = articleId, status = reverseCurrentAvailabilityStatus (availablityStatusIso.get articleStatus) } articleStatusMutation
+                GQLBuilder.request
+                    { id = articleId
+                    , status =
+                        reverseCurrentAvailabilityStatus
+                            (availablityStatusIso.get articleStatus)
+                    }
+                    articleStatusMutation
         )

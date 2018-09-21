@@ -20,15 +20,25 @@ multiSelectMenu : String -> List (Option Value) -> (List String -> msg) -> Html 
 multiSelectMenu title values onselect =
     div []
         [ h6 [] [ text title ]
-        , select [ on "change" (Json.map onselect targetSelectedOptions), multiple True, class "form-control select-checkbox", size 5 ] <|
+        , select
+            [ on "change" (Json.map onselect targetSelectedOptions)
+            , multiple True
+            , class "form-control select-checkbox"
+            , size 5
+            ]
+          <|
             List.map
                 (\value ->
                     case value of
                         Selected valueItem ->
-                            option [ Html.Attributes.value valueItem.id, selected True ] [ text valueItem.value ]
+                            option [ Html.Attributes.value valueItem.id, selected True ]
+                                [ text valueItem.value
+                                ]
 
                         Unselected valueItem ->
-                            option [ Html.Attributes.value valueItem.id, selected False ] [ text valueItem.value ]
+                            option [ Html.Attributes.value valueItem.id, selected False ]
+                                [ text valueItem.value
+                                ]
                 )
                 values
         ]

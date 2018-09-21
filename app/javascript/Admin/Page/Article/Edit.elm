@@ -1,4 +1,16 @@
-module Page.Article.Edit exposing (Model, Msg(..), articleInputs, delayTime, editAndSaveView, init, initModel, save, subscriptions, update, view)
+module Page.Article.Edit exposing
+    ( Model
+    , Msg(..)
+    , articleInputs
+    , delayTime
+    , editAndSaveView
+    , init
+    , initModel
+    , save
+    , subscriptions
+    , update
+    , view
+    )
 
 import Admin.Data.Article exposing (..)
 import Admin.Data.Category exposing (..)
@@ -164,7 +176,10 @@ update msg model =
                     )
 
                 Nothing ->
-                    ( { model | errors = [ "There was an error while saving the article" ], originalArticle = Nothing }
+                    ( { model
+                        | errors = [ "There was an error while saving the article" ]
+                        , originalArticle = Nothing
+                      }
                     , []
                     )
 
@@ -193,12 +208,18 @@ update msg model =
                     )
 
                 Nothing ->
-                    ( { model | errors = [ "There was an error loading the article" ], originalArticle = Nothing }
+                    ( { model
+                        | errors = [ "There was an error loading the article" ]
+                        , originalArticle = Nothing
+                      }
                     , []
                     )
 
         ArticleLoaded (Err err) ->
-            ( { model | errors = [ "There was an error while loading the article" ], originalArticle = Nothing }
+            ( { model
+                | errors = [ "There was an error while loading the article" ]
+                , originalArticle = Nothing
+              }
             , []
             )
 
@@ -292,7 +313,10 @@ update msg model =
             ( { model
                 | status = Saving
               }
-            , [ Strict <| Reader.map (Task.attempt UpdateStatusResponse) <| requestUpdateArticleStatus articleId articleStatus ]
+            , [ Strict <|
+                    Reader.map (Task.attempt UpdateStatusResponse) <|
+                        requestUpdateArticleStatus articleId articleStatus
+              ]
             )
 
         UpdateStatusResponse (Ok newArticle) ->
@@ -340,7 +364,10 @@ view model =
                         , onInput TitleInput
                         ]
                         []
-                    , h1 [ classList [ ( "hidden", model.isEditable ) ] ] [ text <| Field.value model.title ]
+                    , h1 [ classList [ ( "hidden", model.isEditable ) ] ]
+                        [ text <|
+                            Field.value model.title
+                        ]
                     ]
                 , div
                     [ class "row article-content" ]
@@ -353,7 +380,16 @@ view model =
                             ]
                             []
                         ]
-                    , div [ id "trix-show", classList [ ( "trix-content", True ), ( "hidden", model.isEditable ) ] ] []
+                    , div
+                        [ id "trix-show"
+                        , classList
+                            [ ( "trix-content", True )
+                            , ( "hidden"
+                              , model.isEditable
+                              )
+                            ]
+                        ]
+                        []
                     ]
                 ]
             , div [ class "col-sm article-meta-data-block" ]

@@ -1,4 +1,11 @@
-module Data.ContactUs exposing (FeedbackForm, RequestMessage, ResponseMessage, addTicketMutation, decodeMessage, getEncodedContact)
+module Data.ContactUs exposing
+    ( FeedbackForm
+    , RequestMessage
+    , ResponseMessage
+    , addTicketMutation
+    , decodeMessage
+    , getEncodedContact
+    )
 
 import Data.Common exposing (..)
 import GraphQL.Request.Builder as GQLBuilder

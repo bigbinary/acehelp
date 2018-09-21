@@ -1,4 +1,12 @@
-port module Admin.Ports exposing (clearTimeout, insertArticleContent, setTimeout, timedOut, timeoutInitialized, trixChange, trixInitialize)
+port module Admin.Ports exposing
+    ( clearTimeout
+    , insertArticleContent
+    , setTimeout
+    , timedOut
+    , timeoutInitialized
+    , trixChange
+    , trixInitialize
+    )
 
 -- INCOMING PORTS
 

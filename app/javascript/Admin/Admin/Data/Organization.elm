@@ -1,4 +1,13 @@
-module Admin.Data.Organization exposing (Organization, OrganizationData, OrganizationId, OrganizationResponse, UserId, createOrganizationMutation, organizationObject, organizationResponseObject)
+module Admin.Data.Organization exposing
+    ( Organization
+    , OrganizationData
+    , OrganizationId
+    , OrganizationResponse
+    , UserId
+    , createOrganizationMutation
+    , organizationObject
+    , organizationResponseObject
+    )
 
 import Admin.Data.Article exposing (ArticleSummary)
 import Admin.Data.Common exposing (..)

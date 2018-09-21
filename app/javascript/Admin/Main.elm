@@ -1,4 +1,19 @@
-module Main exposing (Flags, Model, Msg(..), Page(..), PageState(..), combineCmds, getPage, init, main, navigateTo, setRoute, subscriptions, update, view)
+module Main exposing
+    ( Flags
+    , Model
+    , Msg(..)
+    , Page(..)
+    , PageState(..)
+    , combineCmds
+    , getPage
+    , init
+    , main
+    , navigateTo
+    , setRoute
+    , subscriptions
+    , update
+    , view
+    )
 
 import Admin.Data.Common exposing (..)
 import Admin.Data.ReaderCmd exposing (..)
@@ -371,8 +386,12 @@ update msg model =
                     in
                     case articleResponse.article of
                         Just article ->
-                            updateNavigation (Route.ArticleList model.organizationKey) ( newModel, newCmds )
-                                |> renderFlashMessages (UserNotification.SuccessNotification "Article created successfully.")
+                            updateNavigation (Route.ArticleList model.organizationKey)
+                                ( newModel, newCmds )
+                                |> renderFlashMessages
+                                    (UserNotification.SuccessNotification
+                                        "Article created successfully."
+                                    )
 
                         Nothing ->
                             ( { model | currentPage = Loaded (ArticleCreate updatedModel) }
@@ -422,7 +441,10 @@ update msg model =
             case cuMsg of
                 UrlCreate.SaveUrlResponse (Ok id) ->
                     updateNavigation (Route.UrlList model.organizationKey) ( newModel, newCmds )
-                        |> renderFlashMessages (UserNotification.SuccessNotification "Url created successfully.")
+                        |> renderFlashMessages
+                            (UserNotification.SuccessNotification
+                                "Url created successfully."
+                            )
 
                 _ ->
                     ( newModel, newCmds )
@@ -448,7 +470,10 @@ update msg model =
             case ueMsg of
                 UrlEdit.UpdateUrlResponse (Ok id) ->
                     updateNavigation (Route.UrlList model.organizationKey) ( newModel, newCmds )
-                        |> renderFlashMessages (UserNotification.SuccessNotification "Url updated successfully.")
+                        |> renderFlashMessages
+                            (UserNotification.SuccessNotification
+                                "Url updated successfully."
+                            )
 
                 _ ->
                     ( newModel, newCmds )
@@ -531,7 +556,10 @@ update msg model =
             case ccMsg of
                 CategoryCreate.SaveCategoryResponse (Ok id) ->
                     updateNavigation (Route.CategoryList model.organizationKey) ( newModel, newCmds )
-                        |> renderFlashMessages (UserNotification.SuccessNotification "Category created successfully.")
+                        |> renderFlashMessages
+                            (UserNotification.SuccessNotification
+                                "Category created successfully."
+                            )
 
                 _ ->
                     ( newModel, newCmds )
@@ -576,7 +604,10 @@ update msg model =
             case fsMsg of
                 FeedbackShow.UpdateFeedbackResponse (Ok feedback) ->
                     updateNavigation (Route.FeedbackList model.organizationKey) ( newModel, newCmds )
-                        |> renderFlashMessages (UserNotification.SuccessNotification "Feedback updated successfully.")
+                        |> renderFlashMessages
+                            (UserNotification.SuccessNotification
+                                "Feedback updated successfully."
+                            )
 
                 _ ->
                     ( newModel, newCmds )
@@ -603,7 +634,10 @@ update msg model =
             case ctMsg of
                 CategoryEdit.UpdateCategoryResponse (Ok id) ->
                     updateNavigation (Route.CategoryList model.organizationKey) ( newModel, newCmds )
-                        |> renderFlashMessages (UserNotification.SuccessNotification "Category updated successfully.")
+                        |> renderFlashMessages
+                            (UserNotification.SuccessNotification
+                                "Category updated successfully."
+                            )
 
                 _ ->
                     ( newModel, newCmds )
@@ -648,7 +682,10 @@ update msg model =
             case tcmsg of
                 TeamMemberCreate.SaveTeamResponse (Ok id) ->
                     updateNavigation (Route.TeamList model.organizationKey) ( newModel, newCmds )
-                        |> renderFlashMessages (UserNotification.SuccessNotification "Team member added successfully.")
+                        |> renderFlashMessages
+                            (UserNotification.SuccessNotification
+                                "Team member added successfully."
+                            )
 
                 _ ->
                     ( newModel, newCmds )
@@ -698,7 +735,10 @@ update msg model =
                                 | organizationKey = org.api_key
                                 , organizationName = org.name
                               }
-                            , Navigation.pushUrl model.navKey (Route.routeToString <| Route.ArticleList org.api_key)
+                            , Navigation.pushUrl model.navKey
+                                (Route.routeToString <|
+                                    Route.ArticleList org.api_key
+                                )
                             )
 
                         Nothing ->
@@ -762,7 +802,11 @@ update msg model =
                         newUpdatedModel =
                             case getPage newMainModel.currentPage of
                                 OrganizationCreate orgModel ->
-                                    { newMainModel | userId = Maybe.withDefault "" <| Maybe.map .id userWithErrors.user }
+                                    { newMainModel
+                                        | userId =
+                                            Maybe.withDefault "" <|
+                                                Maybe.map .id userWithErrors.user
+                                    }
 
                                 _ ->
                                     newMainModel
@@ -793,14 +837,20 @@ update msg model =
                         ( updatedModel, updatedCmd ) =
                             case user.organization of
                                 Nothing ->
-                                    ( model, Navigation.pushUrl model.navKey (Route.routeToString Route.OrganizationCreate) )
+                                    ( model
+                                    , Navigation.pushUrl model.navKey
+                                        (Route.routeToString Route.OrganizationCreate)
+                                    )
 
                                 Just org ->
                                     ( { model
                                         | organizationKey = org.api_key
                                         , organizationName = org.name
                                       }
-                                    , Navigation.pushUrl model.navKey (Route.routeToString <| Route.ArticleList org.api_key)
+                                    , Navigation.pushUrl model.navKey
+                                        (Route.routeToString <|
+                                            Route.ArticleList org.api_key
+                                        )
                                     )
                     in
                     ( { updatedModel
@@ -961,10 +1011,20 @@ view model =
         viewWithTopMenu =
             case model.currentPage of
                 TransitioningFrom _ ->
-                    MainView.adminLayout headerContent UserNotificationMsg True "Loading.." model.notifications [ viewContent ]
+                    MainView.adminLayout headerContent
+                        UserNotificationMsg
+                        True
+                        "Loading.."
+                        model.notifications
+                        [ viewContent ]
 
                 Loaded _ ->
-                    MainView.adminLayout headerContent UserNotificationMsg False "" model.notifications [ viewContent ]
+                    MainView.adminLayout headerContent
+                        UserNotificationMsg
+                        False
+                        ""
+                        model.notifications
+                        [ viewContent ]
 
         viewBody =
             case getPage model.currentPage of
@@ -981,7 +1041,12 @@ view model =
                     viewContent
 
                 OrganizationCreate _ ->
-                    MainView.adminLayout (MainView.logoutOption SignOut) UserNotificationMsg False "" model.notifications [ viewContent ]
+                    MainView.adminLayout (MainView.logoutOption SignOut)
+                        UserNotificationMsg
+                        False
+                        ""
+                        model.notifications
+                        [ viewContent ]
 
                 _ ->
                     viewWithTopMenu

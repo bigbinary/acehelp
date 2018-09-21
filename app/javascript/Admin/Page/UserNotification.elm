@@ -1,14 +1,15 @@
-module Page.UserNotification exposing (..)
+module Page.UserNotification exposing (Model, Msg(..), UserNotification(..), getMessage, init, initModel, isNotificationEqual, notificationView, notificationsColoumn, update, view)
 
+import Admin.Data.ReaderCmd exposing (..)
+import Admin.Views.Common exposing (..)
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
-import Admin.Data.ReaderCmd exposing (..)
-import Admin.Views.Common exposing (..)
+import Json.Encode exposing (string)
 import Process
 import Reader
 import Task
-import Json.Encode exposing (string)
+
 
 
 -- MODEL
@@ -49,12 +50,24 @@ update : Msg -> Model -> ( Model, List (ReaderCmd Msg) )
 update msg model =
     case msg of
         InsertNotification notification ->
-            ( { model | notifications = (List.append model.notifications [ notification ]) }
-            , [ Unit <| Reader.Reader (always <| Task.perform (always (RemoveNotification notification)) <| Process.sleep 5000) ]
+            ( { model | notifications = List.append model.notifications [ notification ] }
+            , [ Unit <|
+                    Reader.Reader
+                        (always <|
+                            Task.perform (always (RemoveNotification notification)) <|
+                                Process.sleep 5000
+                        )
+              ]
             )
 
         RemoveNotification notification ->
-            ( { model | notifications = List.filter (not << isNotificationEqual notification) model.notifications }, [] )
+            ( { model
+                | notifications =
+                    List.filter (not << isNotificationEqual notification)
+                        model.notifications
+              }
+            , []
+            )
 
         ClearNotifications ->
             ( { model | notifications = [] }, [] )
@@ -85,11 +98,27 @@ notificationView userNotification =
     case userNotification of
         ErrorNotification message ->
             div [ class "alert alert-danger alert-dismissible" ]
-                [ text message, button [ type_ "button", class "close", onClick (RemoveNotification userNotification) ] [ span [ property "innerHTML" (string "&times;") ] [] ] ]
+                [ text message
+                , button
+                    [ type_ "button"
+                    , class "close"
+                    , onClick
+                        (RemoveNotification userNotification)
+                    ]
+                    [ span [ property "innerHTML" (string "&times;") ] [] ]
+                ]
 
         SuccessNotification message ->
             div [ class "alert alert-success alert-dismissible" ]
-                [ text message, button [ type_ "button", class "close", onClick (RemoveNotification userNotification) ] [ span [ property "innerHTML" (string "&times;") ] [] ] ]
+                [ text message
+                , button
+                    [ type_ "button"
+                    , class "close"
+                    , onClick
+                        (RemoveNotification userNotification)
+                    ]
+                    [ span [ property "innerHTML" (string "&times;") ] [] ]
+                ]
 
         NoNotification ->
             text ""

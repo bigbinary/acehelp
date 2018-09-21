@@ -1,4 +1,14 @@
-module Admin.Data.Session exposing (ForgotPasswordResponse, LoginData, SignupInputs, Token, forgotPasswordMutation, loginDataObject, loginMutation, signupMutation, tokenObject)
+module Admin.Data.Session exposing
+    ( ForgotPasswordResponse
+    , LoginData
+    , SignupInputs
+    , Token
+    , forgotPasswordMutation
+    , loginDataObject
+    , loginMutation
+    , signupMutation
+    , tokenObject
+    )
 
 import Admin.Data.Common exposing (..)
 import Admin.Data.User exposing (..)
@@ -86,7 +96,13 @@ tokenObject =
         |> GQLBuilder.with (GQLBuilder.field "client" [] GQLBuilder.string)
 
 
-loginMutation : GQLBuilder.Document GQLBuilder.Mutation UserWithOrganization { a | email : String, password : String }
+loginMutation :
+    GQLBuilder.Document GQLBuilder.Mutation
+        UserWithOrganization
+        { a
+            | email : String
+            , password : String
+        }
 loginMutation =
     let
         emailVar =

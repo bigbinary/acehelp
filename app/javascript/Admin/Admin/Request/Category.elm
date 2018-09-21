@@ -1,4 +1,11 @@
-module Admin.Request.Category exposing (deleteCategory, requestCategories, requestCategoryById, requestCreateCategory, requestUpdateCategory, requestUpdateCategoryStatus)
+module Admin.Request.Category exposing
+    ( deleteCategory
+    , requestCategories
+    , requestCategoryById
+    , requestCreateCategory
+    , requestUpdateCategory
+    , requestUpdateCategoryStatus
+    )
 
 import Admin.Data.Category exposing (..)
 import Admin.Data.Status exposing (..)
@@ -29,7 +36,9 @@ requestCategoryById categoryId =
         )
 
 
-requestUpdateCategory : UpdateCategoryInputs -> Reader ( NodeEnv, ApiKey, AppUrl ) (Task GQLClient.Error (Maybe Category))
+requestUpdateCategory :
+    UpdateCategoryInputs
+    -> Reader ( NodeEnv, ApiKey, AppUrl ) (Task GQLClient.Error (Maybe Category))
 requestUpdateCategory categoryInputs =
     Reader.Reader
         (\( nodeEnv, apiKey, appUrl ) ->
@@ -51,7 +60,9 @@ deleteCategory categoryId =
         )
 
 
-requestCreateCategory : CreateCategoryInputs -> Reader ( NodeEnv, ApiKey, AppUrl ) (Task GQLClient.Error (Maybe Category))
+requestCreateCategory :
+    CreateCategoryInputs
+    -> Reader ( NodeEnv, ApiKey, AppUrl ) (Task GQLClient.Error (Maybe Category))
 requestCreateCategory categoryInputs =
     Reader.Reader
         (\( nodeEnv, apiKey, appUrl ) ->
@@ -62,10 +73,19 @@ requestCreateCategory categoryInputs =
         )
 
 
-requestUpdateCategoryStatus : CategoryId -> AvailabilitySatus -> Reader ( NodeEnv, ApiKey, AppUrl ) (Task GQLClient.Error (Maybe (List Category)))
+requestUpdateCategoryStatus :
+    CategoryId
+    -> AvailabilitySatus
+    -> Reader ( NodeEnv, ApiKey, AppUrl ) (Task GQLClient.Error (Maybe (List Category)))
 requestUpdateCategoryStatus categoryId categoryStatus =
     Reader.Reader
         (\( nodeEnv, apiKey, appUrl ) ->
             GQLClient.customSendMutation (requestOptions nodeEnv apiKey appUrl) <|
-                GQLBuilder.request { id = categoryId, status = reverseCurrentAvailabilityStatus (availablityStatusIso.get categoryStatus) } updateCategoryStatusMutation
+                GQLBuilder.request
+                    { id = categoryId
+                    , status =
+                        reverseCurrentAvailabilityStatus
+                            (availablityStatusIso.get categoryStatus)
+                    }
+                    updateCategoryStatusMutation
         )

@@ -1,4 +1,15 @@
-module Page.Category.List exposing (Model, Msg(..), categoryRow, categoryStatusButton, deleteCategoryById, init, initModel, update, updateCategoryStatus, view)
+module Page.Category.List exposing
+    ( Model
+    , Msg(..)
+    , categoryRow
+    , categoryStatusButton
+    , deleteCategoryById
+    , init
+    , initModel
+    , update
+    , updateCategoryStatus
+    , view
+    )
 
 import Admin.Data.Category exposing (..)
 import Admin.Data.ReaderCmd exposing (..)
@@ -74,7 +85,12 @@ update msg model =
         DeleteCategoryResponse (Ok catId) ->
             case catId of
                 Just id ->
-                    ( { model | categories = List.filter (\m -> m.id /= id) model.categories, error = Nothing }, [] )
+                    ( { model
+                        | categories = List.filter (\m -> m.id /= id) model.categories
+                        , error = Nothing
+                      }
+                    , []
+                    )
 
                 Nothing ->
                     ( model, [] )
@@ -165,7 +181,12 @@ updateCategoryStatus : Model -> CategoryId -> AvailabilitySatus -> ( Model, List
 updateCategoryStatus model categoryId categoryStatus =
     let
         cmd =
-            Strict <| Reader.map (Task.attempt CategoriesLoaded) (requestUpdateCategoryStatus categoryId categoryStatus)
+            Strict <|
+                Reader.map (Task.attempt CategoriesLoaded)
+                    (requestUpdateCategoryStatus
+                        categoryId
+                        categoryStatus
+                    )
     in
     ( model, [ cmd ] )
 

@@ -1,4 +1,26 @@
-module Admin.Data.Ticket exposing (Agent, Comment, Note, Ticket, TicketAgentInput, TicketId, TicketInput, TicketNoteComment, TicketStatus, addTicketNotesAndCommentMutation, agentObject, assignTicketToAgentMutation, commentObject, deleteTicketMutation, noteObject, requestAgentsQuery, requestTicketByIdQuery, requestTicketQuery, ticketObject, ticketStatusObject, updateTicketMutation)
+module Admin.Data.Ticket exposing
+    ( Agent
+    , Comment
+    , Note
+    , Ticket
+    , TicketAgentInput
+    , TicketId
+    , TicketInput
+    , TicketNoteComment
+    , TicketStatus
+    , addTicketNotesAndCommentMutation
+    , agentObject
+    , assignTicketToAgentMutation
+    , commentObject
+    , deleteTicketMutation
+    , noteObject
+    , requestAgentsQuery
+    , requestTicketByIdQuery
+    , requestTicketQuery
+    , ticketObject
+    , ticketStatusObject
+    , updateTicketMutation
+    )
 
 import GraphQL.Request.Builder as GQLBuilder
 import GraphQL.Request.Builder.Arg as Arg

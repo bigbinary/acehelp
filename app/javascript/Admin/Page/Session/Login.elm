@@ -77,7 +77,11 @@ update msg model =
                             [ Open <|
                                 Reader.map
                                     (Task.attempt LoginResponse)
-                                    (requestLogin { email = Field.value model.username, password = Field.value model.password })
+                                    (requestLogin
+                                        { email = Field.value model.username
+                                        , password = Field.value model.password
+                                        }
+                                    )
                             ]
 
                         False ->

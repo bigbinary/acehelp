@@ -1,4 +1,18 @@
-module Section.Article.Article exposing (FeedBack(..), Model, Msg(..), didThisHelpView, emptyForm, erroredFeedBack, feedbackSentView, init, initModel, negativeView, positiveView, update, view)
+module Section.Article.Article exposing
+    ( FeedBack(..)
+    , Model
+    , Msg(..)
+    , didThisHelpView
+    , emptyForm
+    , erroredFeedBack
+    , feedbackSentView
+    , init
+    , initModel
+    , negativeView
+    , positiveView
+    , update
+    , view
+    )
 
 import Data.Article exposing (..)
 import Data.Common exposing (..)

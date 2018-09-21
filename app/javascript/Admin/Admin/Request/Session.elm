@@ -31,7 +31,9 @@ signupRequest signupInputs =
         )
 
 
-requestLogin : { a | email : String, password : String } -> Reader ( NodeEnv, AppUrl ) (Task GQLClient.Error UserWithOrganization)
+requestLogin :
+    { a | email : String, password : String }
+    -> Reader ( NodeEnv, AppUrl ) (Task GQLClient.Error UserWithOrganization)
 requestLogin authInputs =
     Reader.Reader
         (\( nodeEnv, appUrl ) ->
@@ -49,7 +51,9 @@ requestLogin authInputs =
         )
 
 
-requestResetPassword : { a | email : String } -> Reader ( NodeEnv, AppUrl ) (Task GQLClient.Error ForgotPasswordResponse)
+requestResetPassword :
+    { a | email : String }
+    -> Reader ( NodeEnv, AppUrl ) (Task GQLClient.Error ForgotPasswordResponse)
 requestResetPassword emailInput =
     Reader.Reader
         (\( nodeEnv, appUrl ) ->

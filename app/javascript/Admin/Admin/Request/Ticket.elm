@@ -1,4 +1,12 @@
-module Admin.Request.Ticket exposing (addNotesAndCommentToTicket, assignTicketToAgent, deleteTicketRequest, requestAgents, requestTicketById, requestTickets, updateTicket)
+module Admin.Request.Ticket exposing
+    ( addNotesAndCommentToTicket
+    , assignTicketToAgent
+    , deleteTicketRequest
+    , requestAgents
+    , requestTicketById
+    , requestTickets
+    , updateTicket
+    )
 
 import Admin.Data.Ticket exposing (..)
 import Admin.Request.Helper exposing (..)
@@ -53,7 +61,9 @@ deleteTicketRequest ticketId =
         )
 
 
-addNotesAndCommentToTicket : TicketNoteComment -> Reader ( NodeEnv, ApiKey, AppUrl ) (Task GQLClient.Error (Maybe Ticket))
+addNotesAndCommentToTicket :
+    TicketNoteComment
+    -> Reader ( NodeEnv, ApiKey, AppUrl ) (Task GQLClient.Error (Maybe Ticket))
 addNotesAndCommentToTicket ticket =
     Reader.Reader
         (\( nodeEnv, apiKey, appUrl ) ->
@@ -62,7 +72,9 @@ addNotesAndCommentToTicket ticket =
         )
 
 
-assignTicketToAgent : TicketAgentInput -> Reader ( NodeEnv, ApiKey, AppUrl ) (Task GQLClient.Error (Maybe Ticket))
+assignTicketToAgent :
+    TicketAgentInput
+    -> Reader ( NodeEnv, ApiKey, AppUrl ) (Task GQLClient.Error (Maybe Ticket))
 assignTicketToAgent ticketAgentInput =
     Reader.Reader
         (\( nodeEnv, apiKey, appUrl ) ->
