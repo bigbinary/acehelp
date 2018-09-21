@@ -1,8 +1,7 @@
 module Page.Article.Common exposing
-    ( SaveSatus(..)
+    ( SaveStatus(..)
     , articleUrls
     , categoryToValue
-    , errorView
     , errorsIn
     , itemSelection
     , multiSelectCategoryList
@@ -26,7 +25,7 @@ import Html exposing (..)
 import Html.Attributes exposing (..)
 
 
-type SaveSatus
+type SaveStatus
     = Saving
     | None
 

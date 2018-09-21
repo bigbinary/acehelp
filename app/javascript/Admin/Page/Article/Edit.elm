@@ -48,7 +48,7 @@ type alias Model =
     , errors : List String
     , success : Maybe String
     , updateTaskId : Maybe Int
-    , status : SaveSatus
+    , status : SaveStatus
     , articleStatus : AvailabilitySatus
     , originalArticle : Maybe Article
     , isEditable : Bool
@@ -402,7 +402,7 @@ view model =
                         []
                         [ span
                             []
-                            [ text "SaveSatus: " ]
+                            [ text "SaveStatus: " ]
                         , span
                             [ class (statusClass model.articleStatus) ]
                             [ text (availablityStatusIso.get model.articleStatus) ]
