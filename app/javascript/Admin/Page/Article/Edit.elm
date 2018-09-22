@@ -5,6 +5,9 @@ module Page.Article.Edit exposing
     , delayTime
     , editAndSaveView
     , init
+    , initCmds
+    , initEdit
+    , initEditModel
     , initModel
     , save
     , subscriptions
@@ -30,6 +33,7 @@ import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
 import Page.Article.Common exposing (..)
+import Process
 import Reader exposing (Reader)
 import Task exposing (Task)
 import Time
@@ -72,13 +76,30 @@ initModel articleId =
     }
 
 
+initEditModel : ArticleId -> Model
+initEditModel articleId =
+    initModel articleId |> (\model -> { model | isEditable = True })
+
+
+initCmds : ArticleId -> List (ReaderCmd Msg)
+initCmds articleId =
+    [ Strict <| Reader.map (Task.attempt ArticleLoaded) (requestArticleById articleId)
+    , Strict <| Reader.map (Task.attempt CategoriesLoaded) requestCategories
+    , Strict <| Reader.map (Task.attempt UrlsLoaded) requestUrls
+    ]
+
+
 init : ArticleId -> ( Model, List (ReaderCmd Msg) )
 init articleId =
     ( initModel articleId
-    , [ Strict <| Reader.map (Task.attempt ArticleLoaded) (requestArticleById articleId)
-      , Strict <| Reader.map (Task.attempt CategoriesLoaded) requestCategories
-      , Strict <| Reader.map (Task.attempt UrlsLoaded) requestUrls
-      ]
+    , initCmds articleId
+    )
+
+
+initEdit : ArticleId -> ( Model, List (ReaderCmd Msg) )
+initEdit articleId =
+    ( initEditModel articleId
+    , initCmds articleId
     )
 
 
@@ -104,6 +125,7 @@ type Msg
     | Killed ()
     | EditArticle
     | ResetArticle
+    | RemoveNotifications
 
 
 
@@ -173,7 +195,7 @@ update msg model =
                         , isEditable = False
                         , success = Just "Article updated successfully."
                       }
-                    , [ Strict <| Reader.Reader <| always <| insertArticleContent article.desc ]
+                    , [ Strict <| Reader.Reader <| always <| insertArticleContent article.desc, removeNotificationCmd ]
                     )
 
                 Nothing ->
@@ -181,7 +203,7 @@ update msg model =
                         | errors = [ "There was an error while saving the article" ]
                         , originalArticle = Nothing
                       }
-                    , []
+                    , [ removeNotificationCmd ]
                     )
 
         SaveArticleResponse (Err error) ->
@@ -189,7 +211,7 @@ update msg model =
                 | errors = [ "There was an error while saving the article" ]
                 , status = None
               }
-            , []
+            , [ removeNotificationCmd ]
             )
 
         ArticleLoaded (Ok articleResp) ->
@@ -270,10 +292,14 @@ update msg model =
                     )
 
                 Nothing ->
-                    ( { model | errors = [ "There was an error loading Urls" ] }, [] )
+                    ( { model | errors = [ "There was an error loading Urls" ] }
+                    , [ removeNotificationCmd ]
+                    )
 
         UrlsLoaded (Err err) ->
-            ( { model | errors = [ "There was an error loading Urls" ] }, [] )
+            ( { model | errors = [ "There was an error loading Urls" ] }
+            , [ removeNotificationCmd ]
+            )
 
         UrlSelected selectedUrlIds ->
             ( { model
@@ -339,7 +365,19 @@ update msg model =
                 | errors = [ "There was an error updating the article" ]
                 , status = None
               }
-            , []
+            , [ removeNotificationCmd ]
+            )
+
+        RemoveNotifications ->
+            ( { model | errors = [], success = Nothing }, [] )
+
+
+removeNotificationCmd =
+    Unit <|
+        Reader.Reader
+            (always <|
+                Task.perform (always RemoveNotifications) <|
+                    Process.sleep 3000
             )
 
 
@@ -402,7 +440,11 @@ view model =
                         []
                         [ span
                             []
+<<<<<<< HEAD
                             [ text "SaveStatus: " ]
+=======
+                            [ text "Satus: " ]
+>>>>>>> c0682b1... UX fixes
                         , span
                             [ class (statusClass model.articleStatus) ]
                             [ text (availablityStatusIso.get model.articleStatus) ]
@@ -415,11 +457,6 @@ view model =
                     ]
                 ]
             ]
-        , if model.status == Saving then
-            savingIndicator
-
-          else
-            text ""
         ]
 
 

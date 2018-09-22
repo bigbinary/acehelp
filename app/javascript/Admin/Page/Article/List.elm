@@ -173,7 +173,7 @@ rows orgKey model article =
     div
         [ class "listingRow" ]
         [ a
-            [ class "textColumn", href <| routeToString <| ArticleEdit orgKey article.id ]
+            [ class "textColumn", href <| routeToString <| ArticleShow orgKey article.id ]
             [ text article.title ]
         , a
             [ href <| routeToString <| ArticleEdit orgKey article.id

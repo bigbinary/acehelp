@@ -270,6 +270,10 @@ navigateTo newRoute model =
             ( { model | currentPage = Loaded Dashboard }, Cmd.none )
 
         Route.ArticleEdit organizationKey articleId ->
+            ArticleEdit.initEdit articleId
+                |> transitionTo ArticleEdit ArticleEditMsg
+
+        Route.ArticleShow organizationKey articleId ->
             ArticleEdit.init articleId
                 |> transitionTo ArticleEdit ArticleEditMsg
 
@@ -409,7 +413,15 @@ update msg model =
                             articleEditModel
 
                         _ ->
-                            ArticleEdit.initModel "0"
+                            case model.route of
+                                Route.ArticleEdit _ articleId ->
+                                    ArticleEdit.initEditModel articleId
+
+                                Route.ArticleShow _ articleId ->
+                                    ArticleEdit.initModel articleId
+
+                                _ ->
+                                    ArticleEdit.initModel "0"
 
                 ( newModel, cmds ) =
                     ArticleEdit.update aeMsg
