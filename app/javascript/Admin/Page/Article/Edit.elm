@@ -49,7 +49,7 @@ type alias Model =
     , success : Maybe String
     , updateTaskId : Maybe Int
     , status : SaveStatus
-    , articleStatus : AvailabilitySatus
+    , articleStatus : AvailabilityStatus
     , originalArticle : Maybe Article
     , isEditable : Bool
     }
@@ -95,7 +95,7 @@ type Msg
     | CategoriesLoaded (Result GQLClient.Error (Maybe (List Category)))
     | CategorySelected (List CategoryId)
     | UrlsLoaded (Result GQLClient.Error (Maybe (List UrlData)))
-    | UpdateStatus ArticleId AvailabilitySatus
+    | UpdateStatus ArticleId AvailabilityStatus
     | UpdateStatusResponse (Result GQLClient.Error (Maybe Article))
     | UrlSelected (List UrlId)
     | TrixInitialize ()

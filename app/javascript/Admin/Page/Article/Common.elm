@@ -135,7 +135,7 @@ errorsIn fields =
             )
 
 
-statusClass : AvailabilitySatus -> String
+statusClass : AvailabilityStatus -> String
 statusClass status =
     case status of
         Active ->
@@ -145,7 +145,7 @@ statusClass status =
             "offline-status"
 
 
-statusToButtonText : AvailabilitySatus -> String
+statusToButtonText : AvailabilityStatus -> String
 statusToButtonText status =
     case status of
         Inactive ->
