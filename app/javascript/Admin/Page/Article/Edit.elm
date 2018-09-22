@@ -33,6 +33,7 @@ import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
 import Page.Article.Common exposing (..)
+import Page.Errors exposing (..)
 import Process
 import Reader exposing (Reader)
 import Task exposing (Task)
@@ -389,7 +390,7 @@ removeNotificationCmd =
 view : Model -> Html Msg
 view model =
     div []
-        [ errorView model.errors
+        [ errorAlertView model.errors
         , successView model.success
         , div [ class "row article-block" ]
             [ div [ class "col-md-8 article-title-content-block" ]
