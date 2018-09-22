@@ -172,8 +172,8 @@ rows : ApiKey -> Model -> ArticleSummary -> Html Msg
 rows orgKey model article =
     div
         [ class "listingRow" ]
-        [ span
-            [ class "textColumn", onClick (UpdateArticleStatus article.id <| availablityStatusIso.reverseGet article.status) ]
+        [ a
+            [ class "textColumn", href <| routeToString <| ArticleEdit orgKey article.id ]
             [ text article.title ]
         , a
             [ href <| routeToString <| ArticleEdit orgKey article.id

@@ -26,6 +26,10 @@
             width: 60%;
             display: table-cell;
             padding-left: 10px;
+            color: #000
+        }
+        .textColumn:hover {
+            text-decoration: none;
         }
 
         .actionButtonColumn {
