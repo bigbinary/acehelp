@@ -92,5 +92,5 @@ rows orgKey model ticket =
         , span [ class "row-name" ] [ text ticket.name ]
         , span [ class "row-email" ] [ text ticket.email ]
         , span [ class "row-message" ] [ text ticket.message ]
-        , span [] [ a [ href <| routeToString <| UrlEdit orgKey ticket.id ] [ text " | Edit Ticket" ] ]
+        , span [] [ a [ href <| routeToString <| TicketEdit orgKey ticket.id ] [ text " | Edit Ticket" ] ]
         ]
