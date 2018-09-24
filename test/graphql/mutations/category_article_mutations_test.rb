@@ -4,7 +4,10 @@ require "test_helper"
 require "graphql/client_host"
 
 class Mutations::CategoryArticleMutationsTest < ActiveSupport::TestCase
+  include Devise::Test::IntegrationHelpers
   setup do
+    @agent = agents(:illya_kuryakin)
+    sign_in @agent
     @category = categories :novel
     org = organizations :bigbinary
     @article = articles :life

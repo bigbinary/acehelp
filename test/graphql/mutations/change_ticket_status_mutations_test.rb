@@ -4,7 +4,10 @@ require "test_helper"
 require "graphql/client_host"
 
 class Mutations::ChangeTicketMutationsTest < ActiveSupport::TestCase
+  include Devise::Test::IntegrationHelpers
   setup do
+    @agent = agents(:illya_kuryakin)
+    sign_in @agent
     @ticket = tickets(:payment_issue_ticket)
     @query = <<-GRAPHQL
         mutation($ticket_args: ChangeTicketStatusInput!) {
@@ -23,22 +26,22 @@ class Mutations::ChangeTicketMutationsTest < ActiveSupport::TestCase
   end
 
   test "update ticket status with OPEN" do
-    result = AceHelp::Client.execute(@query, ticket_args: {id: @ticket.id, status: "open"})
+    result = AceHelp::Client.execute(@query, ticket_args: { id: @ticket.id, status: "open" })
     assert_equal Ticket.statuses[:open], result.data.change_ticket_status.ticket.status
   end
 
   test "update ticket status with PENDING_ON_CUSTOMER" do
-    result = AceHelp::Client.execute(@query, ticket_args: {id: @ticket.id, status: "pending_on_customer"})
+    result = AceHelp::Client.execute(@query, ticket_args: { id: @ticket.id, status: "pending_on_customer" })
     assert_equal Ticket.statuses[:pending_on_customer], result.data.change_ticket_status.ticket.status
   end
 
   test "update ticket status with RESOLVED" do
-    result = AceHelp::Client.execute(@query, ticket_args: {id: @ticket.id, status: "resolved"})
+    result = AceHelp::Client.execute(@query, ticket_args: { id: @ticket.id, status: "resolved" })
     assert_equal Ticket.statuses[:resolved], result.data.change_ticket_status.ticket.status
   end
 
   test "update ticket status with CLOSED" do
-    result = AceHelp::Client.execute(@query, ticket_args: {id: @ticket.id, status: "closed"})
+    result = AceHelp::Client.execute(@query, ticket_args: { id: @ticket.id, status: "closed" })
     assert_equal Ticket.statuses[:closed], result.data.change_ticket_status.ticket.status
   end
 

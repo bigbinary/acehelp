@@ -14,7 +14,7 @@ class Mutations::LoginMutations
       user = User.find_by_email(inputs[:email])
       if user
         if user.valid_password?(inputs[:password])
-          context[:warden].set_user(user)
+          # context[:warden].set_user(user)
         else
           errors = Utils::ErrorHandler.new.error("You have entered an invalid username or password", context)
         end

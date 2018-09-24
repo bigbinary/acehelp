@@ -4,9 +4,11 @@ require "test_helper"
 require "graphql/client_host"
 
 class Mutations::AssignTicketToAgentMutationsTest < ActiveSupport::TestCase
+  include Devise::Test::IntegrationHelpers
   setup do
     @ticket = tickets(:payment_issue_ticket)
     @agent = agents(:illya_kuryakin)
+    sign_in @agent
     @agent.organizations << (organizations :bigbinary)
     @query = <<-GRAPHQL
               mutation($ticket_agent: AssignTicketToAgentInput!) {
