@@ -7,6 +7,7 @@ import Admin.Data.ReaderCmd exposing (..)
 import Admin.Data.Url exposing (UrlData, UrlId)
 import Admin.Request.Article exposing (..)
 import Admin.Request.Category exposing (..)
+import Admin.Request.Helper exposing (ApiKey)
 import Admin.Request.Url exposing (..)
 import Field exposing (..)
 import GraphQL.Client.Http as GQLClient
@@ -69,7 +70,6 @@ type Msg
     | CategorySelected (List CategoryId)
     | UrlsLoaded (Result GQLClient.Error (Maybe (List UrlData)))
     | UrlSelected (List UrlId)
-    | Cancel
 
 
 update : Msg -> Model -> ( Model, List (ReaderCmd Msg) )
@@ -133,16 +133,13 @@ update msg model =
             , []
             )
 
-        Cancel ->
-            ( model, [] )
-
 
 
 -- View
 
 
-view : Model -> Html Msg
-view model =
+view : ApiKey -> Model -> Html Msg
+view orgKey model =
     div []
         [ errorView model.errors
         , div [ class "row article-block" ]
@@ -171,8 +168,11 @@ view model =
                 [ multiSelectCategoryList "Categories:" model.categories CategorySelected
                 , multiSelectUrlList "Urls:" model.urls UrlSelected
                 , button [ id "create-article", type_ "button", class "btn btn-success", onClick SaveArticle ] [ text "Create Article" ]
-                , button
-                    [ id "cancel-create-article", type_ "button", class "btn btn-primary", onClick Cancel ]
+                , a
+                    [ href <| routeToString <| ArticleList orgKey
+                    , id "cancel-create-article"
+                    , class "btn btn-primary"
+                    ]
                     [ text "Cancel" ]
                 ]
             ]
