@@ -21,6 +21,8 @@ class Mutations::AssignUserToOrganizationMutations
 
       if user.blank?
         errors = Utils::ErrorHandler.new.error("User not found/created", context)
+      elsif user.already_present_in_organization?(context[:organization])
+        errors = Utils::ErrorHandler.new.error("Team member already present in current organization.", context)
       else
         user.assign_organization(context[:organization])
         user.send_welcome_mail(sender_id: context[:current_user]["id"], org_id: context[:organization].id)
