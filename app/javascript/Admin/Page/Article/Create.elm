@@ -69,6 +69,7 @@ type Msg
     | CategorySelected (List CategoryId)
     | UrlsLoaded (Result GQLClient.Error (Maybe (List UrlData)))
     | UrlSelected (List UrlId)
+    | Cancel
 
 
 update : Msg -> Model -> ( Model, List (ReaderCmd Msg) )
@@ -132,6 +133,9 @@ update msg model =
             , []
             )
 
+        Cancel ->
+            ( model, [] )
+
 
 
 -- View
@@ -167,6 +171,9 @@ view model =
                 [ multiSelectCategoryList "Categories:" model.categories CategorySelected
                 , multiSelectUrlList "Urls:" model.urls UrlSelected
                 , button [ id "create-article", type_ "button", class "btn btn-success", onClick SaveArticle ] [ text "Create Article" ]
+                , button
+                    [ id "cancel-create-article", type_ "button", class "btn btn-primary", onClick Cancel ]
+                    [ text "Cancel" ]
                 ]
             ]
         , if model.status == Saving then
