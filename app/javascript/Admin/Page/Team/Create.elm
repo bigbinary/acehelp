@@ -3,6 +3,7 @@ module Page.Team.Create exposing (Model, Msg(..), init, initModel, save, update,
 import Admin.Data.ReaderCmd exposing (..)
 import Admin.Data.Team exposing (..)
 import Admin.Request.Team exposing (..)
+import Admin.Views.Common exposing (errorView)
 import Field exposing (..)
 import Field.ValidationResult exposing (..)
 import GraphQL.Client.Http as GQLClient
@@ -106,60 +107,49 @@ update msg model =
 
 view : Model -> Html Msg
 view model =
+    let
+        errors =
+            case model.error of
+                Just error ->
+                    [ error ]
+
+                Nothing ->
+                    []
+    in
     div [ class "container" ]
-        [ div []
-            [ Maybe.withDefault (text "") <|
-                Maybe.map
-                    (\err ->
-                        div
-                            [ class "alert alert-danger alert-dismissible fade show"
-                            , attribute "role" "alert"
-                            ]
-                            [ text <| "Error: " ++ err
-                            ]
-                    )
-                    model.error
-            ]
-        , div []
-            [ Maybe.withDefault (text "") <|
-                Maybe.map
-                    (\message ->
-                        div [ class "alert alert-success alert-dismissible fade show", attribute "role" "alert" ]
-                            [ text <| message
-                            ]
-                    )
-                    model.success
-            ]
-        , div []
-            [ label [] [ text "First Name : " ]
-            , input
-                [ type_ "text"
-                , placeholder "First Name"
-                , onInput FirstNameInput
+        [ Html.form [ onSubmit SaveTeam ]
+            [ errorView errors
+            , div []
+                [ label [] [ text "First Name: " ]
+                , input
+                    [ type_ "text"
+                    , placeholder "First Name"
+                    , onInput FirstNameInput
+                    ]
+                    []
                 ]
-                []
-            ]
-        , div []
-            [ label [] [ text "Last Name: " ]
-            , input
-                [ type_ "text"
-                , placeholder "Last Name"
-                , onInput LastNameInput
+            , div []
+                [ label [] [ text "Last Name: " ]
+                , input
+                    [ type_ "text"
+                    , placeholder "Last Name"
+                    , onInput LastNameInput
+                    ]
+                    []
                 ]
-                []
-            ]
-        , div []
-            [ label [] [ text "Email : " ]
-            , input
-                [ type_ "text"
-                , placeholder "Email"
-                , onInput EmailInput
+            , div []
+                [ label [] [ text "Email: " ]
+                , input
+                    [ type_ "text"
+                    , placeholder "Email"
+                    , onInput EmailInput
+                    , required True
+                    ]
+                    []
                 ]
-                []
+            , button [ type_ "submit", class "btn btn-primary" ]
+                [ text "Save Member" ]
             ]
-        , button
-            [ type_ "button", class "btn btn-primary", onClick SaveTeam ]
-            [ text "Save Member" ]
         ]
 
 
