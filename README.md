@@ -5,6 +5,7 @@
 ## Install dependencies
 
 - node(8+)
+- elasticsearch (v6.4.1+)
 
 ## Local Development setup
 
