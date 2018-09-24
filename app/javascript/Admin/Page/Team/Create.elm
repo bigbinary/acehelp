@@ -106,18 +106,9 @@ update msg model =
 
 view : Model -> Html Msg
 view model =
-    let
-        errors =
-            case model.error of
-                Just error ->
-                    [ error ]
-
-                Nothing ->
-                    []
-    in
     div [ class "container" ]
         [ Html.form [ onSubmit SaveTeam ]
-            [ errorView errors
+            [ errorView model.errors
             , div []
                 [ label [] [ text "First Name: " ]
                 , input
