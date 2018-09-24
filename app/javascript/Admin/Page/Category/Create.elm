@@ -12,6 +12,7 @@ module Page.Category.Create exposing
 import Admin.Data.Category exposing (..)
 import Admin.Data.ReaderCmd exposing (..)
 import Admin.Request.Category exposing (..)
+import Admin.Views.Common exposing (errorView)
 import Field exposing (..)
 import Field.ValidationResult exposing (..)
 import GraphQL.Client.Http as GQLClient
@@ -31,7 +32,7 @@ import Task exposing (Task)
 type alias Model =
     { id : String
     , name : Field String String
-    , error : Maybe String
+    , errors : List String
     }
 
 
@@ -39,7 +40,7 @@ initModel : Model
 initModel =
     { id = "0"
     , name = Field (validateEmpty "Name") ""
-    , error = Nothing
+    , errors = []
     }
 
 
@@ -57,7 +58,7 @@ init =
 type Msg
     = CategoryNameInput CategoryName
     | SaveCategory
-    | SaveCategoryResponse (Result GQLClient.Error (Maybe Category))
+    | SaveCategoryResponse (Result GQLClient.Error CategoryResponse)
 
 
 update : Msg -> Model -> ( Model, List (ReaderCmd Msg) )
@@ -83,13 +84,12 @@ update msg model =
                                     Passed _ ->
                                         "Unknown Error"
                             )
-                        |> String.join ", "
             in
             if isAllValid fields then
                 saveCategory model
 
             else
-                ( { model | error = Just errors }, [] )
+                ( { model | errors = errors }, [] )
 
         SaveCategoryResponse (Ok id) ->
             -- NOTE: Redirection handled in Main
@@ -101,7 +101,7 @@ update msg model =
             )
 
         SaveCategoryResponse (Err error) ->
-            ( { model | error = Just "There was an error while saving the Category" }, [] )
+            ( { model | errors = [ "There was an error while saving the Category" ] }, [] )
 
 
 
@@ -111,18 +111,7 @@ update msg model =
 view : Model -> Html Msg
 view model =
     Html.form [ onSubmit SaveCategory ]
-        [ div []
-            [ Maybe.withDefault (text "") <|
-                Maybe.map
-                    (\err ->
-                        div
-                            [ class "alert alert-danger alert-dismissible fade show"
-                            , attribute "role" "alert"
-                            ]
-                            [ text <| "Error: " ++ err ]
-                    )
-                    model.error
-            ]
+        [ errorView model.errors
         , div []
             [ label [] [ text "Category Name: " ]
             , input

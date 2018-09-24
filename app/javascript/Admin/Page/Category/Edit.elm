@@ -12,6 +12,7 @@ module Page.Category.Edit exposing
 import Admin.Data.Category exposing (..)
 import Admin.Data.ReaderCmd exposing (..)
 import Admin.Request.Category exposing (..)
+import Admin.Views.Common exposing (errorView)
 import Field exposing (..)
 import Field.ValidationResult exposing (..)
 import GraphQL.Client.Http as GQLClient
@@ -30,7 +31,7 @@ import Task exposing (Task)
 type alias Model =
     { id : String
     , name : Field String String
-    , error : Maybe String
+    , errors : List String
     , success : Maybe String
     , status : String
     }
@@ -40,7 +41,7 @@ initModel : CategoryId -> Model
 initModel categoryId =
     { name = Field (validateEmpty "Name") ""
     , id = categoryId
-    , error = Nothing
+    , errors = []
     , success = Nothing
     , status = ""
     }
@@ -61,7 +62,7 @@ type Msg
     = CategoryNameInput CategoryName
     | CategoryLoaded (Result GQLClient.Error (Maybe Category))
     | SaveCategory
-    | UpdateCategoryResponse (Result GQLClient.Error (Maybe Category))
+    | UpdateCategoryResponse (Result GQLClient.Error CategoryResponse)
 
 
 update : Msg -> Model -> ( Model, List (ReaderCmd Msg) )
@@ -82,7 +83,7 @@ update msg model =
                     ( model, [] )
 
         CategoryLoaded (Err err) ->
-            ( { model | error = Just "There was an error while loading the article" }
+            ( { model | errors = [ "There was an error while loading the article" ] }
             , []
             )
 
@@ -110,19 +111,18 @@ update msg model =
                                     Passed _ ->
                                         "Unknown Error"
                             )
-                        |> String.join ", "
             in
             if isAllValid fields then
                 updateCategory model
 
             else
-                ( { model | error = Just errors }, [] )
+                ( { model | errors = errors }, [] )
 
         UpdateCategoryResponse (Ok id) ->
             ( model, [] )
 
         UpdateCategoryResponse (Err error) ->
-            ( { model | error = Just "There was an error while updating the Category" }, [] )
+            ( { model | errors = [ "There was an error while updating the Category" ] }, [] )
 
 
 
@@ -132,18 +132,7 @@ update msg model =
 view : Model -> Html Msg
 view model =
     div []
-        [ div []
-            [ Maybe.withDefault (text "") <|
-                Maybe.map
-                    (\err ->
-                        div
-                            [ class "alert alert-danger alert-dismissible fade show"
-                            , attribute "role" "alert"
-                            ]
-                            [ text <| "Error: " ++ err ]
-                    )
-                    model.error
-            ]
+        [ errorView model.errors
         , div []
             [ Maybe.withDefault (text "") <|
                 Maybe.map

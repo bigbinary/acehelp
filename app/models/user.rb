@@ -42,6 +42,10 @@ class User < ApplicationRecord
     org_data
   end
 
+  def already_present_in_organization?(organization)
+    organization.users.include?(self)
+  end
+
   def deallocate_from_organization(organization_id)
     organization_users.where(organization_id: organization_id).destroy_all
   end

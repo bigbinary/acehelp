@@ -574,11 +574,21 @@ update msg model =
                     )
             in
             case ccMsg of
-                CategoryCreate.SaveCategoryResponse (Ok id) ->
-                    updateNavigation (Route.CategoryList model.organizationKey) ( newModel, newCmds )
-                        |> renderFlashMessages
-                            (UserNotification.SuccessNotification
-                                "Category created successfully."
+                CategoryCreate.SaveCategoryResponse (Ok categoryResponse) ->
+                    let
+                        updatedModel =
+                            { currentPageModel
+                                | errors = flattenErrors categoryResponse.errors
+                            }
+                    in
+                    case categoryResponse.category of
+                        Just category ->
+                            updateNavigation (Route.CategoryList model.organizationKey) ( newModel, newCmds )
+                                |> renderFlashMessages (UserNotification.SuccessNotification "Category created successfully.")
+
+                        Nothing ->
+                            ( { model | currentPage = Loaded (CategoryCreate updatedModel) }
+                            , runReaderCmds CategoryCreateMsg cmds
                             )
 
                 _ ->
@@ -652,11 +662,21 @@ update msg model =
                     )
             in
             case ctMsg of
-                CategoryEdit.UpdateCategoryResponse (Ok id) ->
-                    updateNavigation (Route.CategoryList model.organizationKey) ( newModel, newCmds )
-                        |> renderFlashMessages
-                            (UserNotification.SuccessNotification
-                                "Category updated successfully."
+                CategoryEdit.UpdateCategoryResponse (Ok categoryResponse) ->
+                    let
+                        updatedModel =
+                            { currentPageModel
+                                | errors = flattenErrors categoryResponse.errors
+                            }
+                    in
+                    case categoryResponse.category of
+                        Just category ->
+                            updateNavigation (Route.CategoryList model.organizationKey) ( newModel, newCmds )
+                                |> renderFlashMessages (UserNotification.SuccessNotification "Category updated successfully.")
+
+                        Nothing ->
+                            ( { model | currentPage = Loaded (CategoryEdit updatedModel) }
+                            , runReaderCmds CategoryEditMsg cmds
                             )
 
                 _ ->

@@ -8,6 +8,7 @@ import Admin.Data.Url exposing (UrlData, UrlId)
 import Admin.Request.Article exposing (..)
 import Admin.Request.Category exposing (..)
 import Admin.Request.Url exposing (..)
+import Admin.Views.Common exposing (errorView)
 import Field exposing (..)
 import GraphQL.Client.Http as GQLClient
 import Helpers exposing (..)
@@ -30,7 +31,7 @@ type alias Model =
     , articleId : Maybe ArticleId
     , categories : List (Option Category)
     , urls : List (Option UrlData)
-    , status : SaveSatus
+    , status : SaveStatus
     , errors : List String
     }
 

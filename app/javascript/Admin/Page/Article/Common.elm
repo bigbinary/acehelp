@@ -1,8 +1,7 @@
 module Page.Article.Common exposing
-    ( SaveSatus(..)
+    ( SaveStatus(..)
     , articleUrls
     , categoryToValue
-    , errorView
     , errorsIn
     , itemSelection
     , multiSelectCategoryList
@@ -26,20 +25,9 @@ import Html exposing (..)
 import Html.Attributes exposing (..)
 
 
-type SaveSatus
+type SaveStatus
     = Saving
     | None
-
-
-errorView : List String -> Html msg
-errorView errors =
-    case errors of
-        [] ->
-            text ""
-
-        _ ->
-            div [ class "alert alert-danger alert-dismissible fade show", attribute "role" "alert" ]
-                [ text <| (++) "Error: " <| String.join ", " errors ]
 
 
 successView : Maybe String -> Html msg

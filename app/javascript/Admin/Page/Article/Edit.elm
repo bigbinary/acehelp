@@ -22,6 +22,7 @@ import Admin.Ports exposing (..)
 import Admin.Request.Article exposing (..)
 import Admin.Request.Category exposing (..)
 import Admin.Request.Url exposing (..)
+import Admin.Views.Common exposing (errorView)
 import Field exposing (..)
 import GraphQL.Client.Http as GQLClient
 import Helpers exposing (..)
@@ -47,7 +48,7 @@ type alias Model =
     , errors : List String
     , success : Maybe String
     , updateTaskId : Maybe Int
-    , status : SaveSatus
+    , status : SaveStatus
     , articleStatus : AvailabilitySatus
     , originalArticle : Maybe Article
     , isEditable : Bool
@@ -401,7 +402,7 @@ view model =
                         []
                         [ span
                             []
-                            [ text "SaveSatus: " ]
+                            [ text "SaveStatus: " ]
                         , span
                             [ class (statusClass model.articleStatus) ]
                             [ text (availablityStatusIso.get model.articleStatus) ]

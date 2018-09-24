@@ -3,6 +3,7 @@ module Page.Url.Create exposing (Model, Msg(..), init, initModel, save, update, 
 import Admin.Data.ReaderCmd exposing (..)
 import Admin.Data.Url exposing (..)
 import Admin.Request.Url exposing (..)
+import Admin.Views.Common exposing (errorView)
 import Field exposing (..)
 import Field.ValidationResult exposing (..)
 import GraphQL.Client.Http as GQLClient
@@ -98,17 +99,6 @@ update msg model =
 
 
 -- VIEW
-
-
-errorView : List String -> Html msg
-errorView errors =
-    case errors of
-        [] ->
-            text ""
-
-        _ ->
-            div [ class "alert alert-danger alert-dismissible fade show", attribute "role" "alert" ]
-                [ text <| (++) "Error: " <| String.join ", " errors ]
 
 
 view : Model -> Html Msg

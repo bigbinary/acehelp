@@ -36,9 +36,7 @@ requestCategoryById categoryId =
         )
 
 
-requestUpdateCategory :
-    UpdateCategoryInputs
-    -> Reader ( NodeEnv, ApiKey, AppUrl ) (Task GQLClient.Error (Maybe Category))
+requestUpdateCategory : UpdateCategoryInputs -> Reader ( NodeEnv, ApiKey, AppUrl ) (Task GQLClient.Error CategoryResponse)
 requestUpdateCategory categoryInputs =
     Reader.Reader
         (\( nodeEnv, apiKey, appUrl ) ->
@@ -62,7 +60,7 @@ deleteCategory categoryId =
 
 requestCreateCategory :
     CreateCategoryInputs
-    -> Reader ( NodeEnv, ApiKey, AppUrl ) (Task GQLClient.Error (Maybe Category))
+    -> Reader ( NodeEnv, ApiKey, AppUrl ) (Task GQLClient.Error CategoryResponse)
 requestCreateCategory categoryInputs =
     Reader.Reader
         (\( nodeEnv, apiKey, appUrl ) ->

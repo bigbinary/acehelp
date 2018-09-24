@@ -365,7 +365,7 @@ ticketStatusDropDown model =
     div []
         [ div [ class "status-selection" ]
             [ div []
-                [ h2 [] [ text "SaveSatus Selector" ]
+                [ h2 [] [ text "SaveStatus Selector" ]
                 , select [ onInput UpdateTicketStatus, class "custom-select custom-select-lg mb-3" ]
                     (List.map (statusOption model) model.statuses)
                 ]
