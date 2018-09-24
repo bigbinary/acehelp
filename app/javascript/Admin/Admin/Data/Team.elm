@@ -1,6 +1,7 @@
 module Admin.Data.Team exposing
     ( Team
     , TeamMember
+    , TeamResponse
     , UserId
     , createTeamMemberMutation
     , removeUserFromOrganization
@@ -8,6 +9,7 @@ module Admin.Data.Team exposing
     , teamMemberExtractor
     )
 
+import Admin.Data.Common exposing (..)
 import GraphQL.Request.Builder as GQLBuilder
 import GraphQL.Request.Builder.Arg as Arg
 import GraphQL.Request.Builder.Variable as Var
@@ -31,6 +33,12 @@ type alias TeamMember =
     }
 
 
+type alias TeamResponse =
+    { user : Maybe Team
+    , errors : Maybe (List Error)
+    }
+
+
 requestTeamQuery : GQLBuilder.Document GQLBuilder.Query (Maybe (List Team)) vars
 requestTeamQuery =
     GQLBuilder.queryDocument <|
@@ -45,7 +53,7 @@ requestTeamQuery =
             )
 
 
-createTeamMemberMutation : GQLBuilder.Document GQLBuilder.Mutation (Maybe Team) TeamMember
+createTeamMemberMutation : GQLBuilder.Document GQLBuilder.Mutation TeamResponse TeamMember
 createTeamMemberMutation =
     let
         emailVar =
@@ -68,11 +76,7 @@ createTeamMemberMutation =
                         ]
                   )
                 ]
-                (GQLBuilder.extract <|
-                    GQLBuilder.field "user"
-                        []
-                        (GQLBuilder.nullable teamMemberExtractor)
-                )
+                teamResponseObject
 
 
 teamMemberExtractor : GQLBuilder.ValueSpec GQLBuilder.NonNull GQLBuilder.ObjectType Team vars
@@ -107,3 +111,14 @@ removeUserFromOrganization =
                         )
                     )
                 )
+
+
+teamResponseObject : GQLBuilder.ValueSpec GQLBuilder.NonNull GQLBuilder.ObjectType TeamResponse vars
+teamResponseObject =
+    GQLBuilder.object TeamResponse
+        |> GQLBuilder.with
+            (GQLBuilder.field "user"
+                []
+                (GQLBuilder.nullable teamMemberExtractor)
+            )
+        |> GQLBuilder.with errorsField

@@ -20,7 +20,7 @@ import Task exposing (Task)
 
 
 type alias Model =
-    { error : Maybe String
+    { errors : List String
     , success : Maybe String
     , firstName : String
     , lastName : String
@@ -30,7 +30,7 @@ type alias Model =
 
 initModel : Model
 initModel =
-    { error = Nothing
+    { errors = []
     , success = Nothing
     , firstName = ""
     , lastName = ""
@@ -54,7 +54,7 @@ type Msg
     | LastNameInput String
     | EmailInput String
     | SaveTeam
-    | SaveTeamResponse (Result GQLClient.Error (Maybe Team))
+    | SaveTeamResponse (Result GQLClient.Error TeamResponse)
 
 
 update : Msg -> Model -> ( Model, List (ReaderCmd Msg) )
@@ -86,19 +86,18 @@ update msg model =
                                     Passed _ ->
                                         "Unknown Error"
                             )
-                        |> String.join ", "
             in
             if isAllValid fields then
                 save model
 
             else
-                ( { model | error = Just errors }, [] )
+                ( { model | errors = errors }, [] )
 
         SaveTeamResponse (Ok id) ->
             ( model, [] )
 
         SaveTeamResponse (Err error) ->
-            ( { model | error = Just "An error occured while saving the Team" }, [] )
+            ( { model | errors = [ "An error occured while saving the Team" ] }, [] )
 
 
 
@@ -107,18 +106,9 @@ update msg model =
 
 view : Model -> Html Msg
 view model =
-    let
-        errors =
-            case model.error of
-                Just error ->
-                    [ error ]
-
-                Nothing ->
-                    []
-    in
     div [ class "container" ]
         [ Html.form [ onSubmit SaveTeam ]
-            [ errorView errors
+            [ errorView model.errors
             , div []
                 [ label [] [ text "First Name: " ]
                 , input

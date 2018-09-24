@@ -4,23 +4,12 @@ require "test_helper"
 require "graphql/client_host"
 
 class Mutations::AssignUserToOrganizationMutationsTest < ActiveSupport::TestCase
+  include Devise::Test::IntegrationHelpers
   setup do
     @ethan = users(:hunt)
     @ethan.password = @ethan.password_confirmation = "SelfDestructIn5"
     @ethan.save
-    @login_query = <<-GRAPHQL
-      mutation($login_keys: LoginUserInput!) {
-          loginUser(input: $login_keys) {
-            user {
-              id
-            }
-            errors {
-              message
-              path
-            }
-          }
-      }
-    GRAPHQL
+    sign_in @ethan
     @query = <<-GRAPHQL
         mutation($user_keys: AssignUserToOrganizationInput!) {
             assign_user_to_organization(input: $user_keys) {
@@ -40,7 +29,6 @@ class Mutations::AssignUserToOrganizationMutationsTest < ActiveSupport::TestCase
             }
         }
     GRAPHQL
-    AceHelp::Client.execute(@login_query, login_keys: { email: @ethan.email, password: "SelfDestructIn5" })
   end
 
 

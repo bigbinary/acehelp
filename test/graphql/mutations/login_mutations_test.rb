@@ -4,10 +4,12 @@ require "test_helper"
 require "graphql/client_host"
 
 class Mutations::LoginMutationsTest < ActiveSupport::TestCase
+  include Devise::Test::IntegrationHelpers
   setup do
     @ethan = users(:hunt)
     @ethan.password = @ethan.password_confirmation = "SelfDestructIn5"
     @ethan.save
+    sign_in @ethan
     @query = <<-GRAPHQL
               mutation($login_keys: LoginUserInput!) {
                   loginUser(input: $login_keys) {
