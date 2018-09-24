@@ -17,7 +17,7 @@ requestTeam =
         )
 
 
-createTeamMember : TeamMember -> Reader ( NodeEnv, ApiKey, AppUrl ) (Task GQLClient.Error (Maybe Team))
+createTeamMember : TeamMember -> Reader ( NodeEnv, ApiKey, AppUrl ) (Task GQLClient.Error TeamResponse)
 createTeamMember createTeamMemberInput =
     Reader.Reader
         (\( nodeEnv, apiKey, appUrl ) ->

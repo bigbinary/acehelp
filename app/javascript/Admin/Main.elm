@@ -720,11 +720,24 @@ update msg model =
                     )
             in
             case tcmsg of
-                TeamMemberCreate.SaveTeamResponse (Ok id) ->
-                    updateNavigation (Route.TeamList model.organizationKey) ( newModel, newCmds )
-                        |> renderFlashMessages
-                            (UserNotification.SuccessNotification
-                                "Team member added successfully."
+                TeamMemberCreate.SaveTeamResponse (Ok saveTeamResponse) ->
+                    let
+                        updatedModel =
+                            { currentPageModel
+                                | errors = flattenErrors saveTeamResponse.errors
+                            }
+                    in
+                    case saveTeamResponse.user of
+                        Just user ->
+                            updateNavigation (Route.TeamList model.organizationKey) ( newModel, newCmds )
+                                |> renderFlashMessages
+                                    (UserNotification.SuccessNotification
+                                        "Team member added successfully."
+                                    )
+
+                        Nothing ->
+                            ( { model | currentPage = Loaded (TeamMemberCreate updatedModel) }
+                            , runReaderCmds TeamCreateMsg cmds
                             )
 
                 _ ->

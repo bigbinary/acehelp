@@ -18,10 +18,10 @@ class Mutations::AssignUserToOrganizationMutations
         user.last_name = inputs[:lastName]
         user.password = user.password_confirmation = Devise.friendly_token.first(8)
       end
-
       if user.blank?
         errors = Utils::ErrorHandler.new.error("User not found/created", context)
       elsif user.already_present_in_organization?(context[:organization])
+        user = nil
         errors = Utils::ErrorHandler.new.error("Team member already present in current organization.", context)
       else
         user.assign_organization(context[:organization])
