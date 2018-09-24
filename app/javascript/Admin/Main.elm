@@ -960,7 +960,7 @@ view model =
 
                 ArticleCreate articleCreateModel ->
                     Html.map ArticleCreateMsg
-                        (ArticleCreate.view articleCreateModel)
+                        (ArticleCreate.view model.organizationKey articleCreateModel)
 
                 ArticleEdit articleEditModel ->
                     Html.map ArticleEditMsg

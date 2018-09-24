@@ -7,6 +7,7 @@ import Admin.Data.ReaderCmd exposing (..)
 import Admin.Data.Url exposing (UrlData, UrlId)
 import Admin.Request.Article exposing (..)
 import Admin.Request.Category exposing (..)
+import Admin.Request.Helper exposing (ApiKey)
 import Admin.Request.Url exposing (..)
 import Admin.Views.Common exposing (errorView)
 import Field exposing (..)
@@ -138,8 +139,8 @@ update msg model =
 -- View
 
 
-view : Model -> Html Msg
-view model =
+view : ApiKey -> Model -> Html Msg
+view orgKey model =
     div []
         [ errorView model.errors
         , div [ class "row article-block" ]
@@ -168,6 +169,12 @@ view model =
                 [ multiSelectCategoryList "Categories:" model.categories CategorySelected
                 , multiSelectUrlList "Urls:" model.urls UrlSelected
                 , button [ id "create-article", type_ "button", class "btn btn-success", onClick SaveArticle ] [ text "Create Article" ]
+                , a
+                    [ href <| routeToString <| ArticleList orgKey
+                    , id "cancel-create-article"
+                    , class "btn btn-primary"
+                    ]
+                    [ text "Cancel" ]
                 ]
             ]
         , if model.status == Saving then
