@@ -1,5 +1,5 @@
 module Page.Article.Common exposing
-    ( SaveSatus(..)
+    ( SaveStatus(..)
     , categoryToValue
     , errorsIn
     , multiSelectCategoryList
