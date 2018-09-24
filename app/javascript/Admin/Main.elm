@@ -398,6 +398,9 @@ update msg model =
                             , runReaderCmds ArticleCreateMsg cmds
                             )
 
+                ArticleCreate.Cancel ->
+                    updateNavigation (Route.ArticleList model.organizationKey) ( newModel, newCmds )
+
                 _ ->
                     ( newModel, newCmds )
 
