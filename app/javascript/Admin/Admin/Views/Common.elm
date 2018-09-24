@@ -16,28 +16,40 @@ renderError error =
         Maybe.withDefault "" <| Maybe.map ((++) "Error : ") error
 
 
-multiSelectMenu : String -> List (Option Value) -> (List String -> msg) -> Html msg
+multiSelectMenu : String -> List (Option Value) -> (Option String -> msg) -> Html msg
 multiSelectMenu title values onselect =
     div []
-        [ h6 [] [ text title ]
-        , select
-            [ on "change" (Json.map onselect targetSelectedOptions)
-            , multiple True
-            , class "form-control select-checkbox"
-            , size 5
-            ]
-          <|
+        [ h5 [] [ text title ]
+        , div [ class "multi-select" ] <|
             List.map
                 (\value ->
                     case value of
                         Selected valueItem ->
-                            option [ Html.Attributes.value valueItem.id, selected True ]
-                                [ text valueItem.value
+                            div [ class "checkbox" ]
+                                [ label []
+                                    [ input
+                                        [ type_ "checkbox"
+                                        , Html.Attributes.value valueItem.id
+                                        , checked True
+                                        , onClick (onselect (Unselected valueItem.id))
+                                        ]
+                                        []
+                                    , text valueItem.value
+                                    ]
                                 ]
 
                         Unselected valueItem ->
-                            option [ Html.Attributes.value valueItem.id, selected False ]
-                                [ text valueItem.value
+                            div [ class "checkbox" ]
+                                [ label []
+                                    [ input
+                                        [ type_ "checkbox"
+                                        , Html.Attributes.value valueItem.id
+                                        , selected False
+                                        , onClick (onselect (Selected valueItem.id))
+                                        ]
+                                        []
+                                    , text valueItem.value
+                                    ]
                                 ]
                 )
                 values

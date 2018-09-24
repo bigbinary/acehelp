@@ -427,9 +427,21 @@ update msg model =
                     ArticleEdit.update aeMsg
                         currentPageModel
             in
-            ( { model | currentPage = Loaded (ArticleEdit newModel) }
-            , runReaderCmds ArticleEditMsg cmds
-            )
+            -- TODO: Make this better. There should be no need to check currentpage type here.
+            -- This was done to fix a bug that autonavigated user to an empty article edit page
+            case model.currentPage of
+                Loaded (ArticleEdit _) ->
+                    ( { model | currentPage = Loaded (ArticleEdit newModel) }
+                    , runReaderCmds ArticleEditMsg cmds
+                    )
+
+                TransitioningFrom _ ->
+                    ( { model | currentPage = Loaded (ArticleEdit newModel) }
+                    , runReaderCmds ArticleEditMsg cmds
+                    )
+
+                _ ->
+                    ( model, Cmd.none )
 
         UrlCreateMsg cuMsg ->
             let

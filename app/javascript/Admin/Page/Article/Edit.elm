@@ -114,11 +114,11 @@ type Msg
     | SaveArticleResponse (Result GQLClient.Error (Maybe Article))
     | ArticleLoaded (Result GQLClient.Error (Maybe Article))
     | CategoriesLoaded (Result GQLClient.Error (Maybe (List Category)))
-    | CategorySelected (List CategoryId)
+    | CategorySelected (Option CategoryId)
     | UrlsLoaded (Result GQLClient.Error (Maybe (List UrlData)))
     | UpdateStatus ArticleId AvailabilityStatus
     | UpdateStatusResponse (Result GQLClient.Error (Maybe Article))
-    | UrlSelected (List UrlId)
+    | UrlSelected (Option UrlId)
     | TrixInitialize ()
     | ReceivedTimeoutId Int
     | TimedOut Int
@@ -188,8 +188,8 @@ update msg model =
                         , title = Field.update model.title article.title
                         , desc = Field.update model.desc article.desc
                         , articleStatus = availablityStatusIso.reverseGet article.status
-                        , categories = itemSelection (List.map .id article.categories) model.categories
-                        , urls = itemSelection (List.map .id article.urls) model.urls
+                        , categories = selectItemsInList (List.map (.id >> Selected) article.categories) model.categories
+                        , urls = selectItemsInList (List.map (.id >> Selected) article.urls) model.urls
                         , originalArticle = Just article
                         , status = None
                         , isEditable = False
@@ -222,8 +222,8 @@ update msg model =
                         , title = Field.update model.title article.title
                         , desc = Field.update model.desc article.desc
                         , articleStatus = availablityStatusIso.reverseGet article.status
-                        , categories = itemSelection (List.map .id article.categories) model.categories
-                        , urls = itemSelection (List.map .id article.urls) model.urls
+                        , categories = selectItemsInList (List.map (.id >> Selected) article.categories) model.categories
+                        , urls = selectItemsInList (List.map (.id >> Selected) article.urls) model.urls
                         , originalArticle = Just article
                         , errors = []
                       }
@@ -253,7 +253,7 @@ update msg model =
                         | categories =
                             case model.originalArticle of
                                 Just article ->
-                                    itemSelection (List.map .id article.categories) model.categories
+                                    selectItemsInList (List.map (.id >> Selected) article.categories) model.categories
 
                                 Nothing ->
                                     List.map Unselected categories
@@ -268,9 +268,9 @@ update msg model =
         CategoriesLoaded (Err err) ->
             ( { model | errors = [ "There was an error while loading Categories" ] }, [] )
 
-        CategorySelected categoryIds ->
+        CategorySelected categoryId ->
             ( { model
-                | categories = itemSelection categoryIds model.categories
+                | categories = selectItemInList categoryId model.categories
               }
             , [ Strict <| Reader.Reader <| always <| setTimeout delayTime ]
             )
@@ -282,7 +282,7 @@ update msg model =
                         | urls =
                             case model.originalArticle of
                                 Just article ->
-                                    itemSelection (List.map .id article.urls) model.urls
+                                    selectItemsInList (List.map (.id >> Selected) article.urls) model.urls
 
                                 Nothing ->
                                     List.map Unselected urls
@@ -301,9 +301,9 @@ update msg model =
             , [ removeNotificationCmd ]
             )
 
-        UrlSelected selectedUrlIds ->
+        UrlSelected selectedUrlId ->
             ( { model
-                | urls = itemSelection selectedUrlIds model.urls
+                | urls = selectItemInList selectedUrlId model.urls
               }
             , [ Strict <| Reader.Reader <| always <| setTimeout delayTime ]
             )
@@ -324,8 +324,9 @@ update msg model =
                         | articleId = article.id
                         , title = Field.update model.title article.title
                         , desc = Field.update model.desc article.desc
-                        , categories = itemSelection (List.map .id article.categories) model.categories
-                        , urls = itemSelection (List.map .id article.urls) model.urls
+                        , categories =
+                            selectItemsInList (List.map (.id >> Selected) article.categories) model.categories
+                        , urls = selectItemsInList (List.map (.id >> Selected) article.urls) model.urls
                         , originalArticle = Just article
                         , isEditable = False
                         , errors = []
@@ -440,11 +441,7 @@ view model =
                         []
                         [ span
                             []
-<<<<<<< HEAD
-                            [ text "SaveStatus: " ]
-=======
                             [ text "Satus: " ]
->>>>>>> c0682b1... UX fixes
                         , span
                             [ class (statusClass model.articleStatus) ]
                             [ text (availablityStatusIso.get model.articleStatus) ]

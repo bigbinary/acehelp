@@ -68,9 +68,9 @@ type Msg
     | SaveArticle
     | SaveArticleResponse (Result GQLClient.Error ArticleResponse)
     | CategoriesLoaded (Result GQLClient.Error (Maybe (List Category)))
-    | CategorySelected (List CategoryId)
+    | CategorySelected (Option CategoryId)
     | UrlsLoaded (Result GQLClient.Error (Maybe (List UrlData)))
-    | UrlSelected (List UrlId)
+    | UrlSelected (Option UrlId)
 
 
 update : Msg -> Model -> ( Model, List (ReaderCmd Msg) )
@@ -107,8 +107,8 @@ update msg model =
         CategoriesLoaded (Err err) ->
             ( { model | errors = [ "There was an error while loading Categories" ] }, [] )
 
-        CategorySelected categoryIds ->
-            ( { model | categories = itemSelection categoryIds model.categories }, [] )
+        CategorySelected categoryId ->
+            ( { model | categories = selectItemInList categoryId model.categories }, [] )
 
         UrlsLoaded (Ok loadedUrls) ->
             case loadedUrls of
@@ -126,10 +126,10 @@ update msg model =
         UrlsLoaded (Err err) ->
             ( { model | errors = [] }, [] )
 
-        UrlSelected selectedUrlIds ->
+        UrlSelected selectedUrlId ->
             ( { model
                 | urls =
-                    itemSelection selectedUrlIds model.urls
+                    selectItemInList selectedUrlId model.urls
               }
             , []
             )

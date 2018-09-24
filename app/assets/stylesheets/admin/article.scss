@@ -30,6 +30,18 @@
             position: absolute;
             left: 150px;
         }
+        .multi-select{
+            padding: 0px 25px;
+            .checkbox {
+                input {
+                    margin: 0 10px 0 0;
+                }
+                
+            }
+            label{
+                color:#000;
+            }
+        }
     }
     .article-status-block{
         div{
@@ -51,4 +63,7 @@
     trix-editor{
         min-height:500px;
     }
+    
+
+    
 }
