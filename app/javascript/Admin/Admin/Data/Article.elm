@@ -51,7 +51,7 @@ type alias UpdateArticleInputs =
     { id : ArticleId
     , title : String
     , desc : String
-    , categoryId : Maybe String
+    , categoryIds : Maybe (List CategoryId)
     , urlId : Maybe String
     }
 
@@ -167,8 +167,8 @@ updateArticleMutation =
         descVar =
             Var.required "desc" .desc Var.string
 
-        categoryIdVar =
-            Var.optional "category_id" .categoryId Var.string ""
+        categoryIdsVar =
+            Var.optional "categoryIds" .categoryIds (Var.list Var.string) []
 
         urlIdVar =
             Var.optional "url_id" .urlId Var.string ""
@@ -181,7 +181,7 @@ updateArticleMutation =
                         [ ( "id", Arg.variable idVar )
                         , ( "title", Arg.variable titleVar )
                         , ( "desc", Arg.variable descVar )
-                        , ( "category_id", Arg.variable categoryIdVar )
+                        , ( "category_ids", Arg.variable categoryIdsVar )
                         , ( "url_id", Arg.variable urlIdVar )
                         ]
                   )

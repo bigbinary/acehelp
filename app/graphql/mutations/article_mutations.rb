@@ -44,7 +44,7 @@ class Mutations::ArticleMutations
     name "UpdateArticle"
 
     input_field :id, !types.String
-    input_field :category_id, types.String
+    input_field :category_ids, types[types.String]
     input_field :url_id, types.String
     input_field :title, !types.String
     input_field :desc, !types.String
@@ -53,17 +53,15 @@ class Mutations::ArticleMutations
     return_field :errors, types[Types::ErrorType]
 
     resolve ->(object, inputs, context) {
+      debugger
       article = Article.find_by(id: inputs[:id], organization_id: context[:organization].id)
 
       if article.nil?
         errors = Utils::ErrorHandler.new.error("Article not found", context)
       else
         if article.update_attributes(title: inputs[:title], desc: inputs[:desc])
-          # TODO : remove include check instead use update attributes
-          # TODO : accept category_ids currently asscicated to article
-          if inputs[:category_id].present? && !article.category_ids.include?(inputs[:category_id])
-            category = Category.find_by!(id: inputs[:category_id])
-            article.categories << category
+          if inputs[:category_ids].present?
+            article.category_ids = inputs[:category_ids]
           end
           # TODO : remove include check instead use update attributes
           # TODO : accept url_ids currently asscicated to article

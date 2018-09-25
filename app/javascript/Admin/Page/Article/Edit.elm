@@ -476,18 +476,18 @@ articleInputs { articleId, title, desc, categories, urls } =
     { id = articleId
     , title = Field.value title
     , desc = Field.value desc
-    , categoryId =
-        List.filterMap
-            (\option ->
-                case option of
-                    Selected category ->
-                        Just category.id
+    , categoryIds =
+        Just <|
+            List.filterMap
+                (\option ->
+                    case option of
+                        Selected category ->
+                            Just category.id
 
-                    _ ->
-                        Nothing
-            )
-            categories
-            |> List.head
+                        _ ->
+                            Nothing
+                )
+                categories
     , urlId =
         List.filterMap
             (\option ->
