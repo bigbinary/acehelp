@@ -81,10 +81,6 @@ update msg model =
             ( { model | title = Field.update model.title title }, [] )
 
         DescInput desc ->
-            let
-                _ =
-                    Debug.log "Description: " desc
-            in
             ( { model | desc = Field.update model.desc desc }, [] )
 
         SaveArticle ->
@@ -147,8 +143,8 @@ update msg model =
 view : ApiKey -> Model -> Html Msg
 view orgKey model =
     let
-        onTrixChange msg =
-            Html.Events.on "trix-change" (Json.succeed msg)
+        onTrixChange handler =
+            on "trix-change" <| Json.map handler <| Json.at [ "target", "value" ] Json.string
     in
     div []
         [ errorView model.errors
@@ -165,7 +161,8 @@ view orgKey model =
                         ]
                         []
                     ]
-                , div [ class "row article-content" ]
+                , div
+                    [ class "row article-content" ]
                     [ node "trix-editor"
                         [ placeholder "Article content goes here.."
                         , onTrixChange DescInput
