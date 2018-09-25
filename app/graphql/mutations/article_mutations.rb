@@ -45,7 +45,7 @@ class Mutations::ArticleMutations
 
     input_field :id, !types.String
     input_field :category_ids, types[types.String]
-    input_field :url_id, types.String
+    input_field :url_ids, types[types.String]
     input_field :title, !types.String
     input_field :desc, !types.String
 
@@ -53,7 +53,6 @@ class Mutations::ArticleMutations
     return_field :errors, types[Types::ErrorType]
 
     resolve ->(object, inputs, context) {
-      debugger
       article = Article.find_by(id: inputs[:id], organization_id: context[:organization].id)
 
       if article.nil?
@@ -63,11 +62,8 @@ class Mutations::ArticleMutations
           if inputs[:category_ids].present?
             article.category_ids = inputs[:category_ids]
           end
-          # TODO : remove include check instead use update attributes
-          # TODO : accept url_ids currently asscicated to article
-          if inputs[:url_id].present? && !article.url_ids.include?(inputs[:url_id])
-            url = Url.find_by!(id: inputs[:url_id])
-            article.urls << url
+          if inputs[:url_ids].present?
+            article.url_ids = inputs[:url_ids]
           end
           updated_article = article
         else

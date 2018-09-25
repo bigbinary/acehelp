@@ -488,18 +488,18 @@ articleInputs { articleId, title, desc, categories, urls } =
                             Nothing
                 )
                 categories
-    , urlId =
-        List.filterMap
-            (\option ->
-                case option of
-                    Selected url ->
-                        Just url.id
+    , urlIds =
+        Just <|
+            List.filterMap
+                (\option ->
+                    case option of
+                        Selected url ->
+                            Just url.id
 
-                    _ ->
-                        Nothing
-            )
-            urls
-            |> List.head
+                        _ ->
+                            Nothing
+                )
+                urls
     }
 
 

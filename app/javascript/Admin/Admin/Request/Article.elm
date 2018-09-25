@@ -58,7 +58,7 @@ requestUpdateArticle articleInputs =
                     , title = articleInputs.title
                     , desc = articleInputs.desc
                     , categoryIds = articleInputs.categoryIds
-                    , urlId = articleInputs.urlId
+                    , urlIds = articleInputs.urlIds
                     }
                     updateArticleMutation
         )
