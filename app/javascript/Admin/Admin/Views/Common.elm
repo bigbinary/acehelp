@@ -26,30 +26,30 @@ multiSelectMenu title values onselect =
                     case value of
                         Selected valueItem ->
                             div [ class "checkbox" ]
-                                [ label []
-                                    [ input
-                                        [ type_ "checkbox"
-                                        , Html.Attributes.value valueItem.id
-                                        , checked True
-                                        , onClick (onselect (Unselected valueItem.id))
-                                        ]
-                                        []
-                                    , text valueItem.value
+                                [ input
+                                    [ type_ "checkbox"
+                                    , Html.Attributes.value valueItem.id
+                                    , checked True
+                                    , onClick (onselect (Unselected valueItem.id))
+                                    , id valueItem.id
                                     ]
+                                    []
+                                , label
+                                    [ for valueItem.id ]
+                                    [ text valueItem.value ]
                                 ]
 
                         Unselected valueItem ->
                             div [ class "checkbox" ]
-                                [ label []
-                                    [ input
-                                        [ type_ "checkbox"
-                                        , Html.Attributes.value valueItem.id
-                                        , selected False
-                                        , onClick (onselect (Selected valueItem.id))
-                                        ]
-                                        []
-                                    , text valueItem.value
+                                [ input
+                                    [ type_ "checkbox"
+                                    , Html.Attributes.value valueItem.id
+                                    , selected False
+                                    , onClick (onselect (Selected valueItem.id))
+                                    , id valueItem.id
                                     ]
+                                    []
+                                , label [ for valueItem.id ] [ text valueItem.value ]
                                 ]
                 )
                 values
