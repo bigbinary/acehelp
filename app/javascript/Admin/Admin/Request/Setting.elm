@@ -1,4 +1,8 @@
-module Admin.Request.Setting exposing (requestOrganizationSetting, requestUpdateSetting)
+module Admin.Request.Setting exposing
+    ( requestOrganizationSetting
+    , requestUpdateBaseUrlSetting
+    , requestUpdateVisibilitySetting
+    )
 
 import Admin.Data.Setting exposing (..)
 import Admin.Request.Helper exposing (..)
@@ -8,15 +12,27 @@ import Reader exposing (Reader)
 import Task exposing (Task)
 
 
-requestUpdateSetting : UpdateSettingInputs -> Reader ( NodeEnv, ApiKey, AppUrl ) (Task GQLClient.Error Setting)
-requestUpdateSetting settingInputs =
+requestUpdateVisibilitySetting : UpdateSettingInputs -> Reader ( NodeEnv, ApiKey, AppUrl ) (Task GQLClient.Error Setting)
+requestUpdateVisibilitySetting settingInputs =
     Reader.Reader
         (\( nodeEnv, apiKey, appUrl ) ->
             GQLClient.customSendMutation (requestOptions nodeEnv apiKey appUrl) <|
                 GQLBuilder.request
                     { visibility = settingInputs.visibility
                     }
-                    updateSettingMutation
+                    updateVisibilityMutation
+        )
+
+
+requestUpdateBaseUrlSetting : { base_url : String } -> Reader ( NodeEnv, ApiKey, AppUrl ) (Task GQLClient.Error Setting)
+requestUpdateBaseUrlSetting settingInputs =
+    Reader.Reader
+        (\( nodeEnv, apiKey, appUrl ) ->
+            GQLClient.customSendMutation (requestOptions nodeEnv apiKey appUrl) <|
+                GQLBuilder.request
+                    { visibility = settingInputs.base_url
+                    }
+                    updateBaseUrlMutation
         )
 
 

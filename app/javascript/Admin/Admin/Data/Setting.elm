@@ -1,4 +1,11 @@
-module Admin.Data.Setting exposing (Setting, UpdateSettingInputs, organizationSettingQuery, settingObject, updateSettingMutation)
+module Admin.Data.Setting exposing
+    ( Setting
+    , UpdateSettingInputs
+    , organizationSettingQuery
+    , settingObject
+    , updateBaseUrlMutation
+    , updateVisibilityMutation
+    )
 
 import GraphQL.Request.Builder as GQLBuilder
 import GraphQL.Request.Builder.Arg as Arg
@@ -23,8 +30,8 @@ settingObject =
         |> GQLBuilder.with (GQLBuilder.field "visibility" [] GQLBuilder.bool)
 
 
-updateSettingMutation : GQLBuilder.Document GQLBuilder.Mutation Setting UpdateSettingInputs
-updateSettingMutation =
+updateVisibilityMutation : GQLBuilder.Document GQLBuilder.Mutation Setting UpdateSettingInputs
+updateVisibilityMutation =
     let
         visibilityVar =
             Var.required "visibility" .visibility Var.string
@@ -35,6 +42,29 @@ updateSettingMutation =
                 [ ( "input"
                   , Arg.object
                         [ ( "visibility", Arg.variable visibilityVar )
+                        ]
+                  )
+                ]
+                (GQLBuilder.extract <|
+                    GQLBuilder.field "setting"
+                        []
+                        settingObject
+                )
+            )
+
+
+updateBaseUrlMutation : GQLBuilder.Document GQLBuilder.Mutation Setting UpdateSettingInputs
+updateBaseUrlMutation =
+    let
+        baseUrlVar =
+            Var.required "base_url" .visibility Var.string
+    in
+    GQLBuilder.mutationDocument <|
+        GQLBuilder.extract
+            (GQLBuilder.field "updateBaseUrl"
+                [ ( "input"
+                  , Arg.object
+                        [ ( "base_url", Arg.variable baseUrlVar )
                         ]
                   )
                 ]

@@ -29,11 +29,12 @@ type alias Model =
 
 type SubPage
     = Widget Widget.Model
+    | General General.Model
 
 
 type MenuPosition
     = MenuWidget
-    | MenuSettings
+    | MenuGeneral
 
 
 initModel : Model
@@ -43,9 +44,8 @@ initModel =
 
 init : ( Model, List (ReaderCmd Msg) )
 init =
-    ( initModel
-    , []
-    )
+    Widget.init
+        |> mapSubViewUpdate initModel Widget WidgetMsg
 
 
 
@@ -55,23 +55,39 @@ init =
 type Msg
     = SubMenuClicked MenuPosition
     | WidgetMsg Widget.Msg
+    | GeneralMsg General.Msg
 
 
 update : Msg -> Model -> ( Model, List (ReaderCmd Msg) )
 update msg model =
     case msg of
         WidgetMsg menuMsg ->
-            let
-                subModel =
-                    case model.currentSubPage of
-                        Widget widgetModel ->
-                            widgetModel
-            in
-            Widget.update menuMsg subModel
-                |> mapSubViewUpdate model Widget WidgetMsg
+            case model.currentSubPage of
+                Widget widgetModel ->
+                    Widget.update menuMsg widgetModel
+                        |> mapSubViewUpdate model Widget WidgetMsg
 
-        SubMenuClicked newModel ->
-            ( model, [] )
+                _ ->
+                    ( model, [] )
+
+        GeneralMsg menuMsg ->
+            case model.currentSubPage of
+                General generalModel ->
+                    General.update menuMsg generalModel
+                        |> mapSubViewUpdate model General GeneralMsg
+
+                _ ->
+                    ( model, [] )
+
+        SubMenuClicked menuPosition ->
+            case menuPosition of
+                MenuWidget ->
+                    Widget.init
+                        |> mapSubViewUpdate model Widget WidgetMsg
+
+                MenuGeneral ->
+                    General.init
+                        |> mapSubViewUpdate model General GeneralMsg
 
 
 mapSubViewUpdate model modelMap msgMap ( subPageModel, subCmd ) =
@@ -96,6 +112,9 @@ view nodeEnv organizationKey appUrl model =
             case model.currentSubPage of
                 Widget subModel ->
                     Html.map WidgetMsg <| Widget.view nodeEnv organizationKey appUrl subModel
+
+                General subModel ->
+                    Html.map GeneralMsg <| General.view nodeEnv organizationKey appUrl subModel
     in
     div [ class "container" ]
         [ div [ class "row" ] [ div [ class "col-md-2" ] [ menuView model ], div [ class "col" ] [ contentView ] ] ]
@@ -104,7 +123,17 @@ view nodeEnv organizationKey appUrl model =
 menuView model =
     div []
         [ nav [ class "nav flex-column" ]
-            [ a [ href "#", classList [ ( "nav-link", True ), ( "active", model.currentPosition == MenuWidget ) ], onClick <| SubMenuClicked MenuWidget ] [ text "Widget" ]
-            , a [ href "#", classList [ ( "nav-link", True ), ( "active", False ) ] ] [ text "Settings" ]
+            [ a
+                [ href "#"
+                , classList [ ( "nav-link", True ), ( "active", model.currentPosition == MenuWidget ) ]
+                , onClick <| SubMenuClicked MenuWidget
+                ]
+                [ text "Widget" ]
+            , a
+                [ href "#"
+                , classList [ ( "nav-link", True ), ( "active", model.currentPosition == MenuGeneral ) ]
+                , onClick <| SubMenuClicked MenuGeneral
+                ]
+                [ text "General" ]
             ]
         ]

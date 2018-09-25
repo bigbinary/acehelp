@@ -21,7 +21,7 @@ import Task exposing (Task)
 
 
 type alias Model =
-    { baseUrl : Field validateUrl String
+    { baseUrl : Field String String
     , currentBaseUrl : String
     , errors : List String
     , isSaving : Bool
@@ -30,7 +30,7 @@ type alias Model =
 
 initModel : Model
 initModel =
-    { baseUrl = ""
+    { baseUrl = Field validateUrl ""
     , currentBaseUrl = ""
     , errors = []
     , isSaving = False
@@ -63,7 +63,8 @@ update msg model =
 
         SaveSettingResponse (Ok settingResp) ->
             ( { model
-                | visibility = settingResp.visibility
+                | baseUrl = Field.update model.baseUrl <| Maybe.withDefault "" settingResp.base_url
+                , currentBaseUrl = Maybe.withDefault "" settingResp.base_url
                 , isSaving = False
               }
             , []
@@ -73,13 +74,18 @@ update msg model =
             ( { model | errors = [ "There was an error saving the base url" ], isSaving = False }, [] )
 
         LoadSetting (Ok setting) ->
-            ( { model | baseUrl = setting.base_url, currentBaseUrl = setting.base_url }, [] )
+            ( { model
+                | baseUrl = Field.update model.baseUrl <| Maybe.withDefault "" setting.base_url
+                , currentBaseUrl = Maybe.withDefault "" setting.base_url
+              }
+            , []
+            )
 
         LoadSetting (Err err) ->
             ( { model | errors = [ "There was an error loading settings" ] }, [] )
 
         InputBaseUrl baseUrl ->
-            {}
+            ( { model | baseUrl = Field.update model.baseUrl baseUrl }, [] )
 
 
 
@@ -88,10 +94,10 @@ update msg model =
 
 save : Model -> ( Model, List (ReaderCmd Msg) )
 save model =
-    ( { model | error = [], isSaving = True }
+    ( { model | errors = [], isSaving = True }
     , [ Strict <|
             Reader.map (Task.attempt SaveSettingResponse)
-                (requestUpdateSetting (settingInputs model))
+                (requestUpdateBaseUrlSetting { base_url = Field.value model.baseUrl })
       ]
     )
 
@@ -100,27 +106,26 @@ view : NodeEnv -> ApiKey -> AppUrl -> Model -> Html Msg
 view nodeEnv organizationKey appUrl model =
     div
         []
-        [ errorAlertView model.error
+        [ errorAlertView model.errors
         , div
             [ class "content-header" ]
             [ text "General Settings" ]
         , div
             [ class "content-text" ]
             [ text "Set the base Url for your website" ]
-        , div [ class "row toggle" ]
-            [ div [ class "col-md-4 toggle-label" ] [ text "Enable Widget" ]
-            , div [ class "col-md-8" ]
-                [ div []
-                    [ input
-                        [ type_ "text"
-                        , value model.baseUrl
-                        , onInput InputBaseUrl
-                        ]
-                        []
+        , div [ class "row" ]
+            [ div [ class "col-md-4" ]
+                [ input
+                    [ type_ "text"
+                    , Html.Attributes.value <| Field.value model.baseUrl
+                    , onInput InputBaseUrl
+                    , class "form-control"
+                    , placeholder "https://www.example.com"
                     ]
+                    []
                 ]
             ]
-        , div [ class "row toggle" ]
+        , div [ class "row" ]
             [ div [ class "offset-md-10 col-md-2" ]
                 [ button
                     [ classList [ ( "btn btn-primary", True ), ( "disabled", model.isSaving ) ]

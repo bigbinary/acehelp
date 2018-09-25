@@ -119,7 +119,7 @@ save model =
     ( { model | error = [], isSaving = True }
     , [ Strict <|
             Reader.map (Task.attempt SaveSettingResponse)
-                (requestUpdateSetting (settingInputs model))
+                (requestUpdateVisibilitySetting (settingInputs model))
       ]
     )
 
