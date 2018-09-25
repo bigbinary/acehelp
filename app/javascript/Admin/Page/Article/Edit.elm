@@ -441,7 +441,7 @@ view model =
                         []
                         [ span
                             []
-                            [ text "Satus: " ]
+                            [ text "Status: " ]
                         , span
                             [ class (statusClass model.articleStatus) ]
                             [ text (availablityStatusIso.get model.articleStatus) ]
