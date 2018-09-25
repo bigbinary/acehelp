@@ -40,6 +40,7 @@ requestCreateArticle articleInputs =
                     { title = articleInputs.title
                     , desc = articleInputs.desc
                     , categoryIds = articleInputs.categoryIds
+                    , urlIds = articleInputs.urlIds
                     }
                     createArticleMutation
         )
@@ -56,8 +57,8 @@ requestUpdateArticle articleInputs =
                     { id = articleInputs.id
                     , title = articleInputs.title
                     , desc = articleInputs.desc
-                    , categoryId = articleInputs.categoryId
-                    , urlId = articleInputs.urlId
+                    , categoryIds = articleInputs.categoryIds
+                    , urlIds = articleInputs.urlIds
                     }
                     updateArticleMutation
         )

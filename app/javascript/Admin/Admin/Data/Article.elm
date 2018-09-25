@@ -44,6 +44,7 @@ type alias CreateArticleInputs =
     { title : String
     , desc : String
     , categoryIds : Maybe (List CategoryId)
+    , urlIds : Maybe (List UrlId)
     }
 
 
@@ -51,8 +52,8 @@ type alias UpdateArticleInputs =
     { id : ArticleId
     , title : String
     , desc : String
-    , categoryId : Maybe String
-    , urlId : Maybe String
+    , categoryIds : Maybe (List CategoryId)
+    , urlIds : Maybe (List UrlId)
     }
 
 
@@ -139,6 +140,9 @@ createArticleMutation =
 
         categoryIdsVar =
             Var.optional "categoryIds" .categoryIds (Var.list Var.string) []
+
+        urlIdsVar =
+            Var.optional "urlIds" .urlIds (Var.list Var.string) []
     in
     GQLBuilder.mutationDocument <|
         GQLBuilder.extract
@@ -148,6 +152,7 @@ createArticleMutation =
                         [ ( "title", Arg.variable titleVar )
                         , ( "desc", Arg.variable descVar )
                         , ( "category_ids", Arg.variable categoryIdsVar )
+                        , ( "url_ids", Arg.variable urlIdsVar )
                         ]
                   )
                 ]
@@ -167,11 +172,11 @@ updateArticleMutation =
         descVar =
             Var.required "desc" .desc Var.string
 
-        categoryIdVar =
-            Var.optional "category_id" .categoryId Var.string ""
+        categoryIdsVar =
+            Var.optional "categoryIds" .categoryIds (Var.list Var.string) []
 
-        urlIdVar =
-            Var.optional "url_id" .urlId Var.string ""
+        urlIdsVar =
+            Var.optional "urlIds" .urlIds (Var.list Var.string) []
     in
     GQLBuilder.mutationDocument <|
         GQLBuilder.extract
@@ -181,8 +186,8 @@ updateArticleMutation =
                         [ ( "id", Arg.variable idVar )
                         , ( "title", Arg.variable titleVar )
                         , ( "desc", Arg.variable descVar )
-                        , ( "category_id", Arg.variable categoryIdVar )
-                        , ( "url_id", Arg.variable urlIdVar )
+                        , ( "category_ids", Arg.variable categoryIdsVar )
+                        , ( "url_ids", Arg.variable urlIdsVar )
                         ]
                   )
                 ]
