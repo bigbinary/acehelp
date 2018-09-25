@@ -8,6 +8,7 @@ import GraphQL.Request.Builder.Variable as Var
 type alias Organization =
     { id : String
     , name : String
+    , widgetVisibility : Bool
     }
 
 
@@ -24,5 +25,6 @@ organizationQuery =
                 (GQLBuilder.object Organization
                     |> GQLBuilder.with (GQLBuilder.field "id" [] GQLBuilder.string)
                     |> GQLBuilder.with (GQLBuilder.field "name" [] GQLBuilder.string)
+                    |> GQLBuilder.with (GQLBuilder.field "widget_visibility" [] GQLBuilder.bool)
                 )
             )
