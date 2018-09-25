@@ -432,7 +432,7 @@ view model =
                         []
                     ]
                 ]
-            , div [ class "col-sm article-meta-data-block" ]
+            , div [ class "col-md-4 article-meta-data-block" ]
                 [ multiSelectCategoryList "Categories:" model.categories CategorySelected
                 , multiSelectUrlList "Urls:" model.urls UrlSelected
                 , div

@@ -165,7 +165,7 @@ view orgKey model =
                         []
                     ]
                 ]
-            , div [ class "col-sm article-meta-data-block" ]
+            , div [ class "col-md-4 article-meta-data-block" ]
                 [ multiSelectCategoryList "Categories:" model.categories CategorySelected
                 , multiSelectUrlList "Urls:" model.urls UrlSelected
                 , button [ id "create-article", type_ "button", class "btn btn-success", onClick SaveArticle ] [ text "Create Article" ]
