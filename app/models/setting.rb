@@ -7,4 +7,6 @@ class Setting < ApplicationRecord
     enable: true,
     disable: false
   }
+
+  validates_uniqueness_of :base_url, case_sensitive: false
 end

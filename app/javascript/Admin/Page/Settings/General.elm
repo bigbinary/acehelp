@@ -71,7 +71,12 @@ update msg model =
             )
 
         SaveSettingResponse (Err error) ->
-            ( { model | errors = [ "There was an error saving the base url" ], isSaving = False }, [] )
+            ( { model
+                | errors = [ "There was an error saving the base url" ]
+                , isSaving = False
+              }
+            , []
+            )
 
         LoadSetting (Ok setting) ->
             ( { model

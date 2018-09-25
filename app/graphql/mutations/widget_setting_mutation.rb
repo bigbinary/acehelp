@@ -1,27 +1,28 @@
 # frozen_string_literal: true
 
 class Mutations::WidgetSettingMutation
-  Create = GraphQL::Relay::Mutation.define do
-    name "SaveSettings"
+  Update = GraphQL::Relay::Mutation.define do
+    name "UpdateSettings"
 
-    input_field :base_url, types.String
+    input_field :base_url, !types.String
 
     return_field :setting, Types::SettingType
     return_field :errors, types[Types::ErrorType]
 
     resolve ->(object, inputs, context) {
       raise GraphQL::ExecutionError, "Not logged in" unless context[:current_user]
-      new_setting = Setting.new(
-        organization_id: context[:organization].id,
-        base_url: inputs[:base_url]
-      )
-      if new_setting.save
-        setting = new_setting
+      setting = Setting.find_or_create_by(organization_id: context[:organization].id)
+      if setting
+        if setting.update_attributes!(base_url: inputs[:base_url])
+          updated_settings = setting
+        else
+          errors = Utils::ErrorHandler.new.detailed_error(setting, context)
+        end
       else
-        errors = Utils::ErrorHandler.new.detailed_error(new_setting, context)
+        errors = Utils::ErrorHandler.new.error("Setting not available.", context)
       end
       {
-        setting: setting,
+        setting: updated_settings,
         errors: errors
       }
     }
@@ -40,7 +41,6 @@ class Mutations::WidgetSettingMutation
       setting = Setting.find_or_create_by(organization_id: context[:organization].id)
       if setting
         if setting.update_attributes(visibility: inputs[:visibility].to_sym)
-
           updated_settings = setting
         else
           errors = Utils::ErrorHandler.new.detailed_error(setting, context)

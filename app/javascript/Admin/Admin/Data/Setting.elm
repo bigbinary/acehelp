@@ -61,7 +61,7 @@ updateBaseUrlMutation =
     in
     GQLBuilder.mutationDocument <|
         GQLBuilder.extract
-            (GQLBuilder.field "updateBaseUrl"
+            (GQLBuilder.field "updateBaseUrlForOrganization"
                 [ ( "input"
                   , Arg.object
                         [ ( "base_url", Arg.variable baseUrlVar )
