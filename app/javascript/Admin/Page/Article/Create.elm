@@ -16,6 +16,7 @@ import Helpers exposing (..)
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
+import Json.Decode as Json
 import Page.Article.Common exposing (..)
 import Reader exposing (Reader)
 import Route exposing (..)
@@ -80,6 +81,10 @@ update msg model =
             ( { model | title = Field.update model.title title }, [] )
 
         DescInput desc ->
+            let
+                _ =
+                    Debug.log "Description: " desc
+            in
             ( { model | desc = Field.update model.desc desc }, [] )
 
         SaveArticle ->
@@ -141,6 +146,10 @@ update msg model =
 
 view : ApiKey -> Model -> Html Msg
 view orgKey model =
+    let
+        onTrixChange msg =
+            Html.Events.on "trix-change" (Json.succeed msg)
+    in
     div []
         [ errorView model.errors
         , div [ class "row article-block" ]
@@ -156,11 +165,10 @@ view orgKey model =
                         ]
                         []
                     ]
-                , div
-                    [ class "row article-content" ]
+                , div [ class "row article-content" ]
                     [ node "trix-editor"
                         [ placeholder "Article content goes here.."
-                        , onInput DescInput
+                        , onTrixChange DescInput
                         ]
                         []
                     ]
