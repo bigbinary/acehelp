@@ -1,12 +1,12 @@
 module Page.Article.Common exposing
     ( SaveStatus(..)
-    , articleUrls
     , categoryToValue
     , errorsIn
-    , itemSelection
     , multiSelectCategoryList
     , multiSelectUrlList
     , savingIndicator
+    , selectItemInList
+    , selectItemsInList
     , statusClass
     , statusToButtonText
     , successView
@@ -42,15 +42,7 @@ successView success =
             success
 
 
-articleUrls : List UrlData -> Html msg
-articleUrls urls =
-    div []
-        [ h6 [] [ text "Linked URLs:" ]
-        , span [ class "badge badge-secondary" ] [ text "/getting-started/this-is-hardcoded" ]
-        ]
-
-
-multiSelectCategoryList : String -> List (Option Category) -> (List CategoryId -> msg) -> Html msg
+multiSelectCategoryList : String -> List (Option Category) -> (Option CategoryId -> msg) -> Html msg
 multiSelectCategoryList title categories onItemClick =
     multiSelectMenu title (List.map categoryToValue categories) onItemClick
 
@@ -61,7 +53,7 @@ savingIndicator =
         [ text "Saving.." ]
 
 
-multiSelectUrlList : String -> List (Option UrlData) -> (List UrlId -> msg) -> Html msg
+multiSelectUrlList : String -> List (Option UrlData) -> (Option UrlId -> msg) -> Html msg
 multiSelectUrlList title urls onselect =
     multiSelectMenu title (List.map urlToValue urls) onselect
 
@@ -98,24 +90,37 @@ urlToValue url =
                 }
 
 
-itemSelection : List a -> List (Option { b | id : a }) -> List (Option { b | id : a })
-itemSelection selectedItemList itemList =
-    let
-        switchItem item =
-            if List.member item.id selectedItemList then
-                Selected item
+selectItemsInList : List (Option a) -> List (Option { b | id : a }) -> List (Option { b | id : a })
+selectItemsInList selectedItems itemList =
+    List.foldl
+        (\selectedItem acc ->
+            selectItemInList selectedItem acc
+        )
+        itemList
+        selectedItems
 
-            else
-                Unselected item
-    in
+
+selectItemInList : Option a -> List (Option { b | id : a }) -> List (Option { b | id : a })
+selectItemInList selectedItem itemList =
     List.map
         (\item ->
-            case item of
-                Selected innerItem ->
-                    switchItem innerItem
+            case ( item, selectedItem ) of
+                ( Selected innerItem, Unselected newItemId ) ->
+                    if innerItem.id == newItemId then
+                        Unselected innerItem
 
-                Unselected innerItem ->
-                    switchItem innerItem
+                    else
+                        Selected innerItem
+
+                ( Unselected innerItem, Selected newItemId ) ->
+                    if innerItem.id == newItemId then
+                        Selected innerItem
+
+                    else
+                        Unselected innerItem
+
+                _ ->
+                    item
         )
         itemList
 
@@ -135,7 +140,7 @@ errorsIn fields =
             )
 
 
-statusClass : AvailabilitySatus -> String
+statusClass : AvailabilityStatus -> String
 statusClass status =
     case status of
         Active ->
@@ -145,7 +150,7 @@ statusClass status =
             "offline-status"
 
 
-statusToButtonText : AvailabilitySatus -> String
+statusToButtonText : AvailabilityStatus -> String
 statusToButtonText status =
     case status of
         Inactive ->

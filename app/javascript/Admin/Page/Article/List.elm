@@ -44,7 +44,7 @@ init =
 
 type Msg
     = ArticleListLoaded (Result GQLClient.Error (Maybe (List ArticleSummary)))
-    | UpdateArticleStatus ArticleId AvailabilitySatus
+    | UpdateArticleStatus ArticleId AvailabilityStatus
     | UpdateArticleStatusResponse (Result GQLClient.Error (Maybe Article))
     | DeleteArticle ArticleId
     | DeleteArticleResponse (Result GQLClient.Error (Maybe ArticleId))
@@ -172,8 +172,8 @@ rows : ApiKey -> Model -> ArticleSummary -> Html Msg
 rows orgKey model article =
     div
         [ class "listingRow" ]
-        [ span
-            [ class "textColumn" ]
+        [ a
+            [ class "textColumn", href <| routeToString <| ArticleShow orgKey article.id ]
             [ text article.title ]
         , a
             [ href <| routeToString <| ArticleEdit orgKey article.id

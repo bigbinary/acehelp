@@ -14,6 +14,7 @@ type Route
     = ArticleList ApiKey
     | ArticleCreate ApiKey
     | ArticleEdit ApiKey ArticleId
+    | ArticleShow ApiKey ArticleId
     | CategoryList ApiKey
     | CategoryCreate ApiKey
     | CategoryEdit ApiKey CategoryId
@@ -51,7 +52,8 @@ routeMatcher =
         , UrlParser.map UrlCreate (s "organizations" </> string </> s "urls" </> s "new")
         , UrlParser.map CategoryCreate (s "organizations" </> string </> s "categories" </> s "new")
         , UrlParser.map TeamMemberCreate (s "organizations" </> string </> s "team" </> s "new")
-        , UrlParser.map ArticleEdit (s "organizations" </> string </> s "articles" </> string)
+        , UrlParser.map ArticleEdit (s "organizations" </> string </> s "articles" </> s "edit" </> string)
+        , UrlParser.map ArticleShow (s "organizations" </> string </> s "articles" </> s "show" </> string)
         , UrlParser.map UrlEdit (s "organizations" </> string </> s "urls" </> string </> s "edit")
         , UrlParser.map TicketEdit (s "organizations" </> string </> s "tickets" </> string)
         , UrlParser.map OrganizationCreate (s "organizations" </> s "new")
@@ -114,7 +116,10 @@ routeToString page =
                     [ "organizations", organizationApiKey, "urls", urlId, "edit" ]
 
                 ArticleEdit organizationApiKey articleId ->
-                    [ "organizations", organizationApiKey, "articles", articleId ]
+                    [ "organizations", organizationApiKey, "articles", "edit", articleId ]
+
+                ArticleShow organizationApiKey articleId ->
+                    [ "organizations", organizationApiKey, "articles", "show", articleId ]
 
                 TicketEdit organizationApiKey ticketId ->
                     [ "organizations", organizationApiKey, "tickets", ticketId ]

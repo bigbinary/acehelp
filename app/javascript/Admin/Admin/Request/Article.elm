@@ -96,7 +96,7 @@ requestDeleteArticle articleId =
 
 requestUpdateArticleStatus :
     ArticleId
-    -> AvailabilitySatus
+    -> AvailabilityStatus
     -> Reader ( NodeEnv, ApiKey, AppUrl ) (Task GQLClient.Error (Maybe Article))
 requestUpdateArticleStatus articleId articleStatus =
     Reader.Reader

@@ -1,14 +1,14 @@
-module Admin.Data.Status exposing (AvailabilitySatus(..), availablityStatusIso, reverseCurrentAvailabilityStatus)
+module Admin.Data.Status exposing (AvailabilityStatus(..), availablityStatusIso, reverseCurrentAvailabilityStatus)
 
 import Monocle.Iso exposing (..)
 
 
-type AvailabilitySatus
+type AvailabilityStatus
     = Active
     | Inactive
 
 
-availablityStatusToString : AvailabilitySatus -> String
+availablityStatusToString : AvailabilityStatus -> String
 availablityStatusToString status =
     case status of
         Inactive ->
@@ -18,7 +18,7 @@ availablityStatusToString status =
             "Active"
 
 
-stringToAvailablityStatus : String -> AvailabilitySatus
+stringToAvailablityStatus : String -> AvailabilityStatus
 stringToAvailablityStatus status =
     case status of
         "active" ->
@@ -28,7 +28,7 @@ stringToAvailablityStatus status =
             Inactive
 
 
-availablityStatusIso : Iso AvailabilitySatus String
+availablityStatusIso : Iso AvailabilityStatus String
 availablityStatusIso =
     Iso availablityStatusToString stringToAvailablityStatus
 

@@ -58,7 +58,7 @@ type Msg
     = CategoriesLoaded (Result GQLClient.Error (Maybe (List Category)))
     | DeleteCategory CategoryId
     | DeleteCategoryResponse (Result GQLClient.Error (Maybe CategoryId))
-    | UpdateCategoryStatus CategoryId AvailabilitySatus
+    | UpdateCategoryStatus CategoryId AvailabilityStatus
 
 
 update : Msg -> Model -> ( Model, List (ReaderCmd Msg) )
@@ -177,7 +177,7 @@ deleteCategoryById model categoryId =
     ( model, [ cmd ] )
 
 
-updateCategoryStatus : Model -> CategoryId -> AvailabilitySatus -> ( Model, List (ReaderCmd Msg) )
+updateCategoryStatus : Model -> CategoryId -> AvailabilityStatus -> ( Model, List (ReaderCmd Msg) )
 updateCategoryStatus model categoryId categoryStatus =
     let
         cmd =
