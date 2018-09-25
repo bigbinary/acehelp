@@ -1,9 +1,11 @@
 module Page.Settings.General exposing (Model, Msg(..), init, initModel, save, update, view)
 
+import Admin.Data.Common exposing (..)
 import Admin.Data.ReaderCmd exposing (..)
 import Admin.Data.Setting exposing (..)
 import Admin.Request.Helper exposing (ApiKey, AppUrl, NodeEnv, baseUrl)
 import Admin.Request.Setting exposing (..)
+import Admin.Views.Common exposing (..)
 import Field exposing (..)
 import Field.ValidationResult exposing (..)
 import GraphQL.Client.Http as GQLClient
@@ -11,7 +13,6 @@ import Helpers exposing (..)
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
-import Page.Errors exposing (errorAlertView)
 import Reader exposing (Reader)
 import Task exposing (Task)
 
@@ -25,6 +26,7 @@ type alias Model =
     , currentBaseUrl : String
     , errors : List String
     , isSaving : Bool
+    , success : Maybe String
     }
 
 
@@ -34,6 +36,7 @@ initModel =
     , currentBaseUrl = ""
     , errors = []
     , isSaving = False
+    , success = Nothing
     }
 
 
@@ -51,7 +54,7 @@ init =
 type Msg
     = LoadSetting (Result GQLClient.Error Setting)
     | SaveSetting
-    | SaveSettingResponse (Result GQLClient.Error Setting)
+    | SaveSettingResponse (Result GQLClient.Error SettingsResponse)
     | InputBaseUrl String
 
 
@@ -61,19 +64,27 @@ update msg model =
         SaveSetting ->
             save model
 
-        SaveSettingResponse (Ok settingResp) ->
-            ( { model
-                | baseUrl = Field.update model.baseUrl <| Maybe.withDefault "" settingResp.base_url
-                , currentBaseUrl = Maybe.withDefault "" settingResp.base_url
-                , isSaving = False
-              }
-            , []
-            )
+        SaveSettingResponse (Ok newSetting) ->
+            case newSetting.setting of
+                Just setting ->
+                    ( { model
+                        | baseUrl = Field.update model.baseUrl <| Maybe.withDefault "" setting.base_url
+                        , currentBaseUrl = Maybe.withDefault "" setting.base_url
+                        , isSaving = False
+                        , errors = []
+                        , success = Just "Settings have been updated"
+                      }
+                    , []
+                    )
+
+                Nothing ->
+                    ( { model | errors = flattenErrors newSetting.errors, success = Nothing }, [] )
 
         SaveSettingResponse (Err error) ->
             ( { model
                 | errors = [ "There was an error saving the base url" ]
                 , isSaving = False
+                , success = Nothing
               }
             , []
             )
@@ -82,12 +93,14 @@ update msg model =
             ( { model
                 | baseUrl = Field.update model.baseUrl <| Maybe.withDefault "" setting.base_url
                 , currentBaseUrl = Maybe.withDefault "" setting.base_url
+                , success = Nothing
+                , errors = []
               }
             , []
             )
 
         LoadSetting (Err err) ->
-            ( { model | errors = [ "There was an error loading settings" ] }, [] )
+            ( { model | errors = [ "There was an error loading settings" ], success = Nothing }, [] )
 
         InputBaseUrl baseUrl ->
             ( { model | baseUrl = Field.update model.baseUrl baseUrl }, [] )
@@ -111,7 +124,8 @@ view : NodeEnv -> ApiKey -> AppUrl -> Model -> Html Msg
 view nodeEnv organizationKey appUrl model =
     div
         []
-        [ errorAlertView model.errors
+        [ errorView model.errors
+        , successView model.success
         , div
             [ class "content-header" ]
             [ text "General Settings" ]

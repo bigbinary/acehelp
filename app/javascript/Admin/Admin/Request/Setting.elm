@@ -12,7 +12,7 @@ import Reader exposing (Reader)
 import Task exposing (Task)
 
 
-requestUpdateVisibilitySetting : UpdateSettingInputs -> Reader ( NodeEnv, ApiKey, AppUrl ) (Task GQLClient.Error Setting)
+requestUpdateVisibilitySetting : UpdateSettingInputs -> Reader ( NodeEnv, ApiKey, AppUrl ) (Task GQLClient.Error SettingsResponse)
 requestUpdateVisibilitySetting settingInputs =
     Reader.Reader
         (\( nodeEnv, apiKey, appUrl ) ->
@@ -24,7 +24,7 @@ requestUpdateVisibilitySetting settingInputs =
         )
 
 
-requestUpdateBaseUrlSetting : { base_url : String } -> Reader ( NodeEnv, ApiKey, AppUrl ) (Task GQLClient.Error Setting)
+requestUpdateBaseUrlSetting : { base_url : String } -> Reader ( NodeEnv, ApiKey, AppUrl ) (Task GQLClient.Error SettingsResponse)
 requestUpdateBaseUrlSetting settingInputs =
     Reader.Reader
         (\( nodeEnv, apiKey, appUrl ) ->

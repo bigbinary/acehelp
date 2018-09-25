@@ -1,4 +1,11 @@
-module Admin.Views.Common exposing (errorView, loadingIndicator, multiSelectMenu, renderError, spinner)
+module Admin.Views.Common exposing
+    ( errorView
+    , loadingIndicator
+    , multiSelectMenu
+    , renderError
+    , spinner
+    , successView
+    )
 
 import Admin.Data.Common exposing (..)
 import Html exposing (..)
@@ -81,3 +88,15 @@ errorView errors =
         _ ->
             div [ class "alert alert-danger alert-dismissible fade show", attribute "role" "alert" ]
                 [ text <| (++) "Error: " <| String.join ", " errors ]
+
+
+successView : Maybe String -> Html msg
+successView success =
+    Maybe.withDefault (text "") <|
+        Maybe.map
+            (\message ->
+                div [ class "alert alert-success alert-dismissible fade show", attribute "role" "alert" ]
+                    [ text <| message
+                    ]
+            )
+            success

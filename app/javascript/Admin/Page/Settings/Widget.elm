@@ -9,15 +9,16 @@ module Page.Settings.Widget exposing
     , widgetSettingsView
     )
 
+import Admin.Data.Common exposing (..)
 import Admin.Data.ReaderCmd exposing (..)
 import Admin.Data.Setting exposing (..)
 import Admin.Request.Helper exposing (ApiKey, AppUrl, NodeEnv, baseUrl)
 import Admin.Request.Setting exposing (..)
+import Admin.Views.Common exposing (..)
 import GraphQL.Client.Http as GQLClient
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
-import Page.Errors exposing (errorAlertView)
 import Reader exposing (Reader)
 import Task exposing (Task)
 
@@ -32,6 +33,7 @@ type alias Model =
     , visibility : Bool
     , error : List String
     , isSaving : Bool
+    , success : Maybe String
     }
 
 
@@ -42,6 +44,7 @@ initModel =
     , visibility = True
     , error = []
     , isSaving = False
+    , success = Nothing
     }
 
 
@@ -61,7 +64,7 @@ type Msg
     | ShowCode
     | ChangeToggleVisibility
     | SaveSetting
-    | SaveSettingResponse (Result GQLClient.Error Setting)
+    | SaveSettingResponse (Result GQLClient.Error SettingsResponse)
 
 
 update : Msg -> Model -> ( Model, List (ReaderCmd Msg) )
@@ -76,22 +79,29 @@ update msg model =
         SaveSetting ->
             save model
 
-        SaveSettingResponse (Ok settingResp) ->
-            ( { model
-                | visibility = settingResp.visibility
-                , isSaving = False
-              }
-            , []
-            )
+        SaveSettingResponse (Ok newSetting) ->
+            case newSetting.setting of
+                Just setting ->
+                    ( { model
+                        | visibility = setting.visibility
+                        , isSaving = False
+                        , error = []
+                        , success = Just "Settings have been updated"
+                      }
+                    , []
+                    )
+
+                Nothing ->
+                    ( { model | error = flattenErrors newSetting.errors, success = Nothing }, [] )
 
         SaveSettingResponse (Err error) ->
-            ( { model | error = [ "There was an error saving this setting." ], isSaving = False }, [] )
+            ( { model | error = [ "There was an error saving this setting." ], isSaving = False, success = Nothing }, [] )
 
         LoadSetting (Ok setting) ->
-            ( { model | visibility = setting.visibility }, [] )
+            ( { model | visibility = setting.visibility, success = Nothing, error = [] }, [] )
 
         LoadSetting (Err err) ->
-            ( { model | error = [ "There was an error loading setting" ] }, [] )
+            ( { model | error = [ "There was an error loading setting" ], success = Nothing }, [] )
 
 
 
@@ -131,14 +141,15 @@ view nodeEnv organizationKey appUrl model =
             widgetSettingsView nodeEnv organizationKey appUrl model
 
         False ->
-            errorAlertView model.error
+            errorView model.error
 
 
 widgetSettingsView : NodeEnv -> ApiKey -> AppUrl -> Model -> Html Msg
 widgetSettingsView nodeEnv organizationKey appUrl model =
     div
         []
-        [ errorAlertView model.error
+        [ errorView model.error
+        , successView model.success
         , div
             [ class "content-header" ]
             [ text "Widget Settings" ]
