@@ -8,7 +8,7 @@ fetchOrganizationsQuery : GQLBuilder.Document GQLBuilder.Query (Maybe (List Orga
 fetchOrganizationsQuery =
     GQLBuilder.queryDocument
         (GQLBuilder.extract
-            (GQLBuilder.field "organizations"
+            (GQLBuilder.field "organization_list"
                 []
                 (GQLBuilder.nullable
                     (GQLBuilder.list

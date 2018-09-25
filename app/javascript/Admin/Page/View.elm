@@ -73,7 +73,6 @@ adminHeader orgKey orgName currentRoute signOut =
                     ]
                 ]
             ]
-        , hamBurgerMenu
         ]
 
 
