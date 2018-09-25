@@ -16,4 +16,9 @@ Types::OrganizationType = GraphQL::ObjectType.define do
     preload :urls
     resolve -> (org, args, context) { org.urls }
   end
+
+  field :widget_visibility, -> { !types.Boolean } do
+    preload :setting
+    resolve -> (org, args, context) { org.setting.enable? }
+  end
 end

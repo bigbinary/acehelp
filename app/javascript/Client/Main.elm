@@ -150,7 +150,7 @@ update msg model =
             )
 
         OrganizationLoaded (Ok organization) ->
-            ( { model | renderHelpButton = True }, Cmd.none )
+            ( { model | renderHelpButton = organization.widgetVisibility }, Cmd.none )
 
         OrganizationLoaded (Err error) ->
             ( { model | renderHelpButton = False }, Cmd.none )
