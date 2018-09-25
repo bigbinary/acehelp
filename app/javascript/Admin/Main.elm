@@ -129,6 +129,9 @@ init flags location navKey =
             , notifications = UserNotification.initModel
             , navKey = navKey
             }
+
+        cmd =
+            []
     in
     ( pageModel, readerCmd )
 
