@@ -6,6 +6,7 @@ module Page.Article.Common exposing
     , itemSelection
     , multiSelectCategoryList
     , multiSelectUrlList
+    , onTrixChange
     , savingIndicator
     , statusClass
     , statusToButtonText
@@ -23,6 +24,8 @@ import Field.ValidationResult exposing (..)
 import Helpers exposing (..)
 import Html exposing (..)
 import Html.Attributes exposing (..)
+import Html.Events exposing (on)
+import Json.Decode as Json
 
 
 type SaveStatus
@@ -153,3 +156,10 @@ statusToButtonText status =
 
         Active ->
             "Inactive"
+
+
+onTrixChange : (String -> msg) -> Attribute msg
+onTrixChange handler =
+    Json.at [ "target", "value" ] Json.string
+        |> Json.map handler
+        |> on "trix-change"

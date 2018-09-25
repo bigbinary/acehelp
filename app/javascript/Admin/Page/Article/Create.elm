@@ -16,7 +16,6 @@ import Helpers exposing (..)
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
-import Json.Decode as Json
 import Page.Article.Common exposing (..)
 import Reader exposing (Reader)
 import Route exposing (..)
@@ -142,10 +141,6 @@ update msg model =
 
 view : ApiKey -> Model -> Html Msg
 view orgKey model =
-    let
-        onTrixChange handler =
-            on "trix-change" <| Json.map handler <| Json.at [ "target", "value" ] Json.string
-    in
     div []
         [ errorView model.errors
         , div [ class "row article-block" ]

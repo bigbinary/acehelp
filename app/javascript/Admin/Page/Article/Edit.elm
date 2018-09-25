@@ -377,7 +377,7 @@ view model =
                             [ classList [ ( "trix-content", True ) ]
                             , id "dubi"
                             , placeholder "Article content goes here.."
-                            , onInput DescInput
+                            , onTrixChange DescInput
                             ]
                             []
                         ]
