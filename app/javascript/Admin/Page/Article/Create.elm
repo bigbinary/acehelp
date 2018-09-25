@@ -204,7 +204,7 @@ save model =
 
 
 articleInputs : Model -> CreateArticleInputs
-articleInputs { title, desc, categories } =
+articleInputs { title, desc, categories, urls } =
     { title = Field.value title
     , desc = Field.value desc
     , categoryIds =
@@ -219,4 +219,16 @@ articleInputs { title, desc, categories } =
                             Nothing
                 )
                 categories
+    , urlIds =
+        Just <|
+            List.filterMap
+                (\option ->
+                    case option of
+                        Selected url ->
+                            Just url.id
+
+                        _ ->
+                            Nothing
+                )
+                urls
     }

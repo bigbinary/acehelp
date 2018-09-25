@@ -40,6 +40,7 @@ requestCreateArticle articleInputs =
                     { title = articleInputs.title
                     , desc = articleInputs.desc
                     , categoryIds = articleInputs.categoryIds
+                    , urlIds = articleInputs.urlIds
                     }
                     createArticleMutation
         )

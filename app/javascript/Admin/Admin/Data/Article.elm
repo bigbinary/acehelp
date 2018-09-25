@@ -44,6 +44,7 @@ type alias CreateArticleInputs =
     { title : String
     , desc : String
     , categoryIds : Maybe (List CategoryId)
+    , urlIds : Maybe (List UrlId)
     }
 
 
@@ -139,6 +140,9 @@ createArticleMutation =
 
         categoryIdsVar =
             Var.optional "categoryIds" .categoryIds (Var.list Var.string) []
+
+        urlIdsVar =
+            Var.optional "urlIds" .urlIds (Var.list Var.string) []
     in
     GQLBuilder.mutationDocument <|
         GQLBuilder.extract
@@ -148,6 +152,7 @@ createArticleMutation =
                         [ ( "title", Arg.variable titleVar )
                         , ( "desc", Arg.variable descVar )
                         , ( "category_ids", Arg.variable categoryIdsVar )
+                        , ( "url_ids", Arg.variable urlIdsVar )
                         ]
                   )
                 ]
