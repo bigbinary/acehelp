@@ -160,7 +160,7 @@ view orgKey model =
                     [ class "row article-content" ]
                     [ node "trix-editor"
                         [ placeholder "Article content goes here.."
-                        , onInput DescInput
+                        , onTrixChange DescInput
                         ]
                         []
                     ]
