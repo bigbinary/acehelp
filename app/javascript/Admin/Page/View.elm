@@ -1,5 +1,6 @@
 module Page.View exposing (adminHeader, adminLayout, logoutOption)
 
+import Admin.Data.Organization exposing (Organization)
 import Admin.Request.Helper exposing (ApiKey, NodeEnv)
 import Html exposing (..)
 import Html.Attributes exposing (..)
@@ -43,8 +44,8 @@ navLinkListItem currentRoute matchText linkRoute linkName =
     li [ class "nav-item" ] [ navLink currentRoute matchText linkRoute linkName ]
 
 
-adminHeader : ApiKey -> String -> Route.Route -> msg -> Html msg
-adminHeader orgKey orgName currentRoute signOut =
+adminHeader : ApiKey -> String -> List Organization -> Route.Route -> msg -> Html msg
+adminHeader orgKey orgName organizationList currentRoute signOut =
     div []
         [ nav [ class "header navbar navbar-dark bg-primary navbar-expand flex-column flex-md-row" ]
             [ div [ class "container" ]
@@ -72,6 +73,7 @@ adminHeader orgKey orgName currentRoute signOut =
                         [ text "Logout" ]
                     ]
                 ]
+            , hamBurgerMenu organizationList
             ]
         ]
 
@@ -90,7 +92,8 @@ logoutOption signOut =
         ]
 
 
-hamBurgerMenu =
+hamBurgerMenu : List Organization -> Html msg
+hamBurgerMenu organizationList =
     nav
         [ class "navbar navbar-inverse navbar-static-top"
         , attribute "role" "navigation"
@@ -121,13 +124,7 @@ hamBurgerMenu =
                 ]
                 [ ul
                     [ class "nav navbar-nav" ]
-                    [ li []
-                        [ a [] [ text "org1" ] ]
-                    , li []
-                        [ a [] [ text "org2" ] ]
-                    , li []
-                        [ a [] [ text "org3" ] ]
-                    ]
+                    (List.map (\org -> li [] [ a [] [ text org.name ] ]) organizationList)
                 ]
             ]
         ]
