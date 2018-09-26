@@ -75,22 +75,38 @@ view orgKey model =
             [ text (renderError model.error) ]
         , div
             [ id "content-wrapper" ]
-            (List.map
-                (\ticket ->
-                    rows orgKey model ticket
-                )
-                model.ticketList
-            )
+            [ table
+                [ class "table table-hover" ]
+                [ thead
+                    []
+                    [ tr
+                        []
+                        [ th [ scope "col" ] [ text "ID" ]
+                        , th [ scope "col" ] [ text "Name" ]
+                        , th [ scope "col" ] [ text "Email" ]
+                        , th [ scope "col" ] [ text "Message" ]
+                        , th [] []
+                        ]
+                    ]
+                , tbody []
+                    (List.map
+                        (\ticket ->
+                            rows orgKey model ticket
+                        )
+                        model.ticketList
+                    )
+                ]
+            ]
         ]
 
 
 rows : ApiKey -> Model -> Ticket -> Html Msg
 rows orgKey model ticket =
-    div
-        [ class "listingRow" ]
-        [ span [ class "row-id" ] [ text ticket.id ]
-        , span [ class "row-name" ] [ text ticket.name ]
-        , span [ class "row-email" ] [ text ticket.email ]
-        , span [ class "row-message" ] [ text ticket.message ]
-        , span [] [ a [ href <| routeToString <| TicketEdit orgKey ticket.id ] [ text " | Edit Ticket" ] ]
+    tr
+        []
+        [ td [ class "row-id" ] [ text ticket.id ]
+        , td [ class "row-name" ] [ text ticket.name ]
+        , td [ class "row-email" ] [ text ticket.email ]
+        , td [ class "row-message" ] [ text ticket.message ]
+        , td [] [ a [ href <| routeToString <| TicketEdit orgKey ticket.id ] [ text "View" ] ]
         ]
