@@ -63,5 +63,6 @@ class Mutations::OrganizationMutationsTest < ActiveSupport::TestCase
     organization = Organization.find_by!(id: organization_id)
 
     assert organization.setting
+    assert organization.setting.visibility
   end
 end
