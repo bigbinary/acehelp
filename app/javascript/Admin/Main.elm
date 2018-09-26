@@ -51,7 +51,7 @@ import Page.Url.Edit as UrlEdit
 import Page.Url.List as UrlList
 import Page.UserNotification as UserNotification
 import Page.View as MainView
-import Reader exposing (Reader)
+import Reader exposing (..)
 import Route
 import Task exposing (Task)
 import Url exposing (Url)
@@ -174,6 +174,7 @@ type Msg
     | OrganizationCreateMsg OrganizationCreate.Msg
     | LinkClicked Browser.UrlRequest
     | OrganizationListLoaded (Result GQLClient.Error (Maybe (List Organization)))
+    | UpdateOrganizationData Organization
 
 
 
@@ -973,6 +974,15 @@ update msg model =
         OrganizationListLoaded (Err _) ->
             ( model, Cmd.none )
 
+        -- TODO: add command to update reader apiKey
+        UpdateOrganizationData organization ->
+            ( { model
+                | organizationKey = organization.api_key
+                , organizationName = organization.name
+              }
+            , Cmd.none
+            )
+
 
 
 -- SUBSCRIPTIONS
@@ -1086,7 +1096,7 @@ view model =
                         (ForgotPassword.view forgotPasswordModel)
 
         headerContent =
-            MainView.adminHeader model.organizationKey model.organizationName model.organizationList model.route SignOut
+            MainView.adminHeader model.organizationKey model.organizationName model.organizationList model.route SignOut UpdateOrganizationData
 
         logoutHeaderOption =
             MainView.logoutOption SignOut

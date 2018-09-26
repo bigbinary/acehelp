@@ -44,8 +44,8 @@ navLinkListItem currentRoute matchText linkRoute linkName =
     li [ class "nav-item" ] [ navLink currentRoute matchText linkRoute linkName ]
 
 
-adminHeader : ApiKey -> String -> List Organization -> Route.Route -> msg -> Html msg
-adminHeader orgKey orgName organizationList currentRoute signOut =
+adminHeader : ApiKey -> String -> List Organization -> Route.Route -> msg -> (Organization -> msg) -> Html msg
+adminHeader orgKey orgName organizationList currentRoute signOut updateOrganization =
     div []
         [ nav [ class "header navbar navbar-dark bg-primary navbar-expand flex-column flex-md-row" ]
             [ div [ class "container" ]
@@ -73,7 +73,7 @@ adminHeader orgKey orgName organizationList currentRoute signOut =
                         [ text "Logout" ]
                     ]
                 ]
-            , hamBurgerMenu organizationList
+            , hamBurgerMenu organizationList updateOrganization
             ]
         ]
 
@@ -92,8 +92,8 @@ logoutOption signOut =
         ]
 
 
-hamBurgerMenu : List Organization -> Html msg
-hamBurgerMenu organizationList =
+hamBurgerMenu : List Organization -> (Organization -> msg) -> Html msg
+hamBurgerMenu organizationList updateOrganization =
     nav
         [ class "navbar navbar-inverse navbar-static-top"
         , attribute "role" "navigation"
@@ -124,7 +124,7 @@ hamBurgerMenu organizationList =
                 ]
                 [ ul
                     [ class "nav navbar-nav" ]
-                    (List.map (\org -> li [] [ a [] [ text org.name ] ]) organizationList)
+                    (List.map (\org -> li [] [ button [ onClick (updateOrganization org) ] [ text org.name ] ]) organizationList)
                 ]
             ]
         ]
