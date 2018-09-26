@@ -454,6 +454,7 @@ view model =
                         [ text ("Mark " ++ statusToButtonText model.articleStatus) ]
                     ]
                 ]
+            , div [ class "editor-bottom-placeholder" ] []
             ]
         ]
 

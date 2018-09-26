@@ -77,7 +77,39 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     });
 
+    function ensureEditorCursorStaysInViewport() {
+        const cursorSelection = window.getSelection();
+        const cursorSelectionRange =
+            cursorSelection.rangeCount && window.getSelection().getRangeAt(0);
+        const endContainer =
+            cursorSelectionRange && cursorSelectionRange.endContainer;
+        const elementContainingCursor =
+            endContainer && endContainer.parentElement;
+        const cursorPosition = elementContainingCursor.getBoundingClientRect();
+
+        if (cursorPosition) {
+            const editorBottomPlaceholderHeight = 50;
+            const pageOffsetHeight = document.querySelector("body")
+                .offsetHeight;
+            const relativeHeightOfCursor =
+                cursorPosition.y +
+                cursorPosition.height +
+                editorBottomPlaceholderHeight;
+
+            console.log(
+                window.innerHeight,
+                cursorPosition.y + cursorPosition.height,
+                cursorPosition
+            );
+            if (relativeHeightOfCursor >= window.innerHeight) {
+                window.scrollTo(0, pageOffsetHeight);
+            }
+        }
+    }
+
     document.addEventListener("trix-change", function(event) {
         app.ports.trixChange.send(event.target.innerHTML);
+
+        ensureEditorCursorStaysInViewport();
     });
 });
