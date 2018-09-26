@@ -1,37 +1,36 @@
 $blueThemeColor: rgb(60, 170, 249);
 
 #admin-hook {
-
-  .header{
-    height : 70px;
+  .header {
+    height: 70px;
     .nav-item {
       cursor: pointer;
     }
   }
 
-  .main-wrapper{
-    margin-top:20px;
+  .main-wrapper {
+    margin-top: 20px;
   }
 
-  .js-snippet{
+  .js-snippet {
     width: 100%;
     min-height: 240px;
     background-color: #cdcdcd;
     color: #000;
   }
 
-  .nav-link.active{
-    span{
+  .nav-link.active {
+    span {
       padding-bottom: 3px;
-      border-bottom:2px solid #fff;
+      border-bottom: 2px solid #fff;
     }
   }
 
-  .hidden{
+  .hidden {
     display: none;
   }
 
-  .loading-indicator{
+  .loading-indicator {
     text-align: center;
     display: flex;
     justify-content: center;
@@ -40,7 +39,8 @@ $blueThemeColor: rgb(60, 170, 249);
   #content-wrapper {
     padding: 0 50px;
     height: 100%;
-    .ticket-row, .feedback-row {
+    .ticket-row,
+    .feedback-row {
       margin: 0 -50px;
       padding: 15px 20px;
       cursor: pointer;
@@ -69,7 +69,7 @@ $blueThemeColor: rgb(60, 170, 249);
   }
 
   .btn-login {
-    width:100%;
+    width: 100%;
   }
   .page-wrap {
     background-color: #3399ff;
@@ -111,7 +111,7 @@ $blueThemeColor: rgb(60, 170, 249);
     }
   }
 
-  .floating-notifications{
+  .floating-notifications {
     position: absolute;
     right: 0;
     width: 360px;
@@ -137,7 +137,6 @@ $blueThemeColor: rgb(60, 170, 249);
   button.sign-out {
     background: transparent;
     padding: 0;
-    border : 0;
+    border: 0;
   }
-  
 }
