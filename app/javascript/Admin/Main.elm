@@ -16,12 +16,15 @@ module Main exposing
     )
 
 import Admin.Data.Common exposing (..)
+import Admin.Data.Organization exposing (Organization)
 import Admin.Data.ReaderCmd exposing (..)
 import Admin.Request.Helper exposing (ApiKey, NodeEnv, logoutRequest)
+import Admin.Request.Organization exposing (requestAllOrganizations)
 import Admin.Views.Common exposing (..)
 import Browser
 import Browser.Navigation as Navigation exposing (..)
 import Field exposing (..)
+import GraphQL.Client.Http as GQLClient
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Http
@@ -48,7 +51,9 @@ import Page.Url.Edit as UrlEdit
 import Page.Url.List as UrlList
 import Page.UserNotification as UserNotification
 import Page.View as MainView
+import Reader exposing (Reader)
 import Route
+import Task exposing (Task)
 import Url exposing (Url)
 
 
@@ -108,6 +113,7 @@ type alias Model =
     , appUrl : String
     , notifications : UserNotification.Model
     , navKey : Navigation.Key
+    , organizationList : List Organization
     }
 
 
@@ -128,12 +134,13 @@ init flags location navKey =
             , appUrl = flags.app_url
             , notifications = UserNotification.initModel
             , navKey = navKey
+            , organizationList = []
             }
 
         cmd =
-            []
+            Task.attempt OrganizationListLoaded (Reader.run requestAllOrganizations ( flags.node_env, flags.organization_key, flags.app_url ))
     in
-    ( pageModel, readerCmd )
+    ( pageModel, combineCmds cmd readerCmd )
 
 
 
@@ -166,6 +173,7 @@ type Msg
     | SignUpMsg SignUp.Msg
     | OrganizationCreateMsg OrganizationCreate.Msg
     | LinkClicked Browser.UrlRequest
+    | OrganizationListLoaded (Result GQLClient.Error (Maybe (List Organization)))
 
 
 
@@ -953,6 +961,17 @@ update msg model =
 
         SignedOut _ ->
             ( model, Navigation.load (Admin.Request.Helper.baseUrl model.nodeEnv model.appUrl) )
+
+        OrganizationListLoaded (Ok organizationListResponse) ->
+            case organizationListResponse of
+                Just organizations ->
+                    ( { model | organizationList = organizations }, Cmd.none )
+
+                Nothing ->
+                    ( model, Cmd.none )
+
+        OrganizationListLoaded (Err _) ->
+            ( model, Cmd.none )
 
 
 
