@@ -62,9 +62,36 @@ document.addEventListener("DOMContentLoaded", () => {
         clearTimeout(timeoutId);
     });
 
+    function setTrixEditorHeight() {
+        const queryNode = selector => document.querySelector(selector);
+        const trixEditor = queryNode("trix-editor");
+
+        if (trixEditor) {
+            const headerHeight = queryNode("#admin-hook .header").offsetHeight;
+            const trixToolbarHeight = queryNode("trix-toolbar").offsetHeight;
+            const titleHeight = queryNode(".article-title").offsetHeight;
+            const editArticleButtonRow = queryNode(".article-save-edit");
+            const editArticleButtonRowHeight = editArticleButtonRow
+                ? editArticleButtonRow.offsetHeight
+                : 0;
+            const proposedEditorHeight =
+                window.innerHeight -
+                headerHeight -
+                editArticleButtonRowHeight -
+                titleHeight -
+                trixToolbarHeight -
+                50;
+
+            trixEditor.style.minHeight = proposedEditorHeight + "px";
+            trixEditor.style.maxHeight = proposedEditorHeight + "px";
+        }
+    }
+
     // OUTGOING PORTS
     document.addEventListener("trix-initialize", function(event) {
         app.ports.trixInitialize.send(null);
+
+        setTrixEditorHeight();
     });
 
     //TODO: Handle file uploads
@@ -77,39 +104,9 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     });
 
-    function ensureEditorCursorStaysInViewport() {
-        const cursorSelection = window.getSelection();
-        const cursorSelectionRange =
-            cursorSelection.rangeCount && window.getSelection().getRangeAt(0);
-        const endContainer =
-            cursorSelectionRange && cursorSelectionRange.endContainer;
-        const elementContainingCursor =
-            endContainer && endContainer.parentElement;
-        const cursorPosition = elementContainingCursor.getBoundingClientRect();
-
-        if (cursorPosition) {
-            const editorBottomPlaceholderHeight = 50;
-            const pageOffsetHeight = document.querySelector("body")
-                .offsetHeight;
-            const relativeHeightOfCursor =
-                cursorPosition.y +
-                cursorPosition.height +
-                editorBottomPlaceholderHeight;
-
-            console.log(
-                window.innerHeight,
-                cursorPosition.y + cursorPosition.height,
-                cursorPosition
-            );
-            if (relativeHeightOfCursor >= window.innerHeight) {
-                window.scrollTo(0, pageOffsetHeight);
-            }
-        }
-    }
-
     document.addEventListener("trix-change", function(event) {
         app.ports.trixChange.send(event.target.innerHTML);
-
-        ensureEditorCursorStaysInViewport();
     });
+
+    window.addEventListener("resize", setTrixEditorHeight);
 });
