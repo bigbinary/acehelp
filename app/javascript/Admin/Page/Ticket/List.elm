@@ -101,7 +101,7 @@ rows : ApiKey -> Model -> Ticket -> Html Msg
 rows orgKey model ticket =
     tr
         []
-        [ td [ class "row-id" ] [ text ticket.id ]
+        [ td [ scope "row", class "row-id" ] [ text ticket.id ]
         , td [ class "row-name" ] [ text ticket.name ]
         , td [ class "row-email" ] [ text ticket.email ]
         , td [ class "row-message" ] [ text ticket.message ]
