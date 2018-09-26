@@ -112,12 +112,17 @@ update msg model =
 
 save : Model -> ( Model, List (ReaderCmd Msg) )
 save model =
-    ( { model | errors = [], isSaving = True }
-    , [ Strict <|
-            Reader.map (Task.attempt SaveSettingResponse)
-                (requestUpdateBaseUrlSetting { base_url = Field.value model.baseUrl })
-      ]
-    )
+    case Field.validate model.baseUrl of
+        Passed _ ->
+            ( { model | errors = [], isSaving = True, success = Nothing }
+            , [ Strict <|
+                    Reader.map (Task.attempt SaveSettingResponse)
+                        (requestUpdateBaseUrlSetting { base_url = Field.value model.baseUrl })
+              ]
+            )
+
+        Failed err ->
+            ( { model | errors = [ err ] }, [] )
 
 
 view : NodeEnv -> ApiKey -> AppUrl -> Model -> Html Msg
