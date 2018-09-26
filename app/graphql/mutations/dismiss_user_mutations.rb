@@ -11,6 +11,7 @@ class Mutations::DismissUserMutations
     return_field :errors, types[Types::ErrorType]
 
     resolve ->(object, inputs, context) {
+      raise GraphQL::ExecutionError, "Not logged in" unless context[:current_user]
       user = User.find_by(email: inputs[:email])
       err_message = case
                     when user.nil?

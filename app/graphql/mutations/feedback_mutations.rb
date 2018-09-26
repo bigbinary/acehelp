@@ -12,7 +12,6 @@ class Mutations::FeedbackMutations
     return_field :errors, types[Types::ErrorType]
 
     resolve ->(object, inputs, context) {
-
       sanitized_params = inputs.to_h.slice(*inputs.keys)
       new_feedback = Feedback.new(sanitized_params)
       if new_feedback.save

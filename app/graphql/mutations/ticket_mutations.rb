@@ -41,6 +41,7 @@ class Mutations::TicketMutations
     return_field :errors, types[Types::ErrorType]
 
     resolve ->(object, inputs, context) {
+      raise GraphQL::ExecutionError, "Not logged in" unless context[:current_user]
       ticket = Ticket.find_by!(id: inputs[:id])
       if ticket.soft_delete
         ticket = ticket
@@ -66,6 +67,7 @@ class Mutations::TicketMutations
     return_field :errors, types[Types::ErrorType]
 
     resolve ->(object, inputs, context) {
+      raise GraphQL::ExecutionError, "Not logged in" unless context[:current_user]
       ticket = Ticket.find_by(id: inputs[:id])
       if ticket.present?
         new_comment = Comment.add_comment(

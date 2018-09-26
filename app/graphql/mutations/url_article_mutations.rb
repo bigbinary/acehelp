@@ -11,7 +11,7 @@ class Mutations::UrlArticleMutations
     return_field :errors, types[Types::ErrorType]
 
     resolve ->(object, inputs, context) {
-
+      raise GraphQL::ExecutionError, "Not logged in" unless context[:current_user]
       url = Url.for_organization(context[:organization])
                          .where(id: inputs[:url_id]).first
 
@@ -50,7 +50,7 @@ class Mutations::UrlArticleMutations
     return_field :errors, types[Types::ErrorType]
 
     resolve ->(object, inputs, context) {
-
+      raise GraphQL::ExecutionError, "Not logged in" unless context[:current_user]
       record = ArticleUrl.for_organization(context[:organization])
                          .where(article_id: inputs[:article_id])
                          .where(url_id: inputs[:url_id])

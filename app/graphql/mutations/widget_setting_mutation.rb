@@ -10,6 +10,7 @@ class Mutations::WidgetSettingMutation
     return_field :errors, types[Types::ErrorType]
 
     resolve ->(object, inputs, context) {
+      raise GraphQL::ExecutionError, "Not logged in" unless context[:current_user]
       new_setting = Setting.new(
         organization_id: context[:organization].id,
         base_url: inputs[:base_url]
@@ -35,6 +36,7 @@ class Mutations::WidgetSettingMutation
     return_field :errors, types[Types::ErrorType]
 
     resolve ->(object, inputs, context) {
+      raise GraphQL::ExecutionError, "Not logged in" unless context[:current_user]
       setting = Setting.find_or_create_by(organization_id: context[:organization].id)
       if setting
         if setting.update_attributes(visibility: inputs[:visibility].to_sym)

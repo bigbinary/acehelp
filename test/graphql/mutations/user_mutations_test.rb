@@ -4,7 +4,10 @@ require "test_helper"
 require "graphql/client_host"
 
 class Mutations::UserMutationsTest < ActiveSupport::TestCase
+  include Devise::Test::IntegrationHelpers
   setup do
+    @user = users(:brad)
+    sign_in @user
     @general_query = <<-GRAPHQL
     mutation($input: CreateUserInput!) {
       addUser(input: $input) {

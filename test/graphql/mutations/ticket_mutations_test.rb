@@ -7,8 +7,6 @@ class Mutations::TicketMutationsTest < ActiveSupport::TestCase
   include Devise::Test::IntegrationHelpers
   setup do
     @agent = agents(:illya_kuryakin)
-    @agent.password = @agent.password_confirmation = "SelfDestructIn5"
-    @agent.save
     sign_in @agent
     @ticket = tickets(:payment_issue_ticket)
     @ticket.save

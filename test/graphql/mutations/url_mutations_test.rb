@@ -4,7 +4,10 @@ require "test_helper"
 require "graphql/client_host"
 
 class Mutations::UrlMutationsTest < ActiveSupport::TestCase
+  include Devise::Test::IntegrationHelpers
   setup do
+    @user = users(:brad)
+    sign_in @user
     org = organizations :bigbinary
     @url = org.urls.create!(url: "http://test.com")
   end

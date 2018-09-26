@@ -11,7 +11,7 @@ class Mutations::ChangeTriggerStatusMutation
     return_field :errors, types[Types::ErrorType]
 
     resolve ->(object, inputs, context) {
-
+      raise GraphQL::ExecutionError, "Not logged in" unless context[:current_user]
       trigger = Trigger.find_by(id: inputs[:id])
 
       if trigger

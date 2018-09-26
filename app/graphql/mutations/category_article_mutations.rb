@@ -11,6 +11,7 @@ class Mutations::CategoryArticleMutations
     return_field :errors, types[Types::ErrorType]
 
     resolve ->(object, inputs, context) {
+      raise GraphQL::ExecutionError, "Not logged in" unless context[:current_user]
       category = Category.for_organization(context[:organization])
                          .where(id: inputs[:category_id]).first
 
@@ -48,6 +49,7 @@ class Mutations::CategoryArticleMutations
     return_field :errors, types[Types::ErrorType]
 
     resolve -> (object, inputs, context) {
+      raise GraphQL::ExecutionError, "Not logged in" unless context[:current_user]
       category = Category.for_organization(context[:organization])
                          .where(id: inputs[:category_id]).first
 

@@ -12,6 +12,7 @@ class Mutations::OrganizationMutations
     return_field :errors, types[Types::ErrorType]
 
     resolve -> (object, inputs, context) {
+      raise GraphQL::ExecutionError, "Not logged in" unless context[:current_user]
       user = User.find_by(id: inputs[:user_id])
       if user
         sanitized_params = inputs.to_h.slice("name", "email")

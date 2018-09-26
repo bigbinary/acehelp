@@ -12,6 +12,7 @@ class Mutations::OrganizationUserMutations
     return_field :errors, types[Types::ErrorType]
 
     resolve ->(object, inputs, context) {
+      raise GraphQL::ExecutionError, "Not logged in" unless context[:current_user]
       user = User.find_by_id(inputs[:user_id])
       organization = organization.find_by_id(inputs[:organization_id])
 
@@ -50,6 +51,7 @@ class Mutations::OrganizationUserMutations
     return_field :errors, types[Types::ErrorType]
 
     resolve ->(object, inputs, context) {
+      raise GraphQL::ExecutionError, "Not logged in" unless context[:current_user]
       user = User.find_by_id(inputs[:user_id])
       organization = organization.find_by_id(inputs[:organization_id])
 

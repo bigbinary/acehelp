@@ -53,6 +53,7 @@ class Mutations::ArticleMutations
     return_field :errors, types[Types::ErrorType]
 
     resolve ->(object, inputs, context) {
+      raise GraphQL::ExecutionError, "Not logged in" unless context[:current_user]
       article = Article.find_by(id: inputs[:id], organization_id: context[:organization].id)
 
       if article.nil?
@@ -87,6 +88,7 @@ class Mutations::ArticleMutations
     return_field :errors, types[Types::ErrorType]
 
     resolve ->(_obj, inputs, context) {
+      raise GraphQL::ExecutionError, "Not logged in" unless context[:current_user]
       article = Article.find_by(id: inputs[:id], organization_id: context[:organization].id)
 
       if article.blank?
@@ -170,6 +172,7 @@ class Mutations::ArticleMutations
     return_field :errors, types[Types::ErrorType]
 
     resolve ->(object, inputs, context) {
+      raise GraphQL::ExecutionError, "Not logged in" unless context[:current_user]
       article = Article.find_by(id: inputs[:id], organization_id: context[:organization].id)
 
       if article

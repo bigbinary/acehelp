@@ -11,7 +11,7 @@ class Mutations::ChangeCategoryStatusMutation
     return_field :errors, types[Types::ErrorType]
 
     resolve ->(object, inputs, context) {
-
+      raise GraphQL::ExecutionError, "Not logged in" unless context[:current_user]
       category = Category.find_by(id: inputs[:id])
 
       if category

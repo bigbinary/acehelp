@@ -10,6 +10,7 @@ class Mutations::CategoryMutations
     return_field :errors, types[Types::ErrorType]
 
     resolve ->(object, inputs, context) {
+      raise GraphQL::ExecutionError, "Not logged in" unless context[:current_user]
       new_category = Category.new name: inputs[:name]
       new_category.organization = context[:organization]
       if new_category.save
@@ -39,6 +40,7 @@ class Mutations::CategoryMutations
     return_field :errors, types[Types::ErrorType]
 
     resolve ->(object, inputs, context) {
+      raise GraphQL::ExecutionError, "Not logged in" unless context[:current_user]
       category = Category.find_by(id: inputs[:id], organization_id: context[:organization].id)
 
       if category.nil?
@@ -67,6 +69,7 @@ class Mutations::CategoryMutations
     return_field :errors, types[Types::ErrorType]
 
     resolve ->(_obj, inputs, context) {
+      raise GraphQL::ExecutionError, "Not logged in" unless context[:current_user]
       category = Category.find_by(id: inputs[:id], organization_id: context[:organization].id)
 
       if category.blank?

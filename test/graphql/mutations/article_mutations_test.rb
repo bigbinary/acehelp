@@ -6,8 +6,8 @@ require "graphql/client_host"
 class Mutations::ArticleMutationsTest < ActiveSupport::TestCase
   include Devise::Test::IntegrationHelpers
   setup do
-    @agent = agents(:illya_kuryakin)
-    sign_in @agent
+    @user = users(:brad)
+    sign_in @user
     @category = categories :novel
     @url = urls :bigbinary
     org = organizations :bigbinary

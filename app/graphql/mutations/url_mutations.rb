@@ -10,6 +10,7 @@ class Mutations::UrlMutations
     return_field :errors, types[Types::ErrorType]
 
     resolve ->(object, inputs, context) {
+      raise GraphQL::ExecutionError, "Not logged in" unless context[:current_user]
       new_url = Url.new(url: inputs[:url])
       new_url.organization = context[:organization]
 
@@ -36,6 +37,7 @@ class Mutations::UrlMutations
     return_field :errors, types[Types::ErrorType]
 
     resolve ->(object, inputs, context) {
+      raise GraphQL::ExecutionError, "Not logged in" unless context[:current_user]
       url = Url.find_by(id: inputs[:id], organization_id: context[:organization].id)
 
       if url.nil?
@@ -64,6 +66,7 @@ class Mutations::UrlMutations
     return_field :errors, types[Types::ErrorType]
 
     resolve ->(_obj, inputs, context) {
+      raise GraphQL::ExecutionError, "Not logged in" unless context[:current_user]
       url = Url.find_by(id: inputs[:id], organization_id: context[:organization].id)
       if url.nil?
         errors = Utils::ErrorHandler.new.error("Url not found", context)
