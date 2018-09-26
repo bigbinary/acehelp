@@ -67,36 +67,33 @@ update msg model =
 
 view : ApiKey -> Model -> Html Msg
 view orgKey model =
-    div
-        [ id "ticket_list"
-        ]
-        [ div
-            []
-            [ text (renderError model.error) ]
-        , div
-            [ id "content-wrapper" ]
-            [ table
-                [ class "table table-hover" ]
-                [ thead
+    let
+        tableHeading =
+            thead
+                []
+                [ tr
                     []
-                    [ tr
-                        []
-                        [ th [ scope "col" ] [ text "ID" ]
-                        , th [ scope "col" ] [ text "Name" ]
-                        , th [ scope "col" ] [ text "Email" ]
-                        , th [ scope "col" ] [ text "Message" ]
-                        , th [] []
-                        ]
+                    [ th [ scope "col" ] [ text "ID" ]
+                    , th [ scope "col" ] [ text "Name" ]
+                    , th [ scope "col" ] [ text "Email" ]
+                    , th [ scope "col" ] [ text "Message" ]
+                    , th [] []
                     ]
-                , tbody []
-                    (List.map
-                        (\ticket ->
-                            rows orgKey model ticket
-                        )
-                        model.ticketList
-                    )
                 ]
-            ]
+
+        tableBody =
+            tbody []
+                (List.map
+                    (\ticket ->
+                        rows orgKey model ticket
+                    )
+                    model.ticketList
+                )
+    in
+    div
+        [ id "ticket_list" ]
+        [ div [] [ text (renderError model.error) ]
+        , table [ class "table table-hover" ] [ tableHeading, tableBody ]
         ]
 
 
@@ -108,5 +105,12 @@ rows orgKey model ticket =
         , td [ class "row-name" ] [ text ticket.name ]
         , td [ class "row-email" ] [ text ticket.email ]
         , td [ class "row-message" ] [ text ticket.message ]
-        , td [] [ a [ href <| routeToString <| TicketEdit orgKey ticket.id ] [ text "View" ] ]
+        , td
+            []
+            [ a
+                [ class "btn btn-primary"
+                , href <| routeToString <| TicketEdit orgKey ticket.id
+                ]
+                [ text "View" ]
+            ]
         ]
