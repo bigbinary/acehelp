@@ -7,7 +7,7 @@
             = "Sign-Up to AceHelp"
         .center-form.col-md-12
           = form_for(resource, as: resource_name, url: user_registration_path) do |f|
-            = devise_error_messages!
+            = render 'shared/error_messages', object: resource
             .form-group
               = f.text_field :first_name, autocomplete: "off", class: "form-control", placeholder: "First Name"
             .form-group
