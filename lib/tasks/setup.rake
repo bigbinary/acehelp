@@ -57,7 +57,7 @@ end
 
 def create_data_for_ace_invoice_organization
   desc = "Article details is coming soon"
-  org = Organization.create! name: "AceInvoice", email: "aceinvoice@example.com"
+  org = Organization.create! name: "AceInvoice", email: "aceinvoice@example.com", api_key: "9099015ee520e11887eb"
   OrganizationUser.create! organization_id: org.id, user_id: User.first.id
 
   getting_started_url = org.urls.create! url: "#{Rails.application.secrets.host}/pages/aceinvoice/getting_started"
@@ -169,7 +169,7 @@ end
 
 def create_data_for_careforever_organization
   desc = "Article details is coming soon"
-  org = Organization.create! name: "CareForever", email: "careforever@example.com"
+  org = Organization.create! name: "CareForever", email: "careforever@example.com", api_key: "8c83e37f9789819be471"
   OrganizationUser.create! organization_id: org.id, user_id: User.first.id
 
   about_url = org.urls.create! url: "https://careforever-for-acehelp.herokuapp.com/pages/about"
@@ -236,6 +236,9 @@ def delete_all_records_from_all_tables
   Comment.delete_all
   Ticket.delete_all
   Url.delete_all
+  Setting.delete_all
+  Category.delete_all
+  Organization.delete_all
 
   ApplicationRecord.descendants.each do |klass|
     klass.reset_column_information
