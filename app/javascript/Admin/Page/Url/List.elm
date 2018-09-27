@@ -1,9 +1,12 @@
 module Page.Url.List exposing (Model, Msg(..), deleteRecord, init, initModel, update, urlRow, view)
 
+import Admin.Data.Common exposing (..)
 import Admin.Data.ReaderCmd exposing (..)
 import Admin.Data.Url exposing (..)
 import Admin.Request.Helper exposing (ApiKey)
 import Admin.Request.Url exposing (..)
+import Admin.Views.Common exposing (..)
+import Dialog
 import GraphQL.Client.Http as GQLClient
 import Html exposing (..)
 import Html.Attributes exposing (..)
@@ -21,6 +24,7 @@ type alias Model =
     { urls : List UrlData
     , urlId : UrlId
     , error : Maybe String
+    , showDeleteUrlConfirmation : Acknowledgement UrlId
     }
 
 
@@ -29,6 +33,7 @@ initModel =
     { urls = []
     , urlId = ""
     , error = Nothing
+    , showDeleteUrlConfirmation = No
     }
 
 
@@ -46,8 +51,9 @@ init =
 type Msg
     = LoadUrl UrlId
     | UrlLoaded (Result GQLClient.Error (Maybe (List UrlData)))
-    | DeleteUrl String
+    | DeleteUrl (Acknowledgement UrlId)
     | DeleteUrlResponse (Result GQLClient.Error UrlId)
+    | AcknowledgeDelete (Acknowledgement UrlId)
 
 
 update : Msg -> Model -> ( Model, List (ReaderCmd Msg) )
@@ -67,8 +73,17 @@ update msg model =
         UrlLoaded (Err err) ->
             ( { model | error = Just "There was an error while loading the Urls" }, [] )
 
-        DeleteUrl urlId ->
+        AcknowledgeDelete (Yes urlId) ->
             deleteRecord model urlId
+
+        AcknowledgeDelete No ->
+            ( { model | showDeleteUrlConfirmation = No }, [] )
+
+        DeleteUrl (Yes urlId) ->
+            ( { model | showDeleteUrlConfirmation = Yes urlId }, [] )
+
+        DeleteUrl No ->
+            ( { model | showDeleteUrlConfirmation = No }, [] )
 
         DeleteUrlResponse (Ok id) ->
             ( { model | urls = List.filter (\m -> m.id /= id) model.urls }, [] )
@@ -112,6 +127,20 @@ view orgKey model =
                 )
                 model.urls
             )
+        , Dialog.view <|
+            case model.showDeleteUrlConfirmation of
+                Yes urlId ->
+                    Just
+                        (dialogConfig
+                            { onDecline = AcknowledgeDelete No
+                            , title = "Delete Url"
+                            , body = "Are you sure you want to delete this Url?"
+                            , onAccept = AcknowledgeDelete (Yes urlId)
+                            }
+                        )
+
+                No ->
+                    Nothing
         ]
 
 
@@ -133,7 +162,7 @@ urlRow orgKey url =
             ]
         , div [ class "actionButtonColumn" ]
             [ button
-                [ onClick (DeleteUrl url.id)
+                [ onClick (DeleteUrl (Yes url.id))
                 , class "actionButton btn btn-primary deleteUrl"
                 ]
                 [ text "Delete Url" ]
@@ -147,4 +176,4 @@ deleteRecord model urlId =
         cmd =
             Strict <| Reader.map (Task.attempt DeleteUrlResponse) (deleteUrl urlId)
     in
-    ( model, [ cmd ] )
+    ( { model | showDeleteUrlConfirmation = No }, [ cmd ] )

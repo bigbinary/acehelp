@@ -17,6 +17,7 @@ import Admin.Data.ReaderCmd exposing (..)
 import Admin.Data.Status exposing (..)
 import Admin.Request.Category exposing (..)
 import Admin.Request.Helper exposing (ApiKey)
+import Admin.Views.Common exposing (..)
 import Dialog
 import GraphQL.Client.Http as GQLClient
 import Html exposing (..)
@@ -150,7 +151,14 @@ view orgKey model =
         , Dialog.view <|
             case model.showDeleteCategoryConfirmation of
                 Yes categoryId ->
-                    Just (dialogConfig categoryId model)
+                    Just
+                        (dialogConfig
+                            { onDecline = AcknowledgeDelete No
+                            , title = "Delete Category"
+                            , body = "Are you sure you want to delete this Category?"
+                            , onAccept = AcknowledgeDelete (Yes categoryId)
+                            }
+                        )
 
                 No ->
                     Nothing
@@ -216,20 +224,3 @@ categoryStatusButton category =
         , class "actionButton btn btn-primary"
         ]
         [ text ("Mark " ++ (statusToButtonText <| availablityStatusIso.reverseGet category.status)) ]
-
-
-dialogConfig : CategoryId -> Model -> Dialog.Config Msg
-dialogConfig categoryId model =
-    { closeMessage = Just (AcknowledgeDelete No)
-    , containerClass = Nothing
-    , header = Just (div [ class "modal-title" ] [ h5 [] [ text "Delete Category" ] ])
-    , body = Just (text "Are you sure you want to delete this Category?")
-    , footer =
-        Just
-            (button
-                [ class "btn btn-success"
-                , onClick <| AcknowledgeDelete (Yes categoryId)
-                ]
-                [ text "Yes" ]
-            )
-    }

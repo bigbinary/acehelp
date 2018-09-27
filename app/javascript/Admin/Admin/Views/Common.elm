@@ -1,5 +1,6 @@
 module Admin.Views.Common exposing
-    ( errorView
+    ( dialogConfig
+    , errorView
     , loadingIndicator
     , multiSelectMenu
     , renderError
@@ -8,6 +9,7 @@ module Admin.Views.Common exposing
     )
 
 import Admin.Data.Common exposing (..)
+import Dialog
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
@@ -100,3 +102,20 @@ successView success =
                     ]
             )
             success
+
+
+dialogConfig : { onAccept : msg, onDecline : msg, title : String, body : String } -> Dialog.Config msg
+dialogConfig model =
+    { closeMessage = Just model.onDecline
+    , containerClass = Nothing
+    , header = Just (div [ class "modal-title" ] [ h5 [] [ text model.title ] ])
+    , body = Just (text model.body)
+    , footer =
+        Just
+            (button
+                [ class "btn btn-success"
+                , onClick <| model.onAccept
+                ]
+                [ text "Yes" ]
+            )
+    }

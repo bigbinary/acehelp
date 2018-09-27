@@ -6,6 +6,7 @@ import Admin.Data.ReaderCmd exposing (..)
 import Admin.Data.Status exposing (..)
 import Admin.Request.Article exposing (..)
 import Admin.Request.Helper exposing (ApiKey)
+import Admin.Views.Common exposing (..)
 import Dialog
 import GraphQL.Client.Http as GQLClient
 import Helpers exposing (flip)
@@ -179,7 +180,14 @@ view orgKey model =
         , Dialog.view <|
             case model.showDeleteArticleConfirmation of
                 Yes articleId ->
-                    Just (dialogConfig articleId model)
+                    Just
+                        (dialogConfig
+                            { onDecline = AcknowledgeDelete No
+                            , title = "Delete Article"
+                            , body = "Are you sure you want to delete this Article?"
+                            , onAccept = AcknowledgeDelete (Yes articleId)
+                            }
+                        )
 
                 No ->
                     Nothing
@@ -209,20 +217,3 @@ rows orgKey model article =
             ]
             [ text " Delete Article" ]
         ]
-
-
-dialogConfig : ArticleId -> Model -> Dialog.Config Msg
-dialogConfig articleId model =
-    { closeMessage = Just (AcknowledgeDelete No)
-    , containerClass = Nothing
-    , header = Just (div [ class "modal-title" ] [ h5 [] [ text "Delete Article" ] ])
-    , body = Just (text "Are you sure you want to delete this Artilce?")
-    , footer =
-        Just
-            (button
-                [ class "btn btn-success"
-                , onClick <| AcknowledgeDelete <| Yes articleId
-                ]
-                [ text "Yes" ]
-            )
-    }
