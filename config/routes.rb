@@ -10,6 +10,8 @@ Rails.application.routes.draw do
   get "/pages/aceinvoice/integrations", to: "home#integrations"
   get "/pages/aceinvoice/pricing", to: "home#pricing"
 
+  post "/upload", to: "home#upload"
+
   scope module: 'admin' do
     resources :organizations, only: :new
   end
