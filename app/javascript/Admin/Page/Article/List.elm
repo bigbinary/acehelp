@@ -5,6 +5,7 @@ import Admin.Data.ReaderCmd exposing (..)
 import Admin.Data.Status exposing (..)
 import Admin.Request.Article exposing (..)
 import Admin.Request.Helper exposing (ApiKey)
+import Dialog
 import GraphQL.Client.Http as GQLClient
 import Helpers exposing (flip)
 import Html exposing (..)
@@ -23,6 +24,7 @@ import Task exposing (Task)
 type alias Model =
     { articles : List ArticleSummary
     , error : Maybe String
+    , showDeleteArticleConfirmation : Bool
     }
 
 
@@ -30,6 +32,7 @@ initModel : Model
 initModel =
     { articles = []
     , error = Nothing
+    , showDeleteArticleConfirmation = False
     }
 
 
@@ -48,6 +51,8 @@ type Msg
     | UpdateArticleStatusResponse (Result GQLClient.Error (Maybe Article))
     | DeleteArticle ArticleId
     | DeleteArticleResponse (Result GQLClient.Error (Maybe ArticleId))
+    | OnDeleteArticleClick ArticleId
+    | CancelDeleteArticle
 
 
 update : Msg -> Model -> ( Model, List (ReaderCmd Msg) )
@@ -74,8 +79,14 @@ update msg model =
         ArticleListLoaded (Err err) ->
             ( { model | error = Just "There was an error loading articles" }, [] )
 
+        OnDeleteArticleClick articleId ->
+            ( { model | showDeleteArticleConfirmation = True }, [] )
+
+        CancelDeleteArticle ->
+            ( { model | showDeleteArticleConfirmation = False }, [] )
+
         DeleteArticle articleId ->
-            ( model
+            ( { model | showDeleteArticleConfirmation = False }
             , [ Strict <|
                     Reader.map (Task.attempt DeleteArticleResponse) <|
                         requestDeleteArticle articleId
@@ -186,8 +197,32 @@ rows orgKey model article =
             ]
             [ text ("Mark " ++ (statusToButtonText <| availablityStatusIso.reverseGet article.status)) ]
         , button
-            [ article.id |> DeleteArticle |> onClick
+            [ article.id |> OnDeleteArticleClick |> onClick
             , class "actionButton btn btn-primary"
             ]
             [ text " Delete Article" ]
+        , Dialog.view
+            (if model.showDeleteArticleConfirmation then
+                Just (dialogConfig article.id model)
+
+             else
+                Nothing
+            )
         ]
+
+
+dialogConfig : ArticleId -> Model -> Dialog.Config Msg
+dialogConfig articleId model =
+    { closeMessage = Just CancelDeleteArticle
+    , containerClass = Nothing
+    , header = Just (div [ class "modal-title" ] [ h5 [] [ text "Delete Article" ] ])
+    , body = Just (text "Are you sure you want to delete this Artilce?")
+    , footer =
+        Just
+            (button
+                [ class "btn btn-success"
+                , onClick <| DeleteArticle articleId
+                ]
+                [ text "Yes" ]
+            )
+    }
