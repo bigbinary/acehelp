@@ -78,13 +78,44 @@ document.addEventListener("DOMContentLoaded", () => {
         app.ports.trixInitialize.send(null);
     });
 
-    //TODO: Handle file uploads
-    document.addEventListener("trix-attachment-add", function(event) {
-        var attachment;
-        attachment = event.attachment;
+    const uploadEndpoint = "/upload";
+
+    function uploadAttachment(attachment) {
+        const file = attachment.file;
+        const form = new FormData();
+        const xhr = new XMLHttpRequest();
+
+        form.append("attachment[filename]", file.name);
+        form.append("attachment[content_type]", file.type);
+        form.append("attachment[file]", file);
+
+        xhr.open("POST", uploadEndpoint, true);
+
+        xhr.upload.onprogress = event => {
+            const progress = (event.loaded / event.total) * 100;
+
+            return attachment.setUploadProgress(progress);
+        };
+
+        xhr.onload = () => {
+            if (xhr.status === 201) {
+                const response = JSON.parse(xhr.responseText);
+                const attachmentURL = response.attachment_url;
+
+                return attachment.setAttributes({
+                    url: attachmentURL,
+                    href: attachmentURL
+                });
+            }
+        };
+
+        return xhr.send(form);
+    }
+
+    document.addEventListener("trix-attachment-add", event => {
+        const attachment = event.attachment;
         if (attachment.file) {
-            //return uploadAttachment(attachment);
-            //console.log(attachment.file);
+            return uploadAttachment(attachment);
         }
     });
 
