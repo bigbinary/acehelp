@@ -1,5 +1,6 @@
 module Admin.Data.Common exposing
-    ( Error
+    ( Acknowledgement(..)
+    , Error
     , Option(..)
     , Value
     , errorObject
@@ -29,6 +30,11 @@ type alias Error =
 type Option a
     = Selected a
     | Unselected a
+
+
+type Acknowledgement a
+    = Yes a
+    | No
 
 
 targetSelectedOptions : Json.Decoder (List String)

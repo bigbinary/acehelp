@@ -1,6 +1,7 @@
 module Page.Article.List exposing (Model, Msg(..), init, initModel, rows, update, view)
 
 import Admin.Data.Article exposing (..)
+import Admin.Data.Common exposing (..)
 import Admin.Data.ReaderCmd exposing (..)
 import Admin.Data.Status exposing (..)
 import Admin.Request.Article exposing (..)
@@ -24,7 +25,7 @@ import Task exposing (Task)
 type alias Model =
     { articles : List ArticleSummary
     , error : Maybe String
-    , showDeleteArticleConfirmation : Bool
+    , showDeleteArticleConfirmation : Acknowledgement ArticleId
     }
 
 
@@ -32,7 +33,7 @@ initModel : Model
 initModel =
     { articles = []
     , error = Nothing
-    , showDeleteArticleConfirmation = False
+    , showDeleteArticleConfirmation = No
     }
 
 
@@ -51,7 +52,7 @@ type Msg
     | UpdateArticleStatusResponse (Result GQLClient.Error (Maybe Article))
     | OnDeleteArticleClick ArticleId
     | DeleteArticleResponse (Result GQLClient.Error (Maybe ArticleId))
-    | AcknowledgeDelete Bool ArticleId
+    | AcknowledgeDelete (Acknowledgement ArticleId)
 
 
 update : Msg -> Model -> ( Model, List (ReaderCmd Msg) )
@@ -79,13 +80,13 @@ update msg model =
             ( { model | error = Just "There was an error loading articles" }, [] )
 
         OnDeleteArticleClick articleId ->
-            ( { model | showDeleteArticleConfirmation = True }, [] )
+            ( { model | showDeleteArticleConfirmation = Yes articleId }, [] )
 
-        AcknowledgeDelete False _ ->
-            ( { model | showDeleteArticleConfirmation = False }, [] )
+        AcknowledgeDelete No ->
+            ( { model | showDeleteArticleConfirmation = No }, [] )
 
-        AcknowledgeDelete True articleId ->
-            ( { model | showDeleteArticleConfirmation = False }
+        AcknowledgeDelete (Yes articleId) ->
+            ( { model | showDeleteArticleConfirmation = No }
             , [ Strict <|
                     Reader.map (Task.attempt DeleteArticleResponse) <|
                         requestDeleteArticle articleId
@@ -175,6 +176,13 @@ view orgKey model =
                 )
                 model.articles
             )
+        , Dialog.view <|
+            case model.showDeleteArticleConfirmation of
+                Yes articleId ->
+                    Just (dialogConfig articleId model)
+
+                No ->
+                    Nothing
         ]
 
 
@@ -200,19 +208,12 @@ rows orgKey model article =
             , class "actionButton btn btn-primary"
             ]
             [ text " Delete Article" ]
-        , Dialog.view
-            (if model.showDeleteArticleConfirmation then
-                Just (dialogConfig article.id model)
-
-             else
-                Nothing
-            )
         ]
 
 
 dialogConfig : ArticleId -> Model -> Dialog.Config Msg
 dialogConfig articleId model =
-    { closeMessage = Just (AcknowledgeDelete False articleId)
+    { closeMessage = Just (AcknowledgeDelete No)
     , containerClass = Nothing
     , header = Just (div [ class "modal-title" ] [ h5 [] [ text "Delete Article" ] ])
     , body = Just (text "Are you sure you want to delete this Artilce?")
@@ -220,7 +221,7 @@ dialogConfig articleId model =
         Just
             (button
                 [ class "btn btn-success"
-                , onClick <| AcknowledgeDelete True articleId
+                , onClick <| AcknowledgeDelete <| Yes articleId
                 ]
                 [ text "Yes" ]
             )
