@@ -38,7 +38,7 @@ import Page.Organization.Create as OrganizationCreate
 import Page.Session.ForgotPassword as ForgotPassword
 import Page.Session.Login as Login
 import Page.Session.SignUp as SignUp
-import Page.Settings as Settings
+import Page.Settings.Settings as Settings
 import Page.Team.Create as TeamMemberCreate
 import Page.Team.List as TeamList
 import Page.Ticket.Edit as TicketEdit

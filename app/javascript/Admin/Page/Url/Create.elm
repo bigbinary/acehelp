@@ -1,7 +1,9 @@
 module Page.Url.Create exposing (Model, Msg(..), init, initModel, save, update, view)
 
 import Admin.Data.ReaderCmd exposing (..)
+import Admin.Data.Setting exposing (..)
 import Admin.Data.Url exposing (..)
+import Admin.Request.Setting exposing (..)
 import Admin.Request.Url exposing (..)
 import Admin.Views.Common exposing (errorView)
 import Field exposing (..)
@@ -26,6 +28,7 @@ type alias Model =
     , id : String
     , url : Field String String
     , urlTitle : Field String String
+    , baseUrl : Maybe String
     }
 
 
@@ -35,13 +38,14 @@ initModel =
     , id = "0"
     , url = Field validateUrl ""
     , urlTitle = Field (validateEmpty "Title") ""
+    , baseUrl = Nothing
     }
 
 
 init : ( Model, List (ReaderCmd Msg) )
 init =
     ( initModel
-    , []
+    , [ Strict <| Reader.map (Task.attempt LoadSetting) requestOrganizationSetting ]
     )
 
 
@@ -54,13 +58,21 @@ type Msg
     | TitleInput String
     | SaveUrl
     | SaveUrlResponse (Result GQLClient.Error UrlResponse)
+    | LoadSetting (Result GQLClient.Error Setting)
 
 
 update : Msg -> Model -> ( Model, List (ReaderCmd Msg) )
 update msg model =
     case msg of
         UrlInput url ->
-            ( { model | url = Field.update model.url url }, [] )
+            let
+                newUrl =
+                    unless
+                        (String.startsWith <| Maybe.withDefault "" model.baseUrl)
+                        (always <| Maybe.withDefault "" model.baseUrl)
+                        url
+            in
+            ( { model | url = Field.update model.url newUrl }, [] )
 
         TitleInput title ->
             ( { model | urlTitle = Field.update model.urlTitle title }, [] )
@@ -96,6 +108,27 @@ update msg model =
         SaveUrlResponse (Err error) ->
             ( { model | errors = [ "An error occured while saving the Url" ] }, [] )
 
+        LoadSetting (Ok setting) ->
+            let
+                baseUrl =
+                    Maybe.map
+                        (unless
+                            (String.endsWith "/")
+                            (flip String.append "/")
+                        )
+                        setting.base_url
+            in
+            ( { model
+                | baseUrl = baseUrl
+                , url = Field.update model.url (Maybe.withDefault "" baseUrl)
+                , errors = []
+              }
+            , []
+            )
+
+        LoadSetting (Err err) ->
+            ( { model | errors = [ "Something went wrong while fetching the base Url" ] }, [] )
+
 
 
 -- VIEW
@@ -103,7 +136,7 @@ update msg model =
 
 view : Model -> Html Msg
 view model =
-    div [ class "container" ]
+    div [ class "url-container row" ]
         [ Html.form [ onSubmit SaveUrl ]
             [ errorView model.errors
             , div []
@@ -113,6 +146,9 @@ view model =
                     , placeholder "Url..."
                     , onInput UrlInput
                     , required True
+                    , autofocus True
+                    , id "url-input"
+                    , Html.Attributes.value <| Field.value model.url
                     ]
                     []
                 ]

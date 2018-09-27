@@ -1,9 +1,20 @@
-module Page.Settings exposing (Model, Msg(..), codeSnippet, errorView, init, initModel, jsCodeView, update, view)
+module Page.Settings.Widget exposing
+    ( Model
+    , Msg(..)
+    , codeSnippet
+    , init
+    , initModel
+    , update
+    , view
+    , widgetSettingsView
+    )
 
+import Admin.Data.Common exposing (..)
 import Admin.Data.ReaderCmd exposing (..)
 import Admin.Data.Setting exposing (..)
 import Admin.Request.Helper exposing (ApiKey, AppUrl, NodeEnv, baseUrl)
 import Admin.Request.Setting exposing (..)
+import Admin.Views.Common exposing (..)
 import GraphQL.Client.Http as GQLClient
 import Html exposing (..)
 import Html.Attributes exposing (..)
@@ -20,7 +31,9 @@ type alias Model =
     { code : String
     , isKeyValid : Bool
     , visibility : Bool
-    , error : Maybe String
+    , error : List String
+    , isSaving : Bool
+    , success : Maybe String
     }
 
 
@@ -29,7 +42,9 @@ initModel =
     { code = ""
     , isKeyValid = True
     , visibility = True
-    , error = Nothing
+    , error = []
+    , isSaving = False
+    , success = Nothing
     }
 
 
@@ -49,7 +64,7 @@ type Msg
     | ShowCode
     | ChangeToggleVisibility
     | SaveSetting
-    | SaveSettingResponse (Result GQLClient.Error Setting)
+    | SaveSettingResponse (Result GQLClient.Error SettingsResponse)
 
 
 update : Msg -> Model -> ( Model, List (ReaderCmd Msg) )
@@ -64,21 +79,29 @@ update msg model =
         SaveSetting ->
             save model
 
-        SaveSettingResponse (Ok settingResp) ->
-            ( { model
-                | visibility = settingResp.visibility
-              }
-            , []
-            )
+        SaveSettingResponse (Ok newSetting) ->
+            case newSetting.setting of
+                Just setting ->
+                    ( { model
+                        | visibility = setting.visibility
+                        , isSaving = False
+                        , error = []
+                        , success = Just "Settings have been updated"
+                      }
+                    , []
+                    )
+
+                Nothing ->
+                    ( { model | error = flattenErrors newSetting.errors, success = Nothing }, [] )
 
         SaveSettingResponse (Err error) ->
-            ( { model | error = Just "There was an error saving this setting." }, [] )
+            ( { model | error = [ "There was an error saving this setting." ], isSaving = False, success = Nothing }, [] )
 
         LoadSetting (Ok setting) ->
-            ( { model | visibility = setting.visibility }, [] )
+            ( { model | visibility = setting.visibility, success = Nothing, error = [] }, [] )
 
         LoadSetting (Err err) ->
-            ( { model | error = Just "There was an error loading up the setting" }, [] )
+            ( { model | error = [ "There was an error loading setting" ], success = Nothing }, [] )
 
 
 
@@ -103,33 +126,30 @@ settingInputs { visibility } =
 
 save : Model -> ( Model, List (ReaderCmd Msg) )
 save model =
-    let
-        fields =
-            [ model.visibility ]
-
-        cmd =
-            Strict <|
-                Reader.map (Task.attempt SaveSettingResponse)
-                    (requestUpdateSetting (settingInputs model))
-    in
-    ( { model | error = Nothing }, [ cmd ] )
+    ( { model | error = [], isSaving = True }
+    , [ Strict <|
+            Reader.map (Task.attempt SaveSettingResponse)
+                (requestUpdateVisibilitySetting (settingInputs model))
+      ]
+    )
 
 
 view : NodeEnv -> ApiKey -> AppUrl -> Model -> Html Msg
 view nodeEnv organizationKey appUrl model =
     case model.isKeyValid of
         True ->
-            jsCodeView nodeEnv organizationKey appUrl model
+            widgetSettingsView nodeEnv organizationKey appUrl model
 
         False ->
             errorView model.error
 
 
-jsCodeView : NodeEnv -> ApiKey -> AppUrl -> Model -> Html Msg
-jsCodeView nodeEnv organizationKey appUrl model =
+widgetSettingsView : NodeEnv -> ApiKey -> AppUrl -> Model -> Html Msg
+widgetSettingsView nodeEnv organizationKey appUrl model =
     div
         []
         [ errorView model.error
+        , successView model.success
         , div
             [ class "content-header" ]
             [ text "Widget Settings" ]
@@ -167,25 +187,20 @@ jsCodeView nodeEnv organizationKey appUrl model =
         , div [ class "row toggle" ]
             [ div [ class "offset-md-10 col-md-2" ]
                 [ button
-                    [ class "btn btn-primary"
+                    [ classList [ ( "btn btn-primary", True ), ( "disabled", model.isSaving ) ]
                     , onClick SaveSetting
+                    , disabled model.isSaving
                     ]
-                    [ text "Save Changes" ]
+                    [ case model.isSaving of
+                        True ->
+                            text "Saving"
+
+                        False ->
+                            text "Save Changes"
+                    ]
                 ]
             ]
         ]
-
-
-errorView : Maybe String -> Html msg
-errorView error =
-    Maybe.withDefault (text "") <|
-        Maybe.map
-            (\err ->
-                div [ class "alert alert-danger alert-dismissible fade show", attribute "role" "alert" ]
-                    [ text <| "Error: " ++ err
-                    ]
-            )
-            error
 
 
 addBaseUrl nodeEnv appUrl =

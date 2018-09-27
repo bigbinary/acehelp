@@ -1,4 +1,16 @@
-module Helpers exposing (flip, maybeToBool, maybeToList, stringToMaybe, validEmail, validUrl, validateEmail, validateEmpty, validateUrl)
+module Helpers exposing
+    ( flip
+    , maybeToBool
+    , maybeToList
+    , stringToMaybe
+    , unless
+    , validEmail
+    , validUrl
+    , validateEmail
+    , validateEmpty
+    , validateUrl
+    , when
+    )
 
 import Field.ValidationResult exposing (..)
 import Process exposing (..)
@@ -87,3 +99,23 @@ maybeToList maybe =
 
         Nothing ->
             []
+
+
+when : (a -> Bool) -> (a -> a) -> a -> a
+when predFunc runFunc input =
+    case predFunc input of
+        True ->
+            runFunc input
+
+        False ->
+            input
+
+
+unless : (a -> Bool) -> (a -> a) -> a -> a
+unless predFunc runFunc input =
+    case predFunc input of
+        True ->
+            input
+
+        False ->
+            runFunc input

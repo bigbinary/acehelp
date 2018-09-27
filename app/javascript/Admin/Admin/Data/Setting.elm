@@ -1,5 +1,15 @@
-module Admin.Data.Setting exposing (Setting, UpdateSettingInputs, organizationSettingQuery, settingObject, updateSettingMutation)
+module Admin.Data.Setting exposing
+    ( Setting
+    , SettingsResponse
+    , UpdateSettingInputs
+    , organizationSettingQuery
+    , settingObject
+    , settingResponseObject
+    , updateBaseUrlMutation
+    , updateVisibilityMutation
+    )
 
+import Admin.Data.Common exposing (..)
 import GraphQL.Request.Builder as GQLBuilder
 import GraphQL.Request.Builder.Arg as Arg
 import GraphQL.Request.Builder.Variable as Var
@@ -8,6 +18,12 @@ import GraphQL.Request.Builder.Variable as Var
 type alias Setting =
     { base_url : Maybe String
     , visibility : Bool
+    }
+
+
+type alias SettingsResponse =
+    { setting : Maybe Setting
+    , errors : Maybe (List Error)
     }
 
 
@@ -23,8 +39,19 @@ settingObject =
         |> GQLBuilder.with (GQLBuilder.field "visibility" [] GQLBuilder.bool)
 
 
-updateSettingMutation : GQLBuilder.Document GQLBuilder.Mutation Setting UpdateSettingInputs
-updateSettingMutation =
+settingResponseObject : GQLBuilder.ValueSpec GQLBuilder.NonNull GQLBuilder.ObjectType SettingsResponse vars
+settingResponseObject =
+    GQLBuilder.object SettingsResponse
+        |> GQLBuilder.with
+            (GQLBuilder.field "setting"
+                []
+                (GQLBuilder.nullable settingObject)
+            )
+        |> GQLBuilder.with errorsField
+
+
+updateVisibilityMutation : GQLBuilder.Document GQLBuilder.Mutation SettingsResponse UpdateSettingInputs
+updateVisibilityMutation =
     let
         visibilityVar =
             Var.required "visibility" .visibility Var.string
@@ -38,11 +65,26 @@ updateSettingMutation =
                         ]
                   )
                 ]
-                (GQLBuilder.extract <|
-                    GQLBuilder.field "setting"
-                        []
-                        settingObject
-                )
+                settingResponseObject
+            )
+
+
+updateBaseUrlMutation : GQLBuilder.Document GQLBuilder.Mutation SettingsResponse UpdateSettingInputs
+updateBaseUrlMutation =
+    let
+        baseUrlVar =
+            Var.required "base_url" .visibility Var.string
+    in
+    GQLBuilder.mutationDocument <|
+        GQLBuilder.extract
+            (GQLBuilder.field "updateBaseUrlForOrganization"
+                [ ( "input"
+                  , Arg.object
+                        [ ( "base_url", Arg.variable baseUrlVar )
+                        ]
+                  )
+                ]
+                settingResponseObject
             )
 
 

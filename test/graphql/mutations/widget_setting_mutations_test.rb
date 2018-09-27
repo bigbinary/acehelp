@@ -14,8 +14,8 @@ class Mutations::WidgetSettingMutationsTest < ActiveSupport::TestCase
 
   test "create widget settings mutations" do
     query = <<-'GRAPHQL'
-              mutation($input: SaveSettingsInput!) {
-                saveOrganizationWidgetSetting(input: $input) {
+              mutation($input: UpdateSettingsInput!) {
+                updateBaseUrlForOrganization(input: $input) {
                   setting {
                     id
                     base_url
@@ -29,7 +29,27 @@ class Mutations::WidgetSettingMutationsTest < ActiveSupport::TestCase
 
     result = AceHelp::CustomClient.call(organizations(:bigbinary).api_key).execute(query, input: { base_url: "http://bigbinary.com" })
 
-    assert_equal result.data.save_organization_widget_setting.setting.base_url, "http://bigbinary.com"
+    assert_equal result.data.update_base_url_for_organization.setting.base_url, "http://bigbinary.com"
+  end
+
+  test "fail saving settings with same base_url" do
+    query = <<-'GRAPHQL'
+              mutation($input: UpdateSettingsInput!) {
+                updateBaseUrlForOrganization(input: $input) {
+                  setting {
+                    id
+                    base_url
+                    organization {
+                      id
+                    }
+                  }
+                }
+              }
+            GRAPHQL
+
+    assert_raises ActiveRecord::RecordInvalid do
+      AceHelp::CustomClient.call(organizations(:aceinvoice).api_key).execute(query, input: { base_url: "http://bigbinary.com" })
+    end
   end
 
   test "update widget setting visibility" do

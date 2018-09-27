@@ -10,7 +10,6 @@ module Page.Article.Common exposing
     , selectItemsInList
     , statusClass
     , statusToButtonText
-    , successView
     , urlToValue
     )
 
@@ -31,18 +30,6 @@ import Json.Decode as Json
 type SaveStatus
     = Saving
     | None
-
-
-successView : Maybe String -> Html msg
-successView success =
-    Maybe.withDefault (text "") <|
-        Maybe.map
-            (\message ->
-                div [ class "alert alert-success alert-dismissible fade show", attribute "role" "alert" ]
-                    [ text <| message
-                    ]
-            )
-            success
 
 
 multiSelectCategoryList : String -> List (Option Category) -> (Option CategoryId -> msg) -> Html msg

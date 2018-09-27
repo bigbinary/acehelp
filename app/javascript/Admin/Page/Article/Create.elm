@@ -9,7 +9,7 @@ import Admin.Request.Article exposing (..)
 import Admin.Request.Category exposing (..)
 import Admin.Request.Helper exposing (ApiKey)
 import Admin.Request.Url exposing (..)
-import Admin.Views.Common exposing (errorView)
+import Admin.Views.Common exposing (..)
 import Field exposing (..)
 import GraphQL.Client.Http as GQLClient
 import Helpers exposing (..)
@@ -17,6 +17,7 @@ import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
 import Page.Article.Common exposing (..)
+import Page.Errors exposing (..)
 import Reader exposing (Reader)
 import Route exposing (..)
 import Task exposing (Task)
@@ -142,7 +143,7 @@ update msg model =
 view : ApiKey -> Model -> Html Msg
 view orgKey model =
     div []
-        [ errorView model.errors
+        [ errorAlertView model.errors
         , div [ class "row article-block" ]
             [ div [ class "col-md-8 article-title-content-block" ]
                 [ div
