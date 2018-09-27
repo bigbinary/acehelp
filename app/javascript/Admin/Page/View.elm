@@ -43,13 +43,7 @@ adminHeader orgKey orgName currentRoute signOut =
                     [ a
                         [ classList
                             [ ( "nav-link", True )
-                            , ( "active"
-                              , (currentRoute
-                                    == Route.ArticleList
-                                        orgKey
-                                )
-                                    || (currentRoute == Route.ArticleCreate orgKey)
-                              )
+                            , ( "active", String.contains "/articles" <| routeToString currentRoute )
                             ]
                         , href <| routeToString <| Route.ArticleList orgKey
                         ]
@@ -59,10 +53,7 @@ adminHeader orgKey orgName currentRoute signOut =
                     [ a
                         [ classList
                             [ ( "nav-link", True )
-                            , ( "active"
-                              , (currentRoute == Route.UrlList orgKey)
-                                    || (currentRoute == Route.UrlCreate orgKey)
-                              )
+                            , ( "active", String.contains "/urls" <| routeToString currentRoute )
                             ]
                         , href <| routeToString <| Route.UrlList orgKey
                         ]
@@ -72,10 +63,7 @@ adminHeader orgKey orgName currentRoute signOut =
                     [ a
                         [ classList
                             [ ( "nav-link", True )
-                            , ( "active"
-                              , (currentRoute == Route.CategoryList orgKey)
-                                    || (currentRoute == Route.CategoryCreate orgKey)
-                              )
+                            , ( "active", String.contains "/categories" <| routeToString currentRoute )
                             ]
                         , href <| routeToString <| Route.CategoryList orgKey
                         ]
@@ -85,7 +73,7 @@ adminHeader orgKey orgName currentRoute signOut =
                     [ a
                         [ classList
                             [ ( "nav-link", True )
-                            , ( "active", currentRoute == Route.TicketList orgKey )
+                            , ( "active", String.contains "/tickets" <| routeToString currentRoute )
                             ]
                         , href <| routeToString <| Route.TicketList orgKey
                         ]
@@ -95,7 +83,7 @@ adminHeader orgKey orgName currentRoute signOut =
                     [ a
                         [ classList
                             [ ( "nav-link", True )
-                            , ( "active", currentRoute == Route.FeedbackList orgKey )
+                            , ( "active", String.contains "/feedbacks" <| routeToString currentRoute )
                             ]
                         , href <| routeToString <| Route.FeedbackList orgKey
                         ]
@@ -105,7 +93,7 @@ adminHeader orgKey orgName currentRoute signOut =
                     [ a
                         [ classList
                             [ ( "nav-link", True )
-                            , ( "active", currentRoute == Route.TeamList orgKey )
+                            , ( "active", String.contains "/team" <| routeToString currentRoute )
                             ]
                         , href <| routeToString <| Route.TeamList orgKey
                         ]
@@ -115,7 +103,7 @@ adminHeader orgKey orgName currentRoute signOut =
                     [ a
                         [ classList
                             [ ( "nav-link", True )
-                            , ( "active", currentRoute == Route.Settings orgKey )
+                            , ( "active", String.contains "/settings" <| routeToString currentRoute )
                             ]
                         , href <| routeToString <| Route.Settings orgKey
                         ]
