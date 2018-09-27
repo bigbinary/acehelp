@@ -52,6 +52,7 @@ def create_user(options = {})
 
   create_data_for_ace_invoice_organization
   create_data_for_eii_organization
+  create_data_for_careforever_organization
 end
 
 def create_data_for_ace_invoice_organization
@@ -163,6 +164,64 @@ def create_data_for_eii_organization
                   organization_id: org.id,
                   note: ''
 
+
+end
+
+def create_data_for_careforever_organization
+  desc = "Article details is coming soon"
+  org = Organization.create! name: "CareForever", email: "careforever@example.com"
+  OrganizationUser.create! organization_id: org.id, user_id: User.first.id
+
+  about_url = org.urls.create! url: "https://careforever-for-acehelp.herokuapp.com/pages/about"
+  careplan_utl = org.urls.create! url: "https://careforever-for-acehelp.herokuapp.com/pages/careplan"
+  security_url = org.urls.create! url: "https://careforever-for-acehelp.herokuapp.com/pages/security"
+  root_url = org.urls.create! url: "https://careforever-for-acehelp.herokuapp.com/"
+
+
+  category = org.categories.create! name: "About"
+  a1 = category.articles.create!  title: "How do I put JavaScript code in my website?",
+                                  desc: desc,
+                                  organization_id: org.id
+
+  a2 = category.articles.create!  title: "Will putting JavaScript code in my website will make my site slower?",
+                                  desc: desc,
+                                  organization_id: org.id
+
+
+  category = org.categories.create! name: "Careplan"
+  a3 = category.articles.create! title: "Do you provide integration with wordpress?",
+                                desc: desc,
+                                organization_id: org.id
+
+  a4 = category.articles.create!  title: "Do you provide integration for PHP applications?",
+                                  desc: desc,
+                                  organization_id: org.id
+
+  category = org.categories.create! name: "Security"
+  a5 = category.articles.create!  title: "Do I need to put credit card to try it out?",
+                            desc: desc,
+                            organization_id: org.id
+
+  a6 = category.articles.create!  title: "Do you offer custom plan?",
+                            desc: desc,
+                            organization_id: org.id
+
+  a7 = category.articles.create!  title: "Do you offer discount on yearly plan?",
+                            desc: desc,
+                            organization_id: org.id
+
+  ArticleUrl.create! article_id: a1.id, url_id: about_url.id
+  ArticleUrl.create! article_id: a3.id, url_id: about_url.id
+  ArticleUrl.create! article_id: a1.id, url_id: careplan_utl.id
+  ArticleUrl.create! article_id: a3.id, url_id: security_url.id
+  ArticleUrl.create! article_id: a5.id, url_id: security_url.id
+  ArticleUrl.create! article_id: a7.id, url_id: root_url.id
+
+  Ticket.create!  name: "Sam Smith",
+                  email: "sam@example.com",
+                  message: "How do I put Help articles on my website",
+                  organization_id: org.id,
+                  note: ''
 
 end
 
