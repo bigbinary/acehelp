@@ -49,10 +49,9 @@ type Msg
     = ArticleListLoaded (Result GQLClient.Error (Maybe (List ArticleSummary)))
     | UpdateArticleStatus ArticleId AvailabilityStatus
     | UpdateArticleStatusResponse (Result GQLClient.Error (Maybe Article))
-    | DeleteArticle ArticleId
-    | DeleteArticleResponse (Result GQLClient.Error (Maybe ArticleId))
     | OnDeleteArticleClick ArticleId
-    | CancelDeleteArticle
+    | DeleteArticleResponse (Result GQLClient.Error (Maybe ArticleId))
+    | AcknowledgeDelete Bool ArticleId
 
 
 update : Msg -> Model -> ( Model, List (ReaderCmd Msg) )
@@ -82,10 +81,10 @@ update msg model =
         OnDeleteArticleClick articleId ->
             ( { model | showDeleteArticleConfirmation = True }, [] )
 
-        CancelDeleteArticle ->
+        AcknowledgeDelete False _ ->
             ( { model | showDeleteArticleConfirmation = False }, [] )
 
-        DeleteArticle articleId ->
+        AcknowledgeDelete True articleId ->
             ( { model | showDeleteArticleConfirmation = False }
             , [ Strict <|
                     Reader.map (Task.attempt DeleteArticleResponse) <|
@@ -213,7 +212,7 @@ rows orgKey model article =
 
 dialogConfig : ArticleId -> Model -> Dialog.Config Msg
 dialogConfig articleId model =
-    { closeMessage = Just CancelDeleteArticle
+    { closeMessage = Just (AcknowledgeDelete False articleId)
     , containerClass = Nothing
     , header = Just (div [ class "modal-title" ] [ h5 [] [ text "Delete Article" ] ])
     , body = Just (text "Are you sure you want to delete this Artilce?")
@@ -221,7 +220,7 @@ dialogConfig articleId model =
         Just
             (button
                 [ class "btn btn-success"
-                , onClick <| DeleteArticle articleId
+                , onClick <| AcknowledgeDelete True articleId
                 ]
                 [ text "Yes" ]
             )
