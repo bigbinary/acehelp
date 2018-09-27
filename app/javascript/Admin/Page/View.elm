@@ -26,6 +26,23 @@ adminLayout headerContent userNotificationMsg showLoading spinnerLabel notificat
         ]
 
 
+navLink : Route.Route -> String -> Route.Route -> String -> Html msg
+navLink currentRoute matchText linkRoute linkName =
+    a
+        [ classList
+            [ ( "nav-link", True )
+            , ( "active", routeToString currentRoute |> String.contains matchText )
+            ]
+        , href (routeToString linkRoute)
+        ]
+        [ span [] [ text linkName ] ]
+
+
+navLinkListItem : Route.Route -> String -> Route.Route -> String -> Html msg
+navLinkListItem currentRoute matchText linkRoute linkName =
+    li [ class "nav-item" ] [ navLink currentRoute matchText linkRoute linkName ]
+
+
 adminHeader : ApiKey -> String -> Route.Route -> msg -> Html msg
 adminHeader orgKey orgName currentRoute signOut =
     nav [ class "header navbar navbar-dark bg-primary navbar-expand flex-column flex-md-row" ]
@@ -39,88 +56,13 @@ adminHeader orgKey orgName currentRoute signOut =
                         ]
                         [ span [] [ text orgName ] ]
                     ]
-                , li [ class "nav-item" ]
-                    [ a
-                        [ classList
-                            [ ( "nav-link", True )
-                            , ( "active"
-                              , (currentRoute
-                                    == Route.ArticleList
-                                        orgKey
-                                )
-                                    || (currentRoute == Route.ArticleCreate orgKey)
-                              )
-                            ]
-                        , href <| routeToString <| Route.ArticleList orgKey
-                        ]
-                        [ span [] [ text "Articles" ] ]
-                    ]
-                , li [ class "nav-item" ]
-                    [ a
-                        [ classList
-                            [ ( "nav-link", True )
-                            , ( "active"
-                              , (currentRoute == Route.UrlList orgKey)
-                                    || (currentRoute == Route.UrlCreate orgKey)
-                              )
-                            ]
-                        , href <| routeToString <| Route.UrlList orgKey
-                        ]
-                        [ span [] [ text "URL" ] ]
-                    ]
-                , li [ class "nav-item" ]
-                    [ a
-                        [ classList
-                            [ ( "nav-link", True )
-                            , ( "active"
-                              , (currentRoute == Route.CategoryList orgKey)
-                                    || (currentRoute == Route.CategoryCreate orgKey)
-                              )
-                            ]
-                        , href <| routeToString <| Route.CategoryList orgKey
-                        ]
-                        [ span [] [ text "Category" ] ]
-                    ]
-                , li [ class "nav-item" ]
-                    [ a
-                        [ classList
-                            [ ( "nav-link", True )
-                            , ( "active", currentRoute == Route.TicketList orgKey )
-                            ]
-                        , href <| routeToString <| Route.TicketList orgKey
-                        ]
-                        [ span [] [ text "Ticket" ] ]
-                    ]
-                , li [ class "nav-item" ]
-                    [ a
-                        [ classList
-                            [ ( "nav-link", True )
-                            , ( "active", currentRoute == Route.FeedbackList orgKey )
-                            ]
-                        , href <| routeToString <| Route.FeedbackList orgKey
-                        ]
-                        [ span [] [ text "Feedback" ] ]
-                    ]
-                , li [ class "nav-item" ]
-                    [ a
-                        [ classList
-                            [ ( "nav-link", True )
-                            , ( "active", currentRoute == Route.TeamList orgKey )
-                            ]
-                        , href <| routeToString <| Route.TeamList orgKey
-                        ]
-                        [ span [] [ text "Team" ] ]
-                    ]
-                , li [ class "nav-item" ]
-                    [ a
-                        [ classList
-                            [ ( "nav-link", True )
-                            , ( "active", currentRoute == Route.Settings orgKey )
-                            ]
-                        , href <| routeToString <| Route.Settings orgKey
-                        ]
-                        [ span [] [ text "Settings" ] ]
-                    ]
+                , navLinkListItem currentRoute "/articles" (Route.ArticleList orgKey) "Articles"
+                , navLinkListItem currentRoute "/urls" (Route.UrlList orgKey) "URLs"
+                , navLinkListItem currentRoute "/categories" (Route.CategoryList orgKey) "Categories"
+                , navLinkListItem currentRoute "/tickets" (Route.TicketList orgKey) "Tickets"
+                , navLinkListItem currentRoute "/feedback" (Route.FeedbackList orgKey) "Feedbacks"
+                , navLinkListItem currentRoute "/team" (Route.TeamList orgKey) "Team"
+                , navLinkListItem currentRoute "/settings" (Route.Settings orgKey) "Settings"
                 ]
             , ul [ class "navbar-nav ml-auto" ]
                 [ li [ class "nav-item " ]
