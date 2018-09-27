@@ -62,7 +62,7 @@ ActiveRecord::Schema.define(version: 2018_09_27_130209) do
     t.integer "upvotes_count", default: 0
     t.integer "downvotes_count", default: 0
     t.string "status", default: "inactive", null: false
-    t.boolean "persist", default: false
+    t.boolean "temporary", default: true
     t.index ["organization_id"], name: "index_articles_on_organization_id"
   end
 

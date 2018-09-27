@@ -59,7 +59,7 @@ class Mutations::ArticleMutations
       if article.nil?
         errors = Utils::ErrorHandler.new.error("Article not found", context)
       else
-        if article.update_attributes(title: inputs[:title], desc: inputs[:desc], persist: true)
+        if article.update_attributes(title: inputs[:title], desc: inputs[:desc], temporary: false)
           if inputs[:category_ids].present?
             article.category_ids = inputs[:category_ids]
           end
