@@ -96,8 +96,8 @@ logoutOption signOut =
         ]
 
 
-hamBurgerMenu : List Organization -> (Organization -> msg) -> msg -> Html msg
-hamBurgerMenu organizationList updateOrganization onCloseMenu =
+hamBurgerMenu : { organizationList : List Organization, onUpdateOrganization : Organization -> msg, onCloseMenu : msg } -> Html msg
+hamBurgerMenu { organizationList, onUpdateOrganization, onCloseMenu } =
     div [ class "menu-overlay" ]
         [ div [ class "screen-overlay" ] []
         , div
@@ -112,8 +112,9 @@ hamBurgerMenu organizationList updateOrganization onCloseMenu =
                   ]
                 , List.map
                     (\org ->
-                        span [ class "nav-link", onClick (updateOrganization org) ] [ text org.name ]
+                        span [ class "nav-link", onClick (onUpdateOrganization org) ] [ text org.name ]
                     )
                     organizationList
+                , [ a [ class "nav-link menu-add-org", href <| routeToString <| OrganizationCreate ] [ h5 [] [ text "+ Add" ] ] ]
                 ]
         ]

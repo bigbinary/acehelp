@@ -346,7 +346,7 @@ update msg model =
         LinkClicked urlRequest ->
             case urlRequest of
                 Browser.Internal url ->
-                    ( model
+                    ( { model | showHamMenu = False }
                     , Navigation.pushUrl model.navKey (Url.toString url)
                     )
 
@@ -1137,6 +1137,20 @@ view model =
                 Loaded _ ->
                     MainView.adminLayout layoutConfig
 
+        viewWithHamburgerMenu =
+            case model.showHamMenu of
+                True ->
+                    [ viewWithTopMenu
+                    , MainView.hamBurgerMenu
+                        { organizationList = model.organizationList
+                        , onUpdateOrganization = UpdateOrganizationData
+                        , onCloseMenu = CloseHamMenu
+                        }
+                    ]
+
+                False ->
+                    [ viewWithTopMenu ]
+
         viewBody =
             case getPage model.currentPage of
                 Login _ ->
@@ -1152,21 +1166,19 @@ view model =
                     [ viewContent ]
 
                 OrganizationCreate _ ->
-                    [ MainView.adminLayout
-                        { layoutConfig
-                            | headerContent = MainView.logoutOption SignOut
-                        }
-                    ]
-
-                _ ->
-                    case model.showHamMenu of
-                        True ->
-                            [ viewWithTopMenu
-                            , MainView.hamBurgerMenu model.organizationList UpdateOrganizationData CloseHamMenu
+                    case model.organizationList of
+                        [] ->
+                            [ MainView.adminLayout
+                                { layoutConfig
+                                    | headerContent = MainView.logoutOption SignOut
+                                }
                             ]
 
-                        False ->
-                            [ viewWithTopMenu ]
+                        _ ->
+                            viewWithHamburgerMenu
+
+                _ ->
+                    viewWithHamburgerMenu
     in
     { title = "AceHelp", body = [ div [ id "admin-hook" ] viewBody ] }
 
