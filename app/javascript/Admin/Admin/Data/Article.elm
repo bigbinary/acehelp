@@ -137,13 +137,13 @@ articleByIdQuery =
         )
 
 
-temporaryArticleQuery : GQLBuilder.Document GQLBuilder.Query (Maybe TemporaryArticle) {}
+temporaryArticleQuery : GQLBuilder.Document GQLBuilder.Query (Maybe Article) {}
 temporaryArticleQuery =
     GQLBuilder.queryDocument
         (GQLBuilder.extract
             (GQLBuilder.field "temporaryArticle"
                 []
-                (GQLBuilder.nullable temporaryArticleObject)
+                (GQLBuilder.nullable articleObject)
             )
         )
 
@@ -300,12 +300,6 @@ articleSummaryObject =
         |> GQLBuilder.with (GQLBuilder.field "id" [] GQLBuilder.string)
         |> GQLBuilder.with (GQLBuilder.field "title" [] GQLBuilder.string)
         |> GQLBuilder.with (GQLBuilder.field "status" [] GQLBuilder.string)
-
-
-temporaryArticleObject : GQLBuilder.ValueSpec GQLBuilder.NonNull GQLBuilder.ObjectType TemporaryArticle vars
-temporaryArticleObject =
-    GQLBuilder.object TemporaryArticle
-        |> GQLBuilder.with (GQLBuilder.field "id" [] GQLBuilder.string)
 
 
 nullableArticleSummaryObject : GQLBuilder.ValueSpec GQLBuilder.Nullable GQLBuilder.ObjectType (Maybe ArticleSummary) vars

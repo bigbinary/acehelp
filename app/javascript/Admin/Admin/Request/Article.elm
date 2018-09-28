@@ -60,7 +60,7 @@ requestArticleById articleId =
         )
 
 
-requestTemporaryArticle : Reader ( NodeEnv, ApiKey, AppUrl ) (Task GQLClient.Error (Maybe TemporaryArticle))
+requestTemporaryArticle : Reader ( NodeEnv, ApiKey, AppUrl ) (Task GQLClient.Error (Maybe Article))
 requestTemporaryArticle =
     Reader.Reader
         (\( nodeEnv, apiKey, appUrl ) ->

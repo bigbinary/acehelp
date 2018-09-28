@@ -84,7 +84,7 @@ type Msg
     | CategoriesLoaded (Result GQLClient.Error (Maybe (List Category)))
     | CategorySelected (Option CategoryId)
     | UrlsLoaded (Result GQLClient.Error (Maybe (List UrlData)))
-    | ArticleLoaded (Result GQLClient.Error (Maybe TemporaryArticle))
+    | ArticleLoaded (Result GQLClient.Error (Maybe Article))
     | UrlSelected (Option UrlId)
 
 
@@ -98,7 +98,16 @@ update msg model =
             ( { model | desc = Field.update model.desc desc }, [] )
 
         SaveArticle ->
-            save model
+            case model.articleId of
+                "" ->
+                    ( { model
+                        | errors = [ "There was an error while saving the article" ]
+                      }
+                    , []
+                    )
+
+                _ ->
+                    save model
 
         SaveArticleResponse (Ok articleResp) ->
             case articleResp of
@@ -171,11 +180,7 @@ update msg model =
                     )
 
                 Nothing ->
-                    ( { model
-                        | errors = [ "There was an error loading the article" ]
-                      }
-                    , []
-                    )
+                    ( model, [] )
 
         ArticleLoaded (Err err) ->
             ( { model | errors = [] }, [] )

@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 class Resolvers::TemporaryArticleSearch < GraphQL::Function
-  type Types::TemporaryArticleType
+  type Types::ArticleType
 
   def call(obj, args, context)
     article = Article.new(
