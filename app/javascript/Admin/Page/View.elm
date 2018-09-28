@@ -45,8 +45,8 @@ navLinkListItem currentRoute matchText linkRoute linkName =
     li [ class "nav-item" ] [ navLink currentRoute matchText linkRoute linkName ]
 
 
-adminHeader : ApiKey -> String -> List Organization -> Route.Route -> msg -> (Organization -> msg) -> Html msg
-adminHeader orgKey orgName organizationList currentRoute signOut updateOrganization =
+adminHeader : { orgKey : ApiKey, orgName : String, currentRoute : Route.Route, onSignOut : msg } -> Html msg
+adminHeader { orgKey, orgName, currentRoute, onSignOut } =
     div []
         [ nav [ class "header navbar navbar-dark bg-primary navbar-expand flex-column flex-md-row" ]
             [ div [ class "container" ]

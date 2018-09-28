@@ -1096,7 +1096,12 @@ view model =
                         (ForgotPassword.view forgotPasswordModel)
 
         headerContent =
-            MainView.adminHeader model.organizationKey model.organizationName model.organizationList model.route SignOut UpdateOrganizationData
+            MainView.adminHeader
+                { orgKey = model.organizationKey
+                , orgName = model.organizationName
+                , currentRoute = model.route
+                , onSignOut = SignOut
+                }
 
         logoutHeaderOption =
             MainView.logoutOption SignOut
