@@ -47,21 +47,19 @@ navLinkListItem currentRoute matchText linkRoute linkName =
 
 adminHeader : { orgKey : ApiKey, orgName : String, currentRoute : Route.Route, onSignOut : msg } -> Html msg
 adminHeader { orgKey, orgName, currentRoute, onSignOut } =
-    div []
-        [ nav [ class "header navbar navbar-dark bg-primary navbar-expand flex-column flex-md-row" ]
-            [ div [ class "container" ]
-                [ ul
-                    [ class "navbar-nav mr-auto mt-2 mt-lg-0 " ]
-                    [ li [ class "nav-item" ]
-                        [ span
-                            [ class "navbar-brand"
-                            ]
-                            [ span []
-                                [ span
-                                    [ class "hamburger-button d-inline-block align-self-center" ]
-                                    [ FontAwesome.bars ]
-                                , span [ class "org-name" ] [ text orgName ]
-                                ]
+    nav [ class "header navbar navbar-dark bg-primary navbar-expand flex-column flex-md-row" ]
+        [ div [ class "container" ]
+            [ ul
+                [ class "navbar-nav mr-auto mt-2 mt-lg-0 " ]
+                [ li [ class "nav-item" ]
+                    [ span
+                        [ class "navbar-brand"
+                        ]
+                        [ span []
+                            [ span
+                                [ class "hamburger-button d-inline-block align-self-center" ]
+                                [ FontAwesome.bars ]
+                            , span [ class "org-name" ] [ text orgName ]
                             ]
                         ]
                     ]
@@ -75,7 +73,7 @@ adminHeader { orgKey, orgName, currentRoute, onSignOut } =
                 ]
             , ul [ class "navbar-nav ml-auto" ]
                 [ li [ class "nav-item " ]
-                    [ button [ class "nav-link sign-out", onClick signOut ]
+                    [ button [ class "nav-link sign-out", onClick onSignOut ]
                         [ text "Logout" ]
                     ]
                 ]
