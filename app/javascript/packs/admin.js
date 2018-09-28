@@ -78,9 +78,7 @@ document.addEventListener("DOMContentLoaded", () => {
         app.ports.trixInitialize.send(null);
     });
 
-    const uploadEndpoint = "/upload";
-
-    function uploadAttachment(attachment) {
+    function uploadAttachment(attachment, attachmentsPath) {
         const file = attachment.file;
         const form = new FormData();
         const xhr = new XMLHttpRequest();
@@ -89,7 +87,7 @@ document.addEventListener("DOMContentLoaded", () => {
         form.append("attachment[content_type]", file.type);
         form.append("attachment[file]", file);
 
-        xhr.open("POST", uploadEndpoint, true);
+        xhr.open("POST", attachmentsPath, true);
 
         xhr.upload.onprogress = event => {
             const progress = (event.loaded / event.total) * 100;
@@ -114,8 +112,13 @@ document.addEventListener("DOMContentLoaded", () => {
 
     document.addEventListener("trix-attachment-add", event => {
         const attachment = event.attachment;
-        if (attachment.file) {
-            return uploadAttachment(attachment);
+        const editorParentNode = event.target.parentNode;
+        const attachmentsPath = editorParentNode.getAttribute(
+            "data-attachments-path"
+        );
+
+        if (attachment.file && attachmentsPath) {
+            return uploadAttachment(attachment, attachmentsPath);
         }
     });
 

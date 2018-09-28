@@ -59,6 +59,7 @@ type alias Model =
     , articleStatus : AvailabilityStatus
     , originalArticle : Maybe Article
     , isEditable : Bool
+    , attachmentsPath : String
     }
 
 
@@ -76,6 +77,7 @@ initModel articleId =
     , articleStatus = Inactive
     , originalArticle = Nothing
     , isEditable = False
+    , attachmentsPath = ""
     }
 
 
@@ -231,6 +233,7 @@ update msg model =
                         , urls = selectItemsInList (List.map (.id >> Selected) article.urls) model.urls
                         , originalArticle = Just article
                         , errors = []
+                        , attachmentsPath = article.attachmentsPath
                       }
                     , [ Strict <| Reader.Reader <| always <| insertArticleContent article.desc ]
                     )
@@ -442,7 +445,10 @@ view model =
                     ]
                 , div
                     [ class "row article-content" ]
-                    [ div [ classList [ ( "hidden", not model.isEditable ) ] ]
+                    [ div
+                        [ classList [ ( "hidden", not model.isEditable ) ]
+                        , attribute "data-attachments-path" model.attachmentsPath
+                        ]
                         [ node "trix-editor"
                             [ classList [ ( "trix-content", True ) ]
                             , id editorId

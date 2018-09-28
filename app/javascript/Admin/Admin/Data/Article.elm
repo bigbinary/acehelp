@@ -44,6 +44,7 @@ type alias Article =
     , status : String
     , categories : List Category
     , urls : List UrlData
+    , attachmentsPath : String
     }
 
 
@@ -292,6 +293,7 @@ articleObject =
                     urlObject
                 )
             )
+        |> GQLBuilder.with (GQLBuilder.field "attachments_path" [] GQLBuilder.string)
 
 
 articleSummaryObject : GQLBuilder.ValueSpec GQLBuilder.NonNull GQLBuilder.ObjectType ArticleSummary vars
