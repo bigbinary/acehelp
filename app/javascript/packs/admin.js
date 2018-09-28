@@ -11,6 +11,7 @@ import { Elm } from "../Admin/Main";
 import "bootstrap";
 import "trix";
 import "../../assets/stylesheets/admin/index.scss";
+import AttachmentUploader from "./attachment_uploader";
 
 document.addEventListener("DOMContentLoaded", () => {
     var node = document.getElementById("admin-hook");
@@ -78,53 +79,6 @@ document.addEventListener("DOMContentLoaded", () => {
         app.ports.trixInitialize.send(null);
     });
 
-    function uploadAttachment(apiKey, attachment, attachmentsPath) {
-        const file = attachment.file;
-        const form = new FormData();
-        const xhr = new XMLHttpRequest();
-
-        form.append("attachment[filename]", file.name);
-        form.append("attachment[content_type]", file.type);
-        form.append("attachment[file]", file);
-
-        xhr.open("POST", attachmentsPath, true);
-
-        xhr.setRequestHeader("api-key", apiKey);
-
-        xhr.upload.onprogress = event => {
-            const progress = (event.loaded / event.total) * 100;
-
-            return attachment.setUploadProgress(progress);
-        };
-
-        xhr.onload = () => {
-            if (xhr.status === 201) {
-                const response = JSON.parse(xhr.responseText);
-                const attachmentURL = response.attachment_url;
-
-                return attachment.setAttributes({
-                    url: attachmentURL,
-                    href: attachmentURL
-                });
-            } else {
-                let errorMessage = "";
-
-                try {
-                    errorMessage = JSON.parse(xhr.responseText).error;
-                } catch (e) {}
-
-                attachment.remove();
-                alert(
-                    `Sorry, an error occurred while uploading the file. ${errorMessage} [Status: ${
-                        xhr.status
-                    }]`
-                );
-            }
-        };
-
-        return xhr.send(form);
-    }
-
     document.addEventListener("trix-attachment-add", event => {
         const attachment = event.attachment;
         const editorParentNode = event.target.parentNode;
@@ -134,7 +88,13 @@ document.addEventListener("DOMContentLoaded", () => {
         );
 
         if (apiKey && attachment.file && attachmentsPath) {
-            return uploadAttachment(apiKey, attachment, attachmentsPath);
+            const uploader = new AttachmentUploader(
+                apiKey,
+                attachment,
+                attachmentsPath
+            );
+
+            return uploader.upload();
         }
     });
 
