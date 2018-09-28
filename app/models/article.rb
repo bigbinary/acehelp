@@ -31,6 +31,7 @@ class Article < ApplicationRecord
   def self.search_using(org, opts = {})
     articles = opts[:status].present? ? Article.send(opts[:status]) : Article.all
     articles = articles.for_organization(org)
+    articles = articles.where(temporary: false)
     articles = articles.where(id: opts[:article_id]) if opts[:article_id].present?
     if opts[:url].present?
       articles = articles.joins(:urls).where(
