@@ -16,8 +16,6 @@ class Article < ApplicationRecord
   has_many :categories, through: :article_categories
   has_many_attached :attachments
 
-  has_many_attached :files
-
   validates :title, uniqueness: { scope: [:organization_id] }, presence: true
 
   scope :for_organization, ->(org) { where(organization: org) }
