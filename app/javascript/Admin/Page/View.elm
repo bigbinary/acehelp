@@ -7,6 +7,7 @@ import Html.Attributes exposing (..)
 import Html.Events exposing (..)
 import Page.UserNotification as UserNotification
 import Route exposing (..)
+import Views.FontAwesome as FontAwesome exposing (..)
 
 
 adminLayout :
@@ -53,10 +54,15 @@ adminHeader orgKey orgName organizationList currentRoute signOut updateOrganizat
                     [ class "navbar-nav mr-auto mt-2 mt-lg-0 " ]
                     [ li [ class "nav-item" ]
                         [ span
-                            [ classList
-                                [ ( "navbar-brand", True ) ]
+                            [ class "navbar-brand"
                             ]
-                            [ span [] [ text orgName ] ]
+                            [ span []
+                                [ span
+                                    [ class "hamburger-button d-inline-block align-self-center" ]
+                                    [ FontAwesome.bars ]
+                                , span [ class "org-name" ] [ text orgName ]
+                                ]
+                            ]
                         ]
                     ]
                 , navLinkListItem currentRoute "/articles" (Route.ArticleList orgKey) "Articles"
@@ -73,7 +79,6 @@ adminHeader orgKey orgName organizationList currentRoute signOut updateOrganizat
                         [ text "Logout" ]
                     ]
                 ]
-            , hamBurgerMenu organizationList updateOrganization
             ]
         ]
 

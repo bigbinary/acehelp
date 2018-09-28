@@ -26,6 +26,18 @@ $blueThemeColor: rgb(60, 170, 249);
     }
   }
 
+  .hamburger-button {
+    color: #fff;
+    width: 25px;
+    svg {
+      vertical-align: text-top;
+    }
+  }
+
+  .org-name {
+    margin-left: 10px;
+  }
+
   .hidden {
     display: none;
   }
