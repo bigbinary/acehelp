@@ -985,13 +985,12 @@ update msg model =
             ( model, Cmd.none )
 
         UpdateOrganizationData organization ->
-            ( { model
+            { model
                 | organizationKey = organization.api_key
                 , organizationName = organization.name
                 , showHamMenu = False
-              }
-            , Cmd.none
-            )
+            }
+                |> navigateTo model.route
 
 
 
