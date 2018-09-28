@@ -178,6 +178,7 @@ type Msg
     | OrganizationListLoaded (Result GQLClient.Error (Maybe (List Organization)))
     | UpdateOrganizationData Organization
     | HamMenuClick
+    | CloseHamMenu
 
 
 
@@ -361,6 +362,9 @@ update msg model =
 
         HamMenuClick ->
             ( { model | showHamMenu = True }, Cmd.none )
+
+        CloseHamMenu ->
+            ( { model | showHamMenu = False }, Cmd.none )
 
         ArticleListMsg alMsg ->
             let
@@ -980,11 +984,11 @@ update msg model =
         OrganizationListLoaded (Err _) ->
             ( model, Cmd.none )
 
-        -- TODO: add command to update reader apiKey
         UpdateOrganizationData organization ->
             ( { model
                 | organizationKey = organization.api_key
                 , organizationName = organization.name
+                , showHamMenu = False
               }
             , Cmd.none
             )
@@ -1137,27 +1141,35 @@ view model =
         viewBody =
             case getPage model.currentPage of
                 Login _ ->
-                    viewContent
+                    [ viewContent ]
 
                 SignUp _ ->
-                    viewContent
+                    [ viewContent ]
 
                 ForgotPassword _ ->
-                    viewContent
+                    [ viewContent ]
 
                 NotFound ->
-                    viewContent
+                    [ viewContent ]
 
                 OrganizationCreate _ ->
-                    MainView.adminLayout
+                    [ MainView.adminLayout
                         { layoutConfig
                             | headerContent = MainView.logoutOption SignOut
                         }
+                    ]
 
                 _ ->
-                    viewWithTopMenu
+                    case model.showHamMenu of
+                        True ->
+                            [ viewWithTopMenu
+                            , MainView.hamBurgerMenu model.organizationList UpdateOrganizationData CloseHamMenu
+                            ]
+
+                        False ->
+                            [ viewWithTopMenu ]
     in
-    { title = "AceHelp", body = [ div [ id "admin-hook" ] [ viewBody ] ] }
+    { title = "AceHelp", body = [ div [ id "admin-hook" ] viewBody ] }
 
 
 

@@ -1,4 +1,4 @@
-module Page.View exposing (adminHeader, adminLayout, logoutOption)
+module Page.View exposing (adminHeader, adminLayout, hamBurgerMenu, logoutOption)
 
 import Admin.Data.Organization exposing (Organization)
 import Admin.Request.Helper exposing (ApiKey, NodeEnv)
@@ -47,7 +47,7 @@ navLinkListItem currentRoute matchText linkRoute linkName =
 
 
 adminHeader : { orgKey : ApiKey, orgName : String, currentRoute : Route.Route, onMenuClick : msg, onSignOut : msg } -> Html msg
-adminHeader { orgKey, orgName, currentRoute, onSignOut } =
+adminHeader { orgKey, orgName, currentRoute, onMenuClick, onSignOut } =
     nav [ class "header navbar navbar-dark bg-primary navbar-expand flex-column flex-md-row" ]
         [ div [ class "container" ]
             [ ul
@@ -56,7 +56,7 @@ adminHeader { orgKey, orgName, currentRoute, onSignOut } =
                     [ span
                         [ class "navbar-brand"
                         ]
-                        [ span []
+                        [ span [ onClick onMenuClick ]
                             [ span
                                 [ class "hamburger-button d-inline-block align-self-center" ]
                                 [ FontAwesome.bars ]
@@ -96,39 +96,24 @@ logoutOption signOut =
         ]
 
 
-hamBurgerMenu : List Organization -> (Organization -> msg) -> Html msg
-hamBurgerMenu organizationList updateOrganization =
-    nav
-        [ class "navbar navbar-inverse navbar-static-top"
-        , attribute "role" "navigation"
-        ]
-        [ div
-            [ class "container" ]
-            [ div
-                [ class "navbar-header" ]
-                [ button
-                    [ class "navbar-toggle collapsed"
-                    , attribute "data-toggle" "collapse"
-                    , attribute "data-target" "#bs-example-navbar-collapse-1"
-                    ]
-                    [ span
-                        [ class "sr-only" ]
-                        [ text "toggle" ]
-                    , span
-                        [ class "icon-bar" ]
-                        []
-                    , span
-                        [ class "icon-bar" ]
-                        []
-                    ]
+hamBurgerMenu : List Organization -> (Organization -> msg) -> msg -> Html msg
+hamBurgerMenu organizationList updateOrganization onCloseMenu =
+    div [ class "menu-overlay" ]
+        [ div [ class "screen-overlay" ] []
+        , div
+            [ class "hamburger-menu nav flex-column" ]
+          <|
+            List.concat
+                [ [ div
+                        [ class "nav-link menu-title" ]
+                        [ h4 [] [ text "Select an Organization" ]
+                        , h4 [ class "menu-close", onClick onCloseMenu ] [ text "x" ]
+                        ]
+                  ]
+                , List.map
+                    (\org ->
+                        span [ class "nav-link", onClick (updateOrganization org) ] [ text org.name ]
+                    )
+                    organizationList
                 ]
-            , div
-                [ class "collapse navbar-collapse"
-                , id "bs-example-navbar-collapse-1"
-                ]
-                [ ul
-                    [ class "nav navbar-nav" ]
-                    (List.map (\org -> li [] [ button [ onClick (updateOrganization org) ] [ text org.name ] ]) organizationList)
-                ]
-            ]
         ]
