@@ -8,6 +8,7 @@
     "dependencies": {
         "direct": {
             "NoRedInk/elm-json-decode-pipeline": "1.0.0",
+            "alex-tan/elm-dialog": "1.0.0",
             "arturopala/elm-monocle": "2.0.0",
             "bigbinary/elm-form-field": "1.1.0",
             "bigbinary/elm-reader": "1.1.0",
@@ -28,6 +29,7 @@
         "indirect": {
             "elm/parser": "1.1.0",
             "elm/virtual-dom": "1.0.0",
+            "etaque/elm-response": "3.1.0",
             "rtfeldman/elm-iso8601-date-strings": "1.1.2"
         }
     },

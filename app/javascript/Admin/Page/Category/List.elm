@@ -12,10 +12,13 @@ module Page.Category.List exposing
     )
 
 import Admin.Data.Category exposing (..)
+import Admin.Data.Common exposing (..)
 import Admin.Data.ReaderCmd exposing (..)
 import Admin.Data.Status exposing (..)
 import Admin.Request.Category exposing (..)
 import Admin.Request.Helper exposing (ApiKey)
+import Admin.Views.Common exposing (..)
+import Dialog
 import GraphQL.Client.Http as GQLClient
 import Html exposing (..)
 import Html.Attributes exposing (..)
@@ -33,6 +36,7 @@ import Task exposing (Task)
 type alias Model =
     { categories : List Category
     , error : Maybe String
+    , showDeleteCategoryConfirmation : Acknowledgement CategoryId
     }
 
 
@@ -40,6 +44,7 @@ initModel : Model
 initModel =
     { categories = []
     , error = Nothing
+    , showDeleteCategoryConfirmation = No
     }
 
 
@@ -56,9 +61,10 @@ init =
 
 type Msg
     = CategoriesLoaded (Result GQLClient.Error (Maybe (List Category)))
-    | DeleteCategory CategoryId
+    | OnDeleteCategory CategoryId
     | DeleteCategoryResponse (Result GQLClient.Error (Maybe CategoryId))
     | UpdateCategoryStatus CategoryId AvailabilityStatus
+    | AcknowledgeDelete (Acknowledgement CategoryId)
 
 
 update : Msg -> Model -> ( Model, List (ReaderCmd Msg) )
@@ -79,8 +85,14 @@ update msg model =
         CategoriesLoaded (Err error) ->
             ( { model | error = Just "There was an error while loading the Categories" }, [] )
 
-        DeleteCategory categoryId ->
+        OnDeleteCategory categoryId ->
+            ( { model | showDeleteCategoryConfirmation = Yes categoryId }, [] )
+
+        AcknowledgeDelete (Yes categoryId) ->
             deleteCategoryById model categoryId
+
+        AcknowledgeDelete No ->
+            ( { model | showDeleteCategoryConfirmation = No }, [] )
 
         DeleteCategoryResponse (Ok catId) ->
             case catId of
@@ -136,6 +148,20 @@ view orgKey model =
                 )
                 model.categories
             )
+        , Dialog.view <|
+            case model.showDeleteCategoryConfirmation of
+                Yes categoryId ->
+                    Just
+                        (dialogConfig
+                            { onDecline = AcknowledgeDelete No
+                            , title = "Delete Category"
+                            , body = "Are you sure you want to delete this Category?"
+                            , onAccept = AcknowledgeDelete (Yes categoryId)
+                            }
+                        )
+
+                No ->
+                    Nothing
         ]
 
 
@@ -161,7 +187,7 @@ categoryRow orgKey category =
             [ class "actionButtonColumn" ]
             [ button
                 [ class "actionButton btn btn-primary"
-                , onClick (DeleteCategory category.id)
+                , onClick (OnDeleteCategory category.id)
                 ]
                 [ text "Delete Category" ]
             ]
@@ -174,7 +200,7 @@ deleteCategoryById model categoryId =
         cmd =
             Strict <| Reader.map (Task.attempt DeleteCategoryResponse) (deleteCategory categoryId)
     in
-    ( model, [ cmd ] )
+    ( { model | showDeleteCategoryConfirmation = No }, [ cmd ] )
 
 
 updateCategoryStatus : Model -> CategoryId -> AvailabilityStatus -> ( Model, List (ReaderCmd Msg) )
