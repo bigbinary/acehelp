@@ -15,7 +15,9 @@ Rails.application.routes.draw do
   end
 
   resources :organizations, only: [:show], param: :api_key do
-    resources :articles, only: :index
+    resources :articles, only: [:index] do
+      resource :attachments, only: :create
+    end
     get "*path", to: "admin/dashboard#index", constraints: -> (request) do
       !request.xhr? && request.format.html?
     end
