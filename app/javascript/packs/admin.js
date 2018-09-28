@@ -106,6 +106,19 @@ document.addEventListener("DOMContentLoaded", () => {
                     url: attachmentURL,
                     href: attachmentURL
                 });
+            } else {
+                let errorMessage = "";
+
+                try {
+                    errorMessage = JSON.parse(xhr.responseText).error;
+                } catch (e) {}
+
+                attachment.remove();
+                alert(
+                    `Sorry, an error occurred while uploading the file. ${errorMessage} [Status: ${
+                        xhr.status
+                    }]`
+                );
             }
         };
 
