@@ -116,6 +116,15 @@ var AceHelp = (function() {
          * window.AceHelp.userInfo({ name: "John Doe", email: "john@doe.com"})
          */
         userInfo: _userInfo,
+
+        /**
+         * Open an article in the AceHelp widget programmatically.
+         *
+         * @param {String} articleId String representing the article id
+         *
+         * @example
+         * window.AceHelp.openArticle(articleId);
+         */
         openArticle: _openArticle,
 
         /**
