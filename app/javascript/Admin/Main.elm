@@ -1166,8 +1166,8 @@ view model =
                     [ viewContent ]
 
                 OrganizationCreate _ ->
-                    case model.organizationList of
-                        [] ->
+                    case model.organizationKey of
+                        "" ->
                             [ MainView.adminLayout
                                 { layoutConfig
                                     | headerContent = MainView.logoutOption SignOut
