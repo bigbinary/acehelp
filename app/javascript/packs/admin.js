@@ -74,6 +74,27 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     });
 
+    // On clicking the attachment button in the trix editor's toolbar,
+    // we will the file browser to allow user to choose files.
+    // Once files are selected, we will insert them into editor,
+    // making the editor to invoke an "trix-attachment-add" event
+    // for the each file separately.
+    app.ports.addAttachments.subscribe(() => {
+        const editorNode = document.querySelector("trix-editor");
+        const fileInput = document.createElement("input");
+
+        fileInput.setAttribute("type", "file");
+        fileInput.setAttribute("multiple", "");
+
+        fileInput.addEventListener("change", function(event) {
+            const files = Array.from(this.files);
+
+            return files.map(file => editorNode.editor.insertFile(file));
+        });
+
+        fileInput.click();
+    });
+
     // OUTGOING PORTS
     document.addEventListener("trix-initialize", function(event) {
         app.ports.trixInitialize.send(null);

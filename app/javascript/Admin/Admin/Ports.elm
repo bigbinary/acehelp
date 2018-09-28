@@ -1,5 +1,6 @@
 port module Admin.Ports exposing
-    ( clearTimeout
+    ( addAttachments
+    , clearTimeout
     , insertArticleContent
     , setEditorHeight
     , setTimeout
@@ -30,6 +31,9 @@ port timedOut : (Int -> msg) -> Sub msg
 
 
 port insertArticleContent : String -> Cmd msg
+
+
+port addAttachments : () -> Cmd msg
 
 
 port setTimeout : Int -> Cmd msg

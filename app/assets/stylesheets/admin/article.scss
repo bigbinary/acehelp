@@ -65,4 +65,14 @@
         min-height: 80vh;
         overflow-y: scroll;
     }
+
+    trix-toolbar .trix-button.trix-button--icon-attach:before {
+    background-image: url('data:image/svg+xml;base64,PHN2ZyBoZWlnaHQ9IjI0IiB2aWV3Qm94PSIwIDAgMjQgMjQiIHdpZHRoPSIyNCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cGF0aCBkPSJtMTYuNSA2djExLjVjMCAyLjIxLTEuNzkgNC00IDRzLTQtMS43OS00LTR2LTEyLjVjMC0xLjM4IDEuMTItMi41IDIuNS0yLjVzMi41IDEuMTIgMi41IDIuNXYxMC41YzAgLjU1LS40NDUgMS0xIDFzLTEtLjQ1LTEtMXYtOS41aC0xLjV2OS41YzAgMS4zOCAxLjEyIDIuNSAyLjUgMi41czIuNS0xLjEyIDIuNS0yLjV2LTEwLjVjMC0yLjIxLTEuNzktNC00LTRzLTQgMS43OS00IDR2MTIuNWMwIDMuMDQgMi40NjUgNS41IDUuNSA1LjVzNS41LTIuNDYgNS41LTUuNXYtMTEuNXoiIGZpbGw9IiM0NDQiLz48L3N2Zz4=');
+    }
+
+    trix-toolbar#trix-custom-toolbar {
+        .trix-button-row:first-child {
+            display: none;
+        }
+    }
 }

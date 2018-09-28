@@ -134,6 +134,7 @@ type Msg
     | RemoveNotifications
     | ChangeEditorHeight (Result Dom.Error Dom.Element)
     | ResizeWindow Int Int
+    | AddAttachments
 
 
 
@@ -405,6 +406,10 @@ update msg model =
         ResizeWindow _ _ ->
             ( model
             , [ Strict <| Reader.Reader <| always <| Task.attempt ChangeEditorHeight <| Dom.getElement editorId ]
+
+        AddAttachments ->
+            ( model
+            , [ Strict <| Reader.Reader <| always <| addAttachments () ]
             )
 
 
@@ -451,9 +456,12 @@ view orgKey model =
                         , attribute "data-attachments-path" model.attachmentsPath
                         , attribute "data-api-key" orgKey
                         ]
-                        [ node "trix-editor"
+                        [ trixEditorToolbarView AddAttachments
+                        , node
+                            "trix-editor"
                             [ classList [ ( "trix-content", True ) ]
                             , id editorId
+                            , attribute "toolbar" "trix-custom-toolbar"
                             , placeholder "Article content goes here.."
                             , onTrixChange DescInput
                             ]
