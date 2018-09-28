@@ -24,6 +24,7 @@ import Admin.Data.Url exposing (UrlData, UrlId)
 import Admin.Ports exposing (..)
 import Admin.Request.Article exposing (..)
 import Admin.Request.Category exposing (..)
+import Admin.Request.Helper exposing (ApiKey)
 import Admin.Request.Url exposing (..)
 import Admin.Views.Common exposing (..)
 import Browser.Dom as Dom
@@ -420,8 +421,8 @@ removeNotificationCmd =
 -- View
 
 
-view : Model -> Html Msg
-view model =
+view : ApiKey -> Model -> Html Msg
+view orgKey model =
     div []
         [ errorAlertView model.errors
         , successView model.success
@@ -448,6 +449,7 @@ view model =
                     [ div
                         [ classList [ ( "hidden", not model.isEditable ) ]
                         , attribute "data-attachments-path" model.attachmentsPath
+                        , attribute "data-api-key" orgKey
                         ]
                         [ node "trix-editor"
                             [ classList [ ( "trix-content", True ) ]

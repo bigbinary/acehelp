@@ -78,7 +78,7 @@ document.addEventListener("DOMContentLoaded", () => {
         app.ports.trixInitialize.send(null);
     });
 
-    function uploadAttachment(attachment, attachmentsPath) {
+    function uploadAttachment(apiKey, attachment, attachmentsPath) {
         const file = attachment.file;
         const form = new FormData();
         const xhr = new XMLHttpRequest();
@@ -88,6 +88,8 @@ document.addEventListener("DOMContentLoaded", () => {
         form.append("attachment[file]", file);
 
         xhr.open("POST", attachmentsPath, true);
+
+        xhr.setRequestHeader("api-key", apiKey);
 
         xhr.upload.onprogress = event => {
             const progress = (event.loaded / event.total) * 100;
@@ -113,12 +115,13 @@ document.addEventListener("DOMContentLoaded", () => {
     document.addEventListener("trix-attachment-add", event => {
         const attachment = event.attachment;
         const editorParentNode = event.target.parentNode;
+        const apiKey = editorParentNode.getAttribute("data-api-key");
         const attachmentsPath = editorParentNode.getAttribute(
             "data-attachments-path"
         );
 
-        if (attachment.file && attachmentsPath) {
-            return uploadAttachment(attachment, attachmentsPath);
+        if (apiKey && attachment.file && attachmentsPath) {
+            return uploadAttachment(apiKey, attachment, attachmentsPath);
         }
     });
 
