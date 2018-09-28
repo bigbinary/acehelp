@@ -114,6 +114,7 @@ type alias Model =
     , notifications : UserNotification.Model
     , navKey : Navigation.Key
     , organizationList : List Organization
+    , showHamMenu : Bool
     }
 
 
@@ -135,6 +136,7 @@ init flags location navKey =
             , notifications = UserNotification.initModel
             , navKey = navKey
             , organizationList = []
+            , showHamMenu = False
             }
 
         cmd =
@@ -175,6 +177,7 @@ type Msg
     | LinkClicked Browser.UrlRequest
     | OrganizationListLoaded (Result GQLClient.Error (Maybe (List Organization)))
     | UpdateOrganizationData Organization
+    | HamMenuClick
 
 
 
@@ -355,6 +358,9 @@ update msg model =
             UserNotification.update unMsg model.notifications
                 |> Tuple.mapFirst (\unModel -> { model | notifications = unModel })
                 |> Tuple.mapSecond (runReaderCmds UserNotificationMsg)
+
+        HamMenuClick ->
+            ( { model | showHamMenu = True }, Cmd.none )
 
         ArticleListMsg alMsg ->
             let
@@ -1100,29 +1106,33 @@ view model =
                 { orgKey = model.organizationKey
                 , orgName = model.organizationName
                 , currentRoute = model.route
+                , onMenuClick = HamMenuClick
                 , onSignOut = SignOut
                 }
 
         logoutHeaderOption =
             MainView.logoutOption SignOut
 
+        layoutConfig =
+            { headerContent = headerContent
+            , userNotificationMsg = UserNotificationMsg
+            , showLoading = False
+            , spinnerLabel = ""
+            , notifications = model.notifications
+            , viewContent = [ viewContent ]
+            }
+
         viewWithTopMenu =
             case model.currentPage of
                 TransitioningFrom _ ->
-                    MainView.adminLayout headerContent
-                        UserNotificationMsg
-                        True
-                        "Loading.."
-                        model.notifications
-                        [ viewContent ]
+                    MainView.adminLayout
+                        { layoutConfig
+                            | showLoading = True
+                            , spinnerLabel = "Loading.."
+                        }
 
                 Loaded _ ->
-                    MainView.adminLayout headerContent
-                        UserNotificationMsg
-                        False
-                        ""
-                        model.notifications
-                        [ viewContent ]
+                    MainView.adminLayout layoutConfig
 
         viewBody =
             case getPage model.currentPage of
@@ -1139,12 +1149,10 @@ view model =
                     viewContent
 
                 OrganizationCreate _ ->
-                    MainView.adminLayout (MainView.logoutOption SignOut)
-                        UserNotificationMsg
-                        False
-                        ""
-                        model.notifications
-                        [ viewContent ]
+                    MainView.adminLayout
+                        { layoutConfig
+                            | headerContent = MainView.logoutOption SignOut
+                        }
 
                 _ ->
                     viewWithTopMenu

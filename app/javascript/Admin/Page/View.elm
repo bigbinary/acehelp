@@ -11,14 +11,15 @@ import Views.FontAwesome as FontAwesome exposing (..)
 
 
 adminLayout :
-    Html msg
-    -> (UserNotification.Msg -> msg)
-    -> Bool
-    -> String
-    -> UserNotification.Model
-    -> List (Html msg)
+    { headerContent : Html msg
+    , userNotificationMsg : UserNotification.Msg -> msg
+    , showLoading : Bool
+    , spinnerLabel : String
+    , notifications : UserNotification.Model
+    , viewContent : List (Html msg)
+    }
     -> Html msg
-adminLayout headerContent userNotificationMsg showLoading spinnerLabel notifications viewContent =
+adminLayout { headerContent, userNotificationMsg, showLoading, spinnerLabel, notifications, viewContent } =
     div []
         [ headerContent
         , div
@@ -45,7 +46,7 @@ navLinkListItem currentRoute matchText linkRoute linkName =
     li [ class "nav-item" ] [ navLink currentRoute matchText linkRoute linkName ]
 
 
-adminHeader : { orgKey : ApiKey, orgName : String, currentRoute : Route.Route, onSignOut : msg } -> Html msg
+adminHeader : { orgKey : ApiKey, orgName : String, currentRoute : Route.Route, onMenuClick : msg, onSignOut : msg } -> Html msg
 adminHeader { orgKey, orgName, currentRoute, onSignOut } =
     nav [ class "header navbar navbar-dark bg-primary navbar-expand flex-column flex-md-row" ]
         [ div [ class "container" ]
