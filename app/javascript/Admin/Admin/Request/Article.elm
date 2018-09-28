@@ -2,8 +2,8 @@ module Admin.Request.Article exposing
     ( requestAllArticles
     , requestArticleById
     , requestArticlesByUrl
-    , requestCreateArticle
     , requestDeleteArticle
+    , requestTemporaryArticle
     , requestUpdateArticle
     , requestUpdateArticleStatus
     )
@@ -26,23 +26,6 @@ requestArticlesByUrl url =
         (\( nodeEnv, apiKey, appUrl ) ->
             GQLClient.customSendQuery (requestOptions nodeEnv apiKey appUrl) <|
                 GQLBuilder.request { url = url } articlesByUrlQuery
-        )
-
-
-requestCreateArticle :
-    CreateArticleInputs
-    -> Reader ( NodeEnv, ApiKey, AppUrl ) (Task GQLClient.Error ArticleResponse)
-requestCreateArticle articleInputs =
-    Reader.Reader
-        (\( nodeEnv, apiKey, appUrl ) ->
-            GQLClient.customSendMutation (requestOptions nodeEnv apiKey appUrl) <|
-                GQLBuilder.request
-                    { title = articleInputs.title
-                    , desc = articleInputs.desc
-                    , categoryIds = articleInputs.categoryIds
-                    , urlIds = articleInputs.urlIds
-                    }
-                    createArticleMutation
         )
 
 
@@ -74,6 +57,17 @@ requestArticleById articleId =
                 GQLBuilder.request
                     { id = articleId }
                     articleByIdQuery
+        )
+
+
+requestTemporaryArticle : Reader ( NodeEnv, ApiKey, AppUrl ) (Task GQLClient.Error (Maybe TemporaryArticle))
+requestTemporaryArticle =
+    Reader.Reader
+        (\( nodeEnv, apiKey, appUrl ) ->
+            GQLClient.customSendQuery (requestOptions nodeEnv apiKey appUrl) <|
+                GQLBuilder.request
+                    {}
+                    temporaryArticleQuery
         )
 
 
