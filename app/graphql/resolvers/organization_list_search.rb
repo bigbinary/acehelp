@@ -4,6 +4,7 @@ class Resolvers::OrganizationListSearch < GraphQL::Function
   type !types[Types::OrganizationType]
 
   def call(obj, args, context)
-    Organization.all
+    user = context[:current_user]
+    user.organizations
   end
 end
