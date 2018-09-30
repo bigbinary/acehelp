@@ -43,7 +43,7 @@ type alias Model =
     , desc : Field String String
     , categories : List (Option Category)
     , urls : List (Option UrlData)
-    , status : SaveStatus
+    , saveStatus : SaveStatus
     , errors : List String
     , success : Maybe String
     }
@@ -56,7 +56,7 @@ initModel =
     , desc = Field (validateEmpty "Article Content") ""
     , categories = []
     , urls = []
-    , status = None
+    , saveStatus = None
     , errors = []
     , success = Nothing
     }
@@ -118,7 +118,7 @@ update msg model =
                         , desc = Field.update model.desc article.desc
                         , categories = selectItemsInList (List.map (.id >> Selected) article.categories) model.categories
                         , urls = selectItemsInList (List.map (.id >> Selected) article.urls) model.urls
-                        , status = None
+                        , saveStatus = None
                         , success = Just "Article updated successfully."
                       }
                     , [ Strict <| Reader.Reader <| always <| insertArticleContent article.desc ]
@@ -134,7 +134,7 @@ update msg model =
         SaveArticleResponse (Err error) ->
             ( { model
                 | errors = [ "There was an error while saving the article" ]
-                , status = None
+                , saveStatus = None
               }
             , []
             )
@@ -142,7 +142,7 @@ update msg model =
         CategoriesLoaded (Ok receivedCategories) ->
             case receivedCategories of
                 Just categories ->
-                    ( { model | categories = List.map Unselected categories, status = None }, [] )
+                    ( { model | categories = List.map Unselected categories, saveStatus = None }, [] )
 
                 Nothing ->
                     ( model, [] )
@@ -237,7 +237,7 @@ view orgKey model =
                     [ text "Cancel" ]
                 ]
             ]
-        , if model.status == Saving then
+        , if model.saveStatus == Saving then
             savingIndicator
 
           else
@@ -257,7 +257,7 @@ save model =
                     (requestUpdateArticle (articleInputs model))
     in
     if Field.isAllValid fields then
-        ( { model | errors = [], status = Saving }, [ cmd ] )
+        ( { model | errors = [], saveStatus = Saving }, [ cmd ] )
 
     else
         ( { model | errors = errorsIn fields }, [] )
