@@ -112,17 +112,7 @@ update msg model =
         SaveArticleResponse (Ok articleResp) ->
             case articleResp of
                 Just article ->
-                    ( { model
-                        | articleId = article.id
-                        , title = Field.update model.title article.title
-                        , desc = Field.update model.desc article.desc
-                        , categories = selectItemsInList (List.map (.id >> Selected) article.categories) model.categories
-                        , urls = selectItemsInList (List.map (.id >> Selected) article.urls) model.urls
-                        , saveStatus = None
-                        , success = Just "Article updated successfully."
-                      }
-                    , [ Strict <| Reader.Reader <| always <| insertArticleContent article.desc ]
-                    )
+                    ( model, [] )
 
                 Nothing ->
                     ( { model
