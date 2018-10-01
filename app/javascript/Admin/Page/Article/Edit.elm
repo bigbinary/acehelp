@@ -58,7 +58,6 @@ type alias Model =
     , articleStatus : AvailabilityStatus
     , originalArticle : Maybe Article
     , isEditable : Bool
-    , editorHeight : Float
     }
 
 
@@ -76,7 +75,6 @@ initModel articleId =
     , articleStatus = Inactive
     , originalArticle = Nothing
     , isEditable = False
-    , editorHeight = 0.0
     }
 
 
@@ -382,7 +380,19 @@ update msg model =
             ( { model | errors = [], success = Nothing }, [] )
 
         ChangeEditorHeight (Ok info) ->
-            ( { model | editorHeight = info.viewport.height - info.element.y }, [] )
+            let
+                bottomSpacing =
+                    10.0
+
+                proposedHeight =
+                    info.viewport.height - info.element.y - bottomSpacing
+
+                payload =
+                    { editorId = editorId, height = proposedHeight }
+            in
+            ( model
+            , [ Strict <| Reader.Reader <| always <| setEditorHeight payload ]
+            )
 
         _ ->
             ( model, [] )
@@ -399,11 +409,6 @@ removeNotificationCmd =
 
 
 -- View
-
-
-editorId : String
-editorId =
-    "article-editor"
 
 
 view : Model -> Html Msg
@@ -438,8 +443,6 @@ view model =
                             , id editorId
                             , placeholder "Article content goes here.."
                             , onTrixChange DescInput
-                            , style "min-height" (String.fromFloat model.editorHeight ++ "px")
-                            , style "max-height" (String.fromFloat model.editorHeight ++ "px")
                             ]
                             []
                         ]
@@ -547,6 +550,11 @@ save model =
 proposedEditorHeight : Cmd Msg
 proposedEditorHeight =
     getElement editorId |> Task.attempt ChangeEditorHeight
+
+
+editorId : String
+editorId =
+    "article-editor"
 
 
 

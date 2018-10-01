@@ -62,34 +62,20 @@ document.addEventListener("DOMContentLoaded", () => {
         clearTimeout(timeoutId);
     });
 
-    function setTrixEditorHeight() {
-        // const queryNode = selector => document.querySelector(selector);
-        // const trixEditor = queryNode("trix-editor");
-        // if (trixEditor) {
-        //     const headerHeight = queryNode("#admin-hook .header").offsetHeight;
-        //     const trixToolbarHeight = queryNode("trix-toolbar").offsetHeight;
-        //     const titleHeight = queryNode(".article-title").offsetHeight;
-        //     const editArticleButtonRow = queryNode(".article-save-edit");
-        //     const editArticleButtonRowHeight = editArticleButtonRow
-        //         ? editArticleButtonRow.offsetHeight
-        //         : 0;
-        //     const proposedEditorHeight =
-        //         window.innerHeight -
-        //         headerHeight -
-        //         editArticleButtonRowHeight -
-        //         titleHeight -
-        //         trixToolbarHeight -
-        //         50;
-        //     trixEditor.style.minHeight = proposedEditorHeight + "px";
-        //     trixEditor.style.maxHeight = proposedEditorHeight + "px";
-        // }
-    }
+    app.ports.setEditorHeight.subscribe(({ editorId, height }) => {
+        const editorNode = document.getElementById(editorId);
+
+        if (editorNode) {
+            const heightInPx = (height || editorNode.style.minHeight) + "px";
+
+            editorNode.style.minHeight = heightInPx;
+            editorNode.style.maxHeight = heightInPx;
+        }
+    });
 
     // OUTGOING PORTS
     document.addEventListener("trix-initialize", function(event) {
         app.ports.trixInitialize.send(null);
-
-        setTrixEditorHeight();
     });
 
     //TODO: Handle file uploads
@@ -105,6 +91,4 @@ document.addEventListener("DOMContentLoaded", () => {
     document.addEventListener("trix-change", function(event) {
         app.ports.trixChange.send(event.target.innerHTML);
     });
-
-    window.addEventListener("resize", setTrixEditorHeight);
 });
