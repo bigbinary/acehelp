@@ -2,6 +2,8 @@
 
 class GraphqlController < ApplicationController
   include LoadOrganization
+  skip_before_action :verify_authenticity_token
+
 
   def execute
     result = AcehelpSchema.execute(query, variables: variables, context: context, operation_name: operation_name)
