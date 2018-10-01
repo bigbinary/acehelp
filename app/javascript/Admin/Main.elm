@@ -371,39 +371,23 @@ update msg model =
                         _ ->
                             ArticleCreate.initModel
 
-                ( newPageModel, cmds ) =
+                ( newModel, cmds ) =
                     ArticleCreate.update caMsg
                         currentPageModel
-
-                ( newModel, newCmds ) =
-                    ( { model | currentPage = Loaded (ArticleCreate newPageModel) }
+            in
+            case model.currentPage of
+                Loaded (ArticleCreate _) ->
+                    ( { model | currentPage = Loaded (ArticleCreate newModel) }
                     , runReaderCmds ArticleCreateMsg cmds
                     )
-            in
-            case caMsg of
-                ArticleCreate.SaveArticleResponse (Ok articleResponse) ->
-                    let
-                        updatedModel =
-                            { currentPageModel
-                                | errors = flattenErrors articleResponse.errors
-                            }
-                    in
-                    case articleResponse.article of
-                        Just article ->
-                            updateNavigation (Route.ArticleList model.organizationKey)
-                                ( newModel, newCmds )
-                                |> renderFlashMessages
-                                    (UserNotification.SuccessNotification
-                                        "Article created successfully."
-                                    )
 
-                        Nothing ->
-                            ( { model | currentPage = Loaded (ArticleCreate updatedModel) }
-                            , runReaderCmds ArticleCreateMsg cmds
-                            )
+                TransitioningFrom _ ->
+                    ( { model | currentPage = Loaded (ArticleCreate newModel) }
+                    , runReaderCmds ArticleCreateMsg cmds
+                    )
 
                 _ ->
-                    ( newModel, newCmds )
+                    ( model, Cmd.none )
 
         ArticleEditMsg aeMsg ->
             let

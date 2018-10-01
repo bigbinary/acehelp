@@ -1,10 +1,20 @@
-module Page.Article.Create exposing (Model, Msg(..), articleInputs, init, initModel, save, update, view)
+module Page.Article.Create exposing
+    ( Model
+    , Msg(..)
+    , articleInputs
+    , init
+    , initModel
+    , save
+    , update
+    , view
+    )
 
 import Admin.Data.Article exposing (..)
 import Admin.Data.Category exposing (..)
 import Admin.Data.Common exposing (..)
 import Admin.Data.ReaderCmd exposing (..)
 import Admin.Data.Url exposing (UrlData, UrlId)
+import Admin.Ports exposing (..)
 import Admin.Request.Article exposing (..)
 import Admin.Request.Category exposing (..)
 import Admin.Request.Helper exposing (ApiKey)
@@ -28,32 +38,35 @@ import Task exposing (Task)
 
 
 type alias Model =
-    { title : Field String String
+    { articleId : ArticleId
+    , title : Field String String
     , desc : Field String String
-    , articleId : Maybe ArticleId
     , categories : List (Option Category)
     , urls : List (Option UrlData)
-    , status : SaveStatus
+    , saveStatus : SaveStatus
     , errors : List String
+    , success : Maybe String
     }
 
 
 initModel : Model
 initModel =
-    { title = Field (validateEmpty "Title") ""
+    { articleId = ""
+    , title = Field (validateEmpty "Title") ""
     , desc = Field (validateEmpty "Article Content") ""
-    , articleId = Nothing
     , categories = []
     , urls = []
-    , status = None
+    , saveStatus = None
     , errors = []
+    , success = Nothing
     }
 
 
 init : ( Model, List (ReaderCmd Msg) )
 init =
     ( initModel
-    , [ Strict <| Reader.map (Task.attempt CategoriesLoaded) requestCategories
+    , [ Strict <| Reader.map (Task.attempt ArticleLoaded) requestTemporaryArticle
+      , Strict <| Reader.map (Task.attempt CategoriesLoaded) requestCategories
       , Strict <| Reader.map (Task.attempt UrlsLoaded) requestUrls
       ]
     )
@@ -67,10 +80,11 @@ type Msg
     = TitleInput String
     | DescInput String
     | SaveArticle
-    | SaveArticleResponse (Result GQLClient.Error ArticleResponse)
+    | SaveArticleResponse (Result GQLClient.Error (Maybe Article))
     | CategoriesLoaded (Result GQLClient.Error (Maybe (List Category)))
     | CategorySelected (Option CategoryId)
     | UrlsLoaded (Result GQLClient.Error (Maybe (List UrlData)))
+    | ArticleLoaded (Result GQLClient.Error (Maybe Article))
     | UrlSelected (Option UrlId)
 
 
@@ -84,23 +98,51 @@ update msg model =
             ( { model | desc = Field.update model.desc desc }, [] )
 
         SaveArticle ->
-            save model
+            case model.articleId of
+                "" ->
+                    ( { model
+                        | errors = [ "There was an error while saving the article" ]
+                      }
+                    , []
+                    )
 
-        SaveArticleResponse (Ok id) ->
+                _ ->
+                    save model
+
+        SaveArticleResponse (Ok articleResp) ->
+            case articleResp of
+                Just article ->
+                    ( { model
+                        | articleId = article.id
+                        , title = Field.update model.title article.title
+                        , desc = Field.update model.desc article.desc
+                        , categories = selectItemsInList (List.map (.id >> Selected) article.categories) model.categories
+                        , urls = selectItemsInList (List.map (.id >> Selected) article.urls) model.urls
+                        , saveStatus = None
+                        , success = Just "Article updated successfully."
+                      }
+                    , [ Strict <| Reader.Reader <| always <| insertArticleContent article.desc ]
+                    )
+
+                Nothing ->
+                    ( { model
+                        | errors = [ "There was an error while saving the article" ]
+                      }
+                    , []
+                    )
+
+        SaveArticleResponse (Err error) ->
             ( { model
-                | title = Field.update model.title ""
-                , desc = Field.update model.desc ""
+                | errors = [ "There was an error while saving the article" ]
+                , saveStatus = None
               }
             , []
             )
 
-        SaveArticleResponse (Err error) ->
-            ( { model | errors = [ "There was an error while saving the Article" ] }, [] )
-
         CategoriesLoaded (Ok receivedCategories) ->
             case receivedCategories of
                 Just categories ->
-                    ( { model | categories = List.map Unselected categories, status = None }, [] )
+                    ( { model | categories = List.map Unselected categories, saveStatus = None }, [] )
 
                 Nothing ->
                     ( model, [] )
@@ -127,6 +169,22 @@ update msg model =
         UrlsLoaded (Err err) ->
             ( { model | errors = [] }, [] )
 
+        ArticleLoaded (Ok articleResp) ->
+            case articleResp of
+                Just article ->
+                    ( { model
+                        | articleId = article.id
+                        , errors = []
+                      }
+                    , []
+                    )
+
+                Nothing ->
+                    ( model, [] )
+
+        ArticleLoaded (Err err) ->
+            ( { model | errors = [] }, [] )
+
         UrlSelected selectedUrlId ->
             ( { model
                 | urls =
@@ -144,6 +202,7 @@ view : ApiKey -> Model -> Html Msg
 view orgKey model =
     div []
         [ errorAlertView model.errors
+        , successView model.success
         , div [ class "row article-block" ]
             [ div [ class "col-md-8 article-title-content-block" ]
                 [ div
@@ -178,7 +237,7 @@ view orgKey model =
                     [ text "Cancel" ]
                 ]
             ]
-        , if model.status == Saving then
+        , if model.saveStatus == Saving then
             savingIndicator
 
           else
@@ -195,18 +254,19 @@ save model =
         cmd =
             Strict <|
                 Reader.map (Task.attempt SaveArticleResponse)
-                    (requestCreateArticle (articleInputs model))
+                    (requestUpdateArticle (articleInputs model))
     in
     if Field.isAllValid fields then
-        ( { model | errors = [], status = Saving }, [ cmd ] )
+        ( { model | errors = [], saveStatus = Saving }, [ cmd ] )
 
     else
         ( { model | errors = errorsIn fields }, [] )
 
 
-articleInputs : Model -> CreateArticleInputs
-articleInputs { title, desc, categories, urls } =
-    { title = Field.value title
+articleInputs : Model -> UpdateArticleInputs
+articleInputs { articleId, title, desc, categories, urls } =
+    { id = articleId
+    , title = Field.value title
     , desc = Field.value desc
     , categoryIds =
         Just <|

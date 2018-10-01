@@ -5,6 +5,7 @@ module Admin.Data.Article exposing
     , ArticleResponse
     , ArticleSummary
     , CreateArticleInputs
+    , TemporaryArticle
     , UpdateArticleInputs
     , allArticlesQuery
     , articleByIdQuery
@@ -15,6 +16,7 @@ module Admin.Data.Article exposing
     , createArticleMutation
     , deleteArticleMutation
     , nullableArticleSummaryObject
+    , temporaryArticleQuery
     , updateArticleMutation
     )
 
@@ -30,6 +32,11 @@ type alias ArticleId =
     String
 
 
+type alias TemporaryArticle =
+    { id : ArticleId
+    }
+
+
 type alias Article =
     { id : ArticleId
     , title : String
@@ -41,7 +48,8 @@ type alias Article =
 
 
 type alias CreateArticleInputs =
-    { title : String
+    { id : Maybe ArticleId
+    , title : String
     , desc : String
     , categoryIds : Maybe (List CategoryId)
     , urlIds : Maybe (List UrlId)
@@ -124,6 +132,17 @@ articleByIdQuery =
         (GQLBuilder.extract
             (GQLBuilder.field "article"
                 [ ( "id", Arg.variable idVar ) ]
+                (GQLBuilder.nullable articleObject)
+            )
+        )
+
+
+temporaryArticleQuery : GQLBuilder.Document GQLBuilder.Query (Maybe Article) {}
+temporaryArticleQuery =
+    GQLBuilder.queryDocument
+        (GQLBuilder.extract
+            (GQLBuilder.field "temporaryArticle"
+                []
                 (GQLBuilder.nullable articleObject)
             )
         )

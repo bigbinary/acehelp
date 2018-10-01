@@ -53,7 +53,7 @@ type alias Model =
     , errors : List String
     , success : Maybe String
     , updateTaskId : Maybe Int
-    , status : SaveStatus
+    , saveStatus : SaveStatus
     , articleStatus : AvailabilityStatus
     , originalArticle : Maybe Article
     , isEditable : Bool
@@ -70,7 +70,7 @@ initModel articleId =
     , errors = []
     , success = Nothing
     , updateTaskId = Nothing
-    , status = None
+    , saveStatus = None
     , articleStatus = Inactive
     , originalArticle = Nothing
     , isEditable = False
@@ -192,7 +192,7 @@ update msg model =
                         , categories = selectItemsInList (List.map (.id >> Selected) article.categories) model.categories
                         , urls = selectItemsInList (List.map (.id >> Selected) article.urls) model.urls
                         , originalArticle = Just article
-                        , status = None
+                        , saveStatus = None
                         , isEditable = False
                         , success = Just "Article updated successfully."
                       }
@@ -210,7 +210,7 @@ update msg model =
         SaveArticleResponse (Err error) ->
             ( { model
                 | errors = [ "There was an error while saving the article" ]
-                , status = None
+                , saveStatus = None
               }
             , [ removeNotificationCmd ]
             )
@@ -340,7 +340,7 @@ update msg model =
 
         UpdateStatus articleId articleStatus ->
             ( { model
-                | status = Saving
+                | saveStatus = Saving
               }
             , [ Strict <|
                     Reader.map (Task.attempt UpdateStatusResponse) <|
@@ -354,7 +354,7 @@ update msg model =
                     ( { model
                         | originalArticle = Just article
                         , articleStatus = availablityStatusIso.reverseGet article.status
-                        , status = None
+                        , saveStatus = None
                       }
                     , []
                     )
@@ -365,7 +365,7 @@ update msg model =
         UpdateStatusResponse (Err error) ->
             ( { model
                 | errors = [ "There was an error updating the article" ]
-                , status = None
+                , saveStatus = None
               }
             , [ removeNotificationCmd ]
             )
@@ -516,7 +516,7 @@ save model =
                     (requestUpdateArticle (articleInputs model))
     in
     if Field.isAllValid fields && maybeToBool model.originalArticle then
-        ( { model | errors = [], status = Saving }, [ cmd ] )
+        ( { model | errors = [], saveStatus = Saving }, [ cmd ] )
 
     else
         ( { model | errors = errorsIn fields }, [] )
