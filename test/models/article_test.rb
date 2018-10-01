@@ -23,7 +23,8 @@ class ArticleTest < ActiveSupport::TestCase
     c1.articles.create!(
       title: "How do I put nodejs code in my website?",
       desc: "coming soon",
-      organization_id: org.id
+      organization_id: org.id,
+      temporary: false
     )
 
     Article.reindex
