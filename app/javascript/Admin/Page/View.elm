@@ -45,10 +45,7 @@ navLinkListItem currentRoute matchText linkRoute linkName =
 
 adminHeader : ApiKey -> String -> Route.Route -> msg -> Html msg
 adminHeader orgKey orgName currentRoute signOut =
-    nav
-        [ id "global-navbar"
-        , class "header navbar navbar-dark bg-primary navbar-expand flex-column flex-md-row"
-        ]
+    nav [ class "header navbar navbar-dark bg-primary navbar-expand flex-column flex-md-row" ]
         [ div [ class "container" ]
             [ ul
                 [ class "navbar-nav mr-auto mt-2 mt-lg-0 " ]

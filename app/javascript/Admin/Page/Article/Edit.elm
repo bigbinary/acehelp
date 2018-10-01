@@ -322,7 +322,16 @@ update msg model =
             ( model, [] )
 
         EditArticle ->
-            ( { model | isEditable = True }, [] )
+            let
+                cmd =
+                    Process.sleep 100.0
+                        |> (\_ -> Dom.getElement editorId)
+                        |> Task.attempt ChangeEditorHeight
+                        |> always
+                        |> Reader.Reader
+                        |> Strict
+            in
+            ( { model | isEditable = True }, [ cmd ] )
 
         ResetArticle ->
             case model.originalArticle of
