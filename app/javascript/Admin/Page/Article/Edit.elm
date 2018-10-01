@@ -382,10 +382,6 @@ update msg model =
             ( { model | errors = [], success = Nothing }, [] )
 
         ChangeEditorHeight (Ok info) ->
-            let
-                _ =
-                    Debug.log "....." <| Debug.toString info
-            in
             ( { model | editorHeight = info.viewport.height - info.element.y }, [] )
 
         _ ->
@@ -403,6 +399,11 @@ removeNotificationCmd =
 
 
 -- View
+
+
+editorId : String
+editorId =
+    "article-editor"
 
 
 view : Model -> Html Msg
@@ -434,7 +435,7 @@ view model =
                     [ div [ classList [ ( "hidden", not model.isEditable ) ] ]
                         [ node "trix-editor"
                             [ classList [ ( "trix-content", True ) ]
-                            , id "article-editor"
+                            , id editorId
                             , placeholder "Article content goes here.."
                             , onTrixChange DescInput
                             , style "min-height" (String.fromFloat model.editorHeight ++ "px")
@@ -545,7 +546,7 @@ save model =
 
 proposedEditorHeight : Cmd Msg
 proposedEditorHeight =
-    getElement "article-editor" |> Task.attempt ChangeEditorHeight
+    getElement editorId |> Task.attempt ChangeEditorHeight
 
 
 
