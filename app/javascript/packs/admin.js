@@ -118,8 +118,4 @@ document.addEventListener("DOMContentLoaded", () => {
             return uploader.upload();
         }
     });
-
-    document.addEventListener("trix-change", function(event) {
-        app.ports.trixChange.send(event.target.innerHTML);
-    });
 });

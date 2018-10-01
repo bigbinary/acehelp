@@ -6,7 +6,6 @@ port module Admin.Ports exposing
     , setTimeout
     , timedOut
     , timeoutInitialized
-    , trixChange
     , trixInitialize
     )
 
@@ -14,9 +13,6 @@ port module Admin.Ports exposing
 
 
 port trixInitialize : (() -> msg) -> Sub msg
-
-
-port trixChange : (String -> msg) -> Sub msg
 
 
 port timeoutInitialized : (Int -> msg) -> Sub msg

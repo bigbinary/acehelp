@@ -576,7 +576,6 @@ subscriptions : Model -> Sub Msg
 subscriptions model =
     Sub.batch
         [ trixInitialize <| TrixInitialize
-        , trixChange <| DescInput
         , timeoutInitialized <| ReceivedTimeoutId
         , timedOut <| TimedOut
         , Events.onResize <| \width -> \height -> ResizeWindow width height
