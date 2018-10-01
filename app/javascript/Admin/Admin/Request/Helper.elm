@@ -56,20 +56,7 @@ type alias RequestData =
 
 baseUrl : NodeEnv -> AppUrl -> Url
 baseUrl env appUrl =
-    case env of
-        "production" ->
-            case String.isEmpty <| appUrl of
-                True ->
-                    "https://staging.acehelp.com/"
-
-                False ->
-                    "https://" ++ appUrl ++ ".herokuapp.com/"
-
-        "development" ->
-            "http://localhost:3000/"
-
-        _ ->
-            "http://localhost:3000/"
+    appUrl
 
 
 defaultRequestHeaders : List Http.Header
@@ -117,17 +104,7 @@ constructUrl url params =
 
 graphqlUrl : NodeEnv -> AppUrl -> String
 graphqlUrl env appUrl =
-    case env of
-        "production" ->
-            case String.isEmpty <| appUrl of
-                True ->
-                    "https://staging.acehelp.com/graphql/"
-
-                False ->
-                    "https://" ++ appUrl ++ ".herokuapp.com/graphql"
-
-        _ ->
-            "/graphql/"
+    "/graphql"
 
 
 httpRequest : RequestData -> Decoder a -> Http.Request a
