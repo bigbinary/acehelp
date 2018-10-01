@@ -20,6 +20,18 @@ class Article < ApplicationRecord
 
   scope :for_organization, ->(org) { where(organization: org) }
 
+  scope :persisted_articles, -> { where(temporary: false) }
+
+  scope :search_with_id, ->(opts) { opts[:article_id] && where(id: opts[:article_id]) }
+
+  scope :search_with_status, ->(opts) { opts[:status] && Article.send(opts[:status]) }
+
+  scope :search_with_url, ->(opts) {
+    opts[:url] && joins(:urls).where(
+      "urls.url = ?", opts[:url]
+    )
+  }
+
   def increment_upvote
     self.update(upvotes_count: self.upvotes_count + 1)
   end
@@ -29,15 +41,9 @@ class Article < ApplicationRecord
   end
 
   def self.search_using(org, opts = {})
-    articles = opts[:status].present? ? Article.send(opts[:status]) : Article.all
-    articles = articles.for_organization(org)
-    articles = articles.where(temporary: false)
-    articles = articles.where(id: opts[:article_id]) if opts[:article_id].present?
-    if opts[:url].present?
-      articles = articles.joins(:urls).where(
-        "urls.url = ?", opts[:url]
-      )
-    end
+    articles = Article.persisted_articles.for_organization(org)
+    articles = articles.search_with_status(opts).search_with_id(opts)
+    articles = articles.search_with_url(opts)
     if opts[:search_string].present?
       articles = articles.search opts[:search_string]
       articles = articles.each_with_object([]) { |article, arr| arr.push(article) }

@@ -81,7 +81,7 @@ def create_data_for_ace_invoice_organization
   a3 = category.articles.create! title: "Do you provide integration with wordpress?",
                                 desc: desc,
                                 organization_id: org.id,
-                                  temporary: false
+                                temporary: false
 
   a4 = category.articles.create!  title: "Do you provide integration for PHP applications?",
                                   desc: desc,
