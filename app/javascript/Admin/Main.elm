@@ -346,9 +346,16 @@ update msg model =
         LinkClicked urlRequest ->
             case urlRequest of
                 Browser.Internal url ->
-                    ( { model | showHamMenu = False }
-                    , Navigation.pushUrl model.navKey (Url.toString url)
-                    )
+                    case Route.fromLocation url |> Route.isOrgSame model.organizationKey of
+                        True ->
+                            ( { model | showHamMenu = False }
+                            , Navigation.pushUrl model.navKey (Url.toString url)
+                            )
+
+                        False ->
+                            ( { model | showHamMenu = False }
+                            , Navigation.load (Url.toString url)
+                            )
 
                 Browser.External href ->
                     ( model
@@ -1143,7 +1150,7 @@ view model =
                     [ viewWithTopMenu
                     , MainView.hamBurgerMenu
                         { organizationList = model.organizationList
-                        , onUpdateOrganization = UpdateOrganizationData
+                        , toUpdatedRoute = \org -> Route.updateApiKeyinRoute org.api_key model.route
                         , onCloseMenu = CloseHamMenu
                         }
                     ]
