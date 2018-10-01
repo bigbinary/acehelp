@@ -1,6 +1,7 @@
 port module Admin.Ports exposing
     ( clearTimeout
     , insertArticleContent
+    , setEditorHeight
     , setTimeout
     , timedOut
     , timeoutInitialized
@@ -35,3 +36,6 @@ port setTimeout : Int -> Cmd msg
 
 
 port clearTimeout : Int -> Cmd msg
+
+
+port setEditorHeight : { editorId : String, height : Float } -> Cmd msg

@@ -5,6 +5,7 @@ module Page.Article.Create exposing
     , init
     , initModel
     , save
+    , subscriptions
     , update
     , view
     )
@@ -20,6 +21,8 @@ import Admin.Request.Category exposing (..)
 import Admin.Request.Helper exposing (ApiKey)
 import Admin.Request.Url exposing (..)
 import Admin.Views.Common exposing (..)
+import Browser.Dom as Dom
+import Browser.Events as Events
 import Field exposing (..)
 import GraphQL.Client.Http as GQLClient
 import Helpers exposing (..)
@@ -86,6 +89,9 @@ type Msg
     | UrlsLoaded (Result GQLClient.Error (Maybe (List UrlData)))
     | ArticleLoaded (Result GQLClient.Error (Maybe Article))
     | UrlSelected (Option UrlId)
+    | TrixInitialize ()
+    | ChangeEditorHeight (Result Dom.Error Dom.Element)
+    | ResizeWindow Int Int
 
 
 update : Msg -> Model -> ( Model, List (ReaderCmd Msg) )
@@ -183,6 +189,24 @@ update msg model =
             , []
             )
 
+        TrixInitialize _ ->
+            ( model
+            , [ Strict <| Reader.Reader <| always <| Task.attempt ChangeEditorHeight <| Dom.getElement editorId ]
+            )
+
+        ChangeEditorHeight (Ok info) ->
+            ( model
+            , [ Strict <| Reader.Reader <| always <| setEditorHeight <| proposedEditorHeightPayload info ]
+            )
+
+        ChangeEditorHeight (Err _) ->
+            ( model, [] )
+
+        ResizeWindow _ _ ->
+            ( model
+            , [ Strict <| Reader.Reader <| always <| Task.attempt ChangeEditorHeight <| Dom.getElement editorId ]
+            )
+
 
 
 -- View
@@ -210,6 +234,7 @@ view orgKey model =
                     [ class "row article-content" ]
                     [ node "trix-editor"
                         [ placeholder "Article content goes here.."
+                        , id editorId
                         , onTrixChange DescInput
                         ]
                         []
@@ -283,3 +308,15 @@ articleInputs { articleId, title, desc, categories, urls } =
                 )
                 urls
     }
+
+
+
+-- Subscriptions
+
+
+subscriptions : Model -> Sub Msg
+subscriptions model =
+    Sub.batch
+        [ trixInitialize <| TrixInitialize
+        , Events.onResize <| \width -> \height -> ResizeWindow width height
+        ]

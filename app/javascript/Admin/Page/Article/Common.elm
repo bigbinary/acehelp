@@ -1,10 +1,12 @@
 module Page.Article.Common exposing
     ( SaveStatus(..)
     , categoryToValue
+    , editorId
     , errorsIn
     , multiSelectCategoryList
     , multiSelectUrlList
     , onTrixChange
+    , proposedEditorHeightPayload
     , savingIndicator
     , selectItemInList
     , selectItemsInList
@@ -18,6 +20,7 @@ import Admin.Data.Common exposing (..)
 import Admin.Data.Status exposing (..)
 import Admin.Data.Url exposing (..)
 import Admin.Views.Common exposing (..)
+import Browser.Dom as Dom
 import Field exposing (..)
 import Field.ValidationResult exposing (..)
 import Helpers exposing (..)
@@ -155,3 +158,23 @@ onTrixChange handler =
     Json.at [ "target", "value" ] Json.string
         |> Json.map handler
         |> on "trix-change"
+
+
+editorId : String
+editorId =
+    "article-editor"
+
+
+proposedEditorHeightPayload : Dom.Element -> { editorId : String, height : Float }
+proposedEditorHeightPayload { viewport, element } =
+    let
+        bottomSpacing =
+            10.0
+
+        proposedHeight =
+            viewport.height - element.y - bottomSpacing
+
+        payload =
+            { editorId = editorId, height = proposedHeight }
+    in
+    payload

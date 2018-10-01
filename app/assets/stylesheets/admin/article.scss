@@ -36,7 +36,7 @@
                 input {
                     margin: 0 10px 0 0;
                 }
-                
+
             }
             label{
                 color:#000;
@@ -62,9 +62,7 @@
 
     }
     trix-editor{
-        min-height:500px;
+        min-height: 80vh;
+        overflow-y: scroll;
     }
-    
-
-    
 }

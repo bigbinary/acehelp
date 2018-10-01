@@ -1021,6 +1021,9 @@ update msg model =
 subscriptions : Model -> Sub Msg
 subscriptions model =
     case getPage model.currentPage of
+        ArticleCreate articleCreateModel ->
+            Sub.map ArticleCreateMsg <| ArticleCreate.subscriptions articleCreateModel
+
         ArticleEdit articleEditModel ->
             Sub.map ArticleEditMsg <| ArticleEdit.subscriptions articleEditModel
 

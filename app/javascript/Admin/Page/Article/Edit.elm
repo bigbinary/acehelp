@@ -26,6 +26,8 @@ import Admin.Request.Article exposing (..)
 import Admin.Request.Category exposing (..)
 import Admin.Request.Url exposing (..)
 import Admin.Views.Common exposing (..)
+import Browser.Dom as Dom
+import Browser.Events as Events
 import Field exposing (..)
 import GraphQL.Client.Http as GQLClient
 import Helpers exposing (..)
@@ -127,6 +129,8 @@ type Msg
     | EditArticle
     | ResetArticle
     | RemoveNotifications
+    | ChangeEditorHeight (Result Dom.Error Dom.Element)
+    | ResizeWindow Int Int
 
 
 
@@ -310,13 +314,26 @@ update msg model =
             )
 
         TrixInitialize _ ->
-            ( model, [ Strict <| Reader.Reader <| always <| insertArticleContent <| Field.value model.desc ] )
+            ( model
+            , [ Strict <| Reader.Reader <| always <| insertArticleContent <| Field.value model.desc
+              , Strict <| Reader.Reader <| always <| Task.attempt ChangeEditorHeight <| Dom.getElement editorId
+              ]
+            )
 
         Killed _ ->
             ( model, [] )
 
         EditArticle ->
-            ( { model | isEditable = True }, [] )
+            let
+                cmd =
+                    Process.sleep 100.0
+                        |> (\_ -> Dom.getElement editorId)
+                        |> Task.attempt ChangeEditorHeight
+                        |> always
+                        |> Reader.Reader
+                        |> Strict
+            in
+            ( { model | isEditable = True }, [ cmd ] )
 
         ResetArticle ->
             case model.originalArticle of
@@ -373,6 +390,19 @@ update msg model =
         RemoveNotifications ->
             ( { model | errors = [], success = Nothing }, [] )
 
+        ChangeEditorHeight (Ok info) ->
+            ( model
+            , [ Strict <| Reader.Reader <| always <| setEditorHeight <| proposedEditorHeightPayload info ]
+            )
+
+        ChangeEditorHeight (Err _) ->
+            ( model, [] )
+
+        ResizeWindow _ _ ->
+            ( model
+            , [ Strict <| Reader.Reader <| always <| Task.attempt ChangeEditorHeight <| Dom.getElement editorId ]
+            )
+
 
 removeNotificationCmd =
     Unit <|
@@ -415,7 +445,7 @@ view model =
                     [ div [ classList [ ( "hidden", not model.isEditable ) ] ]
                         [ node "trix-editor"
                             [ classList [ ( "trix-content", True ) ]
-                            , id "dubi"
+                            , id editorId
                             , placeholder "Article content goes here.."
                             , onTrixChange DescInput
                             ]
@@ -533,4 +563,5 @@ subscriptions model =
         , trixChange <| DescInput
         , timeoutInitialized <| ReceivedTimeoutId
         , timedOut <| TimedOut
+        , Events.onResize <| \width -> \height -> ResizeWindow width height
         ]

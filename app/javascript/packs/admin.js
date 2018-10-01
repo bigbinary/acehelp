@@ -62,6 +62,17 @@ document.addEventListener("DOMContentLoaded", () => {
         clearTimeout(timeoutId);
     });
 
+    app.ports.setEditorHeight.subscribe(({ editorId, height }) => {
+        const editorNode = document.getElementById(editorId);
+
+        if (editorNode) {
+            const heightInPx = (height || editorNode.style.minHeight) + "px";
+
+            editorNode.style.minHeight = heightInPx;
+            editorNode.style.maxHeight = heightInPx;
+        }
+    });
+
     // OUTGOING PORTS
     document.addEventListener("trix-initialize", function(event) {
         app.ports.trixInitialize.send(null);
