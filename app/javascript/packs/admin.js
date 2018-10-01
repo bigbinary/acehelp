@@ -63,28 +63,26 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     function setTrixEditorHeight() {
-        const queryNode = selector => document.querySelector(selector);
-        const trixEditor = queryNode("trix-editor");
-
-        if (trixEditor) {
-            const headerHeight = queryNode("#admin-hook .header").offsetHeight;
-            const trixToolbarHeight = queryNode("trix-toolbar").offsetHeight;
-            const titleHeight = queryNode(".article-title").offsetHeight;
-            const editArticleButtonRow = queryNode(".article-save-edit");
-            const editArticleButtonRowHeight = editArticleButtonRow
-                ? editArticleButtonRow.offsetHeight
-                : 0;
-            const proposedEditorHeight =
-                window.innerHeight -
-                headerHeight -
-                editArticleButtonRowHeight -
-                titleHeight -
-                trixToolbarHeight -
-                50;
-
-            trixEditor.style.minHeight = proposedEditorHeight + "px";
-            trixEditor.style.maxHeight = proposedEditorHeight + "px";
-        }
+        // const queryNode = selector => document.querySelector(selector);
+        // const trixEditor = queryNode("trix-editor");
+        // if (trixEditor) {
+        //     const headerHeight = queryNode("#admin-hook .header").offsetHeight;
+        //     const trixToolbarHeight = queryNode("trix-toolbar").offsetHeight;
+        //     const titleHeight = queryNode(".article-title").offsetHeight;
+        //     const editArticleButtonRow = queryNode(".article-save-edit");
+        //     const editArticleButtonRowHeight = editArticleButtonRow
+        //         ? editArticleButtonRow.offsetHeight
+        //         : 0;
+        //     const proposedEditorHeight =
+        //         window.innerHeight -
+        //         headerHeight -
+        //         editArticleButtonRowHeight -
+        //         titleHeight -
+        //         trixToolbarHeight -
+        //         50;
+        //     trixEditor.style.minHeight = proposedEditorHeight + "px";
+        //     trixEditor.style.maxHeight = proposedEditorHeight + "px";
+        // }
     }
 
     // OUTGOING PORTS

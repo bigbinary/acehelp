@@ -26,6 +26,7 @@ import Admin.Request.Article exposing (..)
 import Admin.Request.Category exposing (..)
 import Admin.Request.Url exposing (..)
 import Admin.Views.Common exposing (..)
+import Browser.Dom exposing (..)
 import Field exposing (..)
 import GraphQL.Client.Http as GQLClient
 import Helpers exposing (..)
@@ -57,6 +58,7 @@ type alias Model =
     , articleStatus : AvailabilityStatus
     , originalArticle : Maybe Article
     , isEditable : Bool
+    , editorHeight : Float
     }
 
 
@@ -74,6 +76,7 @@ initModel articleId =
     , articleStatus = Inactive
     , originalArticle = Nothing
     , isEditable = False
+    , editorHeight = 0.0
     }
 
 
@@ -127,6 +130,7 @@ type Msg
     | EditArticle
     | ResetArticle
     | RemoveNotifications
+    | ChangeEditorHeight (Result Browser.Dom.Error Element)
 
 
 
@@ -310,7 +314,11 @@ update msg model =
             )
 
         TrixInitialize _ ->
-            ( model, [ Strict <| Reader.Reader <| always <| insertArticleContent <| Field.value model.desc ] )
+            ( model
+            , [ Strict <| Reader.Reader <| always <| insertArticleContent <| Field.value model.desc
+              , Strict <| Reader.Reader <| always <| proposedEditorHeight
+              ]
+            )
 
         Killed _ ->
             ( model, [] )
@@ -373,6 +381,16 @@ update msg model =
         RemoveNotifications ->
             ( { model | errors = [], success = Nothing }, [] )
 
+        ChangeEditorHeight (Ok info) ->
+            let
+                _ =
+                    Debug.log "....." <| Debug.toString info
+            in
+            ( { model | editorHeight = info.viewport.height - info.element.y }, [] )
+
+        _ ->
+            ( model, [] )
+
 
 removeNotificationCmd =
     Unit <|
@@ -411,13 +429,16 @@ view model =
                         ]
                     ]
                 , div
-                    [ class "row article-content" ]
+                    [ class "row article-content"
+                    ]
                     [ div [ classList [ ( "hidden", not model.isEditable ) ] ]
                         [ node "trix-editor"
                             [ classList [ ( "trix-content", True ) ]
-                            , id "dubi"
+                            , id "article-editor"
                             , placeholder "Article content goes here.."
                             , onTrixChange DescInput
+                            , style "min-height" (String.fromFloat model.editorHeight ++ "px")
+                            , style "max-height" (String.fromFloat model.editorHeight ++ "px")
                             ]
                             []
                         ]
@@ -520,6 +541,11 @@ save model =
 
     else
         ( { model | errors = errorsIn fields }, [] )
+
+
+proposedEditorHeight : Cmd Msg
+proposedEditorHeight =
+    getElement "article-editor" |> Task.attempt ChangeEditorHeight
 
 
 
