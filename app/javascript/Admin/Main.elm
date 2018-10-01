@@ -403,20 +403,34 @@ update msg model =
                 ( newModel, cmds ) =
                     ArticleCreate.update caMsg
                         currentPageModel
-            in
-            case model.currentPage of
-                Loaded (ArticleCreate _) ->
-                    ( { model | currentPage = Loaded (ArticleCreate newModel) }
-                    , runReaderCmds ArticleCreateMsg cmds
-                    )
 
-                TransitioningFrom _ ->
-                    ( { model | currentPage = Loaded (ArticleCreate newModel) }
-                    , runReaderCmds ArticleCreateMsg cmds
-                    )
+                ( updatedModel, updatedCmds ) =
+                    case model.currentPage of
+                        Loaded (ArticleCreate _) ->
+                            ( { model | currentPage = Loaded (ArticleCreate newModel) }
+                            , runReaderCmds ArticleCreateMsg cmds
+                            )
+
+                        TransitioningFrom _ ->
+                            ( { model | currentPage = Loaded (ArticleCreate newModel) }
+                            , runReaderCmds ArticleCreateMsg cmds
+                            )
+
+                        _ ->
+                            ( model, Cmd.none )
+            in
+            case caMsg of
+                ArticleCreate.SaveArticleResponse (Ok articleResp) ->
+                    case articleResp of
+                        Just article ->
+                            updateNavigation (Route.ArticleList model.organizationKey) ( updatedModel, updatedCmds )
+                                |> renderFlashMessages (UserNotification.SuccessNotification "Article created successfully.")
+
+                        Nothing ->
+                            ( updatedModel, updatedCmds )
 
                 _ ->
-                    ( model, Cmd.none )
+                    ( updatedModel, updatedCmds )
 
         ArticleEditMsg aeMsg ->
             let
