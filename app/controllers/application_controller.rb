@@ -5,7 +5,7 @@ class ApplicationController < ActionController::Base
 
   before_action :configure_permitted_parameters, if: :devise_controller?
   rescue_from ActiveRecord::RecordNotFound, with: :render_not_found
-  skip_before_action :verify_authenticity_token
+  protect_from_forgery with: :exception
 
   private
 

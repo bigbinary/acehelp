@@ -1,9 +1,11 @@
 # Read about fixtures at http://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
 
 google:
-  url: "http://google.com"
+  url_pattern: "http://google.com"
+  url_rule: "contains"
   organization: aceinvoice
 
 bigbinary:
-  url: "http://bigbinary.com"
+  url_pattern: "http://bigbinary.com"
+  url_rule: "contains"
   organization: bigbinary

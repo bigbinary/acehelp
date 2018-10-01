@@ -24,9 +24,9 @@ class Mutations::UrlMutationsTest < ActiveSupport::TestCase
               }
             GRAPHQL
 
-    result = AceHelp::Client.execute(query, input: { url: "http://test_url.com" })
+    result = AceHelp::Client.execute(query, input: { url_pattern: "http://test_url.com" })
 
-    assert_equal result.data.add_url.url.url, "http://test_url.com"
+    assert_equal result.data.add_url.url.url_pattern, "http://test_url.com"
   end
 
   test "create url failure" do
@@ -41,8 +41,8 @@ class Mutations::UrlMutationsTest < ActiveSupport::TestCase
               }
             GRAPHQL
 
-    result = AceHelp::Client.execute(query, input: { url: "wrong_url" })
-    assert_nil result.data.add_url.url
+    result = AceHelp::Client.execute(query, input: { url_pattern: "wrong_url" })
+    assert_nil result.data.add_url.url_pattern
   end
 
   test "update url mutations" do
@@ -57,9 +57,9 @@ class Mutations::UrlMutationsTest < ActiveSupport::TestCase
               }
             GRAPHQL
 
-    result = AceHelp::Client.execute(query, id: @url.id, url: "http://test_update_url.com")
+    result = AceHelp::Client.execute(query, id: @url.id, url_pattern: "http://test_update_url.com")
 
-    assert_equal result.data.update_url.url.url, "http://test_update_url.com"
+    assert_equal result.data.update_url.url.url_pattern, "http://test_update_url.com"
   end
 
   test "update url mutation failure" do

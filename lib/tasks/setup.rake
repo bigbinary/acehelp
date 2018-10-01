@@ -66,9 +66,9 @@ def create_data_for_ace_invoice_organization
   org = Organization.create! name: "AceInvoice", email: "aceinvoice@example.com", api_key: "9099015ee520e11887eb"
   OrganizationUser.create! organization_id: org.id, user_id: User.first.id
 
-  getting_started_url = org.urls.create! url: "#{Rails.application.secrets.host}/pages/aceinvoice/getting_started"
-  integrations_url = org.urls.create! url: "#{Rails.application.secrets.host}/pages/aceinvoice/integrations"
-  pricing_url = org.urls.create! url: "#{Rails.application.secrets.host}/pages/aceinvoice/pricing"
+  getting_started_url = org.urls.create! url_pattern: "/pages/aceinvoice/getting_started", url_rule: :ends_with
+  integrations_url = org.urls.create! url_pattern: "/pages/aceinvoice/integrations", url_rule: :ends_with
+  pricing_url = org.urls.create! url_pattern: "/pages/aceinvoice/pricing", url_rule: :ends_with
 
 
   category = org.categories.create! name: "Getting Started"
@@ -126,12 +126,12 @@ end
 
 def create_data_for_eii_organization
   desc = "Article details is coming soon"
-  org = Organization.create! name: "EventsInIndia", email: "eventsinindia@example.com"
+  org = Organization.create! name: "EventsInIndia", email: "eventsinindia@example.com", api_key: "9099015ee520e11887fb"
   OrganizationUser.create! organization_id: org.id, user_id: User.first.id
 
-  events_url = org.urls.create! url: "http://eventsinindia.com/events"
-  buying_tickets_url = org.urls.create! url: "http://eventsinindia.com/buying_tickets"
-  pricing_url = org.urls.create! url: "http://eventsinindia.com/pricing"
+  events_url = org.urls.create! url_pattern: "events/city/*", url_rule: "contains"
+  subscription_url = org.urls.create! url_pattern: "/city_subscription/new", url_rule: "ends_with"
+  pricing_url = org.urls.create! url_pattern: "/pricing", url_rule: "ends_with"
 
   category = org.categories.create! name: "Events"
   a1 = category.articles.create!  title: "Can I post private events?",
@@ -170,8 +170,8 @@ def create_data_for_eii_organization
   ArticleUrl.create! article_id: a1.id, url_id: events_url.id
   ArticleUrl.create! article_id: a2.id, url_id: events_url.id
 
-  ArticleUrl.create! article_id: a3.id, url_id: buying_tickets_url.id
-  ArticleUrl.create! article_id: a4.id, url_id: buying_tickets_url.id
+  ArticleUrl.create! article_id: a3.id, url_id: subscription_url.id
+  ArticleUrl.create! article_id: a4.id, url_id: subscription_url.id
 
   ArticleUrl.create! article_id: a5.id, url_id: pricing_url.id
   ArticleUrl.create! article_id: a6.id, url_id: pricing_url.id
@@ -191,10 +191,9 @@ def create_data_for_careforever_organization
   org = Organization.create! name: "CareForever", email: "careforever@example.com", api_key: "8c83e37f9789819be471"
   OrganizationUser.create! organization_id: org.id, user_id: User.first.id
 
-  about_url = org.urls.create! url: "https://careforever-for-acehelp.herokuapp.com/pages/about"
-  careplan_utl = org.urls.create! url: "https://careforever-for-acehelp.herokuapp.com/pages/careplan"
-  security_url = org.urls.create! url: "https://careforever-for-acehelp.herokuapp.com/pages/security"
-  root_url = org.urls.create! url: "https://careforever-for-acehelp.herokuapp.com/"
+  about_url = org.urls.create! url_pattern: "/pages/about", url_rule: :contains
+  careplan_url = org.urls.create! url_pattern: "/pages/careplan" , url_rule: :contains
+  security_url = org.urls.create! url_pattern: "/pages/security", url_rule: :ends_with
 
 
   category = org.categories.create! name: "About"
@@ -238,10 +237,10 @@ def create_data_for_careforever_organization
 
   ArticleUrl.create! article_id: a1.id, url_id: about_url.id
   ArticleUrl.create! article_id: a3.id, url_id: about_url.id
-  ArticleUrl.create! article_id: a1.id, url_id: careplan_utl.id
+  ArticleUrl.create! article_id: a1.id, url_id: careplan_url.id
   ArticleUrl.create! article_id: a3.id, url_id: security_url.id
   ArticleUrl.create! article_id: a5.id, url_id: security_url.id
-  ArticleUrl.create! article_id: a7.id, url_id: root_url.id
+  ArticleUrl.create! article_id: a7.id, url_id: careplan_url.id
 
   Ticket.create!  name: "Sam Smith",
                   email: "sam@example.com",

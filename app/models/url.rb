@@ -5,8 +5,13 @@ class Url < ApplicationRecord
   has_many :articles, through: :article_urls
   belongs_to :organization
 
-  validates_uniqueness_of :url, case_sensitive: false
-  validates_with HttpUrlValidator
+  enum url_rule: {
+    contains: "contains",
+    ends_with: "ends_with"
+  }
+
+  # validates_uniqueness_of :url, case_sensitive: false
+  # validates_with HttpUrlValidator
 
   scope :for_organization, ->(org) { where(organization: org) }
 end
