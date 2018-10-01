@@ -1,4 +1,35 @@
-module Views.FontAwesome exposing (Path, address_book, address_card, angle_double_left, angle_double_right, angle_double_up, angle_down, angle_left, angle_right, angle_up, file_alt, folder, folder_open, icon, plus, plus_circle, plus_square, question, question_circle, save, search, search_minus, search_plus, thumbs_down, thumbs_up, window_close, window_maximize, window_minimize, window_restore)
+module Views.FontAwesome exposing
+    ( Path
+    , address_book
+    , address_card
+    , angle_double_left
+    , angle_double_right
+    , angle_double_up
+    , angle_down
+    , angle_left
+    , angle_right
+    , angle_up
+    , bars
+    , file_alt
+    , folder
+    , folder_open
+    , icon
+    , plus
+    , plus_circle
+    , plus_square
+    , question
+    , question_circle
+    , save
+    , search
+    , search_minus
+    , search_plus
+    , thumbs_down
+    , thumbs_up
+    , window_close
+    , window_maximize
+    , window_minimize
+    , window_restore
+    )
 
 import Html exposing (Html)
 import Svg exposing (path, svg)
@@ -22,6 +53,11 @@ icon path =
 
 
 ------------------------------------------------------------------------
+
+
+bars : Html msg
+bars =
+    icon "M16 132h416c8.837 0 16-7.163 16-16V76c0-8.837-7.163-16-16-16H16C7.163 60 0 67.163 0 76v40c0 8.837 7.163 16 16 16zm0 160h416c8.837 0 16-7.163 16-16v-40c0-8.837-7.163-16-16-16H16c-8.837 0-16 7.163-16 16v40c0 8.837 7.163 16 16 16zm0 160h416c8.837 0 16-7.163 16-16v-40c0-8.837-7.163-16-16-16H16c-8.837 0-16 7.163-16 16v40c0 8.837 7.163 16 16 16z"
 
 
 {-| -}

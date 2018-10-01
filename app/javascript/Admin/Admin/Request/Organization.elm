@@ -1,4 +1,4 @@
-module Admin.Request.Organization exposing (requestCreateOrganization)
+module Admin.Request.Organization exposing (requestAllOrganizations, requestCreateOrganization)
 
 import Admin.Data.Organization exposing (..)
 import Admin.Request.Helper exposing (..)
@@ -24,4 +24,13 @@ requestCreateOrganization orgInputs =
                     , userId = orgInputs.userId
                     }
                     createOrganizationMutation
+        )
+
+
+requestAllOrganizations : Reader ( NodeEnv, ApiKey, AppUrl ) (Task GQLClient.Error (Maybe (List Organization)))
+requestAllOrganizations =
+    Reader.Reader
+        (\( nodeEnv, apiKey, appUrl ) ->
+            GQLClient.customSendQuery (requestOptions nodeEnv apiKey appUrl) <|
+                GQLBuilder.request {} fetchOrganizationsQuery
         )

@@ -1,22 +1,25 @@
-module Page.View exposing (adminHeader, adminLayout, logoutOption)
+module Page.View exposing (adminHeader, adminLayout, hamBurgerMenu, logoutOption)
 
+import Admin.Data.Organization exposing (Organization)
 import Admin.Request.Helper exposing (ApiKey, NodeEnv)
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
 import Page.UserNotification as UserNotification
 import Route exposing (..)
+import Views.FontAwesome as FontAwesome exposing (..)
 
 
 adminLayout :
-    Html msg
-    -> (UserNotification.Msg -> msg)
-    -> Bool
-    -> String
-    -> UserNotification.Model
-    -> List (Html msg)
+    { headerContent : Html msg
+    , userNotificationMsg : UserNotification.Msg -> msg
+    , showLoading : Bool
+    , spinnerLabel : String
+    , notifications : UserNotification.Model
+    , viewContent : List (Html msg)
+    }
     -> Html msg
-adminLayout headerContent userNotificationMsg showLoading spinnerLabel notifications viewContent =
+adminLayout { headerContent, userNotificationMsg, showLoading, spinnerLabel, notifications, viewContent } =
     div []
         [ headerContent
         , div
@@ -43,18 +46,23 @@ navLinkListItem currentRoute matchText linkRoute linkName =
     li [ class "nav-item" ] [ navLink currentRoute matchText linkRoute linkName ]
 
 
-adminHeader : ApiKey -> String -> Route.Route -> msg -> Html msg
-adminHeader orgKey orgName currentRoute signOut =
+adminHeader : { orgKey : ApiKey, orgName : String, currentRoute : Route.Route, onMenuClick : msg, onSignOut : msg } -> Html msg
+adminHeader { orgKey, orgName, currentRoute, onMenuClick, onSignOut } =
     nav [ class "header navbar navbar-dark bg-primary navbar-expand flex-column flex-md-row" ]
         [ div [ class "container" ]
             [ ul
                 [ class "navbar-nav mr-auto mt-2 mt-lg-0 " ]
                 [ li [ class "nav-item" ]
                     [ span
-                        [ classList
-                            [ ( "navbar-brand", True ) ]
+                        [ class "navbar-brand"
                         ]
-                        [ span [] [ text orgName ] ]
+                        [ span [ onClick onMenuClick ]
+                            [ span
+                                [ class "hamburger-button d-inline-block align-self-center" ]
+                                [ FontAwesome.bars ]
+                            , span [ class "org-name" ] [ text orgName ]
+                            ]
+                        ]
                     ]
                 , navLinkListItem currentRoute "/articles" (Route.ArticleList orgKey) "Articles"
                 , navLinkListItem currentRoute "/urls" (Route.UrlList orgKey) "URLs"
@@ -66,7 +74,7 @@ adminHeader orgKey orgName currentRoute signOut =
                 ]
             , ul [ class "navbar-nav ml-auto" ]
                 [ li [ class "nav-item " ]
-                    [ button [ class "nav-link sign-out", onClick signOut ]
+                    [ button [ class "nav-link sign-out", onClick onSignOut ]
                         [ text "Logout" ]
                     ]
                 ]
@@ -85,4 +93,28 @@ logoutOption signOut =
                     ]
                 ]
             ]
+        ]
+
+
+hamBurgerMenu : { organizationList : List Organization, toUpdatedRoute : Organization -> Route, onCloseMenu : msg } -> Html msg
+hamBurgerMenu { organizationList, toUpdatedRoute, onCloseMenu } =
+    div [ class "menu-overlay" ]
+        [ div [ class "screen-overlay" ] []
+        , div
+            [ class "hamburger-menu nav flex-column" ]
+          <|
+            List.concat
+                [ [ div
+                        [ class "nav-link menu-title" ]
+                        [ h4 [] [ text "Select an Organization" ]
+                        , h4 [ class "menu-close", onClick onCloseMenu ] [ text "x" ]
+                        ]
+                  ]
+                , List.map
+                    (\org ->
+                        a [ class "nav-link", href <| routeToString <| toUpdatedRoute <| org ] [ text org.name ]
+                    )
+                    organizationList
+                , [ a [ class "nav-link menu-add-org", href <| routeToString <| OrganizationCreate ] [ h5 [] [ text "+ Add" ] ] ]
+                ]
         ]

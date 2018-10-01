@@ -16,12 +16,15 @@ module Main exposing
     )
 
 import Admin.Data.Common exposing (..)
+import Admin.Data.Organization exposing (Organization)
 import Admin.Data.ReaderCmd exposing (..)
 import Admin.Request.Helper exposing (ApiKey, NodeEnv, logoutRequest)
+import Admin.Request.Organization exposing (requestAllOrganizations)
 import Admin.Views.Common exposing (..)
 import Browser
 import Browser.Navigation as Navigation exposing (..)
 import Field exposing (..)
+import GraphQL.Client.Http as GQLClient
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Http
@@ -48,7 +51,9 @@ import Page.Url.Edit as UrlEdit
 import Page.Url.List as UrlList
 import Page.UserNotification as UserNotification
 import Page.View as MainView
+import Reader exposing (..)
 import Route
+import Task exposing (Task)
 import Url exposing (Url)
 
 
@@ -108,6 +113,8 @@ type alias Model =
     , appUrl : String
     , notifications : UserNotification.Model
     , navKey : Navigation.Key
+    , organizationList : List Organization
+    , showHamMenu : Bool
     }
 
 
@@ -128,9 +135,14 @@ init flags location navKey =
             , appUrl = flags.app_url
             , notifications = UserNotification.initModel
             , navKey = navKey
+            , organizationList = []
+            , showHamMenu = False
             }
+
+        cmd =
+            Task.attempt OrganizationListLoaded (Reader.run requestAllOrganizations ( flags.node_env, flags.organization_key, flags.app_url ))
     in
-    ( pageModel, readerCmd )
+    ( pageModel, combineCmds cmd readerCmd )
 
 
 
@@ -163,6 +175,10 @@ type Msg
     | SignUpMsg SignUp.Msg
     | OrganizationCreateMsg OrganizationCreate.Msg
     | LinkClicked Browser.UrlRequest
+    | OrganizationListLoaded (Result GQLClient.Error (Maybe (List Organization)))
+    | UpdateOrganizationData Organization
+    | HamMenuClick
+    | CloseHamMenu
 
 
 
@@ -330,9 +346,16 @@ update msg model =
         LinkClicked urlRequest ->
             case urlRequest of
                 Browser.Internal url ->
-                    ( model
-                    , Navigation.pushUrl model.navKey (Url.toString url)
-                    )
+                    case Route.fromLocation url |> Route.isOrgSame model.organizationKey of
+                        True ->
+                            ( { model | showHamMenu = False }
+                            , Navigation.pushUrl model.navKey (Url.toString url)
+                            )
+
+                        False ->
+                            ( { model | showHamMenu = False }
+                            , Navigation.load (Url.toString url)
+                            )
 
                 Browser.External href ->
                     ( model
@@ -343,6 +366,12 @@ update msg model =
             UserNotification.update unMsg model.notifications
                 |> Tuple.mapFirst (\unModel -> { model | notifications = unModel })
                 |> Tuple.mapSecond (runReaderCmds UserNotificationMsg)
+
+        HamMenuClick ->
+            ( { model | showHamMenu = True }, Cmd.none )
+
+        CloseHamMenu ->
+            ( { model | showHamMenu = False }, Cmd.none )
 
         ArticleListMsg alMsg ->
             let
@@ -951,6 +980,25 @@ update msg model =
         SignedOut _ ->
             ( model, Navigation.load (Admin.Request.Helper.baseUrl model.nodeEnv model.appUrl) )
 
+        OrganizationListLoaded (Ok organizationListResponse) ->
+            case organizationListResponse of
+                Just organizations ->
+                    ( { model | organizationList = organizations }, Cmd.none )
+
+                Nothing ->
+                    ( model, Cmd.none )
+
+        OrganizationListLoaded (Err _) ->
+            ( model, Cmd.none )
+
+        UpdateOrganizationData organization ->
+            { model
+                | organizationKey = organization.api_key
+                , organizationName = organization.name
+                , showHamMenu = False
+            }
+                |> navigateTo model.route
+
 
 
 -- SUBSCRIPTIONS
@@ -1064,55 +1112,82 @@ view model =
                         (ForgotPassword.view forgotPasswordModel)
 
         headerContent =
-            MainView.adminHeader model.organizationKey model.organizationName model.route SignOut
+            MainView.adminHeader
+                { orgKey = model.organizationKey
+                , orgName = model.organizationName
+                , currentRoute = model.route
+                , onMenuClick = HamMenuClick
+                , onSignOut = SignOut
+                }
 
         logoutHeaderOption =
             MainView.logoutOption SignOut
 
+        layoutConfig =
+            { headerContent = headerContent
+            , userNotificationMsg = UserNotificationMsg
+            , showLoading = False
+            , spinnerLabel = ""
+            , notifications = model.notifications
+            , viewContent = [ viewContent ]
+            }
+
         viewWithTopMenu =
             case model.currentPage of
                 TransitioningFrom _ ->
-                    MainView.adminLayout headerContent
-                        UserNotificationMsg
-                        True
-                        "Loading.."
-                        model.notifications
-                        [ viewContent ]
+                    MainView.adminLayout
+                        { layoutConfig
+                            | showLoading = True
+                            , spinnerLabel = "Loading.."
+                        }
 
                 Loaded _ ->
-                    MainView.adminLayout headerContent
-                        UserNotificationMsg
-                        False
-                        ""
-                        model.notifications
-                        [ viewContent ]
+                    MainView.adminLayout layoutConfig
+
+        viewWithHamburgerMenu =
+            case model.showHamMenu of
+                True ->
+                    [ viewWithTopMenu
+                    , MainView.hamBurgerMenu
+                        { organizationList = model.organizationList
+                        , toUpdatedRoute = \org -> Route.updateApiKeyinRoute org.api_key model.route
+                        , onCloseMenu = CloseHamMenu
+                        }
+                    ]
+
+                False ->
+                    [ viewWithTopMenu ]
 
         viewBody =
             case getPage model.currentPage of
                 Login _ ->
-                    viewContent
+                    [ viewContent ]
 
                 SignUp _ ->
-                    viewContent
+                    [ viewContent ]
 
                 ForgotPassword _ ->
-                    viewContent
+                    [ viewContent ]
 
                 NotFound ->
-                    viewContent
+                    [ viewContent ]
 
                 OrganizationCreate _ ->
-                    MainView.adminLayout (MainView.logoutOption SignOut)
-                        UserNotificationMsg
-                        False
-                        ""
-                        model.notifications
-                        [ viewContent ]
+                    case model.organizationKey of
+                        "" ->
+                            [ MainView.adminLayout
+                                { layoutConfig
+                                    | headerContent = MainView.logoutOption SignOut
+                                }
+                            ]
+
+                        _ ->
+                            viewWithHamburgerMenu
 
                 _ ->
-                    viewWithTopMenu
+                    viewWithHamburgerMenu
     in
-    { title = "AceHelp", body = [ div [ id "admin-hook" ] [ viewBody ] ] }
+    { title = "AceHelp", body = [ div [ id "admin-hook" ] viewBody ] }
 
 
 

@@ -5,6 +5,7 @@ module Admin.Data.Organization exposing
     , OrganizationResponse
     , UserId
     , createOrganizationMutation
+    , fetchOrganizationsQuery
     , organizationObject
     , organizationResponseObject
     )
@@ -89,3 +90,18 @@ organizationObject =
         |> GQLBuilder.with (GQLBuilder.field "id" [] GQLBuilder.string)
         |> GQLBuilder.with (GQLBuilder.field "name" [] GQLBuilder.string)
         |> GQLBuilder.with (GQLBuilder.field "api_key" [] GQLBuilder.string)
+
+
+fetchOrganizationsQuery : GQLBuilder.Document GQLBuilder.Query (Maybe (List Organization)) {}
+fetchOrganizationsQuery =
+    GQLBuilder.queryDocument
+        (GQLBuilder.extract
+            (GQLBuilder.field "organization_list"
+                []
+                (GQLBuilder.nullable
+                    (GQLBuilder.list
+                        organizationObject
+                    )
+                )
+            )
+        )

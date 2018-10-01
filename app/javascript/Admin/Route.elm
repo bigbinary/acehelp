@@ -1,4 +1,10 @@
-module Route exposing (Route(..), fromLocation, routeToString)
+module Route exposing
+    ( Route(..)
+    , fromLocation
+    , isOrgSame
+    , routeToString
+    , updateApiKeyinRoute
+    )
 
 import Admin.Data.Article exposing (ArticleId)
 import Admin.Data.Category exposing (CategoryId)
@@ -66,6 +72,79 @@ routeMatcher =
 
 
 -- INTERNAL --
+
+
+updateApiKeyinRoute : ApiKey -> Route -> Route
+updateApiKeyinRoute newApiKey page =
+    case page of
+        Dashboard ->
+            Dashboard
+
+        ArticleList organizationApiKey ->
+            ArticleList newApiKey
+
+        UrlList organizationApiKey ->
+            UrlList newApiKey
+
+        CategoryList organizationApiKey ->
+            CategoryList newApiKey
+
+        TicketList organizationApiKey ->
+            TicketList newApiKey
+
+        FeedbackList organizationApiKey ->
+            FeedbackList newApiKey
+
+        FeedbackShow organizationApiKey feedbackId ->
+            FeedbackShow newApiKey feedbackId
+
+        TeamList organizationApiKey ->
+            TeamList newApiKey
+
+        Settings organizationApiKey ->
+            Settings newApiKey
+
+        ArticleCreate organizationApiKey ->
+            ArticleCreate newApiKey
+
+        UrlCreate organizationApiKey ->
+            UrlCreate newApiKey
+
+        CategoryCreate organizationApiKey ->
+            CategoryCreate newApiKey
+
+        TeamMemberCreate organizationApiKey ->
+            TeamMemberCreate newApiKey
+
+        UrlEdit organizationApiKey urlId ->
+            UrlEdit newApiKey urlId
+
+        ArticleEdit organizationApiKey articleId ->
+            ArticleEdit newApiKey articleId
+
+        ArticleShow organizationApiKey articleId ->
+            ArticleShow newApiKey articleId
+
+        TicketEdit organizationApiKey ticketId ->
+            TicketEdit newApiKey ticketId
+
+        OrganizationCreate ->
+            OrganizationCreate
+
+        CategoryEdit organizationApiKey categoryId ->
+            CategoryEdit newApiKey categoryId
+
+        SignUp ->
+            SignUp
+
+        Login ->
+            Login
+
+        ForgotPassword ->
+            ForgotPassword
+
+        NotFound ->
+            NotFound
 
 
 routeToString : Route -> String
@@ -153,3 +232,61 @@ fromLocation location =
 
         _ ->
             NotFound
+
+
+isOrgSame : ApiKey -> Route -> Bool
+isOrgSame newApiKey route =
+    case route of
+        ArticleList organizationApiKey ->
+            organizationApiKey == newApiKey
+
+        UrlList organizationApiKey ->
+            organizationApiKey == newApiKey
+
+        CategoryList organizationApiKey ->
+            organizationApiKey == newApiKey
+
+        TicketList organizationApiKey ->
+            organizationApiKey == newApiKey
+
+        FeedbackList organizationApiKey ->
+            organizationApiKey == newApiKey
+
+        FeedbackShow organizationApiKey feedbackId ->
+            organizationApiKey == newApiKey
+
+        TeamList organizationApiKey ->
+            organizationApiKey == newApiKey
+
+        Settings organizationApiKey ->
+            organizationApiKey == newApiKey
+
+        ArticleCreate organizationApiKey ->
+            organizationApiKey == newApiKey
+
+        UrlCreate organizationApiKey ->
+            organizationApiKey == newApiKey
+
+        CategoryCreate organizationApiKey ->
+            organizationApiKey == newApiKey
+
+        TeamMemberCreate organizationApiKey ->
+            organizationApiKey == newApiKey
+
+        UrlEdit organizationApiKey urlId ->
+            organizationApiKey == newApiKey
+
+        ArticleEdit organizationApiKey articleId ->
+            organizationApiKey == newApiKey
+
+        ArticleShow organizationApiKey articleId ->
+            organizationApiKey == newApiKey
+
+        TicketEdit organizationApiKey ticketId ->
+            organizationApiKey == newApiKey
+
+        CategoryEdit organizationApiKey categoryId ->
+            organizationApiKey == newApiKey
+
+        _ ->
+            False
