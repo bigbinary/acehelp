@@ -49,6 +49,7 @@ type alias Model =
     , saveStatus : SaveStatus
     , errors : List String
     , success : Maybe String
+    , attachmentsPath : String
     }
 
 
@@ -62,6 +63,7 @@ initModel =
     , saveStatus = None
     , errors = []
     , success = Nothing
+    , attachmentsPath = ""
     }
 
 
@@ -172,6 +174,7 @@ update msg model =
                     ( { model
                         | articleId = article.id
                         , errors = []
+                        , attachmentsPath = article.attachmentsPath
                       }
                     , []
                     )
@@ -237,15 +240,21 @@ view orgKey model =
                     ]
                 , div
                     [ class "row article-content" ]
-                    [ trixEditorToolbarView AddAttachments
-                    , node
-                        "trix-editor"
-                        [ placeholder "Article content goes here.."
-                        , id editorId
-                        , attribute "toolbar" "trix-custom-toolbar"
-                        , onTrixChange DescInput
+                    [ div
+                        [ attribute "data-attachments-path" model.attachmentsPath
+                        , attribute "data-api-key" orgKey
                         ]
-                        []
+                        [ trixEditorToolbarView
+                            AddAttachments
+                        , node
+                            "trix-editor"
+                            [ placeholder "Article content goes here.."
+                            , id editorId
+                            , attribute "toolbar" "trix-custom-toolbar"
+                            , onTrixChange DescInput
+                            ]
+                            []
+                        ]
                     ]
                 ]
             , div [ class "col-md-4 article-meta-data-block" ]
