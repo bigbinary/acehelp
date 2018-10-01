@@ -22,6 +22,7 @@ import Admin.Request.Helper exposing (ApiKey)
 import Admin.Request.Url exposing (..)
 import Admin.Views.Common exposing (..)
 import Browser.Dom as Dom
+import Browser.Events as Events
 import Field exposing (..)
 import GraphQL.Client.Http as GQLClient
 import Helpers exposing (..)
@@ -90,6 +91,7 @@ type Msg
     | UrlSelected (Option UrlId)
     | TrixInitialize ()
     | ChangeEditorHeight (Result Dom.Error Dom.Element)
+    | ResizeWindow Int Int
 
 
 update : Msg -> Model -> ( Model, List (ReaderCmd Msg) )
@@ -210,6 +212,11 @@ update msg model =
         ChangeEditorHeight (Err _) ->
             ( model, [] )
 
+        ResizeWindow _ _ ->
+            ( model
+            , [ Strict <| Reader.Reader <| always <| Task.attempt ChangeEditorHeight <| Dom.getElement editorId ]
+            )
+
 
 
 -- View
@@ -319,4 +326,7 @@ articleInputs { articleId, title, desc, categories, urls } =
 
 subscriptions : Model -> Sub Msg
 subscriptions model =
-    Sub.batch [ trixInitialize <| TrixInitialize ]
+    Sub.batch
+        [ trixInitialize <| TrixInitialize
+        , Events.onResize <| \width -> \height -> ResizeWindow width height
+        ]

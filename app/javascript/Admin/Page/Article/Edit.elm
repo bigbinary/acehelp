@@ -27,6 +27,7 @@ import Admin.Request.Category exposing (..)
 import Admin.Request.Url exposing (..)
 import Admin.Views.Common exposing (..)
 import Browser.Dom as Dom
+import Browser.Events as Events
 import Field exposing (..)
 import GraphQL.Client.Http as GQLClient
 import Helpers exposing (..)
@@ -129,6 +130,7 @@ type Msg
     | ResetArticle
     | RemoveNotifications
     | ChangeEditorHeight (Result Dom.Error Dom.Element)
+    | ResizeWindow Int Int
 
 
 
@@ -396,6 +398,11 @@ update msg model =
         ChangeEditorHeight (Err _) ->
             ( model, [] )
 
+        ResizeWindow _ _ ->
+            ( model
+            , [ Strict <| Reader.Reader <| always <| Task.attempt ChangeEditorHeight <| Dom.getElement editorId ]
+            )
+
 
 removeNotificationCmd =
     Unit <|
@@ -556,4 +563,5 @@ subscriptions model =
         , trixChange <| DescInput
         , timeoutInitialized <| ReceivedTimeoutId
         , timedOut <| TimedOut
+        , Events.onResize <| \width -> \height -> ResizeWindow width height
         ]
