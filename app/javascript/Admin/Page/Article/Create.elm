@@ -209,6 +209,7 @@ update msg model =
         ResizeWindow _ _ ->
             ( model
             , [ Strict <| Reader.Reader <| always <| Task.attempt ChangeEditorHeight <| Dom.getElement editorId ]
+            )
 
         AddAttachments ->
             ( model
