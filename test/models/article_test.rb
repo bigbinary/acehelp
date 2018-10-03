@@ -23,7 +23,8 @@ class ArticleTest < ActiveSupport::TestCase
     c1.articles.create!(
       title: "How do I put nodejs code in my website?",
       desc: "coming soon",
-      organization_id: org.id
+      organization_id: org.id,
+      temporary: false
     )
 
     Article.reindex
@@ -39,12 +40,14 @@ class ArticleTest < ActiveSupport::TestCase
     @article.urls << @url
     @article.update(organization_id: @organization.id)
     Article.reindex
-    assert_equal [@article], Article.search_using(@organization, article_id: @article.id, status: "inactive", url: @url.url)
-    assert_equal [@article], Article.search_using(@organization, article_id: @article.id, status: "inactive", url: "")
-    @article.active!
-    assert_equal [@article], Article.search_using(@organization, article_id: "", status: "active", url: @url.url)
-    assert_equal [@article], Article.search_using(@organization, article_id: "", status: "active", url: "")
 
+    assert_equal [@article], Article.search_using(@organization, article_id: @article.id, status: "inactive", url: @url.url)
+    assert_equal [@article], Article.search_using(@organization, article_id: @article.id, status: "inactive")
+
+    @article.active!
+
+    assert_equal [@article], Article.search_using(@organization, status: "active", url: @url.url)
+    assert_equal [@article], Article.search_using(@organization, status: "active")
     assert_equal [], Article.search_using(@organization, article_id: "fake_id", status: "active", url: @url.url)
     assert_equal [@article], Article.search_using(@organization, search_string: "day")
     assert_equal [], Article.search_using(@organization, search_string: "fake_string")

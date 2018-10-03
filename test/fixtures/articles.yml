@@ -4,8 +4,10 @@ life:
   title: "Happiest day of your life"
   desc: "tells more about life"
   organization: bigbinary
+  temporary: false
 
 ror:
   title: "Ruby on rails"
   desc: "Discuss about framework"
   organization: zindi
+  temporary: false

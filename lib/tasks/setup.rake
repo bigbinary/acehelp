@@ -68,34 +68,41 @@ def create_data_for_ace_invoice_organization
   category = org.categories.create! name: "Getting Started"
   a1 = category.articles.create!  title: "How do I put JavaScript code in my website?",
                                   desc: desc,
-                                  organization_id: org.id
+                                  organization_id: org.id,
+                                  temporary: false
 
   a2 = category.articles.create!  title: "Will putting JavaScript code in my website will make my site slower?",
                                   desc: desc,
-                                  organization_id: org.id
+                                  organization_id: org.id,
+                                  temporary: false
 
 
   category = org.categories.create! name: "Integrations"
   a3 = category.articles.create! title: "Do you provide integration with wordpress?",
                                 desc: desc,
-                                organization_id: org.id
+                                organization_id: org.id,
+                                temporary: false
 
   a4 = category.articles.create!  title: "Do you provide integration for PHP applications?",
                                   desc: desc,
-                                  organization_id: org.id
+                                  organization_id: org.id,
+                                  temporary: false
 
   category = org.categories.create! name: "Pricing"
   a5 = category.articles.create!  title: "Do I need to put credit card to try it out?",
                             desc: desc,
-                            organization_id: org.id
+                            organization_id: org.id,
+                            temporary: false
 
   a6 = category.articles.create!  title: "Do you offer custom plan?",
                             desc: desc,
-                            organization_id: org.id
+                            organization_id: org.id,
+                            temporary: false
 
   a7 = category.articles.create!  title: "Do you offer discount on yearly plan?",
                             desc: desc,
-                            organization_id: org.id
+                            organization_id: org.id,
+                            temporary: false
 
   ArticleUrl.create! article_id: a1.id, url_id: getting_started_url.id
   ArticleUrl.create! article_id: a3.id, url_id: getting_started_url.id
@@ -123,30 +130,36 @@ def create_data_for_eii_organization
   category = org.categories.create! name: "Events"
   a1 = category.articles.create!  title: "Can I post private events?",
                                   desc: desc,
-                                  organization_id: org.id
+                                  organization_id: org.id,
+                                  temporary: false
 
   a2 = category.articles.create!  title: "Do you email events information to users immediately or next day?",
                                   desc: desc,
-                                  organization_id: org.id
+                                  organization_id: org.id,
+                                  temporary: false
 
 
   category = org.categories.create! name: "Buying tickets"
   a3 = category.articles.create! title: "Can I buy tickets using credit card?",
                                 desc: desc,
-                                organization_id: org.id
+                                organization_id: org.id,
+                                temporary: false
 
   a4 = category.articles.create!  title: "Can I buy tickets using paytm?",
                                   desc: desc,
-                                  organization_id: org.id
+                                  organization_id: org.id,
+                                  temporary: false
 
   category = Category.create! name: "Pricing", organization_id: org.id
   a5 = category.articles.create!  title: "Can you waive service fee for events happening in colleges?",
                             desc: desc,
-                            organization_id: org.id
+                            organization_id: org.id,
+                            temporary: false
 
   a6 = category.articles.create!  title: "Is the service lower if amount in paid in cash?",
                             desc: desc,
-                            organization_id: org.id
+                            organization_id: org.id,
+                            temporary: false
 
   ArticleUrl.create! article_id: a1.id, url_id: events_url.id
   ArticleUrl.create! article_id: a2.id, url_id: events_url.id
@@ -181,34 +194,41 @@ def create_data_for_careforever_organization
   category = org.categories.create! name: "About"
   a1 = category.articles.create!  title: "How do I put JavaScript code in my website?",
                                   desc: desc,
-                                  organization_id: org.id
+                                  organization_id: org.id,
+                                  temporary: false
 
   a2 = category.articles.create!  title: "Will putting JavaScript code in my website will make my site slower?",
                                   desc: desc,
-                                  organization_id: org.id
+                                  organization_id: org.id,
+                                  temporary: false
 
 
   category = org.categories.create! name: "Careplan"
   a3 = category.articles.create! title: "Do you provide integration with wordpress?",
                                 desc: desc,
-                                organization_id: org.id
+                                organization_id: org.id,
+                                temporary: false
 
   a4 = category.articles.create!  title: "Do you provide integration for PHP applications?",
                                   desc: desc,
-                                  organization_id: org.id
+                                  organization_id: org.id,
+                                  temporary: false
 
   category = org.categories.create! name: "Security"
   a5 = category.articles.create!  title: "Do I need to put credit card to try it out?",
                             desc: desc,
-                            organization_id: org.id
+                            organization_id: org.id,
+                            temporary: false
 
   a6 = category.articles.create!  title: "Do you offer custom plan?",
                             desc: desc,
-                            organization_id: org.id
+                            organization_id: org.id,
+                            temporary: false
 
   a7 = category.articles.create!  title: "Do you offer discount on yearly plan?",
                             desc: desc,
-                            organization_id: org.id
+                            organization_id: org.id,
+                            temporary: false
 
   ArticleUrl.create! article_id: a1.id, url_id: about_url.id
   ArticleUrl.create! article_id: a3.id, url_id: about_url.id
