@@ -1,14 +1,72 @@
+"use strict";
+
+const STATIC_IMAGE_MAX_SIZE_IN_BYTES = 5 * 1024 * 1024; // 5 MB
+const ANIMATED_IMAGE_MAX_SIZE_IN_BYTES = 10 * 1024 * 1024; // 10 MB
+const ALLOWED_ATTACHMENT_MIME_TYPES = ["image/jpeg", "image/png", "image/gif"];
+
+Object.freeze(ALLOWED_ATTACHMENT_MIME_TYPES);
+
 export default class AttachmentUploader {
     constructor(apiKey, attachment, uploadPath) {
         this.apiKey = apiKey;
         this.attachment = attachment;
         this.uploadPath = uploadPath;
+        this.validationError = null;
 
         this.request = this.initializeRequest();
     }
 
     upload() {
-        return this.request.send(this.formData());
+        this.validateAttachment();
+
+        if (this.validationError) {
+            this.attachment.remove();
+
+            alert(this.validationError);
+
+            return false;
+        } else {
+            return this.request.send(this.formData());
+        }
+    }
+
+    validateAttachment() {
+        const { file } = this.attachment;
+        const { type, size } = file;
+        const bytesToMBs = bytes =>
+            parseFloat(bytes / (1024 * 1024)).toFixed(2);
+
+        if (!ALLOWED_ATTACHMENT_MIME_TYPES.includes(type)) {
+            this.validationError =
+                "Sorry, the submitted file cannot be uploaded. Please select a JPG, JPEG, PNG or GIF file instead and try again.";
+
+            return;
+        }
+
+        if (size == 0) {
+            this.validationError =
+                "The submitted file was empty or corrupt. Please select a valid file.";
+
+            return;
+        }
+
+        if (type !== "image/gif" && size > STATIC_IMAGE_MAX_SIZE_IN_BYTES) {
+            const allowedSizeInMBs = bytesToMBs(STATIC_IMAGE_MAX_SIZE_IN_BYTES);
+
+            this.validationError = `Sorry, the size of the submitted image file was bigger than ${allowedSizeInMBs} MB. Please select a smaller file and try again.`;
+
+            return;
+        }
+
+        if (type === "image/gif" && size > ANIMATED_IMAGE_MAX_SIZE_IN_BYTES) {
+            const allowedSizeInMBs = bytesToMBs(
+                ANIMATED_IMAGE_MAX_SIZE_IN_BYTES
+            );
+
+            this.validationError = `Sorry, the size of the submitted GIF file was bigger than ${allowedSizeInMBs} MB. Please select a smaller file and try again.`;
+
+            return;
+        }
     }
 
     initializeRequest() {
