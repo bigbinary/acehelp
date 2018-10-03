@@ -9,7 +9,7 @@ class Mutations::UrlMutationsTest < ActiveSupport::TestCase
     @user = users(:brad)
     sign_in @user
     org = organizations :bigbinary
-    @url = org.urls.create!(url: "http://test.com")
+    @url = org.urls.create!(url_pattern: "http://test.com", url_rule: "contains")
   end
 
   test "create url mutations" do
@@ -18,13 +18,15 @@ class Mutations::UrlMutationsTest < ActiveSupport::TestCase
                 addUrl(input: $input) {
                   url {
                     id
-                    url
+                    url_pattern
                   }
                 }
               }
             GRAPHQL
 
-    result = AceHelp::Client.execute(query, input: { url_pattern: "http://test_url.com" })
+    result = AceHelp::Client.execute(query,
+      input: { url_pattern: "http://test_url.com", url_rule: "contains" }
+    )
 
     assert_equal result.data.add_url.url.url_pattern, "http://test_url.com"
   end
@@ -35,23 +37,24 @@ class Mutations::UrlMutationsTest < ActiveSupport::TestCase
                 addUrl(input: $input) {
                   url {
                     id
-                    url
+                    url_pattern
                   }
                 }
               }
             GRAPHQL
 
-    result = AceHelp::Client.execute(query, input: { url_pattern: "wrong_url" })
-    assert_nil result.data.add_url.url_pattern
+    assert_raises(Graphlient::Errors::GraphQLError) do
+      AceHelp::Client.execute(query, input: { url_pattern: "wrong_url" })
+    end
   end
 
   test "update url mutations" do
     query = <<-'GRAPHQL'
-              mutation ($url: String!, $id: String!) {
-                updateUrl(input: { url: $url, id: $id }) {
+              mutation ($id: String!, $url_pattern: String!, $url_rule: String) {
+                updateUrl(input: { url_pattern: $url_pattern, url_rule: $url_rule, id: $id }) {
                   url {
                     id
-                    url
+                    url_pattern
                   }
                 }
               }
@@ -64,18 +67,19 @@ class Mutations::UrlMutationsTest < ActiveSupport::TestCase
 
   test "update url mutation failure" do
     query = <<-'GRAPHQL'
-              mutation ($url: String!, $id: String!) {
-                updateUrl(input: {url: $url, id: $id}) {
+              mutation ($id: String!, $url_pattern: String!, $url_rule: String) {
+                updateUrl(input: { url_pattern: $url_pattern, url_rule: $url_rule, id: $id }) {
                   url {
                     id
-                    url
+                    url_pattern
                   }
                 }
               }
             GRAPHQL
 
-    result = AceHelp::Client.execute(query, id: @url.id, url: "wrong url")
-    assert_nil result.data.update_url.url
+    assert_raises(Graphlient::Errors::GraphQLError) do
+      AceHelp::Client.execute(query, id: @url.id)
+    end
   end
 
   test "delete url mutations" do

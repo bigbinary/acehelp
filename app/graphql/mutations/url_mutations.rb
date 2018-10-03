@@ -33,7 +33,7 @@ class Mutations::UrlMutations
 
     input_field :id, !types.String
     input_field :url_pattern, !types.String
-    input_field :url_rule, !types.String
+    input_field :url_rule, types.String
 
     return_field :url, Types::UrlType
     return_field :errors, types[Types::ErrorType]
