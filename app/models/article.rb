@@ -22,13 +22,13 @@ class Article < ApplicationRecord
 
   scope :persisted_articles, -> { where(temporary: false) }
 
-  scope :search_with_id, ->(opts) { opts[:article_id] && where(id: opts[:article_id]) }
+  scope :search_with_id, ->(id) { id && where(id: id) }
 
-  scope :search_with_status, ->(opts) { opts[:status] && Article.send(opts[:status]) }
+  scope :search_with_status, ->(status) { status && where(status: status) }
 
-  scope :search_with_url, ->(opts) {
-    opts[:url] && joins(:urls).where(
-      "urls.url = ?", opts[:url]
+  scope :search_with_url, lambda { |url|
+    url && joins(:urls).where(
+      "urls.url = ?", url
     )
   }
 
@@ -40,12 +40,13 @@ class Article < ApplicationRecord
     self.update(downvotes_count: self.downvotes_count + 1)
   end
 
-  def self.search_using(org, opts = {})
+  def self.search_using(org, options = {})
     articles = Article.persisted_articles.for_organization(org)
-    articles = articles.search_with_status(opts).search_with_id(opts)
-    articles = articles.search_with_url(opts)
-    if opts[:search_string].present?
-      articles = articles.search opts[:search_string]
+    articles = articles.search_with_status(
+      options[:status]).search_with_id(options[:article_id])
+    articles = articles.search_with_url(options[:url])
+    if options[:search_string].present?
+      articles = articles.search options[:search_string]
       articles = articles.each_with_object([]) { |article, arr| arr.push(article) }
     end
     articles
