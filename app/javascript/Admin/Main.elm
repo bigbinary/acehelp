@@ -25,6 +25,7 @@ import Browser
 import Browser.Navigation as Navigation exposing (..)
 import Field exposing (..)
 import GraphQL.Client.Http as GQLClient
+import Helpers exposing (PendingAction)
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Http
@@ -115,6 +116,7 @@ type alias Model =
     , navKey : Navigation.Key
     , organizationList : List Organization
     , showHamMenu : Bool
+    , pendingActions : List PendingAction
     }
 
 
@@ -137,6 +139,7 @@ init flags location navKey =
             , navKey = navKey
             , organizationList = []
             , showHamMenu = False
+            , pendingActions = []
             }
 
         cmd =
@@ -401,8 +404,7 @@ update msg model =
                             ArticleCreate.initModel
 
                 ( newModel, cmds ) =
-                    ArticleCreate.update caMsg
-                        currentPageModel
+                    ArticleCreate.update caMsg model.pendingActions currentPageModel
 
                 ( updatedModel, updatedCmds ) =
                     case model.currentPage of
@@ -1046,7 +1048,7 @@ view model =
 
                 ArticleCreate articleCreateModel ->
                     Html.map ArticleCreateMsg
-                        (ArticleCreate.view model.organizationKey articleCreateModel)
+                        (ArticleCreate.view model.organizationKey model.pendingActions articleCreateModel)
 
                 ArticleEdit articleEditModel ->
                     Html.map ArticleEditMsg

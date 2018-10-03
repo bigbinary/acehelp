@@ -97,8 +97,8 @@ type Msg
     | AddAttachments
 
 
-update : Msg -> Model -> ( Model, List (ReaderCmd Msg) )
-update msg model =
+update : Msg -> List PendingAction -> Model -> ( Model, List (ReaderCmd Msg) )
+update msg pendingActions model =
     case msg of
         TitleInput title ->
             ( { model | title = Field.update model.title title }, [] )
@@ -221,8 +221,8 @@ update msg model =
 -- View
 
 
-view : ApiKey -> Model -> Html Msg
-view orgKey model =
+view : ApiKey -> List PendingAction -> Model -> Html Msg
+view orgKey pendingActions model =
     div []
         [ errorAlertView model.errors
         , successView model.success

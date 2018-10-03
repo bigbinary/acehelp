@@ -1,5 +1,6 @@
 module Helpers exposing
-    ( flip
+    ( PendingAction
+    , flip
     , maybeToBool
     , maybeToList
     , stringToMaybe
@@ -16,6 +17,13 @@ import Field.ValidationResult exposing (..)
 import Process exposing (..)
 import Regex exposing (Regex)
 import Task exposing (Task)
+
+
+type alias PendingAction =
+    { identifier : String
+    , priority : Int
+    , message : String
+    }
 
 
 validateEmpty : String -> String -> ValidationResult String String
