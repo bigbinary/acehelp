@@ -7,10 +7,13 @@ class UrlTest < ActiveSupport::TestCase
     url = urls :google
     assert url.valid?
 
-    url.url = "google"
-    assert_not url.valid?
+    url.url_pattern = "http://google.com"
+    assert url.valid?
 
-    url.url = nil
+    url.url_pattern = "http://*.com"
+    assert url.valid?
+
+    url.url_pattern = nil
     assert_not url.valid?
   end
 end

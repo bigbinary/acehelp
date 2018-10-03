@@ -4,14 +4,15 @@ class Mutations::UrlMutations
   Create = GraphQL::Relay::Mutation.define do
     name "CreateUrl"
 
-    input_field :url, !types.String
+    input_field :url_rule, !types.String
+    input_field :url_pattern, !types.String
 
     return_field :url, Types::UrlType
     return_field :errors, types[Types::ErrorType]
 
     resolve ->(object, inputs, context) {
       raise GraphQL::ExecutionError, "Not logged in" unless context[:current_user]
-      new_url = Url.new(url: inputs[:url])
+      new_url = Url.new(url_rule: inputs[:url_rule], url_pattern: inputs[:url_pattern])
       new_url.organization = context[:organization]
 
       if new_url.save
@@ -31,7 +32,8 @@ class Mutations::UrlMutations
     name "UpdateUrl"
 
     input_field :id, !types.String
-    input_field :url, !types.String
+    input_field :url_pattern, !types.String
+    input_field :url_rule, !types.String
 
     return_field :url, Types::UrlType
     return_field :errors, types[Types::ErrorType]
@@ -43,7 +45,10 @@ class Mutations::UrlMutations
       if url.nil?
         errors = Utils::ErrorHandler.new.error("Url not found", context)
       else
-        if url.update_attributes(url: inputs[:url])
+        if url.update_attributes(
+          url_rule: inputs[:url_rule],
+          url_pattern: inputs[:url_pattern]
+        )
           updated_url = url
         else
           errors = Utils::ErrorHandler.new.detailed_error(url, context)
