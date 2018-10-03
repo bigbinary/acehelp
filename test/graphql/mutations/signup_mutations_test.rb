@@ -24,6 +24,7 @@ class Mutations::SignupMutationsTest < ActiveSupport::TestCase
   test "signup mutations" do
     result = AceHelp::Client.execute(@signup_mutation, input: {
       first_name: "morgan",
+      last_name: "freeman",
       email: "morgan@example.com",
       password: "welcome",
       confirm_password: "welcome"
@@ -36,6 +37,7 @@ class Mutations::SignupMutationsTest < ActiveSupport::TestCase
     user = users :hunt
     result = AceHelp::Client.execute(@signup_mutation, input: {
       first_name: user.first_name,
+      last_name: user.last_name,
       email: user.email,
       password: "welcome",
       confirm_password: "welcome"
@@ -47,6 +49,7 @@ class Mutations::SignupMutationsTest < ActiveSupport::TestCase
   test "signup when passwords do no match" do
     result = AceHelp::Client.execute(@signup_mutation, input: {
       first_name: "drake",
+      last_name: "skywalker",
       email: "drake@example.com",
       password: "welcome",
       confirm_password: "wrlcome"
