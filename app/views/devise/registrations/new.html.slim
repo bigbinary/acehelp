@@ -13,6 +13,8 @@
             .form-group
               = f.text_field :first_name, autocomplete: "off", class: "form-control", placeholder: "First Name"
             .form-group
+              = f.text_field :last_name, autocomplete: "off", class: "form-control", placeholder: "Last Name"
+            .form-group
               = f.email_field :email, autofocus: true, autocomplete: "email", class: "form-control", placeholder: "Email address"
             .form-group
               = f.password_field :password, autocomplete: "off", class: "form-control", placeholder: "Password"
