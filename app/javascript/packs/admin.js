@@ -11,6 +11,7 @@ import { Elm } from "../Admin/Main";
 import "bootstrap";
 import "trix";
 import "../../assets/stylesheets/admin/index.scss";
+import AttachmentUploader from "./attachment_uploader";
 
 document.addEventListener("DOMContentLoaded", () => {
     var node = document.getElementById("admin-hook");
@@ -73,22 +74,48 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     });
 
+    // On clicking the attachment button in the trix editor's toolbar,
+    // we will the file browser to allow user to choose files.
+    // Once files are selected, we will insert them into editor,
+    // making the editor to invoke an "trix-attachment-add" event
+    // for the each file separately.
+    app.ports.addAttachments.subscribe(() => {
+        const editorNode = document.querySelector("trix-editor");
+        const fileInput = document.createElement("input");
+
+        fileInput.setAttribute("type", "file");
+        fileInput.setAttribute("multiple", "");
+
+        fileInput.addEventListener("change", function(event) {
+            const files = Array.from(this.files);
+
+            return files.map(file => editorNode.editor.insertFile(file));
+        });
+
+        fileInput.click();
+    });
+
     // OUTGOING PORTS
     document.addEventListener("trix-initialize", function(event) {
         app.ports.trixInitialize.send(null);
     });
 
-    //TODO: Handle file uploads
-    document.addEventListener("trix-attachment-add", function(event) {
-        var attachment;
-        attachment = event.attachment;
-        if (attachment.file) {
-            //return uploadAttachment(attachment);
-            //console.log(attachment.file);
-        }
-    });
+    document.addEventListener("trix-attachment-add", event => {
+        const attachment = event.attachment;
+        const editorParentNode = event.target.parentNode;
+        const apiKey = editorParentNode.getAttribute("data-api-key");
+        const attachmentsPath = editorParentNode.getAttribute(
+            "data-attachments-path"
+        );
 
-    document.addEventListener("trix-change", function(event) {
-        app.ports.trixChange.send(event.target.innerHTML);
+        if (apiKey && attachment.file && attachmentsPath) {
+            const uploader = new AttachmentUploader(
+                apiKey,
+                attachment,
+                attachmentsPath
+            );
+
+            return uploader.upload();
+        }
     });
 });

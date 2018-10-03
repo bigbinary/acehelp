@@ -11,7 +11,10 @@ class Articles::AttachmentsController < ApplicationController
       content_type: attachment_params[:content_type],
       filename: attachment_params[:filename]
     )
-    render json: { url: url_for(attachments.last) }, status: :created
+
+    response = { success: true, attachment_url: url_for(attachments.last) }
+
+    render json: response, status: :created
   end
 
   private
@@ -21,6 +24,6 @@ class Articles::AttachmentsController < ApplicationController
     end
 
     def load_article
-      @article = Article.find(params[:id])
+      @article = Article.find(params[:article_id])
     end
 end

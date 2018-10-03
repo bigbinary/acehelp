@@ -1050,7 +1050,7 @@ view model =
 
                 ArticleEdit articleEditModel ->
                     Html.map ArticleEditMsg
-                        (ArticleEdit.view articleEditModel)
+                        (ArticleEdit.view model.organizationKey articleEditModel)
 
                 UrlCreate urlCreateModel ->
                     Html.map UrlCreateMsg

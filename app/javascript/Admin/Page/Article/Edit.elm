@@ -24,6 +24,7 @@ import Admin.Data.Url exposing (UrlData, UrlId)
 import Admin.Ports exposing (..)
 import Admin.Request.Article exposing (..)
 import Admin.Request.Category exposing (..)
+import Admin.Request.Helper exposing (ApiKey)
 import Admin.Request.Url exposing (..)
 import Admin.Views.Common exposing (..)
 import Browser.Dom as Dom
@@ -59,6 +60,7 @@ type alias Model =
     , articleStatus : AvailabilityStatus
     , originalArticle : Maybe Article
     , isEditable : Bool
+    , attachmentsPath : String
     }
 
 
@@ -76,6 +78,7 @@ initModel articleId =
     , articleStatus = Inactive
     , originalArticle = Nothing
     , isEditable = False
+    , attachmentsPath = ""
     }
 
 
@@ -131,6 +134,7 @@ type Msg
     | RemoveNotifications
     | ChangeEditorHeight (Result Dom.Error Dom.Element)
     | ResizeWindow Int Int
+    | AddAttachments
 
 
 
@@ -231,6 +235,7 @@ update msg model =
                         , urls = selectItemsInList (List.map (.id >> Selected) article.urls) model.urls
                         , originalArticle = Just article
                         , errors = []
+                        , attachmentsPath = article.attachmentsPath
                       }
                     , [ Strict <| Reader.Reader <| always <| insertArticleContent article.desc ]
                     )
@@ -403,6 +408,11 @@ update msg model =
             , [ Strict <| Reader.Reader <| always <| Task.attempt ChangeEditorHeight <| Dom.getElement editorId ]
             )
 
+        AddAttachments ->
+            ( model
+            , [ Strict <| Reader.Reader <| always <| addAttachments () ]
+            )
+
 
 removeNotificationCmd =
     Unit <|
@@ -417,8 +427,8 @@ removeNotificationCmd =
 -- View
 
 
-view : Model -> Html Msg
-view model =
+view : ApiKey -> Model -> Html Msg
+view orgKey model =
     div []
         [ errorAlertView model.errors
         , successView model.success
@@ -442,10 +452,17 @@ view model =
                     ]
                 , div
                     [ class "row article-content" ]
-                    [ div [ classList [ ( "hidden", not model.isEditable ) ] ]
-                        [ node "trix-editor"
+                    [ div
+                        [ classList [ ( "hidden", not model.isEditable ) ]
+                        , attribute "data-attachments-path" model.attachmentsPath
+                        , attribute "data-api-key" orgKey
+                        ]
+                        [ trixEditorToolbarView AddAttachments
+                        , node
+                            "trix-editor"
                             [ classList [ ( "trix-content", True ) ]
                             , id editorId
+                            , attribute "toolbar" "trix-custom-toolbar"
                             , placeholder "Article content goes here.."
                             , onTrixChange DescInput
                             ]
@@ -560,7 +577,6 @@ subscriptions : Model -> Sub Msg
 subscriptions model =
     Sub.batch
         [ trixInitialize <| TrixInitialize
-        , trixChange <| DescInput
         , timeoutInitialized <| ReceivedTimeoutId
         , timedOut <| TimedOut
         , Events.onResize <| \width -> \height -> ResizeWindow width height

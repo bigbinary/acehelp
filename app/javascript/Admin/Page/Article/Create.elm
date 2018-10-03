@@ -49,6 +49,7 @@ type alias Model =
     , saveStatus : SaveStatus
     , errors : List String
     , success : Maybe String
+    , attachmentsPath : String
     }
 
 
@@ -62,6 +63,7 @@ initModel =
     , saveStatus = None
     , errors = []
     , success = Nothing
+    , attachmentsPath = ""
     }
 
 
@@ -92,6 +94,7 @@ type Msg
     | TrixInitialize ()
     | ChangeEditorHeight (Result Dom.Error Dom.Element)
     | ResizeWindow Int Int
+    | AddAttachments
 
 
 update : Msg -> Model -> ( Model, List (ReaderCmd Msg) )
@@ -171,6 +174,7 @@ update msg model =
                     ( { model
                         | articleId = article.id
                         , errors = []
+                        , attachmentsPath = article.attachmentsPath
                       }
                     , []
                     )
@@ -207,6 +211,11 @@ update msg model =
             , [ Strict <| Reader.Reader <| always <| Task.attempt ChangeEditorHeight <| Dom.getElement editorId ]
             )
 
+        AddAttachments ->
+            ( model
+            , [ Strict <| Reader.Reader <| always <| addAttachments () ]
+            )
+
 
 
 -- View
@@ -232,12 +241,21 @@ view orgKey model =
                     ]
                 , div
                     [ class "row article-content" ]
-                    [ node "trix-editor"
-                        [ placeholder "Article content goes here.."
-                        , id editorId
-                        , onTrixChange DescInput
+                    [ div
+                        [ attribute "data-attachments-path" model.attachmentsPath
+                        , attribute "data-api-key" orgKey
                         ]
-                        []
+                        [ trixEditorToolbarView
+                            AddAttachments
+                        , node
+                            "trix-editor"
+                            [ placeholder "Article content goes here.."
+                            , id editorId
+                            , attribute "toolbar" "trix-custom-toolbar"
+                            , onTrixChange DescInput
+                            ]
+                            []
+                        ]
                     ]
                 ]
             , div [ class "col-md-4 article-meta-data-block" ]
