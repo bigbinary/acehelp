@@ -42,11 +42,17 @@ class Article < ApplicationRecord
     articles = Article.persisted_articles.for_organization(org)
     articles = articles.search_with_status(
       options[:status]).search_with_id(options[:article_id])
-    articles = articles.search_with_url(options[:url])
+    articles = articles.search_with_url_pattern(articles, options[:url], org)
     if options[:search_string].present?
       articles = articles.search options[:search_string]
       articles = articles.each_with_object([]) { |article, arr| arr.push(article) }
     end
+    articles
+  end
+
+  def self.search_with_url_pattern(articles, url, org)
+    url_ids = Url.where("? ~* url_pattern", url).pluck(:id)
+    articles = articles.joins(:urls).where(urls: { id: url_ids }) if url_ids.any?
     articles
   end
 end
