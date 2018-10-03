@@ -8,6 +8,7 @@ import Admin.Request.Url exposing (..)
 import Admin.Views.Common exposing (..)
 import Dialog
 import GraphQL.Client.Http as GQLClient
+import Helpers exposing (..)
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
@@ -21,7 +22,7 @@ import Task exposing (Task)
 
 
 type alias Model =
-    { urls : List UrlData
+    { urls : List UrlPattern
     , urlId : UrlId
     , error : Maybe String
     , showDeleteUrlConfirmation : Acknowledgement UrlId
@@ -65,13 +66,13 @@ update msg model =
         UrlLoaded (Ok urls) ->
             case urls of
                 Just newUrls ->
-                    ( { model | urls = newUrls }, [] )
+                    ( { model | urls = List.map dataToPattern newUrls }, [] )
 
                 Nothing ->
-                    ( { model | urls = [], error = Just "There was an error while loading the Urls" }, [] )
+                    ( { model | urls = [], error = Just "There was an error while loading the Url Patterns" }, [] )
 
         UrlLoaded (Err err) ->
-            ( { model | error = Just "There was an error while loading the Urls" }, [] )
+            ( { model | error = Just "There was an error while loading the Url Patterns" }, [] )
 
         AcknowledgeDelete (Yes urlId) ->
             deleteRecord model urlId
@@ -118,7 +119,7 @@ view orgKey model =
             [ href <| routeToString <| UrlCreate orgKey
             , class "btn btn-primary"
             ]
-            [ text "+ Url" ]
+            [ text "+ Url Pattern" ]
         , div
             [ class "listingSection" ]
             (List.map
@@ -133,8 +134,8 @@ view orgKey model =
                     Just
                         (dialogConfig
                             { onDecline = AcknowledgeDelete No
-                            , title = "Delete Url"
-                            , body = "Are you sure you want to delete this Url?"
+                            , title = "Delete Url Pattern"
+                            , body = "Are you sure you want to delete this Url Pattern?"
                             , onAccept = AcknowledgeDelete (Yes urlId)
                             }
                         )
@@ -144,7 +145,7 @@ view orgKey model =
         ]
 
 
-urlRow : ApiKey -> UrlData -> Html Msg
+urlRow : ApiKey -> UrlPattern -> Html Msg
 urlRow orgKey url =
     div
         [ id url.id
@@ -152,20 +153,20 @@ urlRow orgKey url =
         ]
         [ div
             [ class "textColumn" ]
-            [ text url.url ]
+            [ text <| String.join " " <| tupleToList <| ruleToString url.rule ]
         , div [ class "actionButtonColumn" ]
             [ a
                 [ href <| routeToString <| UrlEdit orgKey url.id
                 , class "actionButton btn btn-primary"
                 ]
-                [ text "Edit Url" ]
+                [ text "Edit Pattern" ]
             ]
         , div [ class "actionButtonColumn" ]
             [ button
                 [ onClick (DeleteUrl (Yes url.id))
                 , class "actionButton btn btn-primary deleteUrl"
                 ]
-                [ text "Delete Url" ]
+                [ text "Delete Pattern" ]
             ]
         ]
 
