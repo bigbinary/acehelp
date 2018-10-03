@@ -26,11 +26,9 @@ class Article < ApplicationRecord
 
   scope :search_with_status, ->(status) { status && where(status: status) }
 
-  scope :search_with_url, lambda { |url|
-    url && joins(:urls).where(
-      "urls.url = ?", url
-    )
-  }
+  scope :search_with_url, ->(url) do
+    url && joins(:urls).where(urls: { url: url })
+  end
 
   def increment_upvote
     self.update(upvotes_count: self.upvotes_count + 1)
