@@ -26,6 +26,8 @@ type alias Model =
     , success : Maybe String
     , url : Field String String
     , urlId : UrlId
+    , urlRule : String
+    , urlPattern : String
     , baseUrl : Maybe String
     }
 
@@ -35,6 +37,8 @@ initModel urlId =
     { errors = []
     , success = Nothing
     , url = Field (validateEmpty "Url") ""
+    , urlRule = ""
+    , urlPattern = ""
     , urlId = urlId
     , baseUrl = Nothing
     }
@@ -180,9 +184,11 @@ view model =
 
 
 urlInputs : Model -> UrlData
-urlInputs { url, urlId } =
-    { url = Field.value url
-    , id = urlId
+urlInputs { urlId, url, urlRule, urlPattern } =
+    { id = urlId
+    , url = Field.value url
+    , url_rule = urlRule
+    , url_pattern = urlPattern
     }
 
 
