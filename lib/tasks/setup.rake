@@ -33,12 +33,18 @@ task setup_sample_data: [:environment] do
 end
 
 desc "Perform steps required for every deployment"
-task perform_on_every_deploy: [:environment, :not_production, "setup_sample_data", "reindex_searchkick"] do
+task perform_on_every_deploy: [:environment, :not_production, "disable_searchkick_callbacks", "setup_sample_data", "reindex_searchkick"] do
 end
 
 desc "Reindex all searchkick models"
 task reindex_searchkick: [:environment] do
   system("rake searchkick:reindex:all")
+end
+
+desc "Disable searchkick callbacks"
+task disable_searchkick_callbacks: [:environment] do
+  Searchkick.disable_callbacks
+  puts "Disabled searchkick callbacks."
 end
 
 def create_user(options = {})
