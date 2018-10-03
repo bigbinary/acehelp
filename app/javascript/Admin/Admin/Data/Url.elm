@@ -2,8 +2,8 @@ module Admin.Data.Url exposing
     ( CreateUrlInput
     , UrlData
     , UrlId
-    , UrlsListResponse
     , UrlResponse
+    , UrlsListResponse
     , createUrlMutation
     , deleteUrlMutation
     , nullableUrlObject
@@ -26,6 +26,8 @@ type alias UrlId =
 type alias UrlData =
     { id : UrlId
     , url : String
+    , url_rule : String
+    , url_pattern : String
     }
 
 
@@ -117,6 +119,8 @@ urlObject =
     GQLBuilder.object UrlData
         |> GQLBuilder.with (GQLBuilder.field "id" [] GQLBuilder.string)
         |> GQLBuilder.with (GQLBuilder.field "url" [] GQLBuilder.string)
+        |> GQLBuilder.with (GQLBuilder.field "url_rule" [] GQLBuilder.string)
+        |> GQLBuilder.with (GQLBuilder.field "url_pattern" [] GQLBuilder.string)
 
 
 nullableUrlObject : GQLBuilder.ValueSpec GQLBuilder.Nullable GQLBuilder.ObjectType (Maybe UrlData) vars
@@ -132,13 +136,23 @@ updateUrlMutation =
 
         urlVar =
             Var.required "url" .url Var.string
+
+        urlRuleVar =
+            Var.required "url_rule" .url_rule Var.string
+
+        urlPatternVar =
+            Var.required "url_pattern" .url_pattern Var.string
     in
     GQLBuilder.mutationDocument <|
         GQLBuilder.extract <|
             GQLBuilder.field "updateUrl"
                 [ ( "input"
                   , Arg.object
-                        [ ( "url", Arg.variable urlVar ), ( "id", Arg.variable idVar ) ]
+                        [ ( "id", Arg.variable idVar )
+                        , ( "url", Arg.variable urlVar )
+                        , ( "url_rule", Arg.variable urlRuleVar )
+                        , ( "url_pattern", Arg.variable urlPatternVar )
+                        ]
                   )
                 ]
                 urlResponseObject
