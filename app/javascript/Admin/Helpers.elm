@@ -3,6 +3,7 @@ module Helpers exposing
     , maybeToBool
     , maybeToList
     , stringToMaybe
+    , tupleToList
     , unless
     , validEmail
     , validUrl
@@ -119,3 +120,8 @@ unless predFunc runFunc input =
 
         False ->
             runFunc input
+
+
+tupleToList : ( a, a ) -> List a
+tupleToList ( a, b ) =
+    [ a, b ]

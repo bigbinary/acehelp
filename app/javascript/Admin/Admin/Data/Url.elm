@@ -2,30 +2,48 @@ module Admin.Data.Url exposing
     ( CreateUrlInput
     , UrlData
     , UrlId
+    , UrlPattern
     , UrlResponse
+    , UrlRule(..)
     , UrlsListResponse
     , createUrlMutation
+    , dataToPattern
     , deleteUrlMutation
     , nullableUrlObject
     , requestUrlsQuery
+    , ruleToString
+    , stringToRule
     , updateUrlMutation
     , urlByIdQuery
     , urlObject
+    , urlResponseObject
     )
 
 import Admin.Data.Common exposing (..)
 import GraphQL.Request.Builder as GQLBuilder
 import GraphQL.Request.Builder.Arg as Arg
 import GraphQL.Request.Builder.Variable as Var
+import Monocle.Iso exposing (..)
 
 
 type alias UrlId =
     String
 
 
+type UrlRule
+    = UrlIs String
+    | UrlContains String
+    | UrlEndsWith String
+
+
+type alias UrlPattern =
+    { id : UrlId
+    , rule : UrlRule
+    }
+
+
 type alias UrlData =
     { id : UrlId
-    , url : String
     , url_rule : String
     , url_pattern : String
     }
@@ -44,6 +62,42 @@ type alias UrlsListResponse =
 type alias UrlResponse =
     { url : Maybe UrlData
     , errors : Maybe (List Error)
+    }
+
+
+ruleToString : UrlRule -> ( String, String )
+ruleToString urlRule =
+    case urlRule of
+        UrlIs url ->
+            ( "is", url )
+
+        UrlContains url ->
+            ( "contains", url )
+
+        UrlEndsWith url ->
+            ( "ends_with", url )
+
+
+stringToRule : ( String, String ) -> Maybe UrlRule
+stringToRule urlRule =
+    case urlRule of
+        ( "is", url ) ->
+            Just <| UrlIs url
+
+        ( "contains", url ) ->
+            Just <| UrlContains url
+
+        ( "ends_with", url ) ->
+            Just <| UrlEndsWith url
+
+        _ ->
+            Nothing
+
+
+dataToPattern : UrlData -> UrlPattern
+dataToPattern urlData =
+    { id = urlData.id
+    , rule = Maybe.withDefault (UrlIs urlData.url_pattern) <| stringToRule ( urlData.url_rule, urlData.url_pattern )
     }
 
 
@@ -118,7 +172,6 @@ urlObject : GQLBuilder.ValueSpec GQLBuilder.NonNull GQLBuilder.ObjectType UrlDat
 urlObject =
     GQLBuilder.object UrlData
         |> GQLBuilder.with (GQLBuilder.field "id" [] GQLBuilder.string)
-        |> GQLBuilder.with (GQLBuilder.field "url" [] GQLBuilder.string)
         |> GQLBuilder.with (GQLBuilder.field "url_rule" [] GQLBuilder.string)
         |> GQLBuilder.with (GQLBuilder.field "url_pattern" [] GQLBuilder.string)
 
@@ -134,9 +187,6 @@ updateUrlMutation =
         idVar =
             Var.required "id" .id Var.string
 
-        urlVar =
-            Var.required "url" .url Var.string
-
         urlRuleVar =
             Var.required "url_rule" .url_rule Var.string
 
@@ -149,7 +199,6 @@ updateUrlMutation =
                 [ ( "input"
                   , Arg.object
                         [ ( "id", Arg.variable idVar )
-                        , ( "url", Arg.variable urlVar )
                         , ( "url_rule", Arg.variable urlRuleVar )
                         , ( "url_pattern", Arg.variable urlPatternVar )
                         ]
