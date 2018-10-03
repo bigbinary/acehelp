@@ -20,7 +20,7 @@ class Resolvers::UrlsSearchTest < ActiveSupport::TestCase
   end
 
   test "get_all_urls_success" do
-    assert_equal ["http://bigbinary.com"], find(Hash.new).pluck(:url)
+    assert_equal ["http://bigbinary.com"], find(Hash.new).pluck(:url_pattern)
   end
 
   test "show url success" do
