@@ -50,13 +50,44 @@ class Article < ApplicationRecord
     articles
   end
 
-  def self.search_with_url_pattern(articles, url, org)
-    url_ids = Url.where("? ~* url_pattern", url).pluck(:id)
-    if url_ids.any?
-      articles = articles.joins(:urls).where(urls: { id: url_ids })
-    else
-      articles = []
+  private
+
+    def self.search_with_url_pattern(articles, incoming_url, org)
+      url_ids = urls_with_contains_rule(org, incoming_url) +
+        urls_with_ends_with_rule(org, incoming_url)
+      if url_ids.any?
+        articles = articles.joins(:urls).where(urls: { id: url_ids })
+      else
+        articles = []
+      end
+      articles
     end
-    articles
-  end
+
+    def self.urls_with_contains_rule(org, incoming_url)
+      urls = org.urls.where(url_rule: :contains)
+      url_ids = []
+      urls.each do |url|
+        url_ids << url.id if incoming_url.include? url.url_pattern
+      end
+      url_ids
+    end
+
+    def self.urls_with_ends_with_rule(org, incoming_url)
+      urls = org.urls.where(url_rule: :ends_with)
+      url_ids = []
+      urls.each do |url|
+        url_ids << url.id if incoming_url.match(Regexp.new url.url_pattern)
+      end
+      url_ids
+    end
+
+  # def self.pattern_matching_with_postgres_query(articles, url, org)
+  #   url_ids = Url.where("? ~* url_pattern", url).pluck(:id)
+  #   if url_ids.any?
+  #     articles = articles.joins(:urls).where(urls: { id: url_ids })
+  #   else
+  #     articles = []
+  #   end
+  #   articles
+  # end
 end
