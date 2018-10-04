@@ -14,4 +14,12 @@ class Url < ApplicationRecord
   # validates_with HttpUrlValidator
   validates :url_pattern, presence: true
   scope :for_organization, ->(org) { where(organization: org) }
+
+  before_save :change_url_pattern
+
+  private
+
+    def change_url_pattern
+      self.url_pattern = self.url_pattern.sub(/\*+/, '\\w+')
+    end
 end

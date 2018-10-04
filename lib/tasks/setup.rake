@@ -60,8 +60,8 @@ def create_data_for_ace_invoice_organization
   org = Organization.create! name: "AceInvoice", email: "aceinvoice@example.com", api_key: "9099015ee520e11887eb"
   OrganizationUser.create! organization_id: org.id, user_id: User.first.id
 
-  getting_started_url = org.urls.create! url_pattern: "/pages/\\w+/getting_started", url_rule: :ends_with
-  integrations_url = org.urls.create! url_pattern: "/pages/\\w+/integrations", url_rule: :ends_with
+  getting_started_url = org.urls.create! url_pattern: "/pages/*/getting_started", url_rule: :ends_with
+  integrations_url = org.urls.create! url_pattern: "/pages/*/integrations", url_rule: :ends_with
   pricing_url = org.urls.create! url_pattern: "pricing", url_rule: :ends_with
 
 
