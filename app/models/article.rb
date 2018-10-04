@@ -52,7 +52,11 @@ class Article < ApplicationRecord
 
   def self.search_with_url_pattern(articles, url, org)
     url_ids = Url.where("? ~* url_pattern", url).pluck(:id)
-    articles = articles.joins(:urls).where(urls: { id: url_ids }) if url_ids.any?
+    if url_ids.any?
+      articles = articles.joins(:urls).where(urls: { id: url_ids })
+    else
+      articles = []
+    end
     articles
   end
 end
