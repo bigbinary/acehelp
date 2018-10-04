@@ -25,7 +25,6 @@ import Browser
 import Browser.Navigation as Navigation exposing (..)
 import Field exposing (..)
 import GraphQL.Client.Http as GQLClient
-import Helpers exposing (PendingAction)
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Http
@@ -52,6 +51,7 @@ import Page.Url.Edit as UrlEdit
 import Page.Url.List as UrlList
 import Page.UserNotification as UserNotification
 import Page.View as MainView
+import PendingActions exposing (PendingActions)
 import Reader exposing (..)
 import Route
 import Task exposing (Task)
@@ -116,7 +116,7 @@ type alias Model =
     , navKey : Navigation.Key
     , organizationList : List Organization
     , showHamMenu : Bool
-    , pendingActions : List PendingAction
+    , pendingActions : PendingActions
     }
 
 
@@ -139,7 +139,7 @@ init flags location navKey =
             , navKey = navKey
             , organizationList = []
             , showHamMenu = False
-            , pendingActions = []
+            , pendingActions = PendingActions.empty
             }
 
         cmd =

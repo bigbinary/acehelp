@@ -31,6 +31,7 @@ import Html.Attributes exposing (..)
 import Html.Events exposing (..)
 import Page.Article.Common exposing (..)
 import Page.Errors exposing (..)
+import PendingActions exposing (PendingActions)
 import Reader exposing (Reader)
 import Route exposing (..)
 import Task exposing (Task)
@@ -97,7 +98,7 @@ type Msg
     | AddAttachments
 
 
-update : Msg -> List PendingAction -> Model -> ( Model, List (ReaderCmd Msg) )
+update : Msg -> PendingActions -> Model -> ( Model, List (ReaderCmd Msg) )
 update msg pendingActions model =
     case msg of
         TitleInput title ->
@@ -221,7 +222,7 @@ update msg pendingActions model =
 -- View
 
 
-view : ApiKey -> List PendingAction -> Model -> Html Msg
+view : ApiKey -> PendingActions -> Model -> Html Msg
 view orgKey pendingActions model =
     div []
         [ errorAlertView model.errors
