@@ -24,7 +24,7 @@ class Resolvers::UrlsSearchTest < ActiveSupport::TestCase
   end
 
   test "show url success" do
-    assert_equal ["http://bigbinary.com"], find(url: "http://bigbinary.com").pluck(:url)
+    assert_equal ["http://bigbinary.com"], find(url: "http://bigbinary.com").pluck(:url_pattern)
   end
 
   test "show url failure" do

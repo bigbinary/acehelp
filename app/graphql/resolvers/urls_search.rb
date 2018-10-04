@@ -9,6 +9,6 @@ class Resolvers::UrlsSearch < GraphQL::Function
     query = Url.for_organization(context[:organization])
 
     url = args[:url]
-    url.present? ? query.where(url: url) : query
+    url.present? ? query.where(url_pattern: url) : query
   end
 end

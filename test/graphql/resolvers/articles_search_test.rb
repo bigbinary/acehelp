@@ -26,8 +26,8 @@ class Resolvers::ArticlesSearchTest < ActiveSupport::TestCase
 
   test "show article success" do
     assert_equal find(id: @article.id), [@article]
-    assert_equal find(id: @article.id, url: @url.url), []
-    assert_equal find(url: @url.url), @url.articles.for_organization(@organization)
+    assert_equal find(id: @article.id, url: "http://google.com"), []
+    assert_equal find(url: @url.url_pattern), @url.articles.for_organization(@organization)
   end
 
 

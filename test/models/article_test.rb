@@ -41,14 +41,16 @@ class ArticleTest < ActiveSupport::TestCase
     @article.update(organization_id: @organization.id)
     Article.reindex
 
-    assert_equal [@article], Article.search_using(@organization, article_id: @article.id, status: "inactive", url: @url.url)
+    @article.inactive!
+
+    assert_equal [@article], Article.search_using(@organization, article_id: @article.id, status: "inactive", url: @url.url_pattern)
     assert_equal [@article], Article.search_using(@organization, article_id: @article.id, status: "inactive")
 
     @article.active!
 
-    assert_equal [@article], Article.search_using(@organization, status: "active", url: @url.url)
+    assert_equal [@article], Article.search_using(@organization, status: "active", url: @url.url_pattern)
     assert_equal [@article], Article.search_using(@organization, status: "active")
-    assert_equal [], Article.search_using(@organization, article_id: "fake_id", status: "active", url: @url.url)
+    assert_equal [], Article.search_using(@organization, article_id: "fake_id", status: "active", url: @url.url_pattern)
     assert_equal [@article], Article.search_using(@organization, search_string: "day")
     assert_equal [], Article.search_using(@organization, search_string: "fake_string")
   end

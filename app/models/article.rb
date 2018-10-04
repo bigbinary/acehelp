@@ -26,10 +26,6 @@ class Article < ApplicationRecord
 
   scope :search_with_status, ->(status) { status && where(status: status) }
 
-  scope :search_with_url, ->(url) do
-    url && joins(:urls).where(urls: { url: url })
-  end
-
   def increment_upvote
     self.update(upvotes_count: self.upvotes_count + 1)
   end
@@ -53,6 +49,7 @@ class Article < ApplicationRecord
   private
 
     def self.search_with_url_pattern(articles, incoming_url, org)
+      return articles if incoming_url.nil?
       url_ids = urls_with_contains_rule(org, incoming_url) +
         urls_with_ends_with_rule(org, incoming_url)
       if url_ids.any?
