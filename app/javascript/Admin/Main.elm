@@ -1040,6 +1040,9 @@ subscriptions model =
 view : Model -> Browser.Document Msg
 view model =
     let
+        _ =
+            Debug.log "" (Debug.toString model.pendingActions)
+
         viewContent =
             case getPage model.currentPage of
                 ArticleList articleListModel ->

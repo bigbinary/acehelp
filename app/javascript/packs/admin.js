@@ -118,4 +118,8 @@ document.addEventListener("DOMContentLoaded", () => {
             return uploader.upload();
         }
     });
+
+    document.addEventListener("trix-attachment-remove", event => {
+        console.log(event.attachment);
+    });
 });

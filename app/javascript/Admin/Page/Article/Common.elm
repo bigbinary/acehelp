@@ -166,6 +166,10 @@ editorId =
     "article-editor"
 
 
+
+-- isEditorContentsSaved :
+
+
 proposedEditorHeightPayload : Dom.Element -> { editorId : String, height : Float }
 proposedEditorHeightPayload { viewport, element } =
     let
