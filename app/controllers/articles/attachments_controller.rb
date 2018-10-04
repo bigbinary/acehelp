@@ -3,7 +3,7 @@
 class Articles::AttachmentsController < ApplicationController
   before_action :ensure_user_is_logged_in
   include LoadOrganization
-  before_action :load_article, only: :create
+  before_action :load_article, only: [:create, :destroy]
 
   def create
     attachments = @article.attachments.attach(
@@ -11,10 +11,19 @@ class Articles::AttachmentsController < ApplicationController
       content_type: attachment_params[:content_type],
       filename: attachment_params[:filename]
     )
-
-    response = { success: true, attachment_url: url_for(attachments.last) }
+    attachment = attachments.last
+    response = { success: true, attachment_url: url_for(attachment), attachment_id: attachment.id }
 
     render json: response, status: :created
+  end
+
+  def destroy
+    attachment = @article.attachments.find(params[:id])
+    if attachment.purge
+      render status: 200
+    else
+      logger.error attachment.errors.messages
+    end
   end
 
   private
