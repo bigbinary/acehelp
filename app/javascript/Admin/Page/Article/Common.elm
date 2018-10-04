@@ -74,13 +74,13 @@ urlToValue url =
         Selected item ->
             Selected
                 { id = item.id
-                , value = item.url
+                , value = item.url_rule
                 }
 
         Unselected item ->
             Unselected
                 { id = item.id
-                , value = item.url
+                , value = item.url_rule
                 }
 
 

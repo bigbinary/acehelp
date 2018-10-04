@@ -7,9 +7,11 @@ module Helpers exposing
     , unless
     , validEmail
     , validUrl
+    , validUrlRule
     , validateEmail
     , validateEmpty
     , validateUrl
+    , validateUrlRule
     , when
     )
 
@@ -61,6 +63,23 @@ validUrl =
     Regex.fromStringWith { caseInsensitive = True, multiline = False }
         "^(?:http(s)?:\\/\\/)?[\\w.-]+(?:\\.[\\w\\.-]+)+[\\w\\-\\._~:/?#[\\]@!\\$&'\\(\\)\\*\\+,;=.]+$"
         |> Maybe.withDefault Regex.never
+
+
+validUrlRule : Regex
+validUrlRule =
+    Regex.fromStringWith { caseInsensitive = True, multiline = False }
+        "^[\\w/\\-\\*]+$"
+        |> Maybe.withDefault Regex.never
+
+
+validateUrlRule : String -> ValidationResult String String
+validateUrlRule s =
+    case Regex.contains validUrlRule s of
+        True ->
+            Passed s
+
+        False ->
+            Failed "Please enter a valid Url Pattern"
 
 
 

@@ -112,8 +112,7 @@ update msg model =
             case url of
                 Just newUrl ->
                     ( { model
-                        | url = Field.update model.url newUrl.url
-                        , urlId = newUrl.id
+                        | urlId = newUrl.id
                       }
                     , []
                     )
@@ -186,7 +185,6 @@ view model =
 urlInputs : Model -> UrlData
 urlInputs { urlId, url, urlRule, urlPattern } =
     { id = urlId
-    , url = Field.value url
     , url_rule = urlRule
     , url_pattern = urlPattern
     }

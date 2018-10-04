@@ -50,7 +50,8 @@ type alias UrlData =
 
 
 type alias CreateUrlInput =
-    { url : String
+    { url_rule : String
+    , url_pattern : String
     }
 
 
@@ -133,15 +134,20 @@ urlByIdQuery =
 createUrlMutation : GQLBuilder.Document GQLBuilder.Mutation UrlResponse CreateUrlInput
 createUrlMutation =
     let
-        urlVar =
-            Var.required "url" .url Var.string
+        ruleVar =
+            Var.required "url_url" .url_rule Var.string
+
+        patternVar =
+            Var.required "url_pattern" .url_pattern Var.string
     in
     GQLBuilder.mutationDocument <|
         GQLBuilder.extract <|
             GQLBuilder.field "addUrl"
                 [ ( "input"
                   , Arg.object
-                        [ ( "url", Arg.variable urlVar ) ]
+                        [ ( "url_pattern", Arg.variable patternVar )
+                        , ( "url_rule", Arg.variable ruleVar )
+                        ]
                   )
                 ]
                 urlResponseObject
