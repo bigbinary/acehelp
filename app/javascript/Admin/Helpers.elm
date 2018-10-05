@@ -68,7 +68,7 @@ validUrl =
 validUrlRule : Regex
 validUrlRule =
     Regex.fromStringWith { caseInsensitive = True, multiline = False }
-        "^[\\w/\\-\\*]+$"
+        "^[a-zA-Z0-9.-_~!$&'\\(\\)\\*\\+,;=:@]+$"
         |> Maybe.withDefault Regex.never
 
 
