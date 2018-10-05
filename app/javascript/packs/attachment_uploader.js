@@ -110,11 +110,12 @@ export default class AttachmentUploader {
 
     uploadSuccessHandler() {
         const { responseText } = this.request;
-        const { attachment_url } = JSON.parse(responseText);
+        const { attachment_url, attachment_id } = JSON.parse(responseText);
 
         return this.attachment.setAttributes({
             url: attachment_url,
-            href: attachment_url
+            href: attachment_url,
+            id: attachment_id
         });
     }
 
