@@ -51,6 +51,8 @@ type alias Model =
     , errors : List String
     , success : Maybe String
     , attachmentsPath : String
+    , originalArticle : Maybe Article
+    , pendingActions : PendingActions
     }
 
 
@@ -65,6 +67,8 @@ initModel =
     , errors = []
     , success = Nothing
     , attachmentsPath = ""
+    , originalArticle = Nothing
+    , pendingActions = PendingActions.empty
     }
 
 
@@ -98,14 +102,26 @@ type Msg
     | AddAttachments
 
 
-update : Msg -> PendingActions -> Model -> ( Model, List (ReaderCmd Msg) )
-update msg pendingActions model =
+update : Msg -> Model -> ( Model, List (ReaderCmd Msg) )
+update msg model =
     case msg of
         TitleInput title ->
             ( { model | title = Field.update model.title title }, [] )
 
         DescInput desc ->
-            ( { model | desc = Field.update model.desc desc }, [] )
+            let
+                newPendingActions =
+                    pendingActionsOnDescriptionChange
+                        model.pendingActions
+                        model.originalArticle
+                        desc
+            in
+            ( { model
+                | desc = Field.update model.desc desc
+                , pendingActions = newPendingActions
+              }
+            , []
+            )
 
         SaveArticle ->
             case model.articleId of
@@ -122,7 +138,7 @@ update msg pendingActions model =
         SaveArticleResponse (Ok articleResp) ->
             case articleResp of
                 Just article ->
-                    ( model, [] )
+                    ( { model | originalArticle = Just article }, [] )
 
                 Nothing ->
                     ( { model
@@ -176,6 +192,7 @@ update msg pendingActions model =
                         | articleId = article.id
                         , errors = []
                         , attachmentsPath = article.attachmentsPath
+                        , originalArticle = Just article
                       }
                     , []
                     )
@@ -222,8 +239,8 @@ update msg pendingActions model =
 -- View
 
 
-view : ApiKey -> PendingActions -> Model -> Html Msg
-view orgKey pendingActions model =
+view : ApiKey -> Model -> Html Msg
+view orgKey model =
     div []
         [ errorAlertView model.errors
         , successView model.success

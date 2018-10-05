@@ -6,6 +6,7 @@ module Page.Article.Common exposing
     , multiSelectCategoryList
     , multiSelectUrlList
     , onTrixChange
+    , pendingActionsOnDescriptionChange
     , proposedEditorHeightPayload
     , savingIndicator
     , selectItemInList
@@ -16,6 +17,7 @@ module Page.Article.Common exposing
     , urlToValue
     )
 
+import Admin.Data.Article exposing (Article)
 import Admin.Data.Category exposing (..)
 import Admin.Data.Common exposing (..)
 import Admin.Data.Status exposing (..)
@@ -29,6 +31,7 @@ import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (on, onClick)
 import Json.Decode as Json
+import PendingActions exposing (PendingActions)
 
 
 type SaveStatus
@@ -327,3 +330,42 @@ trixEditorToolbarView addAttachmentsMsg =
                 ]
             ]
         ]
+
+
+pendingActionsOnDescriptionChange :
+    PendingActions
+    -> Maybe Article
+    -> String
+    -> PendingActions
+pendingActionsOnDescriptionChange pendingActions originalArticle newDescription =
+    case originalArticle of
+        Just article ->
+            let
+                pendingActionId =
+                    "article-" ++ article.id
+
+                message =
+                    "Editor has unsaved contents."
+            in
+            if isDescriptionChanged article newDescription then
+                PendingActions.add pendingActionId message pendingActions
+
+            else
+                PendingActions.remove pendingActionId pendingActions
+
+        Nothing ->
+            pendingActions
+
+
+isDescriptionChanged : Article -> String -> Bool
+isDescriptionChanged article newDescription =
+    articleDescription article /= newDescription
+
+
+articleDescription : Article -> String
+articleDescription article =
+    if article.desc == "desc" then
+        ""
+
+    else
+        article.desc

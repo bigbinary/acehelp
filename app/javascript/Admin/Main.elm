@@ -406,23 +406,26 @@ update msg model =
                         _ ->
                             ArticleCreate.initModel
 
+                updatedCurrentPageModel =
+                    { currentPageModel | pendingActions = model.pendingActions }
+
                 ( newModel, cmds ) =
-                    ArticleCreate.update caMsg model.pendingActions currentPageModel
+                    ArticleCreate.update caMsg updatedCurrentPageModel
 
                 ( updatedModel, updatedCmds ) =
                     case model.currentPage of
                         Loaded (ArticleCreate _) ->
-                            ( { model | currentPage = Loaded (ArticleCreate newModel) }
+                            ( { model | currentPage = Loaded (ArticleCreate newModel), pendingActions = newModel.pendingActions }
                             , runReaderCmds ArticleCreateMsg cmds
                             )
 
                         TransitioningFrom _ ->
-                            ( { model | currentPage = Loaded (ArticleCreate newModel) }
+                            ( { model | currentPage = Loaded (ArticleCreate newModel), pendingActions = newModel.pendingActions }
                             , runReaderCmds ArticleCreateMsg cmds
                             )
 
                         _ ->
-                            ( model, Cmd.none )
+                            ( { model | pendingActions = newModel.pendingActions }, Cmd.none )
             in
             case caMsg of
                 ArticleCreate.SaveArticleResponse (Ok articleResp) ->
@@ -1072,7 +1075,7 @@ view model =
 
                 ArticleCreate articleCreateModel ->
                     Html.map ArticleCreateMsg
-                        (ArticleCreate.view model.organizationKey model.pendingActions articleCreateModel)
+                        (ArticleCreate.view model.organizationKey articleCreateModel)
 
                 ArticleEdit articleEditModel ->
                     Html.map ArticleEditMsg
