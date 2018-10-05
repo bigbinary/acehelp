@@ -415,12 +415,18 @@ update msg model =
                 ( updatedModel, updatedCmds ) =
                     case model.currentPage of
                         Loaded (ArticleCreate _) ->
-                            ( { model | currentPage = Loaded (ArticleCreate newModel), pendingActions = newModel.pendingActions }
+                            ( { model
+                                | currentPage = Loaded (ArticleCreate newModel)
+                                , pendingActions = newModel.pendingActions
+                              }
                             , runReaderCmds ArticleCreateMsg cmds
                             )
 
                         TransitioningFrom _ ->
-                            ( { model | currentPage = Loaded (ArticleCreate newModel), pendingActions = newModel.pendingActions }
+                            ( { model
+                                | currentPage = Loaded (ArticleCreate newModel)
+                                , pendingActions = newModel.pendingActions
+                              }
                             , runReaderCmds ArticleCreateMsg cmds
                             )
 
@@ -458,25 +464,33 @@ update msg model =
                                 _ ->
                                     ArticleEdit.initModel "0"
 
+                updatedCurrentPageModel =
+                    { currentPageModel | pendingActions = model.pendingActions }
+
                 ( newModel, cmds ) =
-                    ArticleEdit.update aeMsg
-                        currentPageModel
+                    ArticleEdit.update aeMsg updatedCurrentPageModel
             in
             -- TODO: Make this better. There should be no need to check currentpage type here.
             -- This was done to fix a bug that autonavigated user to an empty article edit page
             case model.currentPage of
                 Loaded (ArticleEdit _) ->
-                    ( { model | currentPage = Loaded (ArticleEdit newModel) }
+                    ( { model
+                        | currentPage = Loaded (ArticleEdit newModel)
+                        , pendingActions = newModel.pendingActions
+                      }
                     , runReaderCmds ArticleEditMsg cmds
                     )
 
                 TransitioningFrom _ ->
-                    ( { model | currentPage = Loaded (ArticleEdit newModel) }
+                    ( { model
+                        | currentPage = Loaded (ArticleEdit newModel)
+                        , pendingActions = newModel.pendingActions
+                      }
                     , runReaderCmds ArticleEditMsg cmds
                     )
 
                 _ ->
-                    ( model, Cmd.none )
+                    ( { model | pendingActions = newModel.pendingActions }, Cmd.none )
 
         UrlCreateMsg cuMsg ->
             let

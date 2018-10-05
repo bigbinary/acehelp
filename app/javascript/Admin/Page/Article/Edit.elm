@@ -37,6 +37,7 @@ import Html.Attributes exposing (..)
 import Html.Events exposing (..)
 import Page.Article.Common exposing (..)
 import Page.Errors exposing (..)
+import PendingActions exposing (PendingActions)
 import Process
 import Reader exposing (Reader)
 import Task exposing (Task)
@@ -61,6 +62,7 @@ type alias Model =
     , originalArticle : Maybe Article
     , isEditable : Bool
     , attachmentsPath : String
+    , pendingActions : PendingActions
     }
 
 
@@ -79,6 +81,7 @@ initModel articleId =
     , originalArticle = Nothing
     , isEditable = False
     , attachmentsPath = ""
+    , pendingActions = PendingActions.empty
     }
 
 
@@ -181,8 +184,22 @@ update msg model =
 
                 errors =
                     errorsIn [ newDesc, model.title ]
+
+                newPendingActions =
+                    if model.isEditable then
+                        pendingActionsOnDescriptionChange
+                            model.pendingActions
+                            model.originalArticle
+                            desc
+
+                    else
+                        PendingActions.empty
             in
-            ( { model | desc = newDesc, errors = errors }
+            ( { model
+                | desc = newDesc
+                , errors = errors
+                , pendingActions = newPendingActions
+              }
             , []
             )
 
