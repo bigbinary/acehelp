@@ -13,6 +13,7 @@ import Helpers exposing (..)
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
+import Page.Url.Common exposing (..)
 import Reader exposing (Reader)
 import Task exposing (Task)
 
@@ -24,11 +25,8 @@ import Task exposing (Task)
 type alias Model =
     { errors : List String
     , success : Maybe String
-    , url : Field String String
     , urlId : UrlId
-    , urlRule : String
-    , urlPattern : String
-    , baseUrl : Maybe String
+    , rule : Field String UrlRule
     }
 
 
@@ -36,11 +34,8 @@ initModel : UrlId -> Model
 initModel urlId =
     { errors = []
     , success = Nothing
-    , url = Field (validateEmpty "Url") ""
-    , urlRule = ""
-    , urlPattern = ""
+    , rule = Field validateSelectedRule (UrlIs "")
     , urlId = urlId
-    , baseUrl = Nothing
     }
 
 
@@ -48,7 +43,6 @@ init : UrlId -> ( Model, List (ReaderCmd Msg) )
 init urlId =
     ( initModel urlId
     , [ Strict <| Reader.map (Task.attempt UrlLoaded) (requestUrlById urlId)
-      , Strict <| Reader.map (Task.attempt LoadSetting) requestOrganizationSetting
       ]
     )
 
@@ -58,49 +52,38 @@ init urlId =
 
 
 type Msg
-    = UrlInput String
+    = RuleChange String
     | UpdateUrl
     | UpdateUrlResponse (Result GQLClient.Error UrlResponse)
     | UrlLoaded (Result GQLClient.Error (Maybe UrlData))
-    | LoadSetting (Result GQLClient.Error Setting)
+    | UrlPatternInput String
 
 
 update : Msg -> Model -> ( Model, List (ReaderCmd Msg) )
 update msg model =
     case msg of
-        UrlInput url ->
+        UrlPatternInput path ->
             let
-                newUrl =
-                    unless
-                        (String.startsWith <| Maybe.withDefault "" model.baseUrl)
-                        (always <| Maybe.withDefault "" model.baseUrl)
-                        url
+                newPath =
+                    case ( String.startsWith "/" path, Field.value model.rule ) of
+                        ( True, _ ) ->
+                            path
+
+                        ( False, UrlIs _ ) ->
+                            path
+
+                        ( False, _ ) ->
+                            "/" ++ path
             in
-            ( { model | url = Field.update model.url newUrl }, [] )
+            ( { model | rule = Field.update model.rule <| updateRuleValue newPath <| Field.value model.rule }, [] )
 
         UpdateUrl ->
-            let
-                fields =
-                    [ model.url ]
+            case validate model.rule of
+                Failed err ->
+                    ( { model | errors = [ err ] }, [] )
 
-                errors =
-                    validateAll fields
-                        |> filterFailures
-                        |> List.map
-                            (\result ->
-                                case result of
-                                    Failed err ->
-                                        err
-
-                                    Passed _ ->
-                                        "Unknown Error"
-                            )
-            in
-            if isAllValid fields then
-                save model
-
-            else
-                ( { model | errors = errors }, [] )
+                Passed _ ->
+                    save model
 
         UpdateUrlResponse (Ok id) ->
             ( model, [] )
@@ -110,9 +93,10 @@ update msg model =
 
         UrlLoaded (Ok url) ->
             case url of
-                Just newUrl ->
+                Just { id, url_rule, url_pattern } ->
                     ( { model
-                        | urlId = newUrl.id
+                        | urlId = id
+                        , rule = Field.update model.rule <| Maybe.withDefault (UrlIs "") <| stringToRule ( url_rule, url_pattern )
                       }
                     , []
                     )
@@ -123,26 +107,19 @@ update msg model =
         UrlLoaded (Err err) ->
             ( { model | errors = [ "There was an error while loading the url" ] }, [] )
 
-        LoadSetting (Ok setting) ->
-            let
-                baseUrl =
-                    Maybe.map
-                        (unless
-                            (String.endsWith "/")
-                            (flip String.append "/")
-                        )
-                        setting.base_url
-            in
-            ( { model
-                | baseUrl = baseUrl
-                , url = Field.update model.url (Maybe.withDefault "" baseUrl)
-                , errors = []
-              }
-            , []
-            )
+        RuleChange rule ->
+            case rule of
+                "is" ->
+                    ( { model | rule = Field.update model.rule <| updateRuleType UrlIs <| Field.value model.rule }, [] )
 
-        LoadSetting (Err err) ->
-            ( { model | errors = [ "Something went wrong while fetching the base Url" ] }, [] )
+                "contains" ->
+                    ( { model | rule = Field.update model.rule <| updateRuleType UrlContains <| Field.value model.rule }, [] )
+
+                "ends_with" ->
+                    ( { model | rule = Field.update model.rule <| updateRuleType UrlEndsWith <| Field.value model.rule }, [] )
+
+                _ ->
+                    ( { model | errors = [ "Something went wrong. Please check the selected URL Rule" ] }, [] )
 
 
 
@@ -150,43 +127,28 @@ update msg model =
 
 
 view : Model -> Html Msg
-view model =
-    div [ class "container" ]
-        [ Html.form [ onSubmit UpdateUrl ]
-            [ errorView model.errors
-            , div []
-                [ Maybe.withDefault (text "") <|
-                    Maybe.map
-                        (\message ->
-                            div
-                                [ class "alert alert-success alert-dismissible fade show"
-                                , attribute "role" "alert"
-                                ]
-                                [ text <| message
-                                ]
-                        )
-                        model.success
-                ]
-            , div []
-                [ label [] [ text "URL: " ]
-                , input
-                    [ Html.Attributes.value <| Field.value model.url
-                    , type_ "text"
-                    , placeholder "Url..."
-                    , onInput UrlInput
-                    ]
-                    []
-                ]
-            , button [ type_ "submit", class "btn btn-primary" ] [ text "Update URL" ]
-            ]
-        ]
+view { errors, rule } =
+    commonView
+        { title = "Edit Url Pattern"
+        , errors = errors
+        , success = Nothing
+        , rule = rule
+        , onSaveUrl = UpdateUrl
+        , onUrlPatternInput = UrlPatternInput
+        , onRuleChange = RuleChange
+        , saveLabel = "Update Url"
+        }
 
 
 urlInputs : Model -> UrlData
-urlInputs { urlId, url, urlRule, urlPattern } =
+urlInputs { urlId, rule } =
+    let
+        ( urlRule, pattern ) =
+            ruleToString <| Field.value rule
+    in
     { id = urlId
     , url_rule = urlRule
-    , url_pattern = urlPattern
+    , url_pattern = pattern
     }
 
 
