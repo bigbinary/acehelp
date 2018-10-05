@@ -51,7 +51,8 @@ class Article < ApplicationRecord
     def self.search_with_url_pattern(articles, incoming_url, org)
       return articles if incoming_url.nil?
       url_ids = urls_with_contains_rule(org, incoming_url) +
-        urls_with_ends_with_rule(org, incoming_url)
+        urls_with_ends_with_rule(org, incoming_url) +
+        urls_with_is_url_rule(org, incoming_url)
       if url_ids.any?
         articles = articles.joins(:urls).where(urls: { id: url_ids })
       else
@@ -74,6 +75,16 @@ class Article < ApplicationRecord
       url_ids = []
       urls.each do |url|
         url_ids << url.id if incoming_url.match(Regexp.new url.url_pattern)
+      end
+      url_ids
+    end
+
+    def self.urls_with_is_url_rule(org, incoming_url)
+      urls = org.urls.where(url_rule: :is)
+      url_ids = []
+      uri = URI.parse(incoming_url)
+      urls.each do |url|
+        url_ids << url.id if uri.is_a?(URI::HTTP)
       end
       url_ids
     end
