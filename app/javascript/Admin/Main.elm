@@ -46,6 +46,7 @@ import Page.Team.Create as TeamMemberCreate
 import Page.Team.List as TeamList
 import Page.Ticket.Edit as TicketEdit
 import Page.Ticket.List as TicketList
+import Page.Url.ArticleList as UrlMappingList
 import Page.Url.Create as UrlCreate
 import Page.Url.Edit as UrlEdit
 import Page.Url.List as UrlList
@@ -81,6 +82,7 @@ type Page
     | UrlList UrlList.Model
     | UrlCreate UrlCreate.Model
     | UrlEdit UrlEdit.Model
+    | UrlMappingList UrlMappingList.Model
     | Settings Settings.Model
     | OrganizationCreate OrganizationCreate.Model
     | TicketList TicketList.Model
@@ -157,6 +159,7 @@ type Msg
     | UrlCreateMsg UrlCreate.Msg
     | UrlEditMsg UrlEdit.Msg
     | UrlListMsg UrlList.Msg
+    | UrlMappingListMsg UrlMappingList.Msg
     | CategoryListMsg CategoryList.Msg
     | CategoryCreateMsg CategoryCreate.Msg
     | CategoryEditMsg CategoryEdit.Msg
@@ -249,6 +252,14 @@ navigateTo newRoute model =
         Route.UrlCreate organizationKey ->
             UrlCreate.init
                 |> transitionTo UrlCreate UrlCreateMsg
+
+        Route.UrlMapping organizationKey ->
+            UrlMappingList.init
+                |> transitionTo UrlMappingList UrlMappingListMsg
+
+        Route.ArticleUrlMapping organizationKey articleId ->
+            UrlMappingList.init
+                |> transitionTo UrlMappingList UrlMappingListMsg
 
         Route.TicketList organizationKey ->
             TicketList.init
@@ -564,6 +575,23 @@ update msg model =
             in
             ( { model | currentPage = Loaded (UrlList newModel) }
             , runReaderCmds UrlListMsg cmds
+            )
+
+        UrlMappingListMsg ulMsg ->
+            let
+                currentPageModel =
+                    case getPage model.currentPage of
+                        UrlMappingList urlListModel ->
+                            urlListModel
+
+                        _ ->
+                            UrlMappingList.initModel
+
+                ( newModel, cmds ) =
+                    UrlMappingList.update ulMsg currentPageModel
+            in
+            ( { model | currentPage = Loaded (UrlMappingList newModel) }
+            , runReaderCmds UrlMappingListMsg cmds
             )
 
         TicketListMsg tlMsg ->
@@ -1059,6 +1087,10 @@ view model =
                 UrlList urlListModel ->
                     Html.map UrlListMsg
                         (UrlList.view model.organizationKey urlListModel)
+
+                UrlMappingList urlListModel ->
+                    Html.map UrlMappingListMsg
+                        (UrlMappingList.view model.organizationKey urlListModel)
 
                 CategoryList categoryListModel ->
                     Html.map CategoryListMsg
