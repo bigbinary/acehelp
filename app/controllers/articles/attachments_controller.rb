@@ -20,7 +20,7 @@ class Articles::AttachmentsController < ApplicationController
   def destroy
     attachment = @article.attachments.find(params[:id])
     if attachment.purge
-      render status: :no_content
+      render json: {}, status: :no_content
     else
       logger.error attachment.errors.messages
       render status: :internal_server_error
