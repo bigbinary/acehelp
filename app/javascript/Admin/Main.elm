@@ -18,6 +18,7 @@ module Main exposing
 import Admin.Data.Common exposing (..)
 import Admin.Data.Organization exposing (Organization)
 import Admin.Data.ReaderCmd exposing (..)
+import Admin.Ports exposing (..)
 import Admin.Request.Helper exposing (ApiKey, NodeEnv, logoutRequest)
 import Admin.Request.Organization exposing (requestAllOrganizations)
 import Admin.Views.Common exposing (..)
@@ -182,6 +183,8 @@ type Msg
     | UpdateOrganizationData Organization
     | HamMenuClick
     | CloseHamMenu
+    | AddPendingAction { id : String, message : String }
+    | RemovePendingAction String
 
 
 
@@ -1015,6 +1018,16 @@ update msg model =
             }
                 |> navigateTo model.route
 
+        AddPendingAction { id, message } ->
+            ( { model | pendingActions = PendingActions.add id message model.pendingActions }
+            , Cmd.none
+            )
+
+        RemovePendingAction id ->
+            ( { model | pendingActions = PendingActions.remove id model.pendingActions }
+            , Cmd.none
+            )
+
 
 
 -- SUBSCRIPTIONS
@@ -1022,15 +1035,23 @@ update msg model =
 
 subscriptions : Model -> Sub Msg
 subscriptions model =
-    case getPage model.currentPage of
-        ArticleCreate articleCreateModel ->
-            Sub.map ArticleCreateMsg <| ArticleCreate.subscriptions articleCreateModel
+    let
+        pageSubscriptions =
+            case getPage model.currentPage of
+                ArticleCreate articleCreateModel ->
+                    Sub.map ArticleCreateMsg <| ArticleCreate.subscriptions articleCreateModel
 
-        ArticleEdit articleEditModel ->
-            Sub.map ArticleEditMsg <| ArticleEdit.subscriptions articleEditModel
+                ArticleEdit articleEditModel ->
+                    Sub.map ArticleEditMsg <| ArticleEdit.subscriptions articleEditModel
 
-        _ ->
-            Sub.none
+                _ ->
+                    Sub.none
+    in
+    Sub.batch
+        [ pageSubscriptions
+        , addPendingAction <| AddPendingAction
+        , removePendingAction <| RemovePendingAction
+        ]
 
 
 

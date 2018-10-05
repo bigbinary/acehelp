@@ -102,17 +102,28 @@ document.addEventListener("DOMContentLoaded", () => {
 
     document.addEventListener("trix-attachment-add", event => {
         const attachment = event.attachment;
+        const { file, id } = attachment;
         const editorParentNode = event.target.parentNode;
         const apiKey = editorParentNode.getAttribute("data-api-key");
         const attachmentsPath = editorParentNode.getAttribute(
             "data-attachments-path"
         );
+        const pendingActionId = `attachment-${id}`;
+        const attachmentUploadFinishCallback = () => {
+            app.ports.removePendingAction.send(pendingActionId);
+        };
 
-        if (apiKey && attachment.file && attachmentsPath) {
+        if (apiKey && file && attachmentsPath) {
+            app.ports.addPendingAction.send({
+                id: pendingActionId,
+                message: `Uploading file: ${file.name}`
+            });
+
             const uploader = new AttachmentUploader(
                 apiKey,
                 attachment,
-                attachmentsPath
+                attachmentsPath,
+                attachmentUploadFinishCallback
             );
 
             return uploader.upload();
