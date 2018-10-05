@@ -4,9 +4,10 @@ Types::UrlType = GraphQL::ObjectType.define do
   name "Url"
   field :id, !types.String
   field :url_rule, !types.String
-  field :url_pattern, !types.String
-  field :url, -> { types.String } do
-    resolve -> (_, _, context) { "Unused URL field" }
+  field :url_pattern, -> { !types.String } do
+    resolve ->(obj, args, context) {
+      obj.change_url_pattern_to_placeholder
+    }
   end
   field :articles, -> { !types[Types::ArticleType] } do
     preload :articles
