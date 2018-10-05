@@ -118,6 +118,7 @@ type alias Model =
     , organizationList : List Organization
     , showHamMenu : Bool
     , pendingActions : PendingActions
+    , showPendingActionsConfirmation : Acknowledgement Msg
     }
 
 
@@ -141,6 +142,7 @@ init flags location navKey =
             , organizationList = []
             , showHamMenu = False
             , pendingActions = PendingActions.empty
+            , showPendingActionsConfirmation = No
             }
 
         cmd =
@@ -185,6 +187,8 @@ type Msg
     | CloseHamMenu
     | AddPendingAction { id : String, message : String }
     | RemovePendingAction String
+    | IgnorePendingActions Msg
+    | HidePendingActionsConfirmationDialog
 
 
 
@@ -350,23 +354,31 @@ update msg model =
     in
     case msg of
         LinkClicked urlRequest ->
-            case urlRequest of
-                Browser.Internal url ->
-                    case Route.fromLocation url |> Route.isOrgSame model.organizationKey of
-                        True ->
-                            ( { model | showHamMenu = False }
-                            , Navigation.pushUrl model.navKey (Url.toString url)
-                            )
+            if PendingActions.isEmpty model.pendingActions then
+                case urlRequest of
+                    Browser.Internal url ->
+                        case Route.fromLocation url |> Route.isOrgSame model.organizationKey of
+                            True ->
+                                ( { model | showHamMenu = False }
+                                , Navigation.pushUrl model.navKey (Url.toString url)
+                                )
 
-                        False ->
-                            ( { model | showHamMenu = False }
-                            , Navigation.load (Url.toString url)
-                            )
+                            False ->
+                                ( { model | showHamMenu = False }
+                                , Navigation.load (Url.toString url)
+                                )
 
-                Browser.External href ->
-                    ( model
-                    , Navigation.load href
-                    )
+                    Browser.External href ->
+                        ( model, Navigation.load href )
+
+            else
+                ( { model
+                    | showPendingActionsConfirmation =
+                        Yes
+                            (IgnorePendingActions (LinkClicked urlRequest))
+                  }
+                , Cmd.none
+                )
 
         UserNotificationMsg unMsg ->
             UserNotification.update unMsg model.notifications
@@ -1045,6 +1057,17 @@ update msg model =
             , Cmd.none
             )
 
+        IgnorePendingActions nextMsg ->
+            ( { model
+                | pendingActions = PendingActions.empty
+                , showPendingActionsConfirmation = No
+              }
+            , Task.perform (always nextMsg) (Task.succeed ())
+            )
+
+        HidePendingActionsConfirmationDialog ->
+            ( { model | showPendingActionsConfirmation = No }, Cmd.none )
+
 
 
 -- SUBSCRIPTIONS
@@ -1247,7 +1270,17 @@ view model =
                 _ ->
                     viewWithHamburgerMenu
     in
-    { title = "AceHelp", body = [ div [ id "admin-hook" ] viewBody ] }
+    { title = "AceHelp"
+    , body =
+        [ div [ id "admin-hook" ]
+            [ div [] viewBody
+            , MainView.pendingActionsConfirmationDialog
+                model.showPendingActionsConfirmation
+                model.pendingActions
+                HidePendingActionsConfirmationDialog
+            ]
+        ]
+    }
 
 
 

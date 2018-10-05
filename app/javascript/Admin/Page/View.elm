@@ -1,11 +1,21 @@
-module Page.View exposing (adminHeader, adminLayout, hamBurgerMenu, logoutOption)
+module Page.View exposing
+    ( adminHeader
+    , adminLayout
+    , hamBurgerMenu
+    , logoutOption
+    , pendingActionsConfirmationDialog
+    )
 
+import Admin.Data.Common exposing (..)
 import Admin.Data.Organization exposing (Organization)
 import Admin.Request.Helper exposing (ApiKey, NodeEnv)
+import Admin.Views.Common exposing (..)
+import Dialog
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
 import Page.UserNotification as UserNotification
+import PendingActions exposing (PendingActions)
 import Route exposing (..)
 import Views.FontAwesome as FontAwesome exposing (..)
 
@@ -118,3 +128,28 @@ hamBurgerMenu { organizationList, toUpdatedRoute, onCloseMenu } =
                 , [ a [ class "nav-link menu-add-org", href <| routeToString <| OrganizationCreate ] [ h5 [] [ text "+ Add" ] ] ]
                 ]
         ]
+
+
+pendingActionsConfirmationDialog : Acknowledgement msg -> PendingActions -> msg -> Html msg
+pendingActionsConfirmationDialog acknowledgement pendingActions onDeclineMsg =
+    let
+        pendingActionMessages =
+            PendingActions.messages pendingActions |> String.join "\n"
+
+        body =
+            "There are some pending actions as follows. Are you sure you want to ignore them?\n" ++ pendingActionMessages
+    in
+    Dialog.view <|
+        case acknowledgement of
+            Yes onAcceptMsg ->
+                Just
+                    (dialogConfig
+                        { onAccept = onAcceptMsg
+                        , onDecline = onDeclineMsg
+                        , title = "Pending Actions"
+                        , body = body
+                        }
+                    )
+
+            No ->
+                Nothing
