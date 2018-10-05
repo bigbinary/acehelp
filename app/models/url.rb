@@ -7,7 +7,8 @@ class Url < ApplicationRecord
 
   enum url_rule: {
     contains: "contains",
-    ends_with: "ends_with"
+    ends_with: "ends_with",
+    is: "is"
   }
 
   # validates_uniqueness_of :url, case_sensitive: false
