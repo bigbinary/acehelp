@@ -29,6 +29,7 @@ import GraphQL.Client.Http as GQLClient
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
+import Http
 import Reader exposing (Reader)
 import Task exposing (Task)
 
@@ -132,8 +133,9 @@ update msg model =
                     ( model, [] )
 
         UpdateTicketResponse (Err error) ->
-            ( { model | error = Just "An error occured while updating the Ticket" }, [] )
+            Task.fail <| GQLClient.HttpError <| Http.BadPayload error
 
+        --( { model | error = Just error[:messages] }, [] )
         DeleteTicketResponse (Ok id) ->
             ( model, [] )
 

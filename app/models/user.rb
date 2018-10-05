@@ -18,6 +18,10 @@ class User < ApplicationRecord
 
   scope :for_organization, ->(org) { joins(organization_users: :organization).where(organization_users: { organization_id: org.id }) }
 
+  enum role: {
+    agent: "agent"
+  }
+
   def name
     ("#{first_name} #{last_name}".squish).presence || "Anonymous"
   end

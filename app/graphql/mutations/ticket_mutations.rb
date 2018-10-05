@@ -77,6 +77,8 @@ class Mutations::TicketMutations
         ) if inputs[:comment].present?
         new_comment.assign_agent_to_ticket(context[:current_user]["id"]) if new_comment
         if inputs[:note].present?
+          user = context[:current_user]
+          return errors = Utils::ErrorHandler.new.detailed_error("User is not agent.", context) unless user.agent?
           Note.add_note!(
             details: inputs[:note],
             agent_id: context[:current_user]["id"],
