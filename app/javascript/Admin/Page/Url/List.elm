@@ -120,6 +120,7 @@ view orgKey model =
             , class "btn btn-primary"
             ]
             [ text "+ Url Pattern" ]
+        , a [ href <| routeToString <| UrlMapping orgKey, class "btn btn-primary" ] [ text "Map Url Patterns to Articles" ]
         , div
             [ class "listingSection" ]
             (List.map
