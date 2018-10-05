@@ -59,6 +59,37 @@ def create_user(options = {})
   create_data_for_ace_invoice_organization
   create_data_for_eii_organization
   create_data_for_careforever_organization
+  create_agents
+end
+
+def create_agents
+  attributes = { email: "agent_test_1@example.com",
+                      first_name: "Bill",
+                      last_name: "Smith",
+                      password: "welcome",
+                      role: :agent }
+  user = User.create! attributes
+
+  org = Organization.find_by(name: "AceInvoice")
+  OrganizationUser.create! organization_id: org.id, user_id: user.id
+  org = Organization.find_by(name: "EventsInIndia")
+  OrganizationUser.create! organization_id: org.id, user_id: user.id
+  org = Organization.find_by(name: "CareForever")
+  OrganizationUser.create! organization_id: org.id, user_id: user.id
+
+  attributes = { email: "agent_test_2@example.com",
+                      first_name: "Sarah",
+                      last_name: "Smith",
+                      password: "welcome",
+                      role: :agent }
+  user = User.create! attributes
+
+  org = Organization.find_by(name: "AceInvoice")
+  OrganizationUser.create! organization_id: org.id, user_id: user.id
+  org = Organization.find_by(name: "EventsInIndia")
+  OrganizationUser.create! organization_id: org.id, user_id: user.id
+  org = Organization.find_by(name: "CareForever")
+  OrganizationUser.create! organization_id: org.id, user_id: user.id
 end
 
 def create_data_for_ace_invoice_organization
