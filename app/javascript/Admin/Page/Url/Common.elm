@@ -81,20 +81,24 @@ commonView :
     }
     -> Html msg
 commonView { title, errors, rule, success, onSaveUrl, onRuleChange, onUrlPatternInput, saveLabel } =
-    div [ class "url-container row" ]
+    div [ class "url-container" ]
         [ Html.form [ onSubmit onSaveUrl ]
             [ errorView errors
             , successView success
             , h4 [] [ text title ]
-            , div []
-                [ select [ onInput onRuleChange ]
+            , div [ class "form-group" ]
+                [ label [ for "rule-type" ] [ text "Pattern Type: " ]
+                , select [ id "rule-type", class "form-control", onInput onRuleChange ]
                     [ option [ selected ("is" == ruleTypeToString rule), Html.Attributes.value "is" ] [ text "Url Is" ]
                     , option [ selected ("contains" == ruleTypeToString rule), Html.Attributes.value "contains" ] [ text "Url Contains" ]
                     , option [ selected ("ends_with" == ruleTypeToString rule), Html.Attributes.value "ends_with" ] [ text "Url Ends With" ]
                     ]
+                ]
+            , div [ class "form-group" ]
+                [ label [ for "url-input" ] []
                 , input
                     [ type_ "text"
-                    , placeholder "Url..."
+                    , placeholder "Please enter a URL Pattern. \"*\" can be used as a wildcard"
                     , onInput onUrlPatternInput
                     , required True
                     , autofocus True
