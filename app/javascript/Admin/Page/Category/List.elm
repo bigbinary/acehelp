@@ -170,7 +170,7 @@ categoryRow : ApiKey -> Category -> Html Msg
 categoryRow orgKey category =
     div
         [ class "listingRow" ]
-        [ div [ style "width" "20px" ] [ FontAwesome.edit ]
+        [ div [ class "actionButton", style "width" "20px" ] [ FontAwesome.edit ]
         , div
             [ class "textColumn" ]
             [ text category.name ]
