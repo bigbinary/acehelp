@@ -27,6 +27,7 @@ import Page.Article.Common exposing (statusToButtonText)
 import Reader exposing (Reader)
 import Route exposing (..)
 import Task exposing (Task)
+import Views.FontAwesome as FontAwesome exposing (..)
 
 
 
@@ -169,7 +170,8 @@ categoryRow : ApiKey -> Category -> Html Msg
 categoryRow orgKey category =
     div
         [ class "listingRow" ]
-        [ div
+        [ div [ style "width" "20px" ] [ FontAwesome.edit ]
+        , div
             [ class "textColumn" ]
             [ text category.name ]
         , div
