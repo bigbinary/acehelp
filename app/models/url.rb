@@ -3,6 +3,10 @@
 class Url < ApplicationRecord
   has_many :article_urls, dependent: :destroy
   has_many :articles, through: :article_urls
+
+  has_many :url_categories, dependent: :destroy
+  has_many :categories, through: :url_categories
+
   belongs_to :organization
 
   enum url_rule: {
