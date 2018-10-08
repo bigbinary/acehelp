@@ -1,5 +1,6 @@
 module Admin.Data.Url exposing
-    ( CreateUrlInput
+    ( CategoryUrlMapInput
+    , CreateUrlInput
     , UrlData
     , UrlId
     , UrlPattern
@@ -7,6 +8,7 @@ module Admin.Data.Url exposing
     , UrlRule(..)
     , UrlSummaryData
     , UrlsListResponse
+    , categoryUrlMutation
     , createUrlMutation
     , dataToPattern
     , deleteUrlMutation
@@ -20,7 +22,7 @@ module Admin.Data.Url exposing
     , urlResponseObject
     )
 
-import Admin.Data.Category exposing (Category, categoryObject)
+import Admin.Data.Category exposing (Category, CategoryId, categoryObject)
 import Admin.Data.Common exposing (..)
 import GraphQL.Request.Builder as GQLBuilder
 import GraphQL.Request.Builder.Arg as Arg
@@ -74,6 +76,10 @@ type alias UrlResponse =
     { url : Maybe UrlData
     , errors : Maybe (List Error)
     }
+
+
+type alias CategoryUrlMapInput =
+    { id : UrlId, categories : List CategoryId }
 
 
 ruleToString : UrlRule -> ( String, String )
@@ -238,6 +244,28 @@ updateUrlMutation =
                         [ ( "id", Arg.variable idVar )
                         , ( "url_rule", Arg.variable urlRuleVar )
                         , ( "url_pattern", Arg.variable urlPatternVar )
+                        ]
+                  )
+                ]
+                urlResponseObject
+
+
+categoryUrlMutation : GQLBuilder.Document GQLBuilder.Mutation UrlResponse CategoryUrlMapInput
+categoryUrlMutation =
+    let
+        idVar =
+            Var.required "id" .id Var.string
+
+        categoriesVar =
+            Var.required "category_ids" .categories (Var.list Var.string)
+    in
+    GQLBuilder.mutationDocument <|
+        GQLBuilder.extract <|
+            GQLBuilder.field "assignCategoryToUrlPattern"
+                [ ( "input"
+                  , Arg.object
+                        [ ( "id", Arg.variable idVar )
+                        , ( "category_ids", Arg.variable categoriesVar )
                         ]
                   )
                 ]

@@ -93,9 +93,18 @@ update msg model =
         SaveUrl ->
             save model
 
-        SaveUrlResponse (Ok id) ->
-            -- NOTE: Redirection handled in Main
-            ( model, [] )
+        SaveUrlResponse (Ok response) ->
+            case response.errors of
+                Just errs ->
+                    case errs of
+                        [] ->
+                            ( { model | success = Just "Successfully assigned Categories" }, [] )
+
+                        _ ->
+                            ( { model | errors = List.map .message errs }, [] )
+
+                _ ->
+                    ( model, [] )
 
         SaveUrlResponse (Err error) ->
             ( { model | errors = [ "An error occured while saving the Url" ] }, [] )
@@ -121,12 +130,25 @@ update msg model =
             ( { model | errors = [ "There was an error while loading the url" ] }, [] )
 
         CategoryModified categoryId ->
-            ( model, [] )
+            ( { model | categories = selectItemInList categoryId model.categories }, [] )
 
 
 categoriesToOption : List Category -> List (Option Category)
 categoriesToOption =
     List.map Unselected
+
+
+optionsToCategoryIds : List (Option Category) -> List CategoryId
+optionsToCategoryIds =
+    List.filterMap
+        (\option ->
+            case option of
+                Selected category ->
+                    Just category.id
+
+                Unselected category ->
+                    Nothing
+        )
 
 
 
@@ -166,4 +188,18 @@ view model =
 
 save : Model -> ( Model, List (ReaderCmd Msg) )
 save model =
-    ( model, [] )
+    ( model
+    , Maybe.map
+        (\urlData ->
+            let
+                newUrlData =
+                    { id = urlData.id, categories = optionsToCategoryIds model.categories }
+            in
+            [ Strict <|
+                Reader.map (Task.attempt SaveUrlResponse)
+                    (updateCategoriesToUrl newUrlData)
+            ]
+        )
+        model.url
+        |> Maybe.withDefault []
+    )

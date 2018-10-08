@@ -1,4 +1,11 @@
-module Admin.Request.Url exposing (createUrl, deleteUrl, requestUrlById, requestUrls, updateUrl)
+module Admin.Request.Url exposing
+    ( createUrl
+    , deleteUrl
+    , requestUrlById
+    , requestUrls
+    , updateCategoriesToUrl
+    , updateUrl
+    )
 
 import Admin.Data.Url exposing (..)
 import Admin.Request.Helper exposing (..)
@@ -55,4 +62,15 @@ requestUrlById urlId =
         (\( nodeEnv, apiKey, appUrl ) ->
             GQLClient.customSendQuery (requestOptions nodeEnv apiKey appUrl) <|
                 GQLBuilder.request { id = urlId } urlByIdQuery
+        )
+
+
+updateCategoriesToUrl :
+    CategoryUrlMapInput
+    -> Reader ( NodeEnv, ApiKey, AppUrl ) (Task GQLClient.Error UrlResponse)
+updateCategoriesToUrl urlData =
+    Reader.Reader
+        (\( nodeEnv, apiKey, appUrl ) ->
+            GQLClient.customSendMutation (requestOptions nodeEnv apiKey appUrl) <|
+                GQLBuilder.request urlData categoryUrlMutation
         )
