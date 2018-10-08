@@ -37,6 +37,7 @@ import Html.Attributes exposing (..)
 import Html.Events exposing (..)
 import Page.Article.Common exposing (..)
 import Page.Errors exposing (..)
+import Page.View as MainView
 import PendingActions exposing (PendingActions)
 import Process
 import Reader exposing (Reader)
@@ -63,6 +64,7 @@ type alias Model =
     , isEditable : Bool
     , attachmentsPath : String
     , pendingActions : PendingActions
+    , showPendingActionsConfirmation : Acknowledgement Msg
     }
 
 
@@ -82,6 +84,7 @@ initModel articleId =
     , isEditable = False
     , attachmentsPath = ""
     , pendingActions = PendingActions.empty
+    , showPendingActionsConfirmation = No
     }
 
 
@@ -138,6 +141,8 @@ type Msg
     | ChangeEditorHeight (Result Dom.Error Dom.Element)
     | ResizeWindow Int Int
     | AddAttachments
+    | IgnorePendingActions Msg
+    | HidePendingActionsConfirmationDialog
 
 
 
@@ -204,7 +209,16 @@ update msg model =
             )
 
         SaveArticle ->
-            save model
+            if preventSaveForPendingActions model.pendingActions model.originalArticle then
+                ( { model
+                    | showPendingActionsConfirmation =
+                        Yes (IgnorePendingActions SaveArticle)
+                  }
+                , []
+                )
+
+            else
+                save model
 
         SaveArticleResponse (Ok articleResp) ->
             case articleResp of
@@ -220,6 +234,7 @@ update msg model =
                         , saveStatus = None
                         , isEditable = False
                         , success = Just "Article updated successfully."
+                        , pendingActions = PendingActions.empty
                       }
                     , [ Strict <| Reader.Reader <| always <| insertArticleContent article.desc, removeNotificationCmd ]
                     )
@@ -228,6 +243,7 @@ update msg model =
                     ( { model
                         | errors = [ "There was an error while saving the article" ]
                         , originalArticle = Nothing
+                        , pendingActions = PendingActions.empty
                       }
                     , [ removeNotificationCmd ]
                     )
@@ -236,6 +252,7 @@ update msg model =
             ( { model
                 | errors = [ "There was an error while saving the article" ]
                 , saveStatus = None
+                , pendingActions = PendingActions.empty
               }
             , [ removeNotificationCmd ]
             )
@@ -358,24 +375,33 @@ update msg model =
             ( { model | isEditable = True }, [ cmd ] )
 
         ResetArticle ->
-            case model.originalArticle of
-                Just article ->
-                    ( { model
-                        | articleId = article.id
-                        , title = Field.update model.title article.title
-                        , desc = Field.update model.desc article.desc
-                        , categories =
-                            selectItemsInList (List.map (.id >> Selected) article.categories) model.categories
-                        , urls = selectItemsInList (List.map (.id >> Selected) article.urls) model.urls
-                        , originalArticle = Just article
-                        , isEditable = False
-                        , errors = []
-                      }
-                    , [ Strict <| Reader.Reader <| always <| insertArticleContent article.desc ]
-                    )
+            if PendingActions.isEmpty model.pendingActions then
+                case model.originalArticle of
+                    Just article ->
+                        ( { model
+                            | articleId = article.id
+                            , title = Field.update model.title article.title
+                            , desc = Field.update model.desc article.desc
+                            , categories =
+                                selectItemsInList (List.map (.id >> Selected) article.categories) model.categories
+                            , urls = selectItemsInList (List.map (.id >> Selected) article.urls) model.urls
+                            , originalArticle = Just article
+                            , isEditable = False
+                            , errors = []
+                          }
+                        , [ Strict <| Reader.Reader <| always <| insertArticleContent article.desc ]
+                        )
 
-                Nothing ->
-                    ( { model | isEditable = False }, [] )
+                    Nothing ->
+                        ( { model | isEditable = False }, [] )
+
+            else
+                ( { model
+                    | showPendingActionsConfirmation =
+                        Yes (IgnorePendingActions ResetArticle)
+                  }
+                , []
+                )
 
         UpdateStatus articleId articleStatus ->
             ( { model
@@ -429,6 +455,25 @@ update msg model =
             ( model
             , [ Strict <| Reader.Reader <| always <| addAttachments () ]
             )
+
+        IgnorePendingActions nextMsg ->
+            let
+                nextCmd =
+                    Task.succeed ()
+                        |> Task.perform (always nextMsg)
+                        |> always
+                        |> Reader.Reader
+                        |> Strict
+            in
+            ( { model
+                | pendingActions = PendingActions.empty
+                , showPendingActionsConfirmation = No
+              }
+            , [ nextCmd ]
+            )
+
+        HidePendingActionsConfirmationDialog ->
+            ( { model | showPendingActionsConfirmation = No }, [] )
 
 
 removeNotificationCmd =
@@ -519,6 +564,10 @@ view orgKey model =
                     ]
                 ]
             ]
+        , MainView.pendingActionsConfirmationDialog
+            model.showPendingActionsConfirmation
+            model.pendingActions
+            HidePendingActionsConfirmationDialog
         ]
 
 
@@ -571,19 +620,22 @@ articleInputs { articleId, title, desc, categories, urls } =
 save : Model -> ( Model, List (ReaderCmd Msg) )
 save model =
     let
+        updatedModel =
+            { model | showPendingActionsConfirmation = No }
+
         fields =
-            [ model.title, model.desc ]
+            [ updatedModel.title, updatedModel.desc ]
 
         cmd =
             Strict <|
                 Reader.map (Task.attempt SaveArticleResponse)
-                    (requestUpdateArticle (articleInputs model))
+                    (requestUpdateArticle (articleInputs updatedModel))
     in
-    if Field.isAllValid fields && maybeToBool model.originalArticle then
-        ( { model | errors = [], saveStatus = Saving }, [ cmd ] )
+    if Field.isAllValid fields && maybeToBool updatedModel.originalArticle then
+        ( { updatedModel | errors = [], saveStatus = Saving }, [ cmd ] )
 
     else
-        ( { model | errors = errorsIn fields }, [] )
+        ( { updatedModel | errors = errorsIn fields }, [] )
 
 
 

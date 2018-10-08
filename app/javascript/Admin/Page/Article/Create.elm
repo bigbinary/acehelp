@@ -129,35 +129,27 @@ update msg model =
             )
 
         SaveArticle ->
-            let
-                unrelatedPendingActions =
-                    PendingActions.without
-                        (unsavedArticlePendingActionId model.originalArticle)
-                        model.pendingActions
-
-                isNoPendingActionRemained =
-                    PendingActions.isEmpty unrelatedPendingActions
-            in
-            if isNoPendingActionRemained then
-                case model.articleId of
-                    "" ->
-                        ( { model
-                            | errors = [ "There was an error while saving the article" ]
-                            , pendingActions = PendingActions.empty
-                          }
-                        , []
-                        )
-
-                    _ ->
-                        save model
-
-            else
+            if preventSaveForPendingActions model.pendingActions model.originalArticle then
                 ( { model
                     | showPendingActionsConfirmation =
                         Yes (IgnorePendingActions SaveArticle)
                   }
                 , []
                 )
+
+            else
+                case model.articleId of
+                    "" ->
+                        ( { model
+                            | errors = [ "There was an error while saving the article" ]
+                            , pendingActions = PendingActions.empty
+                            , showPendingActionsConfirmation = No
+                          }
+                        , []
+                        )
+
+                    _ ->
+                        save model
 
         SaveArticleResponse (Ok articleResp) ->
             case articleResp of
@@ -353,19 +345,22 @@ view orgKey model =
 save : Model -> ( Model, List (ReaderCmd Msg) )
 save model =
     let
+        updatedModel =
+            { model | showPendingActionsConfirmation = No }
+
         fields =
-            [ model.title, model.desc ]
+            [ updatedModel.title, updatedModel.desc ]
 
         cmd =
             Strict <|
                 Reader.map (Task.attempt SaveArticleResponse)
-                    (requestUpdateArticle (articleInputs model))
+                    (requestUpdateArticle (articleInputs updatedModel))
     in
     if Field.isAllValid fields then
-        ( { model | errors = [], saveStatus = Saving }, [ cmd ] )
+        ( { updatedModel | errors = [], saveStatus = Saving }, [ cmd ] )
 
     else
-        ( { model | errors = errorsIn fields }, [] )
+        ( { updatedModel | errors = errorsIn fields }, [] )
 
 
 articleInputs : Model -> UpdateArticleInputs

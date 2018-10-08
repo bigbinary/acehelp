@@ -7,6 +7,7 @@ module Page.Article.Common exposing
     , multiSelectUrlList
     , onTrixChange
     , pendingActionsOnDescriptionChange
+    , preventSaveForPendingActions
     , proposedEditorHeightPayload
     , savingIndicator
     , selectItemInList
@@ -380,3 +381,15 @@ articleDescription article =
 
     else
         article.desc
+
+
+preventSaveForPendingActions : PendingActions -> Maybe Article -> Bool
+preventSaveForPendingActions pendingActions originalArticle =
+    let
+        pendingId =
+            unsavedArticlePendingActionId originalArticle
+
+        unrelatedPendingActions =
+            PendingActions.without pendingId pendingActions
+    in
+    unrelatedPendingActions |> PendingActions.isEmpty |> not
