@@ -22,7 +22,6 @@ module Admin.Data.Article exposing
 
 import Admin.Data.Category exposing (Category, CategoryId, categoryObject)
 import Admin.Data.Common exposing (..)
-import Admin.Data.Url exposing (UrlData, UrlId, urlObject)
 import GraphQL.Request.Builder as GQLBuilder
 import GraphQL.Request.Builder.Arg as Arg
 import GraphQL.Request.Builder.Variable as Var
@@ -43,7 +42,6 @@ type alias Article =
     , desc : String
     , status : String
     , categories : List Category
-    , urls : List UrlData
     , attachmentsPath : String
     }
 
@@ -53,7 +51,6 @@ type alias CreateArticleInputs =
     , title : String
     , desc : String
     , categoryIds : Maybe (List CategoryId)
-    , urlIds : Maybe (List UrlId)
     }
 
 
@@ -62,7 +59,6 @@ type alias UpdateArticleInputs =
     , title : String
     , desc : String
     , categoryIds : Maybe (List CategoryId)
-    , urlIds : Maybe (List UrlId)
     }
 
 
@@ -160,9 +156,6 @@ createArticleMutation =
 
         categoryIdsVar =
             Var.optional "categoryIds" .categoryIds (Var.list Var.string) []
-
-        urlIdsVar =
-            Var.optional "urlIds" .urlIds (Var.list Var.string) []
     in
     GQLBuilder.mutationDocument <|
         GQLBuilder.extract
@@ -172,7 +165,6 @@ createArticleMutation =
                         [ ( "title", Arg.variable titleVar )
                         , ( "desc", Arg.variable descVar )
                         , ( "category_ids", Arg.variable categoryIdsVar )
-                        , ( "url_ids", Arg.variable urlIdsVar )
                         ]
                   )
                 ]
@@ -194,9 +186,6 @@ updateArticleMutation =
 
         categoryIdsVar =
             Var.optional "categoryIds" .categoryIds (Var.list Var.string) []
-
-        urlIdsVar =
-            Var.optional "urlIds" .urlIds (Var.list Var.string) []
     in
     GQLBuilder.mutationDocument <|
         GQLBuilder.extract
@@ -207,7 +196,6 @@ updateArticleMutation =
                         , ( "title", Arg.variable titleVar )
                         , ( "desc", Arg.variable descVar )
                         , ( "category_ids", Arg.variable categoryIdsVar )
-                        , ( "url_ids", Arg.variable urlIdsVar )
                         ]
                   )
                 ]
@@ -284,13 +272,6 @@ articleObject =
                 []
                 (GQLBuilder.list
                     categoryObject
-                )
-            )
-        |> GQLBuilder.with
-            (GQLBuilder.field "urls"
-                []
-                (GQLBuilder.list
-                    urlObject
                 )
             )
         |> GQLBuilder.with (GQLBuilder.field "attachments_path" [] GQLBuilder.string)

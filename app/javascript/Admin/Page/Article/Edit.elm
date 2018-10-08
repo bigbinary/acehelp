@@ -20,7 +20,6 @@ import Admin.Data.Category exposing (..)
 import Admin.Data.Common exposing (..)
 import Admin.Data.ReaderCmd exposing (..)
 import Admin.Data.Status exposing (..)
-import Admin.Data.Url exposing (UrlId, UrlSummaryData)
 import Admin.Ports exposing (..)
 import Admin.Request.Article exposing (..)
 import Admin.Request.Category exposing (..)
@@ -52,7 +51,6 @@ type alias Model =
     , desc : Field String String
     , articleId : ArticleId
     , categories : List (Option Category)
-    , urls : List (Option UrlSummaryData)
     , errors : List String
     , success : Maybe String
     , updateTaskId : Maybe Int
@@ -70,7 +68,6 @@ initModel articleId =
     , desc = Field (validateEmpty "Article Content") ""
     , articleId = articleId
     , categories = []
-    , urls = []
     , errors = []
     , success = Nothing
     , updateTaskId = Nothing
@@ -195,7 +192,6 @@ update msg model =
                         , desc = Field.update model.desc article.desc
                         , articleStatus = availablityStatusIso.reverseGet article.status
                         , categories = selectItemsInList (List.map (.id >> Selected) article.categories) model.categories
-                        , urls = selectItemsInList (List.map (.id >> Selected) article.urls) model.urls
                         , originalArticle = Just article
                         , saveStatus = None
                         , isEditable = False
@@ -229,7 +225,6 @@ update msg model =
                         , desc = Field.update model.desc article.desc
                         , articleStatus = availablityStatusIso.reverseGet article.status
                         , categories = selectItemsInList (List.map (.id >> Selected) article.categories) model.categories
-                        , urls = selectItemsInList (List.map (.id >> Selected) article.urls) model.urls
                         , originalArticle = Just article
                         , errors = []
                         , attachmentsPath = article.attachmentsPath
@@ -313,7 +308,6 @@ update msg model =
                         , desc = Field.update model.desc article.desc
                         , categories =
                             selectItemsInList (List.map (.id >> Selected) article.categories) model.categories
-                        , urls = selectItemsInList (List.map (.id >> Selected) article.urls) model.urls
                         , originalArticle = Just article
                         , isEditable = False
                         , errors = []
@@ -483,7 +477,7 @@ editAndSaveView isisEditable =
 
 
 articleInputs : Model -> UpdateArticleInputs
-articleInputs { articleId, title, desc, categories, urls } =
+articleInputs { articleId, title, desc, categories } =
     { id = articleId
     , title = Field.value title
     , desc = Field.value desc
@@ -499,18 +493,6 @@ articleInputs { articleId, title, desc, categories, urls } =
                             Nothing
                 )
                 categories
-    , urlIds =
-        Just <|
-            List.filterMap
-                (\option ->
-                    case option of
-                        Selected url ->
-                            Just url.id
-
-                        _ ->
-                            Nothing
-                )
-                urls
     }
 
 

@@ -269,7 +269,7 @@ save model =
 
 
 articleInputs : Model -> UpdateArticleInputs
-articleInputs { articleId, title, desc, categories, urls } =
+articleInputs { articleId, title, desc, categories } =
     { id = articleId
     , title = Field.value title
     , desc = Field.value desc
@@ -285,18 +285,6 @@ articleInputs { articleId, title, desc, categories, urls } =
                             Nothing
                 )
                 categories
-    , urlIds =
-        Just <|
-            List.filterMap
-                (\option ->
-                    case option of
-                        Selected url ->
-                            Just url.id
-
-                        _ ->
-                            Nothing
-                )
-                urls
     }
 
 
