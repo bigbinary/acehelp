@@ -51,7 +51,7 @@ view model color =
             , placeholder "Search for an Article"
             ]
             []
-        , span [ onClick OnSearch, style "width" "40px" ] [ FontAwesome.search ]
+        , span [ onClick OnSearch ] [ FontAwesome.search ]
         ]
 
 
