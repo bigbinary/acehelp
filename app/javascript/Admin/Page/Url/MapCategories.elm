@@ -73,7 +73,13 @@ update msg model =
             case receivedCategories of
                 Just categories ->
                     ( { model
-                        | categories = categoriesToOption categories
+                        | categories =
+                            selectItemsInList
+                                (Maybe.withDefault [] <|
+                                    Maybe.map (\url -> List.map (.id >> Selected) url.categories) model.url
+                                )
+                            <|
+                                categoriesToOption categories
                       }
                     , []
                     )
@@ -96,9 +102,14 @@ update msg model =
 
         UrlLoaded (Ok url) ->
             case url of
-                Just _ ->
+                Just urlData ->
                     ( { model
                         | url = url
+                        , categories =
+                            selectItemsInList
+                                (List.map (.id >> Selected) urlData.categories)
+                            <|
+                                model.categories
                       }
                     , []
                     )

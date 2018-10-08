@@ -48,7 +48,7 @@ type alias UrlData =
     { id : UrlId
     , url_rule : String
     , url_pattern : String
-    , categories : Maybe (List Category)
+    , categories : List Category
     }
 
 
@@ -201,10 +201,8 @@ urlObject =
         |> GQLBuilder.with
             (GQLBuilder.field "categories"
                 []
-                (GQLBuilder.nullable
-                    (GQLBuilder.list
-                        categoryObject
-                    )
+                (GQLBuilder.list
+                    categoryObject
                 )
             )
 
