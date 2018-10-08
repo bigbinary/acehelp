@@ -49,6 +49,7 @@ import Page.Ticket.List as TicketList
 import Page.Url.Create as UrlCreate
 import Page.Url.Edit as UrlEdit
 import Page.Url.List as UrlList
+import Page.Url.MapCategories as UrlShow
 import Page.UserNotification as UserNotification
 import Page.View as MainView
 import Reader exposing (..)
@@ -81,6 +82,7 @@ type Page
     | UrlList UrlList.Model
     | UrlCreate UrlCreate.Model
     | UrlEdit UrlEdit.Model
+    | UrlShow UrlShow.Model
     | Settings Settings.Model
     | OrganizationCreate OrganizationCreate.Model
     | TicketList TicketList.Model
@@ -156,6 +158,7 @@ type Msg
     | ArticleEditMsg ArticleEdit.Msg
     | UrlCreateMsg UrlCreate.Msg
     | UrlEditMsg UrlEdit.Msg
+    | UrlShowMsg UrlShow.Msg
     | UrlListMsg UrlList.Msg
     | CategoryListMsg CategoryList.Msg
     | CategoryCreateMsg CategoryCreate.Msg
@@ -257,6 +260,10 @@ navigateTo newRoute model =
         Route.UrlEdit organizationKey urlId ->
             UrlEdit.init urlId
                 |> transitionTo UrlEdit UrlEditMsg
+
+        Route.CategoriesToUrlMapping organizationKey urlId ->
+            UrlShow.init urlId
+                |> transitionTo UrlShow UrlShowMsg
 
         Route.FeedbackList organizationKey ->
             FeedbackList.init
@@ -564,6 +571,23 @@ update msg model =
             in
             ( { model | currentPage = Loaded (UrlList newModel) }
             , runReaderCmds UrlListMsg cmds
+            )
+
+        UrlShowMsg ulMsg ->
+            let
+                currentPageModel =
+                    case getPage model.currentPage of
+                        UrlShow urlShowModel ->
+                            urlShowModel
+
+                        _ ->
+                            UrlShow.initModel
+
+                ( newModel, cmds ) =
+                    UrlShow.update ulMsg currentPageModel
+            in
+            ( { model | currentPage = Loaded (UrlShow newModel) }
+            , runReaderCmds UrlShowMsg cmds
             )
 
         TicketListMsg tlMsg ->
@@ -1059,6 +1083,10 @@ view model =
                 UrlList urlListModel ->
                     Html.map UrlListMsg
                         (UrlList.view model.organizationKey urlListModel)
+
+                UrlShow urlShowModel ->
+                    Html.map UrlShowMsg
+                        (UrlShow.view urlShowModel)
 
                 CategoryList categoryListModel ->
                     Html.map CategoryListMsg

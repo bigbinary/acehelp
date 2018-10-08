@@ -40,6 +40,7 @@ type Route
     | OrganizationCreate
     | Login
     | ForgotPassword
+    | CategoriesToUrlMapping ApiKey UrlId
 
 
 routeMatcher : Parser (Route -> a) a
@@ -61,6 +62,7 @@ routeMatcher =
         , UrlParser.map ArticleEdit (s "organizations" </> string </> s "articles" </> s "edit" </> string)
         , UrlParser.map ArticleShow (s "organizations" </> string </> s "articles" </> s "show" </> string)
         , UrlParser.map UrlEdit (s "organizations" </> string </> s "urls" </> string </> s "edit")
+        , UrlParser.map CategoriesToUrlMapping (s "organizations" </> string </> s "urls" </> string </> s "mapping")
         , UrlParser.map TicketEdit (s "organizations" </> string </> s "tickets" </> string)
         , UrlParser.map OrganizationCreate (s "organizations" </> s "new")
         , UrlParser.map CategoryEdit (s "organizations" </> string </> s "categories" </> string)
@@ -118,6 +120,9 @@ updateApiKeyinRoute newApiKey page =
 
         UrlEdit organizationApiKey urlId ->
             UrlEdit newApiKey urlId
+
+        CategoriesToUrlMapping organizationApiKey urlId ->
+            CategoriesToUrlMapping newApiKey urlId
 
         ArticleEdit organizationApiKey articleId ->
             ArticleEdit newApiKey articleId
@@ -193,6 +198,9 @@ routeToString page =
 
                 UrlEdit organizationApiKey urlId ->
                     [ "organizations", organizationApiKey, "urls", urlId, "edit" ]
+
+                CategoriesToUrlMapping organizationApiKey urlId ->
+                    [ "organizations", organizationApiKey, "urls", urlId, "mapping" ]
 
                 ArticleEdit organizationApiKey articleId ->
                     [ "organizations", organizationApiKey, "articles", "edit", articleId ]
