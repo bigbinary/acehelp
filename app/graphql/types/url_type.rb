@@ -9,4 +9,8 @@ Types::UrlType = GraphQL::ObjectType.define do
       obj.change_url_pattern_to_placeholder
     }
   end
+  field :categories, -> { !types[Types::CategoryType] } do
+    preload :categories
+    resolve ->(obj, args, context) { obj.categories }
+  end
 end
