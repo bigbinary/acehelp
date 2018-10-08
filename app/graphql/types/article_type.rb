@@ -14,12 +14,6 @@ Types::ArticleType = GraphQL::ObjectType.define do
     resolve ->(obj, args, context) { obj.categories }
   end
 
-  field :urls, -> { !types[Types::UrlType] }  do
-    preload :urls
-    preload_scope ->(args, context) { Url.for_organization(context[:organization]) }
-    resolve ->(obj, args, context) { obj.urls }
-  end
-
   field :attachments_path, -> { !types.String }  do
     resolve ->(obj, args, context) do
       Rails.application.routes.url_helpers.organization_article_attachments_path(context[:organization], obj)

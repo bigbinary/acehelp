@@ -9,8 +9,6 @@ class Article < ApplicationRecord
   }
 
   belongs_to :organization
-  has_many :article_urls, dependent: :destroy
-  has_many :urls, through: :article_urls
 
   has_many :article_categories, dependent: :destroy
   has_many :categories, through: :article_categories
@@ -54,7 +52,7 @@ class Article < ApplicationRecord
         urls_with_ends_with_rule(org, incoming_url) +
         urls_with_is_url_rule(org, incoming_url)
       if url_ids.any?
-        articles = articles.joins(:urls).where(urls: { id: url_ids })
+        articles = articles.joins(categories: :urls).where(urls: { id: url_ids })
       else
         articles = []
       end

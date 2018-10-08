@@ -5,7 +5,6 @@ class Mutations::ArticleMutations
     name "CreateArticle"
 
     input_field :category_ids, types[types.String]
-    input_field :url_ids, types[types.String]
     input_field :title, !types.String
     input_field :desc, !types.String
 
@@ -24,10 +23,6 @@ class Mutations::ArticleMutations
           valid_category_ids = Category.where(id: inputs[:category_ids]).pluck(:id)
           new_article.category_ids = valid_category_ids
         end
-        if inputs[:url_ids].present?
-          valid_url_ids = Url.where(id: inputs[:url_ids]).pluck(:id)
-          new_article.url_ids = valid_url_ids
-        end
         article = new_article
       else
         errors = Utils::ErrorHandler.new.detailed_error(new_article, context)
@@ -45,7 +40,6 @@ class Mutations::ArticleMutations
 
     input_field :id, !types.String
     input_field :category_ids, types[types.String]
-    input_field :url_ids, types[types.String]
     input_field :title, !types.String
     input_field :desc, !types.String
 
@@ -62,9 +56,6 @@ class Mutations::ArticleMutations
         if article.update_attributes(title: inputs[:title], desc: inputs[:desc], temporary: false)
           if inputs[:category_ids].present?
             article.category_ids = inputs[:category_ids]
-          end
-          if inputs[:url_ids].present?
-            article.url_ids = inputs[:url_ids]
           end
           updated_article = article
         else
