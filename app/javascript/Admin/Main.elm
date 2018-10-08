@@ -1023,7 +1023,15 @@ update msg model =
             setRoute location model
 
         SignOut ->
-            ( model, Http.send SignedOut <| logoutRequest model.nodeEnv model.appUrl )
+            if PendingActions.isEmpty model.pendingActions then
+                ( model, Http.send SignedOut <| logoutRequest model.nodeEnv model.appUrl )
+
+            else
+                ( { model
+                    | showPendingActionsConfirmation = Yes (IgnorePendingActions SignOut)
+                  }
+                , Cmd.none
+                )
 
         SignedOut _ ->
             ( model, Navigation.load (Admin.Request.Helper.baseUrl model.nodeEnv model.appUrl) )
