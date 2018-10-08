@@ -15,6 +15,7 @@ class Article < ApplicationRecord
   has_many :article_categories, dependent: :destroy
   has_many :categories, through: :article_categories
   has_many_attached :attachments
+  has_many :feedbacks, dependent: :destroy
 
   validates :title, uniqueness: { scope: [:organization_id] }, presence: true
 
