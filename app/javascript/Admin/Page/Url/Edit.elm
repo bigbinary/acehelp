@@ -1,4 +1,4 @@
-module Page.Url.Edit exposing (Model, Msg(..), init, initModel, save, update, urlInputs, view)
+module Page.Url.Edit exposing (Model, Msg(..), init, initModel, save, update, view)
 
 import Admin.Data.ReaderCmd exposing (..)
 import Admin.Data.Setting exposing (..)
@@ -140,22 +140,20 @@ view { errors, rule } =
         }
 
 
-urlInputs : Model -> UrlData
-urlInputs { urlId, rule } =
-    let
-        ( urlRule, pattern ) =
-            ruleToString <| Field.value rule
-    in
-    { id = urlId
-    , url_rule = urlRule
-    , url_pattern = pattern
-    }
-
-
 save : Model -> ( Model, List (ReaderCmd Msg) )
 save model =
     let
+        ( urlRule, pattern ) =
+            ruleToString <| Field.value model.rule
+
         cmd =
-            Strict <| Reader.map (Task.attempt UpdateUrlResponse) (updateUrl <| urlInputs model)
+            Strict <|
+                Reader.map (Task.attempt UpdateUrlResponse)
+                    (updateUrl <|
+                        { id = model.urlId
+                        , url_rule = urlRule
+                        , url_pattern = pattern
+                        }
+                    )
     in
     ( model, [ cmd ] )

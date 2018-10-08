@@ -19,6 +19,7 @@ module Admin.Data.Url exposing
     , urlResponseObject
     )
 
+import Admin.Data.Category exposing (Category, categoryObject)
 import Admin.Data.Common exposing (..)
 import GraphQL.Request.Builder as GQLBuilder
 import GraphQL.Request.Builder.Arg as Arg
@@ -46,6 +47,7 @@ type alias UrlData =
     { id : UrlId
     , url_rule : String
     , url_pattern : String
+    , categories : List Category
     }
 
 
@@ -180,6 +182,13 @@ urlObject =
         |> GQLBuilder.with (GQLBuilder.field "id" [] GQLBuilder.string)
         |> GQLBuilder.with (GQLBuilder.field "url_rule" [] GQLBuilder.string)
         |> GQLBuilder.with (GQLBuilder.field "url_pattern" [] GQLBuilder.string)
+        |> GQLBuilder.with
+            (GQLBuilder.field "categories"
+                []
+                (GQLBuilder.list
+                    categoryObject
+                )
+            )
 
 
 nullableUrlObject : GQLBuilder.ValueSpec GQLBuilder.Nullable GQLBuilder.ObjectType (Maybe UrlData) vars
@@ -187,7 +196,13 @@ nullableUrlObject =
     GQLBuilder.nullable urlObject
 
 
-updateUrlMutation : GQLBuilder.Document GQLBuilder.Mutation UrlResponse UrlData
+updateUrlMutation :
+    GQLBuilder.Document GQLBuilder.Mutation
+        UrlResponse
+        { id : UrlId
+        , url_rule : String
+        , url_pattern : String
+        }
 updateUrlMutation =
     let
         idVar =

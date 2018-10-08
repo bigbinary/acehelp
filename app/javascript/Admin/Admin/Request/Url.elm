@@ -35,7 +35,12 @@ deleteUrl urlId =
         )
 
 
-updateUrl : UrlData -> Reader ( NodeEnv, ApiKey, AppUrl ) (Task GQLClient.Error UrlResponse)
+updateUrl :
+    { id : UrlId
+    , url_rule : String
+    , url_pattern : String
+    }
+    -> Reader ( NodeEnv, ApiKey, AppUrl ) (Task GQLClient.Error UrlResponse)
 updateUrl urlData =
     Reader.Reader
         (\( nodeEnv, apiKey, appUrl ) ->
