@@ -1,4 +1,4 @@
 daily_delete_temporary_article:
-  cron: "* * * * *"
+  cron: "0 0 * * *"
   class: "DailyDeleteTemporaryArticleWorker"
   queue: "default"
