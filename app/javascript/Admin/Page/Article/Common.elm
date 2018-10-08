@@ -4,12 +4,9 @@ module Page.Article.Common exposing
     , editorId
     , errorsIn
     , multiSelectCategoryList
-    , multiSelectUrlList
     , onTrixChange
     , proposedEditorHeightPayload
     , savingIndicator
-    , selectItemInList
-    , selectItemsInList
     , statusClass
     , statusToButtonText
     , trixEditorToolbarView
@@ -47,11 +44,6 @@ savingIndicator =
         [ text "Saving.." ]
 
 
-multiSelectUrlList : String -> List (Option UrlData) -> (Option UrlId -> msg) -> Html msg
-multiSelectUrlList title urls onselect =
-    multiSelectMenu title (List.map urlToValue urls) onselect
-
-
 categoryToValue : Option Category -> Option Value
 categoryToValue category =
     case category of
@@ -82,41 +74,6 @@ urlToValue url =
                 { id = item.id
                 , value = item.url_rule
                 }
-
-
-selectItemsInList : List (Option a) -> List (Option { b | id : a }) -> List (Option { b | id : a })
-selectItemsInList selectedItems itemList =
-    List.foldl
-        (\selectedItem acc ->
-            selectItemInList selectedItem acc
-        )
-        itemList
-        selectedItems
-
-
-selectItemInList : Option a -> List (Option { b | id : a }) -> List (Option { b | id : a })
-selectItemInList selectedItem itemList =
-    List.map
-        (\item ->
-            case ( item, selectedItem ) of
-                ( Selected innerItem, Unselected newItemId ) ->
-                    if innerItem.id == newItemId then
-                        Unselected innerItem
-
-                    else
-                        Selected innerItem
-
-                ( Unselected innerItem, Selected newItemId ) ->
-                    if innerItem.id == newItemId then
-                        Selected innerItem
-
-                    else
-                        Unselected innerItem
-
-                _ ->
-                    item
-        )
-        itemList
 
 
 errorsIn : List (Field String v) -> List String

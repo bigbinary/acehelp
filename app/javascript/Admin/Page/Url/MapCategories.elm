@@ -73,7 +73,7 @@ update msg model =
             case receivedCategories of
                 Just categories ->
                     ( { model
-                        | categories = []
+                        | categories = categoriesToOption categories
                       }
                     , []
                     )
@@ -113,6 +113,11 @@ update msg model =
             ( model, [] )
 
 
+categoriesToOption : List Category -> List (Option Category)
+categoriesToOption =
+    List.map Unselected
+
+
 
 -- VIEW
 
@@ -128,7 +133,7 @@ view model =
     div [ class "url-container" ]
         [ errorView model.errors
         , successView model.success
-        , h5 [] [ text <| rule ++ " " ++ pattern ]
+        , h3 [] [ text <| rule ++ " " ++ pattern ]
         , div [ class "form-group" ]
             [ multiSelectMenu "Select Categories:"
                 (List.map

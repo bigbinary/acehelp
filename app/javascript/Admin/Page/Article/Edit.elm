@@ -20,7 +20,7 @@ import Admin.Data.Category exposing (..)
 import Admin.Data.Common exposing (..)
 import Admin.Data.ReaderCmd exposing (..)
 import Admin.Data.Status exposing (..)
-import Admin.Data.Url exposing (UrlData, UrlId)
+import Admin.Data.Url exposing (UrlId, UrlSummaryData)
 import Admin.Ports exposing (..)
 import Admin.Request.Article exposing (..)
 import Admin.Request.Category exposing (..)
@@ -52,7 +52,7 @@ type alias Model =
     , desc : Field String String
     , articleId : ArticleId
     , categories : List (Option Category)
-    , urls : List (Option UrlData)
+    , urls : List (Option UrlSummaryData)
     , errors : List String
     , success : Maybe String
     , updateTaskId : Maybe Int
@@ -91,7 +91,6 @@ initCmds : ArticleId -> List (ReaderCmd Msg)
 initCmds articleId =
     [ Strict <| Reader.map (Task.attempt ArticleLoaded) (requestArticleById articleId)
     , Strict <| Reader.map (Task.attempt CategoriesLoaded) requestCategories
-    , Strict <| Reader.map (Task.attempt UrlsLoaded) requestUrls
     ]
 
 
@@ -121,10 +120,8 @@ type Msg
     | ArticleLoaded (Result GQLClient.Error (Maybe Article))
     | CategoriesLoaded (Result GQLClient.Error (Maybe (List Category)))
     | CategorySelected (Option CategoryId)
-    | UrlsLoaded (Result GQLClient.Error (Maybe (List UrlData)))
     | UpdateStatus ArticleId AvailabilityStatus
     | UpdateStatusResponse (Result GQLClient.Error (Maybe Article))
-    | UrlSelected (Option UrlId)
     | TrixInitialize ()
     | ReceivedTimeoutId Int
     | TimedOut Int
@@ -281,39 +278,6 @@ update msg model =
         CategorySelected categoryId ->
             ( { model
                 | categories = selectItemInList categoryId model.categories
-              }
-            , [ Strict <| Reader.Reader <| always <| setTimeout delayTime ]
-            )
-
-        UrlsLoaded (Ok loadedUrls) ->
-            case loadedUrls of
-                Just urls ->
-                    ( { model
-                        | urls =
-                            case model.originalArticle of
-                                Just article ->
-                                    selectItemsInList (List.map (.id >> Selected) article.urls) model.urls
-
-                                Nothing ->
-                                    List.map Unselected urls
-                        , errors = []
-                      }
-                    , []
-                    )
-
-                Nothing ->
-                    ( { model | errors = [ "There was an error loading Urls" ] }
-                    , [ removeNotificationCmd ]
-                    )
-
-        UrlsLoaded (Err err) ->
-            ( { model | errors = [ "There was an error loading Urls" ] }
-            , [ removeNotificationCmd ]
-            )
-
-        UrlSelected selectedUrlId ->
-            ( { model
-                | urls = selectItemInList selectedUrlId model.urls
               }
             , [ Strict <| Reader.Reader <| always <| setTimeout delayTime ]
             )
@@ -482,7 +446,6 @@ view orgKey model =
                 ]
             , div [ class "col-md-4 article-meta-data-block" ]
                 [ multiSelectCategoryList "Categories:" model.categories CategorySelected
-                , multiSelectUrlList "Urls:" model.urls UrlSelected
                 , div
                     [ class "article-block article-status-block" ]
                     [ div

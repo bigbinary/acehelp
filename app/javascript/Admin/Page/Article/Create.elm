@@ -72,7 +72,6 @@ init =
     ( initModel
     , [ Strict <| Reader.map (Task.attempt ArticleLoaded) requestTemporaryArticle
       , Strict <| Reader.map (Task.attempt CategoriesLoaded) requestCategories
-      , Strict <| Reader.map (Task.attempt UrlsLoaded) requestUrls
       ]
     )
 
@@ -88,9 +87,7 @@ type Msg
     | SaveArticleResponse (Result GQLClient.Error (Maybe Article))
     | CategoriesLoaded (Result GQLClient.Error (Maybe (List Category)))
     | CategorySelected (Option CategoryId)
-    | UrlsLoaded (Result GQLClient.Error (Maybe (List UrlData)))
     | ArticleLoaded (Result GQLClient.Error (Maybe Article))
-    | UrlSelected (Option UrlId)
     | TrixInitialize ()
     | ChangeEditorHeight (Result Dom.Error Dom.Element)
     | ResizeWindow Int Int
@@ -152,22 +149,6 @@ update msg model =
         CategorySelected categoryId ->
             ( { model | categories = selectItemInList categoryId model.categories }, [] )
 
-        UrlsLoaded (Ok loadedUrls) ->
-            case loadedUrls of
-                Just urls ->
-                    ( { model
-                        | urls =
-                            List.map Unselected urls
-                      }
-                    , []
-                    )
-
-                Nothing ->
-                    ( { model | errors = [ "There was an error while loading Urls" ] }, [] )
-
-        UrlsLoaded (Err err) ->
-            ( { model | errors = [] }, [] )
-
         ArticleLoaded (Ok articleResp) ->
             case articleResp of
                 Just article ->
@@ -184,14 +165,6 @@ update msg model =
 
         ArticleLoaded (Err err) ->
             ( { model | errors = [] }, [] )
-
-        UrlSelected selectedUrlId ->
-            ( { model
-                | urls =
-                    selectItemInList selectedUrlId model.urls
-              }
-            , []
-            )
 
         TrixInitialize _ ->
             ( model
@@ -260,7 +233,6 @@ view orgKey model =
                 ]
             , div [ class "col-md-4 article-meta-data-block" ]
                 [ multiSelectCategoryList "Categories:" model.categories CategorySelected
-                , multiSelectUrlList "Urls:" model.urls UrlSelected
                 , button [ id "create-article", type_ "button", class "btn btn-success", onClick SaveArticle ] [ text "Create Article" ]
                 , a
                     [ href <| routeToString <| ArticleList orgKey

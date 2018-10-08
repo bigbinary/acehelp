@@ -51,7 +51,7 @@ init =
 
 type Msg
     = LoadUrl UrlId
-    | UrlLoaded (Result GQLClient.Error (Maybe (List UrlData)))
+    | UrlLoaded (Result GQLClient.Error (Maybe (List UrlSummaryData)))
     | DeleteUrl (Acknowledgement UrlId)
     | DeleteUrlResponse (Result GQLClient.Error UrlId)
     | AcknowledgeDelete (Acknowledgement UrlId)

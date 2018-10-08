@@ -6,6 +6,8 @@ module Admin.Data.Common exposing
     , errorObject
     , errorsField
     , flattenErrors
+    , selectItemInList
+    , selectItemsInList
     , targetSelectedOptions
     )
 
@@ -63,3 +65,38 @@ errorsField =
 flattenErrors : Maybe (List Error) -> List String
 flattenErrors =
     maybeToList >> List.concat >> List.map .message
+
+
+selectItemsInList : List (Option a) -> List (Option { b | id : a }) -> List (Option { b | id : a })
+selectItemsInList selectedItems itemList =
+    List.foldl
+        (\selectedItem acc ->
+            selectItemInList selectedItem acc
+        )
+        itemList
+        selectedItems
+
+
+selectItemInList : Option a -> List (Option { b | id : a }) -> List (Option { b | id : a })
+selectItemInList selectedItem itemList =
+    List.map
+        (\item ->
+            case ( item, selectedItem ) of
+                ( Selected innerItem, Unselected newItemId ) ->
+                    if innerItem.id == newItemId then
+                        Unselected innerItem
+
+                    else
+                        Selected innerItem
+
+                ( Unselected innerItem, Selected newItemId ) ->
+                    if innerItem.id == newItemId then
+                        Selected innerItem
+
+                    else
+                        Unselected innerItem
+
+                _ ->
+                    item
+        )
+        itemList

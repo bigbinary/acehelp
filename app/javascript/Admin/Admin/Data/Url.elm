@@ -5,6 +5,7 @@ module Admin.Data.Url exposing
     , UrlPattern
     , UrlResponse
     , UrlRule(..)
+    , UrlSummaryData
     , UrlsListResponse
     , createUrlMutation
     , dataToPattern
@@ -104,7 +105,7 @@ stringToRule urlRule =
             Nothing
 
 
-dataToPattern : UrlData -> UrlPattern
+dataToPattern : { id : String, url_pattern : String, url_rule : String } -> UrlPattern
 dataToPattern urlData =
     { id = urlData.id
     , rule = Maybe.withDefault (UrlIs urlData.url_pattern) <| stringToRule ( urlData.url_rule, urlData.url_pattern )

@@ -8,7 +8,7 @@ import Reader exposing (Reader)
 import Task exposing (Task)
 
 
-requestUrls : Reader ( NodeEnv, ApiKey, AppUrl ) (Task GQLClient.Error (Maybe (List UrlData)))
+requestUrls : Reader ( NodeEnv, ApiKey, AppUrl ) (Task GQLClient.Error (Maybe (List UrlSummaryData)))
 requestUrls =
     Reader.Reader
         (\( nodeEnv, apiKey, appUrl ) ->
