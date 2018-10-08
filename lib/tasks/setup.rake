@@ -71,51 +71,48 @@ def create_data_for_ace_invoice_organization
   pricing_url = org.urls.create! url_pattern: "pricing", url_rule: :ends_with
 
 
-  category = org.categories.create! name: "Getting Started"
-  a1 = category.articles.create!  title: "How do I put JavaScript code in my website?",
+  getting_started_category = org.categories.create! name: "Getting Started"
+  a1 = getting_started_category.articles.create!  title: "How do I put JavaScript code in my website?",
                                   desc: desc,
                                   organization_id: org.id,
                                   temporary: false
 
-  a2 = category.articles.create!  title: "Will putting JavaScript code in my website will make my site slower?",
+  a2 = getting_started_category.articles.create!  title: "Will putting JavaScript code in my website will make my site slower?",
                                   desc: desc,
                                   organization_id: org.id,
                                   temporary: false
 
 
-  category = org.categories.create! name: "Integrations"
-  a3 = category.articles.create! title: "Do you provide integration with wordpress?",
+  integration_category = org.categories.create! name: "Integrations"
+  a3 = integration_category.articles.create! title: "Do you provide integration with wordpress?",
                                 desc: desc,
                                 organization_id: org.id,
                                 temporary: false
 
-  a4 = category.articles.create!  title: "Do you provide integration for PHP applications?",
+  a4 = integration_category.articles.create!  title: "Do you provide integration for PHP applications?",
                                   desc: desc,
                                   organization_id: org.id,
                                   temporary: false
 
-  category = org.categories.create! name: "Pricing"
-  a5 = category.articles.create!  title: "Do I need to put credit card to try it out?",
+  pricing_category = org.categories.create! name: "Pricing"
+  a5 = pricing_category.articles.create!  title: "Do I need to put credit card to try it out?",
                             desc: desc,
                             organization_id: org.id,
                             temporary: false
 
-  a6 = category.articles.create!  title: "Do you offer custom plan?",
+  a6 = pricing_category.articles.create!  title: "Do you offer custom plan?",
                             desc: desc,
                             organization_id: org.id,
                             temporary: false
 
-  a7 = category.articles.create!  title: "Do you offer discount on yearly plan?",
+  a7 = pricing_category.articles.create!  title: "Do you offer discount on yearly plan?",
                             desc: desc,
                             organization_id: org.id,
                             temporary: false
 
-  ArticleUrl.create! article_id: a1.id, url_id: getting_started_url.id
-  ArticleUrl.create! article_id: a3.id, url_id: getting_started_url.id
-  ArticleUrl.create! article_id: a1.id, url_id: pricing_url.id
-  ArticleUrl.create! article_id: a3.id, url_id: integrations_url.id
-  ArticleUrl.create! article_id: a5.id, url_id: integrations_url.id
-  ArticleUrl.create! article_id: a7.id, url_id: getting_started_url.id
+  UrlCategory.create! category_id: getting_started_category.id, url_id: getting_started_url.id
+  UrlCategory.create! category_id: pricing_category.id, url_id: pricing_url.id
+  UrlCategory.create! category_id: integration_category.id, url_id: integrations_url.id
 
   Ticket.create!  name: "Sam Smith",
                   email: "sam@example.com",
@@ -133,48 +130,43 @@ def create_data_for_eii_organization
   subscription_url = org.urls.create! url_pattern: "/city_subscription/new", url_rule: "ends_with"
   pricing_url = org.urls.create! url_pattern: "/pricing", url_rule: "ends_with"
 
-  category = org.categories.create! name: "Events"
-  a1 = category.articles.create!  title: "Can I post private events?",
+  events_category = org.categories.create! name: "Events"
+  a1 = events_category.articles.create!  title: "Can I post private events?",
                                   desc: desc,
                                   organization_id: org.id,
                                   temporary: false
 
-  a2 = category.articles.create!  title: "Do you email events information to users immediately or next day?",
+  a2 = events_category.articles.create!  title: "Do you email events information to users immediately or next day?",
                                   desc: desc,
                                   organization_id: org.id,
                                   temporary: false
 
 
-  category = org.categories.create! name: "Buying tickets"
-  a3 = category.articles.create! title: "Can I buy tickets using credit card?",
+  subscription_category = org.categories.create! name: "Buying tickets"
+  a3 = subscription_category.articles.create! title: "Can I buy tickets using credit card?",
                                 desc: desc,
                                 organization_id: org.id,
                                 temporary: false
 
-  a4 = category.articles.create!  title: "Can I buy tickets using paytm?",
+  a4 = subscription_category.articles.create!  title: "Can I buy tickets using paytm?",
                                   desc: desc,
                                   organization_id: org.id,
                                   temporary: false
 
-  category = Category.create! name: "Pricing", organization_id: org.id
-  a5 = category.articles.create!  title: "Can you waive service fee for events happening in colleges?",
+  pricing_category = Category.create! name: "Pricing", organization_id: org.id
+  a5 = pricing_category.articles.create!  title: "Can you waive service fee for events happening in colleges?",
                             desc: desc,
                             organization_id: org.id,
                             temporary: false
 
-  a6 = category.articles.create!  title: "Is the service lower if amount in paid in cash?",
+  a6 = pricing_category.articles.create!  title: "Is the service lower if amount in paid in cash?",
                             desc: desc,
                             organization_id: org.id,
                             temporary: false
 
-  ArticleUrl.create! article_id: a1.id, url_id: events_url.id
-  ArticleUrl.create! article_id: a2.id, url_id: events_url.id
-
-  ArticleUrl.create! article_id: a3.id, url_id: subscription_url.id
-  ArticleUrl.create! article_id: a4.id, url_id: subscription_url.id
-
-  ArticleUrl.create! article_id: a5.id, url_id: pricing_url.id
-  ArticleUrl.create! article_id: a6.id, url_id: pricing_url.id
+  UrlCategory.create! category_id: events_category.id, url_id: events_url.id
+  UrlCategory.create! category_id: subscription_category.id, url_id: subscription_url.id
+  UrlCategory.create! category_id: pricing_category.id, url_id: pricing_url.id
 
 
   Ticket.create!  name: "Sam Smith",
@@ -196,51 +188,48 @@ def create_data_for_careforever_organization
   security_url = org.urls.create! url_pattern: "/pages/security", url_rule: :ends_with
 
 
-  category = org.categories.create! name: "About"
-  a1 = category.articles.create!  title: "How do I put JavaScript code in my website?",
+  about_category = org.categories.create! name: "About"
+  a1 = about_category.articles.create!  title: "How do I put JavaScript code in my website?",
                                   desc: desc,
                                   organization_id: org.id,
                                   temporary: false
 
-  a2 = category.articles.create!  title: "Will putting JavaScript code in my website will make my site slower?",
+  a2 = about_category.articles.create!  title: "Will putting JavaScript code in my website will make my site slower?",
                                   desc: desc,
                                   organization_id: org.id,
                                   temporary: false
 
 
-  category = org.categories.create! name: "Careplan"
-  a3 = category.articles.create! title: "Do you provide integration with wordpress?",
+  careplan_category = org.categories.create! name: "Careplan"
+  a3 = careplan_category.articles.create! title: "Do you provide integration with wordpress?",
                                 desc: desc,
                                 organization_id: org.id,
                                 temporary: false
 
-  a4 = category.articles.create!  title: "Do you provide integration for PHP applications?",
+  a4 = careplan_category.articles.create!  title: "Do you provide integration for PHP applications?",
                                   desc: desc,
                                   organization_id: org.id,
                                   temporary: false
 
-  category = org.categories.create! name: "Security"
-  a5 = category.articles.create!  title: "Do I need to put credit card to try it out?",
+  security_category = org.categories.create! name: "Security"
+  a5 = security_category.articles.create!  title: "Do I need to put credit card to try it out?",
                             desc: desc,
                             organization_id: org.id,
                             temporary: false
 
-  a6 = category.articles.create!  title: "Do you offer custom plan?",
+  a6 = security_category.articles.create!  title: "Do you offer custom plan?",
                             desc: desc,
                             organization_id: org.id,
                             temporary: false
 
-  a7 = category.articles.create!  title: "Do you offer discount on yearly plan?",
+  a7 = security_category.articles.create!  title: "Do you offer discount on yearly plan?",
                             desc: desc,
                             organization_id: org.id,
                             temporary: false
 
-  ArticleUrl.create! article_id: a1.id, url_id: about_url.id
-  ArticleUrl.create! article_id: a3.id, url_id: about_url.id
-  ArticleUrl.create! article_id: a1.id, url_id: careplan_url.id
-  ArticleUrl.create! article_id: a3.id, url_id: security_url.id
-  ArticleUrl.create! article_id: a5.id, url_id: security_url.id
-  ArticleUrl.create! article_id: a7.id, url_id: careplan_url.id
+  UrlCategory.create! category_id: about_category.id, url_id: about_url.id
+  UrlCategory.create! category_id: security_category.id, url_id: security_url.id
+  UrlCategory.create! category_id: careplan_category.id, url_id: careplan_url.id
 
   Ticket.create!  name: "Sam Smith",
                   email: "sam@example.com",
@@ -254,7 +243,7 @@ def delete_all_records_from_all_tables
   ActiveRecord::Base.connection.schema_cache.clear!
 
   OrganizationUser.delete_all
-  ArticleUrl.delete_all
+  UrlCategory.delete_all
   ArticleCategory.delete_all
   User.delete_all
   Article.delete_all
