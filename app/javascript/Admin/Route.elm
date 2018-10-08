@@ -41,8 +41,6 @@ type Route
     | Login
     | ForgotPassword
     | CategoriesToUrlMapping ApiKey UrlId
-    | UrlMapping ApiKey
-    | ArticleUrlMapping ApiKey ArticleId
 
 
 routeMatcher : Parser (Route -> a) a
@@ -71,8 +69,6 @@ routeMatcher =
         , UrlParser.map SignUp (s "users" </> s "sign_up")
         , UrlParser.map Login (s "users" </> s "sign_in")
         , UrlParser.map ForgotPassword (s "users" </> s "forgot_password")
-        , UrlParser.map UrlMapping (s "organizations" </> string </> s "urls" </> s "mapping")
-        , UrlParser.map ArticleUrlMapping (s "organizations" </> string </> s "urls" </> s "article" </> string)
         ]
 
 
@@ -155,12 +151,6 @@ updateApiKeyinRoute newApiKey page =
         NotFound ->
             NotFound
 
-        UrlMapping organizationApiKey ->
-            UrlMapping newApiKey
-
-        ArticleUrlMapping organizationApiKey articleId ->
-            ArticleUrlMapping newApiKey articleId
-
 
 routeToString : Route -> String
 routeToString page =
@@ -238,12 +228,6 @@ routeToString page =
 
                 NotFound ->
                     []
-
-                UrlMapping organizationApiKey ->
-                    [ "organizations", organizationApiKey, "urls", "mapping" ]
-
-                ArticleUrlMapping organizationApiKey articleId ->
-                    [ "organizations", organizationApiKey, "urls", "article", articleId ]
     in
     "/" ++ String.join "/" pieces
 
