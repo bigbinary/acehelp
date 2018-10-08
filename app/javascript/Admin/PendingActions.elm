@@ -5,6 +5,7 @@ module PendingActions exposing
     , isEmpty
     , messages
     , remove
+    , without
     )
 
 
@@ -37,7 +38,12 @@ exists id pendingActions =
 
 
 remove : String -> PendingActions -> PendingActions
-remove id pendingActions =
+remove =
+    without
+
+
+without : String -> PendingActions -> PendingActions
+without id pendingActions =
     case pendingActions of
         PendingActions actions ->
             actions

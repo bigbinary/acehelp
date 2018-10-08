@@ -14,6 +14,7 @@ module Page.Article.Common exposing
     , statusClass
     , statusToButtonText
     , trixEditorToolbarView
+    , unsavedArticlePendingActionId
     , urlToValue
     )
 
@@ -342,7 +343,7 @@ pendingActionsOnDescriptionChange pendingActions originalArticle newDescription 
         Just article ->
             let
                 pendingActionId =
-                    "article-" ++ article.id
+                    unsavedArticlePendingActionId originalArticle
 
                 message =
                     "Editor has unsaved contents."
@@ -355,6 +356,16 @@ pendingActionsOnDescriptionChange pendingActions originalArticle newDescription 
 
         Nothing ->
             pendingActions
+
+
+unsavedArticlePendingActionId : Maybe Article -> String
+unsavedArticlePendingActionId originalArticle =
+    case originalArticle of
+        Just article ->
+            "article-" ++ article.id
+
+        Nothing ->
+            "article"
 
 
 isDescriptionChanged : Article -> String -> Bool

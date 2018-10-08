@@ -31,6 +31,7 @@ import Html.Attributes exposing (..)
 import Html.Events exposing (..)
 import Page.Article.Common exposing (..)
 import Page.Errors exposing (..)
+import Page.View as MainView
 import PendingActions exposing (PendingActions)
 import Reader exposing (Reader)
 import Route exposing (..)
@@ -53,6 +54,7 @@ type alias Model =
     , attachmentsPath : String
     , originalArticle : Maybe Article
     , pendingActions : PendingActions
+    , showPendingActionsConfirmation : Acknowledgement Msg
     }
 
 
@@ -69,6 +71,7 @@ initModel =
     , attachmentsPath = ""
     , originalArticle = Nothing
     , pendingActions = PendingActions.empty
+    , showPendingActionsConfirmation = No
     }
 
 
@@ -100,6 +103,8 @@ type Msg
     | ChangeEditorHeight (Result Dom.Error Dom.Element)
     | ResizeWindow Int Int
     | AddAttachments
+    | IgnorePendingActions Msg
+    | HidePendingActionsConfirmationDialog
 
 
 update : Msg -> Model -> ( Model, List (ReaderCmd Msg) )
@@ -124,25 +129,50 @@ update msg model =
             )
 
         SaveArticle ->
-            case model.articleId of
-                "" ->
-                    ( { model
-                        | errors = [ "There was an error while saving the article" ]
-                      }
-                    , []
-                    )
+            let
+                unrelatedPendingActions =
+                    PendingActions.without
+                        (unsavedArticlePendingActionId model.originalArticle)
+                        model.pendingActions
 
-                _ ->
-                    save model
+                isNoPendingActionRemained =
+                    PendingActions.isEmpty unrelatedPendingActions
+            in
+            if isNoPendingActionRemained then
+                case model.articleId of
+                    "" ->
+                        ( { model
+                            | errors = [ "There was an error while saving the article" ]
+                            , pendingActions = PendingActions.empty
+                          }
+                        , []
+                        )
+
+                    _ ->
+                        save model
+
+            else
+                ( { model
+                    | showPendingActionsConfirmation =
+                        Yes (IgnorePendingActions SaveArticle)
+                  }
+                , []
+                )
 
         SaveArticleResponse (Ok articleResp) ->
             case articleResp of
                 Just article ->
-                    ( { model | originalArticle = Just article }, [] )
+                    ( { model
+                        | originalArticle = Just article
+                        , pendingActions = PendingActions.empty
+                      }
+                    , []
+                    )
 
                 Nothing ->
                     ( { model
                         | errors = [ "There was an error while saving the article" ]
+                        , pendingActions = PendingActions.empty
                       }
                     , []
                     )
@@ -151,6 +181,7 @@ update msg model =
             ( { model
                 | errors = [ "There was an error while saving the article" ]
                 , saveStatus = None
+                , pendingActions = PendingActions.empty
               }
             , []
             )
@@ -234,6 +265,25 @@ update msg model =
             , [ Strict <| Reader.Reader <| always <| addAttachments () ]
             )
 
+        IgnorePendingActions nextMsg ->
+            let
+                nextCmd =
+                    Task.succeed ()
+                        |> Task.perform (always nextMsg)
+                        |> always
+                        |> Reader.Reader
+                        |> Strict
+            in
+            ( { model
+                | pendingActions = PendingActions.empty
+                , showPendingActionsConfirmation = No
+              }
+            , [ nextCmd ]
+            )
+
+        HidePendingActionsConfirmationDialog ->
+            ( { model | showPendingActionsConfirmation = No }, [] )
+
 
 
 -- View
@@ -293,6 +343,10 @@ view orgKey model =
 
           else
             text ""
+        , MainView.pendingActionsConfirmationDialog
+            model.showPendingActionsConfirmation
+            model.pendingActions
+            HidePendingActionsConfirmationDialog
         ]
 
 
