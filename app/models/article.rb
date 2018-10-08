@@ -33,6 +33,10 @@ class Article < ApplicationRecord
     url && joins(:urls).where(urls: { url: url })
   end
 
+  scope :article_saved_two_hours_ago, -> do
+    where("updated_at > ?", 2.hours.ago)
+  end
+
   def increment_upvote
     self.update(upvotes_count: self.upvotes_count + 1)
   end

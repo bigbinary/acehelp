@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class DailyDeleteTemporaryArticleWorker
+class TemporaryArticlesDailyCleanupWorker
   include Sidekiq::Worker
 
   def perform
@@ -11,6 +11,6 @@ class DailyDeleteTemporaryArticleWorker
   private
 
     def temporary_articles
-      Article.temporary_articles
+      TemporaryArticleService.new.article_saved_two_hours_ago
     end
 end

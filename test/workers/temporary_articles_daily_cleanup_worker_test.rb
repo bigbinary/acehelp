@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 require "test_helper"
-class DailyDeleteTemporaryArticleWorkerTest < ActiveSupport::TestCase
+class TemporaryArticlesDailyCleanupWorkerTest < ActiveSupport::TestCase
   require "sidekiq/testing"
 
   def setup
@@ -15,7 +15,7 @@ class DailyDeleteTemporaryArticleWorkerTest < ActiveSupport::TestCase
 
   def test_deletes_all_article_with_temporary_true
     assert_equal Article.count, 2
-    DailyDeleteTemporaryArticleWorker.new.perform
+    TemporaryArticlesDailyCleanupWorker.new.perform
     assert_equal Article.count, 0
   end
 end

@@ -1,6 +1,5 @@
 default: &default
   :concurrency: 5
-  logfile: ./log/sidekiq.log
 
 development:
   <<: *default
