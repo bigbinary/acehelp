@@ -11,4 +11,9 @@ Types::CategoryType = GraphQL::ObjectType.define do
     preload_scope ->(args, context) { Article.for_organization(context[:organization]) }
     resolve ->(obj, args, context) { obj.articles }
   end
+
+  field :urls, -> { !types[Types::UrlType] }  do
+    preload :urls
+    resolve -> (obj, args, context) { obj.urls }
+  end
 end

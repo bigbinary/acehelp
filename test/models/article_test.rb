@@ -33,11 +33,10 @@ class ArticleTest < ActiveSupport::TestCase
   end
 
   def test_search_using
-    @article = articles :life
+    @article = articles :ror
     @url = urls :bigbinary
     @organization = organizations :bigbinary
     Article.reindex
-    @article.urls << @url
     @article.update(organization_id: @organization.id)
     Article.reindex
 
@@ -49,9 +48,9 @@ class ArticleTest < ActiveSupport::TestCase
     @article.active!
 
     assert_equal [@article], Article.search_using(@organization, status: "active", url: @url.url_pattern)
-    assert_equal [@article], Article.search_using(@organization, status: "active")
+    assert_equal Article.last, Article.search_using(@organization, status: "active").last
     assert_equal [], Article.search_using(@organization, article_id: "fake_id", status: "active", url: @url.url_pattern)
-    assert_equal [@article], Article.search_using(@organization, search_string: "day")
+    assert_equal [@article], Article.search_using(@organization, search_string: "Ruby")
     assert_equal [], Article.search_using(@organization, search_string: "fake_string")
   end
 end

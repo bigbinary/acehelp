@@ -9,6 +9,9 @@ class Category < ApplicationRecord
   has_many :article_categories, dependent: :destroy
   has_many :articles, through: :article_categories
 
+  has_many :url_categories, dependent: :destroy
+  has_many :urls, through: :url_categories
+
   belongs_to :organization
 
   validates :name, presence: true

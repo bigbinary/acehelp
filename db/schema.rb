@@ -181,8 +181,8 @@ ActiveRecord::Schema.define(version: 2018_10_08_081503) do
   end
 
   create_table "url_categories", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
-    t.integer "category_id", null: false
-    t.integer "url_id", null: false
+    t.uuid "category_id", default: -> { "gen_random_uuid()" }, null: false
+    t.uuid "url_id", default: -> { "gen_random_uuid()" }, null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["category_id"], name: "index_url_categories_on_category_id"
