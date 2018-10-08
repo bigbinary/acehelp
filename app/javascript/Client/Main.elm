@@ -199,9 +199,14 @@ update msg model =
                 ( newModel, cmds ) =
                     SuggestedList.update sectionMsg currentModel
             in
-            ( { model | sectionState = Loaded (SuggestedArticlesSection newModel) }
-            , runReaderCmds SuggestedArticlesMsg cmds
-            )
+            case sectionMsg of
+                SuggestedList.LoadArticle articleId ->
+                    transitionToSection ArticleSection ArticleMsg (Article.init articleId)
+
+                _ ->
+                    ( { model | sectionState = Loaded (SuggestedArticlesSection newModel) }
+                    , runReaderCmds SuggestedArticlesMsg cmds
+                    )
 
         ArticleMsg sectionMsg ->
             let
