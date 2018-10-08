@@ -78,6 +78,12 @@ gem 'browser'
 # for error tracking
 gem 'honeybadger', '~> 4.0'
 
+# For background processing
+gem 'sidekiq'
+
+# For periodic jobs on sidekiq
+gem 'sidekiq-cron'
+
 group :development, :test do
   # Call "byebug" anywhere in the code to stop execution and get a debugger console
   gem "byebug", platforms: [:mri, :mingw, :x64_mingw]

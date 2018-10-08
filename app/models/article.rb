@@ -26,6 +26,8 @@ class Article < ApplicationRecord
 
   scope :search_with_status, ->(status) { status && where(status: status) }
 
+  scope :temporary_articles, -> { where(temporary: true) }
+
   scope :search_with_url, ->(url) do
     url && joins(:urls).where(urls: { url: url })
   end
