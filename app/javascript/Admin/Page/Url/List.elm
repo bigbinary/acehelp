@@ -151,8 +151,8 @@ urlRow orgKey url =
         [ id url.id
         , class "listingRow"
         ]
-        [ div
-            [ class "textColumn" ]
+        [ a
+            [ class "textColumn", href <| routeToString <| CategoriesToUrlMapping orgKey url.id ]
             [ text <| String.join " " <| tupleToList <| ruleToString url.rule ]
         , div [ class "actionButtonColumn" ]
             [ a

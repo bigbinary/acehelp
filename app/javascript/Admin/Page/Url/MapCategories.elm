@@ -125,24 +125,26 @@ view model =
                 |> Maybe.map (\url -> ( url.url_rule, url.url_pattern ))
                 |> Maybe.withDefault ( "", "" )
     in
-    div [ class "url-container row" ]
+    div [ class "url-container" ]
         [ errorView model.errors
         , successView model.success
         , h5 [] [ text <| rule ++ " " ++ pattern ]
-        , multiSelectMenu "Select Categories:"
-            (List.map
-                (\category ->
-                    case category of
-                        Selected { id, name } ->
-                            Selected { id = id, value = name }
+        , div [ class "form-group" ]
+            [ multiSelectMenu "Select Categories:"
+                (List.map
+                    (\category ->
+                        case category of
+                            Selected { id, name } ->
+                                Selected { id = id, value = name }
 
-                        Unselected { id, name } ->
-                            Unselected { id = id, value = name }
+                            Unselected { id, name } ->
+                                Unselected { id = id, value = name }
+                    )
+                    model.categories
                 )
-                model.categories
-            )
-            CategoryModified
-        , button [ onClick SaveUrl, class "btn btn-primary" ] [ text "Save URL" ]
+                CategoryModified
+            , button [ onClick SaveUrl, class "btn btn-primary" ] [ text "Save URL" ]
+            ]
         ]
 
 

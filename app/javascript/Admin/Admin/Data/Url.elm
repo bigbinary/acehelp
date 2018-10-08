@@ -47,7 +47,14 @@ type alias UrlData =
     { id : UrlId
     , url_rule : String
     , url_pattern : String
-    , categories : List Category
+    , categories : Maybe (List Category)
+    }
+
+
+type alias UrlSummaryData =
+    { id : UrlId
+    , url_rule : String
+    , url_pattern : String
     }
 
 
@@ -104,7 +111,7 @@ dataToPattern urlData =
     }
 
 
-requestUrlsQuery : GQLBuilder.Document GQLBuilder.Query (Maybe (List UrlData)) vars
+requestUrlsQuery : GQLBuilder.Document GQLBuilder.Query (Maybe (List UrlSummaryData)) vars
 requestUrlsQuery =
     GQLBuilder.queryDocument <|
         GQLBuilder.extract
@@ -112,7 +119,7 @@ requestUrlsQuery =
                 []
                 (GQLBuilder.nullable
                     (GQLBuilder.list
-                        urlObject
+                        urlSummaryObject
                     )
                 )
             )
@@ -176,6 +183,14 @@ deleteUrlMutation =
                 )
 
 
+urlSummaryObject : GQLBuilder.ValueSpec GQLBuilder.NonNull GQLBuilder.ObjectType UrlSummaryData vars
+urlSummaryObject =
+    GQLBuilder.object UrlSummaryData
+        |> GQLBuilder.with (GQLBuilder.field "id" [] GQLBuilder.string)
+        |> GQLBuilder.with (GQLBuilder.field "url_rule" [] GQLBuilder.string)
+        |> GQLBuilder.with (GQLBuilder.field "url_pattern" [] GQLBuilder.string)
+
+
 urlObject : GQLBuilder.ValueSpec GQLBuilder.NonNull GQLBuilder.ObjectType UrlData vars
 urlObject =
     GQLBuilder.object UrlData
@@ -185,8 +200,10 @@ urlObject =
         |> GQLBuilder.with
             (GQLBuilder.field "categories"
                 []
-                (GQLBuilder.list
-                    categoryObject
+                (GQLBuilder.nullable
+                    (GQLBuilder.list
+                        categoryObject
+                    )
                 )
             )
 
