@@ -133,7 +133,7 @@ view orgKey model =
                         (dialogConfig
                             { onDecline = AcknowledgeDelete No
                             , title = "Remove Team Member"
-                            , body = "Are you sure you want to remove this Team Member?"
+                            , body = text "Are you sure you want to remove this Team Member?"
                             , onAccept = AcknowledgeDelete (Yes emailId)
                             }
                         )

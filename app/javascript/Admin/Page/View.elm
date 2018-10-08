@@ -134,10 +134,16 @@ pendingActionsConfirmationDialog : Acknowledgement msg -> PendingActions -> msg 
 pendingActionsConfirmationDialog acknowledgement pendingActions onDeclineMsg =
     let
         pendingActionMessages =
-            PendingActions.messages pendingActions |> String.join "\n"
+            PendingActions.messages pendingActions
+                |> List.map (\message -> li [] [ strong [] [ text message ] ])
 
         body =
-            "There are some pending actions as follows. Are you sure you want to ignore them?\n" ++ pendingActionMessages
+            div []
+                [ p []
+                    [ text "There are some pending actions as follows. Are you sure you want to ignore them?"
+                    ]
+                , ul [] pendingActionMessages
+                ]
     in
     Dialog.view <|
         case acknowledgement of
