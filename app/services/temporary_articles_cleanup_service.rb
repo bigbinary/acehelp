@@ -9,7 +9,6 @@ class TemporaryArticlesCleanupService
     article_saved_two_hours_ago.destroy_all
   end
 
-
   private
 
     def article_saved_two_hours_ago

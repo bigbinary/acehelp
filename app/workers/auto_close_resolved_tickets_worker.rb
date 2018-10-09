@@ -6,6 +6,5 @@ class AutoCloseResolvedTicketsWorker
   def perform
     service = AutoCloseResolvedTicketService.new
     service.process
-    logger.info("Auto closed resolved tickets.")
   end
 end

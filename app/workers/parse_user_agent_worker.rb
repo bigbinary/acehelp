@@ -6,9 +6,7 @@ class ParseUserAgentWorker
   def perform(ticket, user_agent)
     if user_agent.present?
       parsed_device_info = ParseUserAgentService.new(user_agent).parse
-      update(device_info: parsed_device_info)
-    else
-      update(device_info: nil)
+      ticket.update_attributes!(device_info: parsed_device_info)
     end
   end
 end

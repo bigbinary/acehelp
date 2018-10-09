@@ -5,6 +5,5 @@ class TemporaryArticlesDailyCleanupWorker
 
   def perform
     TemporaryArticlesCleanupService.new.process
-    logger.info("Temporary articles deleted successfully.")
   end
 end
