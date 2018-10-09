@@ -80,9 +80,8 @@ class Article < ApplicationRecord
     def self.urls_with_is_url_rule(org, incoming_url)
       urls = org.urls.where(url_rule: :is)
       url_ids = []
-      uri = URI.parse(incoming_url)
       urls.each do |url|
-        url_ids << url.id if uri.is_a?(URI::HTTP)
+        url_ids << url.id if url.url_pattern == incoming_url
       end
       url_ids
     end
