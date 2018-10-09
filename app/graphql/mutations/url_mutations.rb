@@ -100,17 +100,21 @@ class Mutations::UrlMutations
     return_field :errors, types[Types::ErrorType]
 
     resolve ->(_obj, inputs, context) {
-      # raise GraphQL::ExecutionError, "Not logged in" unless context[:current_user]
+      raise GraphQL::ExecutionError, "Not logged in" unless context[:current_user]
       url = Url.find_by(id: inputs[:id], organization_id: context[:organization].id)
       if url.nil?
         errors = Utils::ErrorHandler.new.error("Url not found", context)
       else
-        categories = Category.where(id: inputs[:category_ids])
-        if categories.any?
-          url.categories << categories
-          updated_url = url
+        if inputs[:category_ids].empty?
+          url.url_categories.delete_all
         else
-          errors = Utils::ErrorHandler.new.error("Categories not present.", context)
+          categories = Category.where(id: inputs[:category_ids])
+          if categories.any?
+            url.categories << categories
+            updated_url = url
+          else
+            errors = Utils::ErrorHandler.new.error("Categories not present.", context)
+          end
         end
       end
       {
