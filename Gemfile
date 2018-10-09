@@ -53,7 +53,7 @@ gem "jbuilder", "~> 2.5"
 gem "bootsnap", ">= 1.1.0", require: false
 
 # Making it easy to serialize models for client-side use
-gem "active_model_serializers", "~> 0.9.4"
+gem "active_model_serializers", "~> 0.10.7"
 
 # To build graphql server
 gem "graphql"
