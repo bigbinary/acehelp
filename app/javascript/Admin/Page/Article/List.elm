@@ -184,7 +184,7 @@ view orgKey model =
                         (dialogConfig
                             { onDecline = AcknowledgeDelete No
                             , title = "Delete Article"
-                            , body = "Are you sure you want to delete this Article?"
+                            , body = text "Are you sure you want to delete this Article?"
                             , onAccept = AcknowledgeDelete (Yes articleId)
                             }
                         )

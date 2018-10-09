@@ -6,6 +6,8 @@ module Page.Article.Common exposing
     , multiSelectCategoryList
     , multiSelectUrlList
     , onTrixChange
+    , pendingActionsOnDescriptionChange
+    , preventSaveForPendingActions
     , proposedEditorHeightPayload
     , savingIndicator
     , selectItemInList
@@ -13,9 +15,11 @@ module Page.Article.Common exposing
     , statusClass
     , statusToButtonText
     , trixEditorToolbarView
+    , unsavedArticlePendingActionId
     , urlToValue
     )
 
+import Admin.Data.Article exposing (Article)
 import Admin.Data.Category exposing (..)
 import Admin.Data.Common exposing (..)
 import Admin.Data.Status exposing (..)
@@ -29,6 +33,7 @@ import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (on, onClick)
 import Json.Decode as Json
+import PendingActions exposing (PendingActions)
 
 
 type SaveStatus
@@ -164,6 +169,10 @@ onTrixChange handler =
 editorId : String
 editorId =
     "article-editor"
+
+
+
+-- isEditorContentsSaved :
 
 
 proposedEditorHeightPayload : Dom.Element -> { editorId : String, height : Float }
@@ -323,3 +332,64 @@ trixEditorToolbarView addAttachmentsMsg =
                 ]
             ]
         ]
+
+
+pendingActionsOnDescriptionChange :
+    PendingActions
+    -> Maybe Article
+    -> String
+    -> PendingActions
+pendingActionsOnDescriptionChange pendingActions originalArticle newDescription =
+    case originalArticle of
+        Just article ->
+            let
+                pendingActionId =
+                    unsavedArticlePendingActionId originalArticle
+
+                message =
+                    "Editor has unsaved contents."
+            in
+            if isDescriptionChanged article newDescription then
+                PendingActions.add pendingActionId message pendingActions
+
+            else
+                PendingActions.remove pendingActionId pendingActions
+
+        Nothing ->
+            pendingActions
+
+
+unsavedArticlePendingActionId : Maybe Article -> String
+unsavedArticlePendingActionId originalArticle =
+    case originalArticle of
+        Just article ->
+            "article-" ++ article.id
+
+        Nothing ->
+            "article"
+
+
+isDescriptionChanged : Article -> String -> Bool
+isDescriptionChanged article newDescription =
+    articleDescription article /= newDescription
+
+
+articleDescription : Article -> String
+articleDescription article =
+    if article.desc == "desc" then
+        ""
+
+    else
+        article.desc
+
+
+preventSaveForPendingActions : PendingActions -> Maybe Article -> Bool
+preventSaveForPendingActions pendingActions originalArticle =
+    let
+        pendingId =
+            unsavedArticlePendingActionId originalArticle
+
+        unrelatedPendingActions =
+            PendingActions.without pendingId pendingActions
+    in
+    unrelatedPendingActions |> PendingActions.isEmpty |> not

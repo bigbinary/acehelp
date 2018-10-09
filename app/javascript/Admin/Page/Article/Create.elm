@@ -31,6 +31,8 @@ import Html.Attributes exposing (..)
 import Html.Events exposing (..)
 import Page.Article.Common exposing (..)
 import Page.Errors exposing (..)
+import Page.View as MainView
+import PendingActions exposing (PendingActions)
 import Reader exposing (Reader)
 import Route exposing (..)
 import Task exposing (Task)
@@ -50,6 +52,8 @@ type alias Model =
     , errors : List String
     , success : Maybe String
     , attachmentsPath : String
+    , originalArticle : Maybe Article
+    , showPendingActionsConfirmation : Acknowledgement Msg
     }
 
 
@@ -64,6 +68,8 @@ initModel =
     , errors = []
     , success = Nothing
     , attachmentsPath = ""
+    , originalArticle = Nothing
+    , showPendingActionsConfirmation = No
     }
 
 
@@ -95,38 +101,55 @@ type Msg
     | ChangeEditorHeight (Result Dom.Error Dom.Element)
     | ResizeWindow Int Int
     | AddAttachments
+    | IgnorePendingActions Msg
+    | HidePendingActionsConfirmationDialog
 
 
-update : Msg -> Model -> ( Model, List (ReaderCmd Msg) )
-update msg model =
+update : Msg -> PendingActions -> Model -> ( Model, PendingActions, List (ReaderCmd Msg) )
+update msg pendingActions model =
     case msg of
         TitleInput title ->
-            ( { model | title = Field.update model.title title }, [] )
+            ( { model | title = Field.update model.title title }, pendingActions, [] )
 
         DescInput desc ->
-            ( { model | desc = Field.update model.desc desc }, [] )
+            let
+                newPendingActions =
+                    pendingActionsOnDescriptionChange
+                        pendingActions
+                        model.originalArticle
+                        desc
+            in
+            ( { model | desc = Field.update model.desc desc }, newPendingActions, [] )
 
         SaveArticle ->
-            case model.articleId of
-                "" ->
-                    ( { model
-                        | errors = [ "There was an error while saving the article" ]
-                      }
-                    , []
-                    )
+            if preventSaveForPendingActions pendingActions model.originalArticle then
+                ( { model | showPendingActionsConfirmation = Yes (IgnorePendingActions SaveArticle) }
+                , pendingActions
+                , []
+                )
 
-                _ ->
-                    save model
+            else
+                case model.articleId of
+                    "" ->
+                        ( { model
+                            | errors = [ "There was an error while saving the article" ]
+                            , showPendingActionsConfirmation = No
+                          }
+                        , PendingActions.empty
+                        , []
+                        )
+
+                    _ ->
+                        save pendingActions model
 
         SaveArticleResponse (Ok articleResp) ->
             case articleResp of
                 Just article ->
-                    ( model, [] )
+                    ( { model | originalArticle = Just article }, PendingActions.empty, [] )
 
                 Nothing ->
-                    ( { model
-                        | errors = [ "There was an error while saving the article" ]
-                      }
+                    ( { model | errors = [ "There was an error while saving the article" ] }
+                    , PendingActions.empty
                     , []
                     )
 
@@ -135,38 +158,37 @@ update msg model =
                 | errors = [ "There was an error while saving the article" ]
                 , saveStatus = None
               }
+            , PendingActions.empty
             , []
             )
 
         CategoriesLoaded (Ok receivedCategories) ->
             case receivedCategories of
                 Just categories ->
-                    ( { model | categories = List.map Unselected categories, saveStatus = None }, [] )
-
-                Nothing ->
-                    ( model, [] )
-
-        CategoriesLoaded (Err err) ->
-            ( { model | errors = [ "There was an error while loading Categories" ] }, [] )
-
-        CategorySelected categoryId ->
-            ( { model | categories = selectItemInList categoryId model.categories }, [] )
-
-        UrlsLoaded (Ok loadedUrls) ->
-            case loadedUrls of
-                Just urls ->
-                    ( { model
-                        | urls =
-                            List.map Unselected urls
-                      }
+                    ( { model | categories = List.map Unselected categories, saveStatus = None }
+                    , pendingActions
                     , []
                     )
 
                 Nothing ->
-                    ( { model | errors = [ "There was an error while loading Urls" ] }, [] )
+                    ( model, pendingActions, [] )
+
+        CategoriesLoaded (Err err) ->
+            ( { model | errors = [ "There was an error while loading Categories" ] }, pendingActions, [] )
+
+        CategorySelected categoryId ->
+            ( { model | categories = selectItemInList categoryId model.categories }, pendingActions, [] )
+
+        UrlsLoaded (Ok loadedUrls) ->
+            case loadedUrls of
+                Just urls ->
+                    ( { model | urls = List.map Unselected urls }, pendingActions, [] )
+
+                Nothing ->
+                    ( { model | errors = [ "There was an error while loading Urls" ] }, pendingActions, [] )
 
         UrlsLoaded (Err err) ->
-            ( { model | errors = [] }, [] )
+            ( { model | errors = [] }, pendingActions, [] )
 
         ArticleLoaded (Ok articleResp) ->
             case articleResp of
@@ -175,54 +197,69 @@ update msg model =
                         | articleId = article.id
                         , errors = []
                         , attachmentsPath = article.attachmentsPath
+                        , originalArticle = Just article
                       }
+                    , pendingActions
                     , []
                     )
 
                 Nothing ->
-                    ( model, [] )
+                    ( model, pendingActions, [] )
 
         ArticleLoaded (Err err) ->
-            ( { model | errors = [] }, [] )
+            ( { model | errors = [] }, pendingActions, [] )
 
         UrlSelected selectedUrlId ->
-            ( { model
-                | urls =
-                    selectItemInList selectedUrlId model.urls
-              }
-            , []
-            )
+            ( { model | urls = selectItemInList selectedUrlId model.urls }, pendingActions, [] )
 
         TrixInitialize _ ->
             ( model
+            , pendingActions
             , [ Strict <| Reader.Reader <| always <| Task.attempt ChangeEditorHeight <| Dom.getElement editorId ]
             )
 
         ChangeEditorHeight (Ok info) ->
             ( model
+            , pendingActions
             , [ Strict <| Reader.Reader <| always <| setEditorHeight <| proposedEditorHeightPayload info ]
             )
 
         ChangeEditorHeight (Err _) ->
-            ( model, [] )
+            ( model, pendingActions, [] )
 
         ResizeWindow _ _ ->
             ( model
+            , pendingActions
             , [ Strict <| Reader.Reader <| always <| Task.attempt ChangeEditorHeight <| Dom.getElement editorId ]
             )
 
         AddAttachments ->
             ( model
+            , pendingActions
             , [ Strict <| Reader.Reader <| always <| addAttachments () ]
             )
+
+        IgnorePendingActions nextMsg ->
+            let
+                nextCmd =
+                    Task.succeed ()
+                        |> Task.perform (always nextMsg)
+                        |> always
+                        |> Reader.Reader
+                        |> Strict
+            in
+            ( { model | showPendingActionsConfirmation = No }, PendingActions.empty, [ nextCmd ] )
+
+        HidePendingActionsConfirmationDialog ->
+            ( { model | showPendingActionsConfirmation = No }, pendingActions, [] )
 
 
 
 -- View
 
 
-view : ApiKey -> Model -> Html Msg
-view orgKey model =
+view : ApiKey -> PendingActions -> Model -> Html Msg
+view orgKey pendingActions model =
     div []
         [ errorAlertView model.errors
         , successView model.success
@@ -275,25 +312,32 @@ view orgKey model =
 
           else
             text ""
+        , MainView.pendingActionsConfirmationDialog
+            model.showPendingActionsConfirmation
+            pendingActions
+            HidePendingActionsConfirmationDialog
         ]
 
 
-save : Model -> ( Model, List (ReaderCmd Msg) )
-save model =
+save : PendingActions -> Model -> ( Model, PendingActions, List (ReaderCmd Msg) )
+save pendingActions model =
     let
+        updatedModel =
+            { model | showPendingActionsConfirmation = No }
+
         fields =
-            [ model.title, model.desc ]
+            [ updatedModel.title, updatedModel.desc ]
 
         cmd =
             Strict <|
                 Reader.map (Task.attempt SaveArticleResponse)
-                    (requestUpdateArticle (articleInputs model))
+                    (requestUpdateArticle (articleInputs updatedModel))
     in
     if Field.isAllValid fields then
-        ( { model | errors = [], saveStatus = Saving }, [ cmd ] )
+        ( { updatedModel | errors = [], saveStatus = Saving }, pendingActions, [ cmd ] )
 
     else
-        ( { model | errors = errorsIn fields }, [] )
+        ( { updatedModel | errors = errorsIn fields }, pendingActions, [] )
 
 
 articleInputs : Model -> UpdateArticleInputs
