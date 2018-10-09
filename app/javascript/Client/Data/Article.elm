@@ -14,7 +14,7 @@ module Data.Article exposing
     , decodeArticles
     , downvoteMutation
     , searchArticlesQuery
-    , suggestedArticledQuery
+    , suggestedArticlesQuery
     , upvoteMutation
     , voteMutation
     )
@@ -111,26 +111,22 @@ articlesQuery =
         GQLBuilder.extract articleSummaryField
 
 
-suggestedArticledQuery :
+suggestedArticlesQuery :
     GQLBuilder.Document GQLBuilder.Query
         (List ArticleSummary)
         { vars
             | url : Maybe String
-            , status : Maybe String
         }
-suggestedArticledQuery =
+suggestedArticlesQuery =
     let
         urlVar =
             Var.optional "url" .url Var.string ""
-
-        statusVar =
-            Var.optional "status" .status Var.string ""
     in
     GQLBuilder.queryDocument <|
         GQLBuilder.extract <|
             GQLBuilder.field "articles"
                 [ ( "url", Arg.variable urlVar )
-                , ( "status", Arg.variable statusVar )
+                , ( "status", Arg.string "active" )
                 ]
                 (GQLBuilder.list
                     (GQLBuilder.object ArticleSummary
