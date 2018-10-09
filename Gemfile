@@ -66,12 +66,6 @@ gem "searchkick"
 # Cross-Origin Resource Sharing (CORS) for Rack compatible web applications
 gem "rack-cors", require: "rack/cors"
 
-# for background job processing
-gem "delayed_job_active_record"
-
-# Delayed Job extension for writing recurring jobs.
-gem "delayed_job_recurring"
-
 # for user_agent/device detection
 gem 'browser'
 

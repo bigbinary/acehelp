@@ -2,3 +2,8 @@ temporary_articles_daily_cleanup:
   cron: "0 0 * * *"
   class: "TemporaryArticlesDailyCleanupWorker"
   queue: "default"
+
+auto_close_resolved_tickets:
+  cron: "0 1 * * *"
+  class: "AutoCloseResolvedTicketsWorker"
+  queue: "default"
