@@ -418,32 +418,26 @@ update msg model =
                         _ ->
                             ArticleCreate.initModel
 
-                updatedCurrentPageModel =
-                    { currentPageModel | pendingActions = model.pendingActions }
+                ( newModel, newPendingActions, cmds ) =
+                    ArticleCreate.update caMsg model.pendingActions currentPageModel
 
-                ( newModel, cmds ) =
-                    ArticleCreate.update caMsg updatedCurrentPageModel
+                mainModel =
+                    { model | pendingActions = newPendingActions }
 
                 ( updatedModel, updatedCmds ) =
-                    case model.currentPage of
+                    case mainModel.currentPage of
                         Loaded (ArticleCreate _) ->
-                            ( { model
-                                | currentPage = Loaded (ArticleCreate newModel)
-                                , pendingActions = newModel.pendingActions
-                              }
+                            ( { mainModel | currentPage = Loaded (ArticleCreate newModel) }
                             , runReaderCmds ArticleCreateMsg cmds
                             )
 
                         TransitioningFrom _ ->
-                            ( { model
-                                | currentPage = Loaded (ArticleCreate newModel)
-                                , pendingActions = newModel.pendingActions
-                              }
+                            ( { mainModel | currentPage = Loaded (ArticleCreate newModel) }
                             , runReaderCmds ArticleCreateMsg cmds
                             )
 
                         _ ->
-                            ( { model | pendingActions = newModel.pendingActions }, Cmd.none )
+                            ( mainModel, Cmd.none )
             in
             case caMsg of
                 ArticleCreate.SaveArticleResponse (Ok articleResp) ->
@@ -476,33 +470,27 @@ update msg model =
                                 _ ->
                                     ArticleEdit.initModel "0"
 
-                updatedCurrentPageModel =
-                    { currentPageModel | pendingActions = model.pendingActions }
+                ( newModel, newPendingActions, cmds ) =
+                    ArticleEdit.update aeMsg model.pendingActions currentPageModel
 
-                ( newModel, cmds ) =
-                    ArticleEdit.update aeMsg updatedCurrentPageModel
+                mainModel =
+                    { model | pendingActions = newPendingActions }
             in
             -- TODO: Make this better. There should be no need to check currentpage type here.
             -- This was done to fix a bug that autonavigated user to an empty article edit page
-            case model.currentPage of
+            case mainModel.currentPage of
                 Loaded (ArticleEdit _) ->
-                    ( { model
-                        | currentPage = Loaded (ArticleEdit newModel)
-                        , pendingActions = newModel.pendingActions
-                      }
+                    ( { mainModel | currentPage = Loaded (ArticleEdit newModel) }
                     , runReaderCmds ArticleEditMsg cmds
                     )
 
                 TransitioningFrom _ ->
-                    ( { model
-                        | currentPage = Loaded (ArticleEdit newModel)
-                        , pendingActions = newModel.pendingActions
-                      }
+                    ( { mainModel | currentPage = Loaded (ArticleEdit newModel) }
                     , runReaderCmds ArticleEditMsg cmds
                     )
 
                 _ ->
-                    ( { model | pendingActions = newModel.pendingActions }, Cmd.none )
+                    ( model, Cmd.none )
 
         UrlCreateMsg cuMsg ->
             let
@@ -1117,11 +1105,11 @@ view model =
 
                 ArticleCreate articleCreateModel ->
                     Html.map ArticleCreateMsg
-                        (ArticleCreate.view model.organizationKey articleCreateModel)
+                        (ArticleCreate.view model.organizationKey model.pendingActions articleCreateModel)
 
                 ArticleEdit articleEditModel ->
                     Html.map ArticleEditMsg
-                        (ArticleEdit.view model.organizationKey articleEditModel)
+                        (ArticleEdit.view model.organizationKey model.pendingActions articleEditModel)
 
                 UrlCreate urlCreateModel ->
                     Html.map UrlCreateMsg
