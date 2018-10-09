@@ -5,7 +5,7 @@ import Data.Common exposing (..)
 import GraphQL.Client.Http as GQLClient
 import Html exposing (..)
 import Html.Attributes as Attributes exposing (class, placeholder, style, type_)
-import Html.Events exposing (onClick, onInput)
+import Html.Events exposing (onClick, onInput, onSubmit)
 import Http
 import Reader exposing (Reader, run)
 import Request.Article exposing (requestSearchArticles)
@@ -44,7 +44,7 @@ type Msg
 
 view : Model -> String -> Html Msg
 view model color =
-    div [ class "ah-search-bar", style "background-color" color ]
+    Html.form [ class "ah-search-bar", style "background-color" color, onSubmit OnSearch ]
         [ input
             [ type_ "text"
             , onInput OnSearchQueryInput

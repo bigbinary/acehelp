@@ -104,12 +104,12 @@ successView success =
             success
 
 
-dialogConfig : { onAccept : msg, onDecline : msg, title : String, body : String } -> Dialog.Config msg
+dialogConfig : { onAccept : msg, onDecline : msg, title : String, body : Html msg } -> Dialog.Config msg
 dialogConfig model =
     { closeMessage = Just model.onDecline
     , containerClass = Nothing
     , header = Just (div [ class "modal-title" ] [ h5 [] [ text model.title ] ])
-    , body = Just (text model.body)
+    , body = Just model.body
     , footer =
         Just
             (button

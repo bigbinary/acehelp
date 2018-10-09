@@ -7,11 +7,12 @@ const ALLOWED_ATTACHMENT_MIME_TYPES = ["image/jpeg", "image/png", "image/gif"];
 Object.freeze(ALLOWED_ATTACHMENT_MIME_TYPES);
 
 export default class AttachmentUploader {
-    constructor(apiKey, attachment, uploadPath) {
+    constructor(apiKey, attachment, uploadPath, finishCallback) {
         this.apiKey = apiKey;
         this.attachment = attachment;
         this.uploadPath = uploadPath;
         this.validationError = null;
+        this.finishCallback = finishCallback;
 
         this.request = this.initializeRequest();
     }
@@ -20,7 +21,7 @@ export default class AttachmentUploader {
         this.validateAttachment();
 
         if (this.validationError) {
-            this.attachment.remove();
+            this.removeAttachment();
 
             alert(this.validationError);
 
@@ -112,11 +113,15 @@ export default class AttachmentUploader {
         const { responseText } = this.request;
         const { attachment_url, attachment_id } = JSON.parse(responseText);
 
-        return this.attachment.setAttributes({
+        const result = this.attachment.setAttributes({
             url: attachment_url,
             href: attachment_url,
             id: attachment_id
         });
+
+        this.executeFinishCallback();
+
+        return result;
     }
 
     uploadErrorHandler() {
@@ -131,6 +136,20 @@ export default class AttachmentUploader {
             `Sorry, an error occurred while uploading the file. ${errorMessage} [Status: ${status}]`
         );
 
-        return this.attachment.remove();
+        return this.removeAttachment();
+    }
+
+    removeAttachment() {
+        const result = this.attachment.remove();
+
+        this.executeFinishCallback();
+
+        return result;
+    }
+
+    executeFinishCallback() {
+        if (this.finishCallback && typeof this.finishCallback === "function") {
+            this.finishCallback(this.attachment);
+        }
     }
 }

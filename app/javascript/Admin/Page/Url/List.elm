@@ -136,7 +136,7 @@ view orgKey model =
                         (dialogConfig
                             { onDecline = AcknowledgeDelete No
                             , title = "Delete Url Pattern"
-                            , body = "Are you sure you want to delete this Url Pattern?"
+                            , body = text "Are you sure you want to delete this Url Pattern?"
                             , onAccept = AcknowledgeDelete (Yes urlId)
                             }
                         )

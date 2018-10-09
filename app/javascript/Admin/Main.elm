@@ -18,6 +18,7 @@ module Main exposing
 import Admin.Data.Common exposing (..)
 import Admin.Data.Organization exposing (Organization)
 import Admin.Data.ReaderCmd exposing (..)
+import Admin.Ports exposing (..)
 import Admin.Request.Helper exposing (ApiKey, NodeEnv, logoutRequest)
 import Admin.Request.Organization exposing (requestAllOrganizations)
 import Admin.Views.Common exposing (..)
@@ -52,6 +53,7 @@ import Page.Url.List as UrlList
 import Page.Url.MapCategories as UrlShow
 import Page.UserNotification as UserNotification
 import Page.View as MainView
+import PendingActions exposing (PendingActions)
 import Reader exposing (..)
 import Route
 import Task exposing (Task)
@@ -117,6 +119,8 @@ type alias Model =
     , navKey : Navigation.Key
     , organizationList : List Organization
     , showHamMenu : Bool
+    , pendingActions : PendingActions
+    , showPendingActionsConfirmation : Acknowledgement Msg
     }
 
 
@@ -139,6 +143,8 @@ init flags location navKey =
             , navKey = navKey
             , organizationList = []
             , showHamMenu = False
+            , pendingActions = PendingActions.empty
+            , showPendingActionsConfirmation = No
             }
 
         cmd =
@@ -182,6 +188,10 @@ type Msg
     | UpdateOrganizationData Organization
     | HamMenuClick
     | CloseHamMenu
+    | AddPendingAction { id : String, message : String }
+    | RemovePendingAction String
+    | IgnorePendingActions Msg
+    | HidePendingActionsConfirmationDialog
 
 
 
@@ -351,23 +361,31 @@ update msg model =
     in
     case msg of
         LinkClicked urlRequest ->
-            case urlRequest of
-                Browser.Internal url ->
-                    case Route.fromLocation url |> Route.isOrgSame model.organizationKey of
-                        True ->
-                            ( { model | showHamMenu = False }
-                            , Navigation.pushUrl model.navKey (Url.toString url)
-                            )
+            if PendingActions.isEmpty model.pendingActions then
+                case urlRequest of
+                    Browser.Internal url ->
+                        case Route.fromLocation url |> Route.isOrgSame model.organizationKey of
+                            True ->
+                                ( { model | showHamMenu = False }
+                                , Navigation.pushUrl model.navKey (Url.toString url)
+                                )
 
-                        False ->
-                            ( { model | showHamMenu = False }
-                            , Navigation.load (Url.toString url)
-                            )
+                            False ->
+                                ( { model | showHamMenu = False }
+                                , Navigation.load (Url.toString url)
+                                )
 
-                Browser.External href ->
-                    ( model
-                    , Navigation.load href
-                    )
+                    Browser.External href ->
+                        ( model, Navigation.load href )
+
+            else
+                ( { model
+                    | showPendingActionsConfirmation =
+                        Yes
+                            (IgnorePendingActions (LinkClicked urlRequest))
+                  }
+                , Cmd.none
+                )
 
         UserNotificationMsg unMsg ->
             UserNotification.update unMsg model.notifications
@@ -407,24 +425,26 @@ update msg model =
                         _ ->
                             ArticleCreate.initModel
 
-                ( newModel, cmds ) =
-                    ArticleCreate.update caMsg
-                        currentPageModel
+                ( newModel, newPendingActions, cmds ) =
+                    ArticleCreate.update caMsg model.pendingActions currentPageModel
+
+                mainModel =
+                    { model | pendingActions = newPendingActions }
 
                 ( updatedModel, updatedCmds ) =
-                    case model.currentPage of
+                    case mainModel.currentPage of
                         Loaded (ArticleCreate _) ->
-                            ( { model | currentPage = Loaded (ArticleCreate newModel) }
+                            ( { mainModel | currentPage = Loaded (ArticleCreate newModel) }
                             , runReaderCmds ArticleCreateMsg cmds
                             )
 
                         TransitioningFrom _ ->
-                            ( { model | currentPage = Loaded (ArticleCreate newModel) }
+                            ( { mainModel | currentPage = Loaded (ArticleCreate newModel) }
                             , runReaderCmds ArticleCreateMsg cmds
                             )
 
                         _ ->
-                            ( model, Cmd.none )
+                            ( mainModel, Cmd.none )
             in
             case caMsg of
                 ArticleCreate.SaveArticleResponse (Ok articleResp) ->
@@ -457,20 +477,22 @@ update msg model =
                                 _ ->
                                     ArticleEdit.initModel "0"
 
-                ( newModel, cmds ) =
-                    ArticleEdit.update aeMsg
-                        currentPageModel
+                ( newModel, newPendingActions, cmds ) =
+                    ArticleEdit.update aeMsg model.pendingActions currentPageModel
+
+                mainModel =
+                    { model | pendingActions = newPendingActions }
             in
             -- TODO: Make this better. There should be no need to check currentpage type here.
             -- This was done to fix a bug that autonavigated user to an empty article edit page
-            case model.currentPage of
+            case mainModel.currentPage of
                 Loaded (ArticleEdit _) ->
-                    ( { model | currentPage = Loaded (ArticleEdit newModel) }
+                    ( { mainModel | currentPage = Loaded (ArticleEdit newModel) }
                     , runReaderCmds ArticleEditMsg cmds
                     )
 
                 TransitioningFrom _ ->
-                    ( { model | currentPage = Loaded (ArticleEdit newModel) }
+                    ( { mainModel | currentPage = Loaded (ArticleEdit newModel) }
                     , runReaderCmds ArticleEditMsg cmds
                     )
 
@@ -1013,7 +1035,15 @@ update msg model =
             setRoute location model
 
         SignOut ->
-            ( model, Http.send SignedOut <| logoutRequest model.nodeEnv model.appUrl )
+            if PendingActions.isEmpty model.pendingActions then
+                ( model, Http.send SignedOut <| logoutRequest model.nodeEnv model.appUrl )
+
+            else
+                ( { model
+                    | showPendingActionsConfirmation = Yes (IgnorePendingActions SignOut)
+                  }
+                , Cmd.none
+                )
 
         SignedOut _ ->
             ( model, Navigation.load (Admin.Request.Helper.baseUrl model.nodeEnv model.appUrl) )
@@ -1037,6 +1067,27 @@ update msg model =
             }
                 |> navigateTo model.route
 
+        AddPendingAction { id, message } ->
+            ( { model | pendingActions = PendingActions.add id message model.pendingActions }
+            , Cmd.none
+            )
+
+        RemovePendingAction id ->
+            ( { model | pendingActions = PendingActions.remove id model.pendingActions }
+            , Cmd.none
+            )
+
+        IgnorePendingActions nextMsg ->
+            ( { model
+                | pendingActions = PendingActions.empty
+                , showPendingActionsConfirmation = No
+              }
+            , Task.perform (always nextMsg) (Task.succeed ())
+            )
+
+        HidePendingActionsConfirmationDialog ->
+            ( { model | showPendingActionsConfirmation = No }, Cmd.none )
+
 
 
 -- SUBSCRIPTIONS
@@ -1044,15 +1095,23 @@ update msg model =
 
 subscriptions : Model -> Sub Msg
 subscriptions model =
-    case getPage model.currentPage of
-        ArticleCreate articleCreateModel ->
-            Sub.map ArticleCreateMsg <| ArticleCreate.subscriptions articleCreateModel
+    let
+        pageSubscriptions =
+            case getPage model.currentPage of
+                ArticleCreate articleCreateModel ->
+                    Sub.map ArticleCreateMsg <| ArticleCreate.subscriptions articleCreateModel
 
-        ArticleEdit articleEditModel ->
-            Sub.map ArticleEditMsg <| ArticleEdit.subscriptions articleEditModel
+                ArticleEdit articleEditModel ->
+                    Sub.map ArticleEditMsg <| ArticleEdit.subscriptions articleEditModel
 
-        _ ->
-            Sub.none
+                _ ->
+                    Sub.none
+    in
+    Sub.batch
+        [ pageSubscriptions
+        , addPendingAction <| AddPendingAction
+        , removePendingAction <| RemovePendingAction
+        ]
 
 
 
@@ -1070,11 +1129,11 @@ view model =
 
                 ArticleCreate articleCreateModel ->
                     Html.map ArticleCreateMsg
-                        (ArticleCreate.view model.organizationKey articleCreateModel)
+                        (ArticleCreate.view model.organizationKey model.pendingActions articleCreateModel)
 
                 ArticleEdit articleEditModel ->
                     Html.map ArticleEditMsg
-                        (ArticleEdit.view model.organizationKey articleEditModel)
+                        (ArticleEdit.view model.organizationKey model.pendingActions articleEditModel)
 
                 UrlCreate urlCreateModel ->
                     Html.map UrlCreateMsg
@@ -1232,7 +1291,17 @@ view model =
                 _ ->
                     viewWithHamburgerMenu
     in
-    { title = "AceHelp", body = [ div [ id "admin-hook" ] viewBody ] }
+    { title = "AceHelp"
+    , body =
+        [ div [ id "admin-hook" ]
+            [ div [] viewBody
+            , MainView.pendingActionsConfirmationDialog
+                model.showPendingActionsConfirmation
+                model.pendingActions
+                HidePendingActionsConfirmationDialog
+            ]
+        ]
+    }
 
 
 
