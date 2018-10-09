@@ -342,7 +342,6 @@ update msg pendingActions model =
                             , desc = Field.update model.desc article.desc
                             , categories =
                                 selectItemsInList (List.map (.id >> Selected) article.categories) model.categories
-                            , urls = selectItemsInList (List.map (.id >> Selected) article.urls) model.urls
                             , originalArticle = Just article
                             , isEditable = False
                             , errors = []
