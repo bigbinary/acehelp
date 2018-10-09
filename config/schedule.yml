@@ -1,4 +1,4 @@
 temporary_articles_daily_cleanup:
-  cron: "0 9 * * *"
+  cron: "0 0 * * *"
   class: "TemporaryArticlesDailyCleanupWorker"
   queue: "default"
