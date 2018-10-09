@@ -4,6 +4,7 @@
   "dependencies": {
     "@rails/webpacker": "3.5",
     "bootstrap": "4.1.2",
+    "csrf-xhr": "^1.0.0",
     "elm": "0.19",
     "elm-webpack-loader": "5.0.0",
     "trix": "1.0.0"
