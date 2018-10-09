@@ -9,7 +9,7 @@
         "direct": {
             "NoRedInk/elm-json-decode-pipeline": "1.0.0",
             "alex-tan/elm-dialog": "1.0.0",
-            "arturopala/elm-monocle": "2.0.0",
+            "arturopala/elm-monocle": "2.1.0",
             "bigbinary/elm-form-field": "1.1.0",
             "bigbinary/elm-reader": "1.1.0",
             "elm/browser": "1.0.0",
