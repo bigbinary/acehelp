@@ -8,3 +8,25 @@
     width: 300px;
   }
 }
+.url-rule {
+  display: inline-block;
+  padding: 0 5px;
+  border-radius: 20px;
+  color: #fff;
+  margin-right: 10px;
+}
+.url-ends-with {
+  background-color: #cc3300;
+}
+.url-contains {
+  background-color: #99cc00;
+}
+.url-is {
+  background-color: #99ccff;
+  border-radius: 5px;
+}
+
+.url-head {
+  border-bottom: 1px #c9c9c9 solid;
+  padding-bottom: 5px;
+}

@@ -12,6 +12,7 @@ import Helpers exposing (..)
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
+import Page.Url.Common exposing (..)
 import Reader exposing (Reader)
 import Route exposing (..)
 import Task exposing (Task)
@@ -147,13 +148,17 @@ view orgKey model =
 
 urlRow : ApiKey -> UrlPattern -> Html Msg
 urlRow orgKey url =
+    let
+        ( rule, pattern ) =
+            ruleToString url.rule
+    in
     div
         [ id url.id
         , class "listingRow"
         ]
         [ a
             [ class "textColumn", href <| routeToString <| CategoriesToUrlMapping orgKey url.id ]
-            [ text <| String.join " " <| tupleToList <| ruleToString url.rule ]
+            [ text "URL ", span [ class ("url-rule " ++ ruleToClass url.rule) ] [ text rule ], span [ class "url-pattern" ] [ text pattern ] ]
         , div [ class "actionButtonColumn" ]
             [ a
                 [ href <| routeToString <| UrlEdit orgKey url.id

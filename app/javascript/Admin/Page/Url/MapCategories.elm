@@ -16,6 +16,7 @@ import Helpers exposing (..)
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
+import Page.Url.Common exposing (..)
 import Reader exposing (Reader)
 import Request.Helpers exposing (ApiKey, NodeEnv)
 import Route
@@ -166,7 +167,7 @@ view model =
     div [ class "url-container" ]
         [ errorView model.errors
         , successView model.success
-        , h3 [] [ text <| rule ++ " " ++ pattern ]
+        , h3 [ class "url-head" ] [ text "URL ", span [ class ("url-rule " ++ (Maybe.withDefault "" <| Maybe.map ruleToClass (stringToRule ( rule, pattern )))) ] [ text rule ], span [ class "url-pattern" ] [ text pattern ] ]
         , div [ class "form-group" ]
             [ multiSelectMenu "Select Categories:"
                 (List.map

@@ -1,5 +1,6 @@
 module Page.Url.Common exposing
     ( commonView
+    , ruleToClass
     , ruleTypeToString
     , updateRuleType
     , updateRuleValue
@@ -110,3 +111,15 @@ commonView { title, errors, rule, success, onSaveUrl, onRuleChange, onUrlPattern
             , button [ type_ "submit", class "btn btn-primary" ] [ text saveLabel ]
             ]
         ]
+
+
+ruleToClass rule =
+    case rule of
+        UrlIs _ ->
+            "url-is"
+
+        UrlContains _ ->
+            "url-contains"
+
+        UrlEndsWith _ ->
+            "url-ends-with"
