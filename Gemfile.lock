@@ -101,14 +101,14 @@ GEM
       multi_json
     erubi (1.7.1)
     execjs (2.7.0)
-    faraday (0.15.2)
+    faraday (0.15.3)
       multipart-post (>= 1.2, < 3)
     faraday_middleware (0.12.2)
       faraday (>= 0.7.4, < 1.0)
     ffi (1.9.25)
     globalid (0.4.1)
       activesupport (>= 4.2.0)
-    graphlient (0.3.2)
+    graphlient (0.3.3)
       faraday
       faraday_middleware
       graphql-client
@@ -300,7 +300,7 @@ DEPENDENCIES
   delayed_job_active_record
   delayed_job_recurring
   devise (~> 4.4.0)
-  graphlient (~> 0.3.2)
+  graphlient (~> 0.3.3)
   graphql
   graphql-preload
   graphql_playground-rails (~> 1.0)

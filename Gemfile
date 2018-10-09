@@ -115,7 +115,7 @@ group :test do
   # Easy installation and use of chromedriver to run system tests with Chrome
   gem "chromedriver-helper"
   # A friendlier Ruby client for consuming GraphQL-based APIs.
-  gem "graphlient", "~> 0.3.2"
+  gem "graphlient", "~> 0.3.3"
   # SimpleCov is a code coverage analysis tool for Ruby
   gem "simplecov", require: false
 end
