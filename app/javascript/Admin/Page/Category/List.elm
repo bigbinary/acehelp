@@ -11,8 +11,6 @@ module Page.Category.List exposing
     , view
     )
 
--- import Debug exposing (log)
-
 import Admin.Data.Category exposing (..)
 import Admin.Data.Common exposing (..)
 import Admin.Data.ReaderCmd exposing (..)
@@ -22,7 +20,9 @@ import Admin.Request.Helper exposing (ApiKey)
 import Admin.Views.Common exposing (..)
 import Dialog
 import Field exposing (..)
+import Field.ValidationResult exposing (..)
 import GraphQL.Client.Http as GQLClient
+import Helpers exposing (..)
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
@@ -42,7 +42,7 @@ type alias Model =
     , error : Maybe String
     , showDeleteCategoryConfirmation : Acknowledgement CategoryId
     , editCategoryId : Maybe CategoryId
-    , editCategoryName : String
+    , editCategoryName : Field String String
     }
 
 
@@ -52,7 +52,7 @@ initModel =
     , error = Nothing
     , showDeleteCategoryConfirmation = No
     , editCategoryId = Nothing
-    , editCategoryName = ""
+    , editCategoryName = Field (validateEmpty "Name") ""
     }
 
 
@@ -75,6 +75,7 @@ type Msg
     | AcknowledgeDelete (Acknowledgement CategoryId)
     | EditCategory CategoryId CategoryName
     | CategoryNameInput String
+    | SaveCategory
 
 
 update : Msg -> Model -> ( Model, List (ReaderCmd Msg) )
@@ -124,10 +125,14 @@ update msg model =
             updateCategoryStatus model categoryId status
 
         EditCategory categoryId categoryName ->
-            ( { model | editCategoryId = Just categoryId, editCategoryName = categoryName }, [] )
+            ( { model | editCategoryId = Just categoryId, editCategoryName = Field.update model.editCategoryName categoryName }, [] )
 
         CategoryNameInput name ->
-            ( { model | editCategoryName = name }, [] )
+            ( { model | editCategoryName = Field.update model.editCategoryName name }, [] )
+
+        SaveCategory ->
+            Debug.log "Add Save category logic here"
+                ( model, [] )
 
 
 
@@ -192,12 +197,12 @@ categoryRow orgKey category model =
                 [ text category.name ]
 
           else
-            div
-                [ class "textColumn" ]
+            Html.form
+                [ class "textColumn", onSubmit SaveCategory ]
                 [ input
                     [ type_ "text"
                     , onInput CategoryNameInput
-                    , Html.Attributes.value model.editCategoryName
+                    , Html.Attributes.value <| Field.value model.editCategoryName
                     ]
                     []
                 ]
