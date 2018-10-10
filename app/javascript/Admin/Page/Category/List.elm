@@ -11,6 +11,8 @@ module Page.Category.List exposing
     , view
     )
 
+-- import Debug exposing (log)
+
 import Admin.Data.Category exposing (..)
 import Admin.Data.Common exposing (..)
 import Admin.Data.ReaderCmd exposing (..)
@@ -19,6 +21,7 @@ import Admin.Request.Category exposing (..)
 import Admin.Request.Helper exposing (ApiKey)
 import Admin.Views.Common exposing (..)
 import Dialog
+import Field exposing (..)
 import GraphQL.Client.Http as GQLClient
 import Html exposing (..)
 import Html.Attributes exposing (..)
@@ -38,6 +41,8 @@ type alias Model =
     { categories : List Category
     , error : Maybe String
     , showDeleteCategoryConfirmation : Acknowledgement CategoryId
+    , editCategoryId : Maybe CategoryId
+    , editCategoryName : String
     }
 
 
@@ -46,6 +51,8 @@ initModel =
     { categories = []
     , error = Nothing
     , showDeleteCategoryConfirmation = No
+    , editCategoryId = Nothing
+    , editCategoryName = ""
     }
 
 
@@ -66,6 +73,8 @@ type Msg
     | DeleteCategoryResponse (Result GQLClient.Error (Maybe CategoryId))
     | UpdateCategoryStatus CategoryId AvailabilityStatus
     | AcknowledgeDelete (Acknowledgement CategoryId)
+    | EditCategory CategoryId CategoryName
+    | CategoryNameInput String
 
 
 update : Msg -> Model -> ( Model, List (ReaderCmd Msg) )
@@ -114,6 +123,12 @@ update msg model =
         UpdateCategoryStatus categoryId status ->
             updateCategoryStatus model categoryId status
 
+        EditCategory categoryId categoryName ->
+            ( { model | editCategoryId = Just categoryId, editCategoryName = categoryName }, [] )
+
+        CategoryNameInput name ->
+            ( { model | editCategoryName = name }, [] )
+
 
 
 -- VIEW
@@ -145,7 +160,7 @@ view orgKey model =
             [ class "listingSection" ]
             (List.map
                 (\category ->
-                    categoryRow orgKey category
+                    categoryRow orgKey category model
                 )
                 model.categories
             )
@@ -166,14 +181,26 @@ view orgKey model =
         ]
 
 
-categoryRow : ApiKey -> Category -> Html Msg
-categoryRow orgKey category =
+categoryRow : ApiKey -> Category -> Model -> Html Msg
+categoryRow orgKey category model =
     div
         [ class "listingRow" ]
-        [ div [ class "actionButton", style "width" "20px" ] [ FontAwesome.edit ]
-        , div
-            [ class "textColumn" ]
-            [ text category.name ]
+        [ div [ class "actionButton", style "width" "20px", onClick (EditCategory category.id category.name) ] [ FontAwesome.edit ]
+        , if model.editCategoryId /= Just category.id then
+            div
+                [ class "textColumn" ]
+                [ text category.name ]
+
+          else
+            div
+                [ class "textColumn" ]
+                [ input
+                    [ type_ "text"
+                    , onInput CategoryNameInput
+                    , Html.Attributes.value model.editCategoryName
+                    ]
+                    []
+                ]
         , div
             [ class "actionButtonColumn" ]
             [ a
