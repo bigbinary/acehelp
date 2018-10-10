@@ -41,7 +41,7 @@ type alias Model =
     { categories : List Category
     , error : Maybe String
     , showDeleteCategoryConfirmation : Acknowledgement CategoryId
-    , editCategoryId : Maybe CategoryId
+    , editCategoryId : CategoryId
     , editCategoryName : Field String String
     }
 
@@ -51,7 +51,7 @@ initModel =
     { categories = []
     , error = Nothing
     , showDeleteCategoryConfirmation = No
-    , editCategoryId = Nothing
+    , editCategoryId = ""
     , editCategoryName = Field (validateEmpty "Name") ""
     }
 
@@ -76,6 +76,7 @@ type Msg
     | EditCategory CategoryId CategoryName
     | CategoryNameInput String
     | SaveCategory
+    | UpdateCategoryResponse (Result GQLClient.Error CategoryResponse)
 
 
 update : Msg -> Model -> ( Model, List (ReaderCmd Msg) )
@@ -125,14 +126,28 @@ update msg model =
             updateCategoryStatus model categoryId status
 
         EditCategory categoryId categoryName ->
-            ( { model | editCategoryId = Just categoryId, editCategoryName = Field.update model.editCategoryName categoryName }, [] )
+            ( { model | editCategoryId = categoryId, editCategoryName = Field.update model.editCategoryName categoryName }, [] )
 
         CategoryNameInput name ->
             ( { model | editCategoryName = Field.update model.editCategoryName name }, [] )
 
         SaveCategory ->
-            Debug.log "Add Save category logic here"
-                ( model, [] )
+            -- Debug.log "Add Save category logic here"
+            let
+                cmd =
+                    Strict <|
+                        Reader.map (Task.attempt UpdateCategoryResponse)
+                            (requestUpdateCategory <|
+                                categoryUpdateInputs model
+                            )
+            in
+            ( model, [ cmd ] )
+
+        UpdateCategoryResponse (Ok id) ->
+            ( model, [] )
+
+        UpdateCategoryResponse (Err error) ->
+            ( { model | error = Just "There was an error while updating the Category" }, [] )
 
 
 
@@ -191,7 +206,7 @@ categoryRow orgKey category model =
     div
         [ class "listingRow" ]
         [ div [ class "actionButton", style "width" "20px", onClick (EditCategory category.id category.name) ] [ FontAwesome.edit ]
-        , if model.editCategoryId /= Just category.id then
+        , if model.editCategoryId /= category.id then
             div
                 [ class "textColumn" ]
                 [ text category.name ]
@@ -258,3 +273,10 @@ categoryStatusButton category =
         , class "actionButton btn btn-primary"
         ]
         [ text ("Mark " ++ (statusToButtonText <| availablityStatusIso.reverseGet category.status)) ]
+
+
+categoryUpdateInputs : Model -> UpdateCategoryInputs
+categoryUpdateInputs { editCategoryId, editCategoryName } =
+    { id = editCategoryId
+    , name = Field.value editCategoryName
+    }
