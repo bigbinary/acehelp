@@ -21,7 +21,7 @@ gem "puma", "~> 3.11"
 gem "sass-rails", "~> 5.0"
 
 # slim as a templating language
-gem "slim", "3.0.6"
+gem "slim", "4.0.1"
 
 # Use Uglifier as compressor for JavaScript assets
 gem "uglifier", ">= 1.3.0"
