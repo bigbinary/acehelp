@@ -13,10 +13,13 @@ $blueThemeColor: rgb(60, 170, 249);
   }
 
   .js-snippet {
-    width: 100%;
-    min-height: 240px;
-    background-color: #cdcdcd;
-    color: #000;
+    background-color: #000;
+    color: #fff;
+    padding: 15px;
+    border-radius: 5px;
+    white-space: pre-wrap;
+    word-break: break-all;
+    word-wrap: break-word;
   }
 
   .nav-link.active {
