@@ -103,6 +103,8 @@ type Msg
     | AddAttachments
     | IgnorePendingActions Msg
     | HidePendingActionsConfirmationDialog
+    | DiscardArticle
+    | DeleteTemporaryArticleResponse
 
 
 update : Msg -> PendingActions -> Model -> ( Model, PendingActions, List (ReaderCmd Msg) )
@@ -253,6 +255,25 @@ update msg pendingActions model =
         HidePendingActionsConfirmationDialog ->
             ( { model | showPendingActionsConfirmation = No }, pendingActions, [] )
 
+        DiscardArticle ->
+            if PendingActions.isEmpty pendingActions then
+                ( model
+                , pendingActions
+                , [ Strict <|
+                        Reader.map (Task.attempt <| always DeleteTemporaryArticleResponse) <|
+                            requestDeleteArticle model.articleId
+                  ]
+                )
+
+            else
+                ( { model | showPendingActionsConfirmation = Yes (IgnorePendingActions DiscardArticle) }
+                , pendingActions
+                , []
+                )
+
+        DeleteTemporaryArticleResponse ->
+            ( model, pendingActions, [] )
+
 
 
 -- View
@@ -299,10 +320,11 @@ view orgKey pendingActions model =
                 [ multiSelectCategoryList "Categories:" model.categories CategorySelected
                 , multiSelectUrlList "Urls:" model.urls UrlSelected
                 , button [ id "create-article", type_ "button", class "btn btn-success", onClick SaveArticle ] [ text "Create Article" ]
-                , a
-                    [ href <| routeToString <| ArticleList orgKey
-                    , id "cancel-create-article"
+                , button
+                    [ id "cancel-create-article"
+                    , type_ "button"
                     , class "btn btn-primary"
+                    , onClick DiscardArticle
                     ]
                     [ text "Cancel" ]
                 ]
