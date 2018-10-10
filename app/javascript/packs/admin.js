@@ -10,6 +10,7 @@
 import { Elm } from "../Admin/Main";
 import "bootstrap";
 import "trix";
+import "csrf-xhr";
 import "../../assets/stylesheets/admin/index.scss";
 import AttachmentUploader from "./attachment_uploader";
 
