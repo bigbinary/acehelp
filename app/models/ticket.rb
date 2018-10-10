@@ -39,14 +39,8 @@ class Ticket < ApplicationRecord
 
   private
     def parse_user_agent
-      if user_agent.present?
-        parsed_device_info = ParseUserAgentService.new(user_agent).parse
-        update(device_info: parsed_device_info)
-      else
-        update(device_info: nil)
-      end
+      ParseUserAgentWorker.perform_async(self, user_agent)
     end
-    handle_asynchronously :parse_user_agent
 
     def mark_status_updates
       if saved_change_to_status?

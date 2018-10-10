@@ -15,6 +15,7 @@ class Article < ApplicationRecord
   has_many :article_categories, dependent: :destroy
   has_many :categories, through: :article_categories
   has_many_attached :attachments
+  has_many :feedbacks, dependent: :destroy
 
   validates :title, uniqueness: { scope: [:organization_id] }, presence: true
 
@@ -26,8 +27,14 @@ class Article < ApplicationRecord
 
   scope :search_with_status, ->(status) { status && where(status: status) }
 
+  scope :temporary_articles, -> { where(temporary: true) }
+
   scope :search_with_url, ->(url) do
     url && joins(:urls).where(urls: { url: url })
+  end
+
+  scope :article_saved_two_hours_ago, -> do
+    where("updated_at > ?", 2.hours.ago)
   end
 
   def increment_upvote
