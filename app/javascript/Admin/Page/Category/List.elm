@@ -134,14 +134,27 @@ update msg model =
         SaveCategory ->
             -- Debug.log "Add Save category logic here"
             let
-                cmd =
-                    Strict <|
-                        Reader.map (Task.attempt UpdateCategoryResponse)
-                            (requestUpdateCategory <|
-                                categoryUpdateInputs model
+                fields =
+                    [ model.editCategoryName ]
+
+                errors =
+                    validateAll fields
+                        |> filterFailures
+                        |> List.map
+                            (\result ->
+                                case result of
+                                    Failed err ->
+                                        err
+
+                                    Passed _ ->
+                                        "Unknown Error"
                             )
             in
-            ( model, [ cmd ] )
+            if isAllValid fields then
+                updateCategory model
+
+            else
+                ( { model | error = List.head errors }, [] )
 
         UpdateCategoryResponse (Ok id) ->
             ( model, [] )
@@ -217,6 +230,7 @@ categoryRow orgKey category model =
                 [ input
                     [ type_ "text"
                     , onInput CategoryNameInput
+                    , required True
                     , Html.Attributes.value <| Field.value model.editCategoryName
                     ]
                     []
@@ -280,3 +294,16 @@ categoryUpdateInputs { editCategoryId, editCategoryName } =
     { id = editCategoryId
     , name = Field.value editCategoryName
     }
+
+
+updateCategory : Model -> ( Model, List (ReaderCmd Msg) )
+updateCategory model =
+    let
+        cmd =
+            Strict <|
+                Reader.map (Task.attempt UpdateCategoryResponse)
+                    (requestUpdateCategory <|
+                        categoryUpdateInputs model
+                    )
+    in
+    ( model, [ cmd ] )
