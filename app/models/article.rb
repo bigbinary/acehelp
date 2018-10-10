@@ -43,67 +43,8 @@ class Article < ApplicationRecord
     self.update(downvotes_count: self.downvotes_count + 1)
   end
 
-  def self.search_using(org, options = {})
-    articles = Article.persisted_articles.for_organization(org)
-    articles = articles.search_with_status(
-      options[:status]).search_with_id(options[:article_id])
-    articles = articles.search_with_url_pattern(articles, options[:url], org)
-    if options[:search_string].present?
-      articles = articles.search options[:search_string]
-      articles = articles.each_with_object([]) { |article, arr| arr.push(article) }
-    end
-    articles
+  def self.search_using(organization, options = {})
+    search = ArticleSearchService.new(organization, options)
+    search.process
   end
-
-  private
-
-    def self.search_with_url_pattern(articles, incoming_url, org)
-      return articles if incoming_url.nil?
-      url_ids = urls_with_contains_rule(org, incoming_url) +
-        urls_with_ends_with_rule(org, incoming_url) +
-        urls_with_is_url_rule(org, incoming_url)
-      if url_ids.any?
-        articles = articles.joins(categories: :urls).where(urls: { id: url_ids })
-      else
-        articles = []
-      end
-      articles
-    end
-
-    def self.urls_with_contains_rule(org, incoming_url)
-      urls = org.urls.where(url_rule: :contains)
-      url_ids = []
-      urls.each do |url|
-        url_ids << url.id if incoming_url.include? url.url_pattern
-      end
-      url_ids
-    end
-
-    def self.urls_with_ends_with_rule(org, incoming_url)
-      urls = org.urls.where(url_rule: :ends_with)
-      url_ids = []
-      urls.each do |url|
-        url_ids << url.id if incoming_url.match(Regexp.new url.url_pattern)
-      end
-      url_ids
-    end
-
-    def self.urls_with_is_url_rule(org, incoming_url)
-      urls = org.urls.where(url_rule: :is)
-      url_ids = []
-      urls.each do |url|
-        url_ids << url.id if url.url_pattern == incoming_url
-      end
-      url_ids
-    end
-
-  # def self.pattern_matching_with_postgres_query(articles, url, org)
-  #   url_ids = Url.where("? ~* url_pattern", url).pluck(:id)
-  #   if url_ids.any?
-  #     articles = articles.joins(:urls).where(urls: { id: url_ids })
-  #   else
-  #     articles = []
-  #   end
-  #   articles
-  # end
 end

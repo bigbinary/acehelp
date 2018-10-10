@@ -2,10 +2,10 @@
 
 class ApplicationController < ActionController::Base
   include ::Concerns::ErrorHandlers
+  skip_before_action :verify_authenticity_token
 
   before_action :configure_permitted_parameters, if: :devise_controller?
   rescue_from ActiveRecord::RecordNotFound, with: :render_not_found
-  protect_from_forgery with: :exception
 
   private
 

@@ -2,7 +2,6 @@
 
 class GraphqlController < ApplicationController
   include LoadOrganization
-  skip_before_action :verify_authenticity_token
 
 
   def execute

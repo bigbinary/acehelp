@@ -261,7 +261,7 @@ categoryUrlMutation =
     in
     GQLBuilder.mutationDocument <|
         GQLBuilder.extract <|
-            GQLBuilder.field "assignCategoryToUrlPattern"
+            GQLBuilder.field "assignCategoriesToUrlPattern"
                 [ ( "input"
                   , Arg.object
                         [ ( "id", Arg.variable idVar )

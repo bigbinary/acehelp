@@ -12,8 +12,6 @@ class Url < ApplicationRecord
     is: "is"
   }
 
-  # validates_uniqueness_of :url, case_sensitive: false
-  # validates_with HttpUrlValidator
   validates :url_pattern, presence: true
   scope :for_organization, ->(org) { where(organization: org) }
 
