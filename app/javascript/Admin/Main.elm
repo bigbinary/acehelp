@@ -449,6 +449,9 @@ update msg model =
                         Nothing ->
                             ( updatedModel, updatedCmds )
 
+                ArticleCreate.DeleteTemporaryArticleResponse ->
+                    updateNavigation (Route.ArticleList model.organizationKey) ( updatedModel, updatedCmds )
+
                 _ ->
                     ( updatedModel, updatedCmds )
 
