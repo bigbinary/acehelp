@@ -1,0 +1,11 @@
+default: &default
+  :concurrency: 5
+
+development:
+  <<: *default
+
+staging:
+  <<: *default
+
+production:
+  <<: *default

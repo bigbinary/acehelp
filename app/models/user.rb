@@ -52,7 +52,6 @@ class User < ApplicationRecord
 
   def send_welcome_mail(sender_id:, org_id:)
     token = set_reset_password_token
-    InviteUserMailer.welcome_email(self.id, org_id, sender_id, token).deliver_now
+    InviteUserMailer.delay.welcome_email(self.id, org_id, sender_id, token)
   end
-  handle_asynchronously :send_welcome_mail, queue: "devise"
 end

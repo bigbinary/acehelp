@@ -21,7 +21,7 @@ gem "puma", "~> 3.11"
 gem "sass-rails", "~> 5.0"
 
 # slim as a templating language
-gem "slim", "3.0.6"
+gem "slim", "4.0.1"
 
 # Use Uglifier as compressor for JavaScript assets
 gem "uglifier", ">= 1.3.0"
@@ -66,17 +66,17 @@ gem "searchkick"
 # Cross-Origin Resource Sharing (CORS) for Rack compatible web applications
 gem "rack-cors", require: "rack/cors"
 
-# for background job processing
-gem "delayed_job_active_record"
-
-# Delayed Job extension for writing recurring jobs.
-gem "delayed_job_recurring"
-
 # for user_agent/device detection
 gem 'browser'
 
 # for error tracking
 gem 'honeybadger', '~> 4.0'
+
+# For background processing
+gem 'sidekiq'
+
+# For periodic jobs on sidekiq
+gem 'sidekiq-cron'
 
 group :development, :test do
   # Call "byebug" anywhere in the code to stop execution and get a debugger console
