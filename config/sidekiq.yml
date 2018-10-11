@@ -1,5 +1,5 @@
 default: &default
-  :concurrency: 5
+  :concurrency: 1
 
 development:
   <<: *default
