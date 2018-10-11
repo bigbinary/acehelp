@@ -1,7 +1,7 @@
 Sidekiq::Extensions.enable_delay!
 
 Sidekiq.configure_server do |config|
-  config.redis = { url: ENV['REDIS_URL'], size: 3 }
+  config.redis = { url: ENV['REDIS_URL'], size: 9 }
   schedule_file = Rails.application.secrets.sidekiq_schedule_file
 
   if File.exists?(schedule_file)
