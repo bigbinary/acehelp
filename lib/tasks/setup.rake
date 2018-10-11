@@ -32,6 +32,14 @@ task setup_sample_data: [:environment] do
   puts "sample data was added successfully"
 end
 
+desc "Check if perform_on_every_deploy should be executed or not "
+task check_and_act_on_every_deploy: [:environment] do
+  unless Rails.env.production?
+    Rake::Task[:perform_on_every_deploy].invoke
+  end
+end
+
+
 desc "Perform steps required for every deployment"
 task perform_on_every_deploy: [:environment, :not_production, "disable_searchkick_callbacks", "setup_sample_data", "reindex_searchkick"] do
 end
