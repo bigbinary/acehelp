@@ -1229,7 +1229,7 @@ view model =
                     [ viewWithTopMenu
                     , MainView.hamBurgerMenu
                         { organizationList = model.organizationList
-                        , toUpdatedRoute = \org -> Route.updateApiKeyinRoute org.api_key model.route
+                        , toUpdatedRoute = \org -> Route.ArticleList org.api_key
                         , onCloseMenu = CloseHamMenu
                         }
                     ]
