@@ -1,8 +1,7 @@
 # frozen_string_literal: true
 
-class GraphqlExecution::WidgetsController < GraphqlExecution::BaseController
+class GraphqlExecution::DashboardController < GraphqlExecution::BaseController
   include LoadOrganization
-  skip_before_action :verify_authenticity_token
 
   def create
     result = AcehelpSchema.execute(query, variables: variables, context: context, operation_name: operation_name)
@@ -16,9 +15,6 @@ class GraphqlExecution::WidgetsController < GraphqlExecution::BaseController
   private
 
     def context
-      context = {}
-      context[:organization] = @organization if @organization.present?
-      context[:request] = request
-      context
+      super.merge(current_user: current_user)
     end
 end

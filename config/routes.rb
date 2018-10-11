@@ -10,8 +10,8 @@ Rails.application.routes.draw do
   get "/pages/aceinvoice/pricing", to: "home#pricing"
 
   namespace :graphql_execution do
-    resource :dashboard, only: :create
-    resource :widget, only: :create
+    resources :dashboard, only: :create
+    resources :widget, only: :create
   end
 
   scope module: 'admin' do
