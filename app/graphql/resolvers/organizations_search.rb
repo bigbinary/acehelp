@@ -7,7 +7,7 @@ class Resolvers::OrganizationsSearch < GraphQL::Function
   def call(obj, args, context)
     organization = Organization.includes(:setting).find_by(api_key: context[:organization].api_key)
 
-    if organization && context[:request_client_is_widget]
+    if organization && context[:requesting_client_is_widget]
       organization.setting.update_attributes!(widget_installed: true)
     end
 
