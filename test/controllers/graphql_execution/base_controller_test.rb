@@ -3,7 +3,7 @@
 require "test_helper"
 require "graphql/client_host"
 
-class GraphqlControllerTest < ActionDispatch::IntegrationTest
+class GraphqlExecution::BaseControllerTest < ActionDispatch::IntegrationTest
   setup do
     @article = articles :ror
     @organization = organizations :bigbinary
