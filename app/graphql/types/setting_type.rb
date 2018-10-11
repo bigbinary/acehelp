@@ -4,6 +4,7 @@ Types::SettingType = GraphQL::ObjectType.define do
   name "Setting"
   field :id, !types.String
   field :base_url, types.String
+  field :widget_installed, types.Boolean
   field :visibility, -> { !types.Boolean } do
     resolve ->(obj, args, context) { obj.enable? }
   end

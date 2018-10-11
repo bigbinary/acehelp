@@ -18,6 +18,7 @@ import GraphQL.Request.Builder.Variable as Var
 type alias Setting =
     { base_url : Maybe String
     , visibility : Bool
+    , widgetInstalled : Bool
     }
 
 
@@ -37,6 +38,7 @@ settingObject =
     GQLBuilder.object Setting
         |> GQLBuilder.with (GQLBuilder.field "base_url" [] (GQLBuilder.nullable GQLBuilder.string))
         |> GQLBuilder.with (GQLBuilder.field "visibility" [] GQLBuilder.bool)
+        |> GQLBuilder.with (GQLBuilder.field "widget_installed" [] GQLBuilder.bool)
 
 
 settingResponseObject : GQLBuilder.ValueSpec GQLBuilder.NonNull GQLBuilder.ObjectType SettingsResponse vars
