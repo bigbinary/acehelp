@@ -7,6 +7,7 @@ Types::TicketCommentType = GraphQL::ObjectType.define do
   field :commentable_id, !types.String
   field :ticket_id, !types.String
   field :info, !types.String
+  field :created_at, !types.String
 
   field :commentable, -> { !Types::UserType }  do
     resolve -> (obj, args, context) { obj.commentable }

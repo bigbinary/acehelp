@@ -72,6 +72,7 @@ type alias TicketId =
 type alias Comment =
     { ticket_id : String
     , info : String
+    , created_at : String
     }
 
 
@@ -144,6 +145,7 @@ commentObject =
     GQLBuilder.object Comment
         |> GQLBuilder.with (GQLBuilder.field "ticket_id" [] GQLBuilder.string)
         |> GQLBuilder.with (GQLBuilder.field "info" [] GQLBuilder.string)
+        |> GQLBuilder.with (GQLBuilder.field "created_at" [] GQLBuilder.string)
 
 
 agentObject : GQLBuilder.ValueSpec GQLBuilder.NonNull GQLBuilder.ObjectType Agent vars
