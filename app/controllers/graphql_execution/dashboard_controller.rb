@@ -1,8 +1,6 @@
 # frozen_string_literal: true
 
 class GraphqlExecution::DashboardController < GraphqlExecution::BaseController
-  include LoadOrganization
-
   def create
     result = AcehelpSchema.execute(query, variables: variables, context: context, operation_name: operation_name)
     render json: result
