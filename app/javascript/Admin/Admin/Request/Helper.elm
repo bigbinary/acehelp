@@ -104,7 +104,7 @@ constructUrl url params =
 
 graphqlUrl : NodeEnv -> AppUrl -> String
 graphqlUrl env appUrl =
-    "/graphql"
+    "/graphql_execution/dashboard"
 
 
 httpRequest : RequestData -> Decoder a -> Http.Request a

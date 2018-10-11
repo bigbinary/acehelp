@@ -69,10 +69,10 @@ graphqlUrl : String -> String
 graphqlUrl env =
     case env of
         "production" ->
-            "https://staging.acehelp.com/graphql_api/"
+            "https://staging.acehelp.com/graphql_execution/widget/"
 
         _ ->
-            "/graphql_api/"
+            "/graphql_execution/widget/"
 
 
 requestOptions : NodeEnv -> ApiKey -> RequestOptions
