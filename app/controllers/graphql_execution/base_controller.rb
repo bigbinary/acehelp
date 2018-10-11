@@ -1,9 +1,9 @@
 # frozen_string_literal: true
 
-class GraphqlController < ApplicationController
+class GraphqlExecution::BaseController < ApplicationController
   include LoadOrganization
 
-  def execute
+  def create
     result = AcehelpSchema.execute(query, variables: variables, context: context, operation_name: operation_name)
     render json: result
   rescue => e
@@ -13,6 +13,13 @@ class GraphqlController < ApplicationController
   end
 
   private
+
+    def context
+      context = {}
+      context[:organization] = @organization if @organization.present?
+      context[:request] = request
+      context
+    end
 
     def query
       params[:query]
@@ -24,14 +31,6 @@ class GraphqlController < ApplicationController
 
     def operation_name
       params[:operationName]
-    end
-
-    def context
-      context = {}
-      context[:organization] = @organization if @organization.present?
-      context[:current_user] = current_user
-      context[:request] = request
-      context
     end
 
     def ensure_hash(ambiguous_param)

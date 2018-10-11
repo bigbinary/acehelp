@@ -3,12 +3,16 @@
 Rails.application.routes.draw do
   root to: "home#index"
 
-  post "/graphql", to: "graphql#execute"
   devise_for :users
 
   get "/pages/aceinvoice/getting_started", to: "home#getting_started"
   get "/pages/aceinvoice/integrations", to: "home#integrations"
   get "/pages/aceinvoice/pricing", to: "home#pricing"
+
+  namespace :graphql_execution do
+    resources :dashboard, only: :create
+    resources :widget, only: :create
+  end
 
   scope module: 'admin' do
     resources :organizations, only: :new
@@ -24,7 +28,7 @@ Rails.application.routes.draw do
   end
 
   if Rails.env.development?
-    mount GraphqlPlayground::Rails::Engine, at: "/graphql/playground", graphql_path: "/graphql"
+    mount GraphqlPlayground::Rails::Engine, at: "/graphql/playground", graphql_path: "/graphql_execution/widget"
   end
 
   get "*path", to: "home#new", constraints: -> (request) do
