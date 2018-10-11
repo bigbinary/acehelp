@@ -66,11 +66,17 @@ defaultRequestHeaders =
     ]
 
 
+clientName : String
+clientName =
+    "dashboard"
+
+
 requestOptions : NodeEnv -> ApiKey -> AppUrl -> RequestOptions
 requestOptions env apiKey appUrl =
     let
         headers =
             [ Http.header "api-key" apiKey
+            , Http.header "X-Client" clientName
             ]
 
         url =
