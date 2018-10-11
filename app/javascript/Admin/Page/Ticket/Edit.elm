@@ -441,6 +441,12 @@ commentRows comment =
         [ class "comment-row" ]
         [ span [ class "row-id", id comment.ticket_id ] []
         , span [ class "row-name" ] [ text comment.info ]
+        , br [] []
+        , span [ class "row-name" ] [ text "by " ]
+        , span [ class "row-name" ] [ text comment.user_name ]
+        , br [] []
+        , span [ class "row-name" ] [ text "on " ]
+        , span [ class "row-name" ] [ text comment.created_at ]
         ]
 
 

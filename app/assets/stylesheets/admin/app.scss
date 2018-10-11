@@ -77,8 +77,14 @@ $blueThemeColor: rgb(60, 170, 249);
     }
   }
 
+  .ticket-comments {
+    .comment-row {
+      border-bottom: 1px solid #cdcdcd;
+    }
+  }
+
   .close-error-icon::after {
-    content: "\2716";
+    content: '\2716';
     cursor: pointer;
     margin: 0px 10px;
   }
