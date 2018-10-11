@@ -1,5 +1,4 @@
 import { Elm } from "../Client/Main";
-import "csrf-xhr";
 import "../../assets/stylesheets/client/index.scss";
 
 /**
