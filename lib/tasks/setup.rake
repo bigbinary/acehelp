@@ -35,7 +35,7 @@ end
 desc "Check if perform_on_every_deploy should be executed or not "
 task check_and_act_on_every_deploy: [:environment] do
   unless Rails.env.production?
-    system "rake perform_on_every_deploy"
+    Rake::Task[:perform_on_every_deploy].invoke
   end
 end
 
