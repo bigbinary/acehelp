@@ -64,7 +64,7 @@ initModel ticketId =
     , statuses = []
     , comments = []
     , notes = []
-    , comment = Comment ticketId "" ""
+    , comment = Comment ticketId "" "" ""
     , agents = []
     , agent = Nothing
     }
@@ -103,7 +103,7 @@ update msg model =
             ( { model | note = Note model.ticketId note }, [] )
 
         CommentInput comment ->
-            ( { model | comment = Comment model.ticketId comment "" }, [] )
+            ( { model | comment = Comment model.ticketId comment "" "" }, [] )
 
         UpdateTicket ->
             save model
@@ -119,7 +119,7 @@ update msg model =
                         , status = ticket.status
                         , statuses = ticket.statuses
                         , message = ticket.message
-                        , comment = Comment ticket.id "" ""
+                        , comment = Comment ticket.id "" "" ""
                         , note = Note ticket.id ""
                         , comments = ticket.comments
                         , notes = ticket.notes
@@ -148,7 +148,7 @@ update msg model =
                         , status = ticket.status
                         , statuses = ticket.statuses
                         , message = ticket.message
-                        , comment = Comment ticket.id "" ""
+                        , comment = Comment ticket.id "" "" ""
                         , note = Note ticket.id ""
                         , comments = ticket.comments
                         , notes = ticket.notes
