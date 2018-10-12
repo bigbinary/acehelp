@@ -136,6 +136,10 @@ GEM
     json (2.1.0)
     knapsack (1.16.0)
       rake
+    launchy (2.4.3)
+      addressable (~> 2.3)
+    letter_opener (1.6.0)
+      launchy (~> 2.2)
     loofah (2.2.2)
       crass (~> 1.0.2)
       nokogiri (>= 1.5.9)
@@ -314,6 +318,7 @@ DEPENDENCIES
   honeybadger (~> 4.0)
   jbuilder (~> 2.5)
   knapsack
+  letter_opener
   minitest (= 5.10.3)
   minitest-ci
   minitest-reporters
