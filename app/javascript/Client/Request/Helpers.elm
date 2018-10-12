@@ -75,17 +75,11 @@ graphqlUrl env =
             "/graphql_execution/widget/"
 
 
-clientName : String
-clientName =
-    "widget"
-
-
 requestOptions : NodeEnv -> ApiKey -> RequestOptions
 requestOptions nodeEnv apiKey =
     let
         headers =
             [ Http.header "api-key" apiKey
-            , Http.header "X-Client" clientName
             ]
 
         url =
