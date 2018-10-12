@@ -74,10 +74,11 @@ def create_data_for_ace_invoice_organization
   org = Organization.create! name: "AceInvoice", email: "aceinvoice@example.com", api_key: "9099015ee520e11887eb"
   sam = User.find_by(email: "sam@example.com")
   OrganizationUser.create! organization_id: org.id, user_id: sam.id
+  app_url = AppUrlCarrier.app_url
 
-  getting_started_url = org.urls.create! url: "#{Rails.application.secrets.host}/pages/aceinvoice/getting_started"
-  integrations_url = org.urls.create! url: "#{Rails.application.secrets.host}/pages/aceinvoice/integrations"
-  pricing_url = org.urls.create! url: "#{Rails.application.secrets.host}/pages/aceinvoice/pricing"
+  getting_started_url = org.urls.create! url: "#{app_url}/pages/aceinvoice/getting_started"
+  integrations_url = org.urls.create! url: "#{app_url}/pages/aceinvoice/integrations"
+  pricing_url = org.urls.create! url: "#{app_url}/pages/aceinvoice/pricing"
 
 
   category = org.categories.create! name: "Getting Started"
