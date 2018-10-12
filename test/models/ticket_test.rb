@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require "test_helper"
 
 class TicketTest < ActiveSupport::TestCase
@@ -7,6 +9,10 @@ class TicketTest < ActiveSupport::TestCase
 
   test "valid ticket" do
     assert @ticket.valid?
+  end
+
+  test "default priority" do
+    assert_equal @ticket.priority, "medium"
   end
 
   test "ticket is not valid if message is not present" do
@@ -40,5 +46,4 @@ class TicketTest < ActiveSupport::TestCase
     assert_not_nil @ticket.closed_at
     assert_equal Ticket.statuses[:closed], @ticket.status
   end
-
 end

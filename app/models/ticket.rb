@@ -10,6 +10,8 @@ class Ticket < ApplicationRecord
     closed: "closed"
   }
 
+  enum priority: { low: "low", medium: "medium", high: "high", urgent: "urgent" }
+
   validates :email, :message, presence: true
   belongs_to :organization
 

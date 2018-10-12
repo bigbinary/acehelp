@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2018_10_10_125135) do
+ActiveRecord::Schema.define(version: 2018_10_12_183125) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "pgcrypto"
@@ -168,6 +168,7 @@ ActiveRecord::Schema.define(version: 2018_10_10_125135) do
     t.datetime "resolved_at"
     t.datetime "closed_at"
     t.datetime "deleted_at"
+    t.string "priority", default: "medium", null: false
     t.index ["organization_id"], name: "index_tickets_on_organization_id"
   end
 

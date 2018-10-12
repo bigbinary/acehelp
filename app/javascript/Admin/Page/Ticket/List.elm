@@ -76,6 +76,7 @@ view orgKey model =
                     [ th [ scope "col" ] [ text "ID" ]
                     , th [ scope "col" ] [ text "Name" ]
                     , th [ scope "col" ] [ text "Email" ]
+                    , th [ scope "col" ] [ text "Priority" ]
                     , th [ scope "col" ] [ text "Message" ]
                     , th [] []
                     ]
@@ -104,6 +105,7 @@ rows orgKey model ticket =
         [ td [ scope "row", class "row-id" ] [ text ticket.id ]
         , td [ class "row-name" ] [ text ticket.name ]
         , td [ class "row-email" ] [ text ticket.email ]
+        , td [ class "row-email" ] [ text ticket.priority ]
         , td [ class "row-message" ] [ text ticket.message ]
         , td
             []

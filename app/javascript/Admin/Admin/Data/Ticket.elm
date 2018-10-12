@@ -37,6 +37,7 @@ type alias Ticket =
     , notes : List Note
     , comments : List Comment
     , agent : Maybe Agent
+    , priority : String
     }
 
 
@@ -297,3 +298,4 @@ ticketObject =
                 []
                 (GQLBuilder.nullable agentObject)
             )
+        |> GQLBuilder.with (GQLBuilder.field "priority" [] GQLBuilder.string)
