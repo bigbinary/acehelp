@@ -28,6 +28,10 @@ task setup_sample_data: [:environment] do
   delete_all_records_from_all_tables
 
   create_user
+  create_data_for_ace_invoice_organization
+  create_data_for_eii_organization
+  create_data_for_careforever_organization
+  create_agents
 
   puts "sample data was added successfully"
 end
@@ -63,16 +67,13 @@ def create_user(options = {})
   attributes = user_attributes.merge(options)
 
   User.create! attributes
-
-  create_data_for_ace_invoice_organization
-  create_data_for_eii_organization
-  create_data_for_careforever_organization
 end
 
 def create_data_for_ace_invoice_organization
   desc = "Article details is coming soon"
   org = Organization.create! name: "AceInvoice", email: "aceinvoice@example.com", api_key: "9099015ee520e11887eb"
-  OrganizationUser.create! organization_id: org.id, user_id: User.first.id
+  sam = User.find_by(email: "sam@example.com")
+  OrganizationUser.create! organization_id: org.id, user_id: sam.id
 
   getting_started_url = org.urls.create! url: "#{Rails.application.secrets.host}/pages/aceinvoice/getting_started"
   integrations_url = org.urls.create! url: "#{Rails.application.secrets.host}/pages/aceinvoice/integrations"
@@ -135,7 +136,8 @@ end
 def create_data_for_eii_organization
   desc = "Article details is coming soon"
   org = Organization.create! name: "EventsInIndia", email: "eventsinindia@example.com"
-  OrganizationUser.create! organization_id: org.id, user_id: User.first.id
+  sam = User.find_by(email: "sam@example.com")
+  OrganizationUser.create! organization_id: org.id, user_id: sam.id
 
   events_url = org.urls.create! url: "http://eventsinindia.com/events"
   buying_tickets_url = org.urls.create! url: "http://eventsinindia.com/buying_tickets"
@@ -190,14 +192,13 @@ def create_data_for_eii_organization
                   message: "How do I put Help articles on my website",
                   organization_id: org.id,
                   note: ''
-
-
 end
 
 def create_data_for_careforever_organization
   desc = "Article details is coming soon"
   org = Organization.create! name: "CareForever", email: "careforever@example.com", api_key: "8c83e37f9789819be471"
-  OrganizationUser.create! organization_id: org.id, user_id: User.first.id
+  sam = User.find_by(email: "sam@example.com")
+  OrganizationUser.create! organization_id: org.id, user_id: sam.id
 
   about_url = org.urls.create! url: "https://careforever-for-acehelp.herokuapp.com/pages/about"
   careplan_utl = org.urls.create! url: "https://careforever-for-acehelp.herokuapp.com/pages/careplan"
@@ -256,7 +257,24 @@ def create_data_for_careforever_organization
                   message: "How do I put Help articles on my website",
                   organization_id: org.id,
                   note: ''
+end
 
+def create_agents
+  ["Phil Coulson", "Jason Bourne", "Ethan Hunt"].each do |name|
+    first_name, last_name = name.split(" ")
+    email = name.delete(" ").downcase + "@example.com"
+
+    agent = Agent.create!({
+      email: email,
+      first_name: first_name,
+      last_name: last_name,
+      password: 'welcome'
+    })
+
+    Organization.all.each do |org|
+      OrganizationUser.create! organization_id: org.id, user_id: agent.id
+    end
+  end
 end
 
 def delete_all_records_from_all_tables
