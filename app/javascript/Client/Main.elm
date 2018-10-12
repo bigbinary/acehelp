@@ -12,7 +12,7 @@ import Html.Attributes exposing (class, id, style)
 import Html.Events exposing (onClick)
 import Ports exposing (..)
 import Reader exposing (Reader)
-import Request.Helpers exposing (ApiKey, Context(..), NodeEnv)
+import Request.Helpers exposing (ApiKey, AppUrl, Context(..), NodeEnv)
 import Request.Organization exposing (..)
 import Section.Article.Article as Article
 import Section.Article.SuggestedList as SuggestedList
@@ -36,6 +36,7 @@ type alias Flags =
     { node_env : String
     , api_key : String
     , location : String
+    , app_url : AppUrl
     }
 
 
@@ -62,6 +63,7 @@ type SectionState
 type alias Model =
     { nodeEnv : NodeEnv
     , apiKey : ApiKey
+    , appUrl : AppUrl
     , sectionState : SectionState
     , containerAnimation : Animation.State
     , currentAppState : AppState
@@ -94,6 +96,7 @@ init : Flags -> ( Model, Cmd Msg )
 init flags =
     ( { nodeEnv = flags.node_env
       , apiKey = flags.api_key
+      , appUrl = flags.app_url
       , sectionState = Loaded Blank
       , containerAnimation = Animation.style initAnimation
       , currentAppState = Minimized
@@ -105,7 +108,7 @@ init flags =
       , renderHelpButton = False
       }
     , Task.attempt OrganizationLoaded
-        (Reader.run requestOrganizations ( flags.node_env, flags.api_key ))
+        (Reader.run requestOrganizations ( flags.app_url, flags.api_key ))
     )
 
 
@@ -137,7 +140,7 @@ update msg model =
             transitionTo model
 
         runReaderCmds =
-            sectionCmdToCmd model.nodeEnv model.apiKey
+            sectionCmdToCmd model.appUrl model.apiKey
     in
     case msg of
         Animate animationMsg ->
@@ -300,7 +303,7 @@ update msg model =
                 , containerAnimation = animation
                 , sectionState = newSectionState
               }
-            , sectionCmdToCmd model.nodeEnv model.apiKey ArticleMsg cmd
+            , sectionCmdToCmd model.appUrl model.apiKey ArticleMsg cmd
             )
 
         SearchBarMsg searchBarMsg ->
@@ -422,7 +425,7 @@ setAppState appState model =
                         ]
                         model.containerAnimation
                     , TransitioningFrom (getSection model.sectionState)
-                    , sectionCmdToCmd model.nodeEnv model.apiKey SuggestedArticlesMsg cmd
+                    , sectionCmdToCmd model.appUrl model.apiKey SuggestedArticlesMsg cmd
                     )
 
                 Maximized ->
@@ -452,7 +455,7 @@ transitionTo model sec msg ( sectionModel, sectionCmds ) =
 
         _ ->
             ( { model | sectionState = TransitioningFrom (getSection model.sectionState) }
-            , sectionCmdToCmd model.nodeEnv model.apiKey msg sectionCmds
+            , sectionCmdToCmd model.appUrl model.apiKey msg sectionCmds
             )
 
 

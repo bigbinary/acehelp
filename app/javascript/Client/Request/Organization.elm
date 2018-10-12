@@ -8,10 +8,10 @@ import Request.Helpers exposing (..)
 import Task exposing (Task)
 
 
-requestOrganizations : Reader ( NodeEnv, ApiKey ) (Task GQLClient.Error Organization)
+requestOrganizations : Reader ( AppUrl, ApiKey ) (Task GQLClient.Error Organization)
 requestOrganizations =
     Reader.Reader
-        (\( env, apiKey ) ->
-            GQLClient.customSendQuery (requestOptions env apiKey) <|
+        (\( appUrl, apiKey ) ->
+            GQLClient.customSendQuery (requestOptions appUrl apiKey) <|
                 GQLBuilder.request {} organizationQuery
         )

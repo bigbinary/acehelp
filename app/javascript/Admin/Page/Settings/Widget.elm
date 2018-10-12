@@ -228,16 +228,11 @@ widgetSettingsView nodeEnv organizationKey appUrl model =
         ]
 
 
-addBaseUrl nodeEnv appUrl =
-    baseUrl nodeEnv appUrl
-        |> String.slice 0 -1
-
-
 codeSnippet : NodeEnv -> ApiKey -> AppUrl -> Model -> String
 codeSnippet nodeEnv organizationKey appUrl { visibility } =
     "<script>"
         ++ "var req=new XMLHttpRequest,baseUrl='"
-        ++ addBaseUrl nodeEnv appUrl
+        ++ baseUrl nodeEnv appUrl
         ++ "',apiKey='"
         ++ organizationKey
         ++ "',script=document.createElement('script');script.type='text/javascript',script.async=!0,script.onload=function(){var e=window.AceHelp;e&&e._internal.insertWidget({apiKey:apiKey})};var link=document.createElement('link');link.rel='stylesheet',link.type='text/css',link.media='all',req.responseType='json',req.open('GET',baseUrl+'/packs/manifest.json',!0),req.onload=function(){var e=document.getElementsByTagName('script')[0],t=req.response;link.href=baseUrl+t['client.css'],script.src=baseUrl+t['client.js'],e.parentNode.insertBefore(link,e),e.parentNode.insertBefore(script,e)},req.send();"

@@ -18,70 +18,70 @@ import Request.Helpers exposing (..)
 import Task exposing (Task)
 
 
-requestArticleList : Reader ( NodeEnv, ApiKey ) (Task GQLClient.Error (List ArticleSummary))
+requestArticleList : Reader ( AppUrl, ApiKey ) (Task GQLClient.Error (List ArticleSummary))
 requestArticleList =
     Reader.Reader
-        (\( env, apiKey ) ->
-            GQLClient.customSendQuery (requestOptions env apiKey) <|
+        (\( appUrl, apiKey ) ->
+            GQLClient.customSendQuery (requestOptions appUrl apiKey) <|
                 GQLBuilder.request {} articlesQuery
         )
 
 
-requestSuggestedArticles : Context -> Reader ( NodeEnv, ApiKey ) (Task GQLClient.Error (List ArticleSummary))
+requestSuggestedArticles : Context -> Reader ( AppUrl, ApiKey ) (Task GQLClient.Error (List ArticleSummary))
 requestSuggestedArticles context =
     Reader.Reader
-        (\( env, apiKey ) ->
-            GQLClient.customSendQuery (requestOptions env apiKey) <|
+        (\( appUrl, apiKey ) ->
+            GQLClient.customSendQuery (requestOptions appUrl apiKey) <|
                 GQLBuilder.request { url = contextToMaybe context, status = Just "active" } suggestedArticledQuery
         )
 
 
-requestArticle : ArticleId -> Reader ( NodeEnv, ApiKey ) (Task GQLClient.Error Article)
+requestArticle : ArticleId -> Reader ( AppUrl, ApiKey ) (Task GQLClient.Error Article)
 requestArticle articleId =
     Reader.Reader
-        (\( env, apiKey ) ->
-            GQLClient.customSendQuery (requestOptions env apiKey) <|
+        (\( appUrl, apiKey ) ->
+            GQLClient.customSendQuery (requestOptions appUrl apiKey) <|
                 GQLBuilder.request { articleId = articleId } articleQuery
         )
 
 
-requestSearchArticles : String -> Reader ( NodeEnv, ApiKey ) (Task GQLClient.Error (List ArticleSummary))
+requestSearchArticles : String -> Reader ( AppUrl, ApiKey ) (Task GQLClient.Error (List ArticleSummary))
 requestSearchArticles searchString =
     Reader.Reader
-        (\( env, apiKey ) ->
-            GQLClient.customSendQuery (requestOptions env apiKey) <|
+        (\( appUrl, apiKey ) ->
+            GQLClient.customSendQuery (requestOptions appUrl apiKey) <|
                 GQLBuilder.request { searchString = searchString } searchArticlesQuery
         )
 
 
 requestUpvoteMutation :
     ArticleId
-    -> Reader ( NodeEnv, ApiKey ) (Task GQLClient.Error ArticleSummary)
+    -> Reader ( AppUrl, ApiKey ) (Task GQLClient.Error ArticleSummary)
 requestUpvoteMutation articleId =
     Reader.Reader
-        (\( env, apiKey ) ->
-            GQLClient.customSendMutation (requestOptions env apiKey) <|
+        (\( appUrl, apiKey ) ->
+            GQLClient.customSendMutation (requestOptions appUrl apiKey) <|
                 GQLBuilder.request { articleId = articleId } upvoteMutation
         )
 
 
 requestDownvoteMutation :
     ArticleId
-    -> Reader ( NodeEnv, ApiKey ) (Task GQLClient.Error ArticleSummary)
+    -> Reader ( AppUrl, ApiKey ) (Task GQLClient.Error ArticleSummary)
 requestDownvoteMutation articleId =
     Reader.Reader
-        (\( env, apiKey ) ->
-            GQLClient.customSendMutation (requestOptions env apiKey) <|
+        (\( appUrl, apiKey ) ->
+            GQLClient.customSendMutation (requestOptions appUrl apiKey) <|
                 GQLBuilder.request { articleId = articleId } downvoteMutation
         )
 
 
 requestAddFeedbackMutation :
     FeedbackForm
-    -> Reader ( NodeEnv, ApiKey ) (Task GQLClient.Error (Maybe (List GQLError)))
+    -> Reader ( AppUrl, ApiKey ) (Task GQLClient.Error (Maybe (List GQLError)))
 requestAddFeedbackMutation feedbackFrom =
     Reader.Reader
-        (\( env, apiKey ) ->
-            GQLClient.sendMutation (graphqlUrl env) <|
+        (\( appUrl, apiKey ) ->
+            GQLClient.sendMutation (graphqlUrl appUrl) <|
                 GQLBuilder.request feedbackFrom addFeedbackMutation
         )

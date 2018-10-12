@@ -11,10 +11,10 @@ import Task exposing (Task)
 
 requestAddTicketMutation :
     FeedbackForm
-    -> Reader ( NodeEnv, ApiKey ) (Task GQLClient.Error (Maybe (List GQLError)))
+    -> Reader ( AppUrl, ApiKey ) (Task GQLClient.Error (Maybe (List GQLError)))
 requestAddTicketMutation feedbackFrom =
     Reader.Reader
-        (\( env, apiKey ) ->
-            GQLClient.customSendMutation (requestOptions env apiKey) <|
+        (\( appUrl, apiKey ) ->
+            GQLClient.customSendMutation (requestOptions appUrl apiKey) <|
                 GQLBuilder.request feedbackFrom addTicketMutation
         )
