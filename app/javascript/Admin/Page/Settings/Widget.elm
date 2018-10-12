@@ -31,6 +31,7 @@ type alias Model =
     { code : String
     , isKeyValid : Bool
     , visibility : Bool
+    , installed : Bool
     , error : List String
     , isSaving : Bool
     , success : Maybe String
@@ -42,6 +43,7 @@ initModel =
     { code = ""
     , isKeyValid = True
     , visibility = True
+    , installed = False
     , error = []
     , isSaving = False
     , success = Nothing
@@ -84,6 +86,7 @@ update msg model =
                 Just setting ->
                     ( { model
                         | visibility = setting.visibility
+                        , installed = setting.widgetInstalled
                         , isSaving = False
                         , error = []
                         , success = Just "Settings have been updated"
@@ -98,7 +101,14 @@ update msg model =
             ( { model | error = [ "There was an error saving this setting." ], isSaving = False, success = Nothing }, [] )
 
         LoadSetting (Ok setting) ->
-            ( { model | visibility = setting.visibility, success = Nothing, error = [] }, [] )
+            ( { model
+                | visibility = setting.visibility
+                , installed = setting.widgetInstalled
+                , success = Nothing
+                , error = []
+              }
+            , []
+            )
 
         LoadSetting (Err err) ->
             ( { model | error = [ "There was an error loading setting" ], success = Nothing }, [] )
@@ -144,6 +154,19 @@ view nodeEnv organizationKey appUrl model =
             errorView model.error
 
 
+widgetInstallationAcknowedgement : Bool -> Html Msg
+widgetInstallationAcknowedgement widgetInstalled =
+    let
+        message =
+            if widgetInstalled then
+                "The widget is successfully installed."
+
+            else
+                "The widget is not installed yet."
+    in
+    p [] [ strong [] [ text message ] ]
+
+
 widgetSettingsView : NodeEnv -> ApiKey -> AppUrl -> Model -> Html Msg
 widgetSettingsView nodeEnv organizationKey appUrl model =
     div
@@ -155,7 +178,9 @@ widgetSettingsView nodeEnv organizationKey appUrl model =
             [ text "Widget Settings" ]
         , div
             [ class "content-text" ]
-            [ text "Insert the following script before the closing body tag of your site or app to display AceHelp's widget on your website." ]
+            [ widgetInstallationAcknowedgement model.installed
+            , p [] [ text "Insert the following script before the closing body tag of your site or app to display AceHelp's widget on your website." ]
+            ]
         , div []
             [ pre
                 [ class "js-snippet"

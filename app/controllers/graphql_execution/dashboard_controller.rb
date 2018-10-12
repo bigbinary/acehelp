@@ -13,6 +13,9 @@ class GraphqlExecution::DashboardController < GraphqlExecution::BaseController
   private
 
     def context
-      super.merge(current_user: current_user)
+      super.merge(
+        current_user: current_user,
+        request_source: Utils::Constants::REQUEST_SOURCE_DASHBOARD
+      )
     end
 end
