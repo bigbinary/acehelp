@@ -10,9 +10,9 @@ html lang="en"
     table border="0" cellpadding="0" cellspacing="0" style=("background: #fff; width: 500px; margin: 40px auto 0 auto; text-align: left; padding: 0; border-collapse: collapse; mso-table-lspace: 0pt; mso-table-rspace: 0pt;")
       tr style=("margin: 0; padding: 0; background: #7159a5; color: #fff;")
         td style=("background: #fff; padding: 18px 0 0; font-weight: 700;")
-          a href="http://staging.acehelp.com/" style=("color: #222; text-decoration: none; font-size: 26px; line-height: 1; text-shadow: 0 1px 1px #f9f9f9; border-bottom: 1px solid #ebebeb; display: block; padding-bottom: 15px;")  AceHelp
+          a href="#{Rails.application.secrets.host}" style=("color: #222; text-decoration: none; font-size: 26px; line-height: 1; text-shadow: 0 1px 1px #f9f9f9; border-bottom: 1px solid #ebebeb; display: block; padding-bottom: 15px;")  AceHelp
       tr style=("margin: 0; padding: 0;")
         td
           = yield
     .footer style=("font-size: 14px; color: #888; margin: 15px auto; text-align: left; width: 500px;")
-        a href="http://staging.acehelp.com" style=("color: #888; text-decoration: underline;")  Help Center
+        a href="#{Rails.application.secrets.host}" style=("color: #888; text-decoration: underline;")  Help Center
