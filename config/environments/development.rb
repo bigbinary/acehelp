@@ -39,6 +39,9 @@ Rails.application.configure do
 
   config.action_mailer.perform_caching = false
 
+  # set this to true to perform email deliveries
+  config.action_mailer.perform_deliveries = false
+
   # Print deprecation notices to the Rails logger.
   config.active_support.deprecation = :log
 

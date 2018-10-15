@@ -106,6 +106,9 @@ group :development do
 
   #  For mountable GraphQL Playground endpoint
   gem "graphql_playground-rails", "~> 1.0"
+
+  # for previewing emails
+  gem "letter_opener"
 end
 
 group :test do

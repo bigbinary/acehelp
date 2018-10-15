@@ -4,6 +4,7 @@ class Comment < ApplicationRecord
   belongs_to :commentable, polymorphic: true
 
   belongs_to :ticket
+  after_create :send_email_to_customer
 
 
   def assign_agent_to_ticket(agent_id)
@@ -18,4 +19,9 @@ class Comment < ApplicationRecord
       comment
     end
   end
+
+  private
+    def send_email_to_customer
+      CustomerMailer.delay.reply_to_ticket_email(ticket, self)
+    end
 end
