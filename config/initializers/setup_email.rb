@@ -2,7 +2,7 @@
 
 ActionMailer::Base.perform_deliveries = Rails.application.secrets.mailer[:perform_deliveries]
 
-ActionMailer::Base.default_url_options[:host] = Rails.application.secrets.host
+ActionMailer::Base.default_url_options[:host] = AppUrlCarrier.app_url.host
 
 ActionMailer::Base.delivery_method = Rails.application.secrets.mailer[:mailer_delivery_method].to_sym
 

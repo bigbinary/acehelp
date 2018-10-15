@@ -1,11 +1,11 @@
 module Request.Helpers exposing
     ( ApiErrorMessage
     , ApiKey
+    , AppUrl
     , Context(..)
     , NodeEnv
     , QueryParameters
     , Url
-    , apiUrl
     , constructUrl
     , contextToMaybe
     , defaultRequestHeaders
@@ -41,6 +41,10 @@ type alias ApiKey =
     String
 
 
+type alias AppUrl =
+    String
+
+
 type alias ApiErrorMessage =
     { error : String }
 
@@ -55,35 +59,20 @@ contextToMaybe context =
             Nothing
 
 
-apiUrl : String -> String -> String
-apiUrl env str =
-    case env of
-        "production" ->
-            "https://staging.acehelp.com/api/v1/" ++ str
-
-        _ ->
-            "/api/v1/" ++ str
+graphqlUrl : AppUrl -> String
+graphqlUrl appUrl =
+    appUrl ++ "/graphql_execution/widget/"
 
 
-graphqlUrl : String -> String
-graphqlUrl env =
-    case env of
-        "production" ->
-            "https://staging.acehelp.com/graphql_execution/widget/"
-
-        _ ->
-            "/graphql_execution/widget/"
-
-
-requestOptions : NodeEnv -> ApiKey -> RequestOptions
-requestOptions nodeEnv apiKey =
+requestOptions : AppUrl -> ApiKey -> RequestOptions
+requestOptions appUrl apiKey =
     let
         headers =
             [ Http.header "api-key" apiKey
             ]
 
         url =
-            graphqlUrl nodeEnv
+            graphqlUrl appUrl
     in
     { method = "POST"
     , headers = headers

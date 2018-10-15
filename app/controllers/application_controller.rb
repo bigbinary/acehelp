@@ -4,6 +4,8 @@ class ApplicationController < ActionController::Base
   include ::Concerns::ErrorHandlers
 
   before_action :configure_permitted_parameters, if: :devise_controller?
+  before_action :load_app_url
+
   rescue_from ActiveRecord::RecordNotFound, with: :render_not_found
 
   private
@@ -20,5 +22,9 @@ class ApplicationController < ActionController::Base
 
     def after_sign_out_path_for(resource)
       root_path
+    end
+
+    def load_app_url
+      @app_url = AppUrlCarrier.app_url(request)
     end
 end

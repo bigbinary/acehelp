@@ -73,12 +73,13 @@ def create_data_for_ace_invoice_organization
   desc = "Article details is coming soon"
   org = Organization.create! name: "AceInvoice", email: "aceinvoice@example.com", api_key: "9099015ee520e11887eb"
   sam = User.find_by(email: "sam@example.com")
+  app_url = AppUrlCarrier.app_url
+
   OrganizationUser.create! organization_id: org.id, user_id: sam.id
 
-  getting_started_url = org.urls.create! url: "#{Rails.application.secrets.host}/pages/aceinvoice/getting_started"
-  integrations_url = org.urls.create! url: "#{Rails.application.secrets.host}/pages/aceinvoice/integrations"
-  pricing_url = org.urls.create! url: "#{Rails.application.secrets.host}/pages/aceinvoice/pricing"
-
+  getting_started_url = org.urls.create! url: "#{app_url}/pages/aceinvoice/getting_started"
+  integrations_url = org.urls.create! url: "#{app_url}/pages/aceinvoice/integrations"
+  pricing_url = org.urls.create! url: "#{app_url}/pages/aceinvoice/pricing"
 
   category = org.categories.create! name: "Getting Started"
   a1 = category.articles.create!  title: "How do I put JavaScript code in my website?",

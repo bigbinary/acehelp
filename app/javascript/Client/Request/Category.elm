@@ -8,10 +8,10 @@ import Request.Helpers exposing (..)
 import Task exposing (Task)
 
 
-requestAllCategories : Reader ( NodeEnv, ApiKey ) (Task GQLClient.Error (List Category))
+requestAllCategories : Reader ( AppUrl, ApiKey ) (Task GQLClient.Error (List Category))
 requestAllCategories =
     Reader.Reader
-        (\( env, apiKey ) ->
-            GQLClient.customSendQuery (requestOptions env apiKey) <|
+        (\( appUrl, apiKey ) ->
+            GQLClient.customSendQuery (requestOptions appUrl apiKey) <|
                 GQLBuilder.request {} allCategoriesQuery
         )

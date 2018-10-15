@@ -8,7 +8,7 @@ html
     meta name="organization_name" value="#{@organization&.name}" /
     meta name="user_id" value="#{@current_user&.id}" /
     meta name="user_email" value="#{@current_user&.email}" /
-    meta name="app_url" value = app_url /
+    meta name="app_url" value = @app_url /
     title Acehelp
     = yield :head
   body
