@@ -38,6 +38,15 @@ var AceHelp = (function() {
         //     history.pushState({}, '', url);
         //     _app.ports.onUrlChange.send(location.href);
         // });
+      
+        _app.ports.insertArticleContent.subscribe(function(html) {
+          setTimeout(function() {
+            var divEl = document.querySelector("#trix-content");
+            if (divEl) {
+              divEl.innerHTML = html;
+            }
+          }, 50);
+        });
     }
 
     function _userInfo(user) {
@@ -90,60 +99,58 @@ var AceHelp = (function() {
     * It makes it such that onclick of this element the widget will load up an article with a article id,
     * The article id needs to be specified as the value to the attribute "data-acehelp-article"
     */
-    function _bindDataElements() {
-        var aceDataElements = document.querySelectorAll(
-            "[data-acehelp-article]"
-        );
-        aceDataElements.forEach(function(elem) {
-            elem.onclick = _onDataElementClick;
-        });
-    }
+  function _bindDataElements() {
+    var aceDataElements = document.querySelectorAll("[data-acehelp-article]");
+    aceDataElements.forEach(function(elem) {
+      elem.onclick = _onDataElementClick;
+    });
+  }
 
-    internal.insertWidget = _insertWidget;
+  internal.insertWidget = _insertWidget;
 
-    return {
-        /**
-         * _internal is a sub-namespace that holds methods that are to be used internally
-         * @ignore
-         */
-        _internal: internal,
+  return {
+    /**
+     * _internal is a sub-namespace that holds methods that are to be used internally
+     * @ignore
+     */
+    _internal: internal,
 
-        /**
-         * Provide user information such as name and email to the widget. This will auto fill certain forms
-         *
-         * @param {Object} user An object with the user name and email strings
-         *
-         * @example
-         * window.AceHelp.userInfo({ name: "John Doe", email: "john@doe.com"})
-         */
-        userInfo: _userInfo,
+    /**
+     * Provide user information such as name and email to the widget. This will auto fill certain forms
+     *
+     * @param {Object} user An object with the user name and email strings
+     *
+     * @example
+     * window.AceHelp.userInfo({ name: "John Doe", email: "john@doe.com"})
+     */
+    userInfo: _userInfo,
 
-        /**
-         * Open an article in the AceHelp widget programmatically.
-         *
-         * @param {String} articleId String representing the article id
-         *
-         * @example
-         * window.AceHelp.openArticle(articleId);
-         */
-        openArticle: _openArticle,
+    /**
+     * Open an article in the AceHelp widget programmatically.
+     *
+     * @param {String} articleId String representing the article id
+     *
+     * @example
+     * window.AceHelp.openArticle(articleId);
+     */
+    openArticle: _openArticle,
 
-        /**
-         * Open the Ace Help widget programmatically.
-         *
-         * @example
-         * window.AceHelp.openWidget();
-         */
-        openWidget: _openWidget,
+    /**
+     * Open the Ace Help widget programmatically.
+     *
+     * @example
+     * window.AceHelp.openWidget();
+     */
+    openWidget: _openWidget,
 
-        /**
-         * Close the Ace Help widget programmatically.
-         *
-         * @example
-         * window.AceHelp.closeWidget();
-         */
-        closeWidget: _closeWidget
-    };
+    /**
+     * Close the Ace Help widget programmatically.
+     *
+     * @example
+     * window.AceHelp.closeWidget();
+     */
+    closeWidget: _closeWidget
+  };
 })();
 
 window.AceHelp = AceHelp;

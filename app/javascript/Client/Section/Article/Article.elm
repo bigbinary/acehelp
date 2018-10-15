@@ -21,6 +21,7 @@ import GraphQL.Client.Http as GQLClient
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
+import Ports exposing (..)
 import Reader exposing (Reader)
 import Request.Article exposing (..)
 import Request.ContactUs exposing (requestAddTicketMutation)
@@ -95,7 +96,9 @@ update : Msg -> Model -> ( Model, List (SectionCmd Msg) )
 update msg model =
     case msg of
         ArticleLoaded (Ok article) ->
-            ( { model | article = IsA article }, [] )
+            ( { model | article = IsA article }
+            , [ Strict <| Reader.Reader <| always <| insertArticleContent article.content ]
+            )
 
         ArticleLoaded (Err error) ->
             ( { model | article = Error error }, [] )
@@ -228,9 +231,8 @@ view model =
             div [ id "content-wrapper" ]
                 [ div [ class "article-wrapper" ]
                     [ h1 [] [ text articleItem.title ]
-                    , div [ class "article-content trix-content" ]
-                        [ p [] [ text articleItem.content ]
-                        ]
+                    , div [ id "trix-content", class "article-content trix-content" ]
+                        []
                     , feebackView
                     ]
                 ]
