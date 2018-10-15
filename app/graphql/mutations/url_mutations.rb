@@ -101,7 +101,7 @@ class Mutations::UrlMutations
 
     resolve ->(_obj, inputs, context) {
       raise GraphQL::ExecutionError, "Not logged in" unless context[:current_user]
-      url_category = AssignCategoriesToUrlService.new(inputs[:id], inputs[:category_ids], context[:organization])
+      url_category = CategoryAndUrlMappingService.new(inputs[:id], inputs[:category_ids], context[:organization])
       mapped_url = url_category.process
       {
         url: mapped_url[:updated_url],

@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class AssignCategoriesToUrlService
+class CategoryAndUrlMappingService
   attr_reader :url_id, :category_ids, :organization
   attr_accessor :errors, :updated_url, :url
 
@@ -8,6 +8,7 @@ class AssignCategoriesToUrlService
     @url_id = url_id
     @category_ids = category_ids
     @organization = organization
+    @errors = []
   end
 
   def process
