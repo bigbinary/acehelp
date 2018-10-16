@@ -1,4 +1,13 @@
-port module Ports exposing (UserInfo, closeWidget, decodeUserInfo, onUrlChange, openArticle, openWidget, userInfo)
+port module Ports exposing
+    ( UserInfo
+    , closeWidget
+    , decodeUserInfo
+    , insertArticleContent
+    , onUrlChange
+    , openArticle
+    , openWidget
+    , userInfo
+    )
 
 import Data.Article exposing (ArticleId)
 import Json.Decode as Decode
@@ -33,6 +42,12 @@ port onUrlChange : (String -> msg) -> Sub msg
 
 
 -- OUTGOING PORTS
+
+
+port insertArticleContent : String -> Cmd msg
+
+
+
 -- DECODERS
 
 
